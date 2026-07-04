@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innocence.server.modules.account.mapper.UserMapper">
+
+    <resultMap id="UserResultMap" type="com.innocence.server.modules.account.domain.User">
+        <id property="id" column="id"/>
+        <result property="userNo" column="user_no"/>
+        <result property="nickname" column="nickname"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="status" column="status"/>
+        <result property="lastLoginTime" column="last_login_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="UserAuthResultMap" type="com.innocence.server.modules.account.domain.UserAuth">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="authType" column="auth_type"/>
+        <result property="authAccount" column="auth_account"/>
+        <result property="passwordHash" column="password_hash"/>
+        <result property="passwordSalt" column="password_salt"/>
+        <result property="isVerified" column="is_verified"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="UserProfileResultMap" type="com.innocence.server.modules.account.domain.UserProfile">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="bio" column="bio"/>
+        <result property="timezone" column="timezone"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="UserPrivacyResultMap" type="com.innocence.server.modules.account.domain.UserPrivacySetting">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="allowFriendViewProfile" column="allow_friend_view_profile"/>
+        <result property="allowTeammateViewStudy" column="allow_teammate_view_study"/>
+        <result property="allowStrangerMessage" column="allow_stranger_message"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="UserBlacklistResultMap" type="com.innocence.server.modules.account.domain.UserBlacklist">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="blockedUserId" column="blocked_user_id"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <resultMap id="UserSessionResultMap" type="com.innocence.server.modules.account.domain.UserSession">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="deviceType" column="device_type"/>
+        <result property="deviceSlot" column="device_slot"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="sessionToken" column="session_token"/>
+        <result property="status" column="status"/>
+        <result property="loginTime" column="login_time"/>
+        <result property="logoutTime" column="logout_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="findAuthByEmail" resultMap="UserAuthResultMap">
+        select *
+        from user_auth
+        where auth_account = #{email}
+          and auth_type = 'email'
+        limit 1
+    </select>
+
+    <select id="findAuthByUserId" resultMap="UserAuthResultMap">
+        select *
+        from user_auth
+        where user_id = #{userId}
+          and auth_type = 'email'
+        limit 1
+    </select>
+
+    <select id="findUserById" resultMap="UserResultMap">
+        select *
+        from app_user
+        where id = #{userId}
+        limit 1
+    </select>
+
+    <select id="findProfileByUserId" resultMap="UserProfileResultMap">
+        select *
+        from user_profile
+        where user_id = #{userId}
+        limit 1
+    </select>
+
+    <select id="findPrivacyByUserId" resultMap="UserPrivacyResultMap">
+        select *
+        from user_privacy_setting
+        where user_id = #{userId}
+        limit 1
+    </select>
+
+    <select id="findBlacklistByUserId" resultMap="UserBlacklistResultMap">
+        select *
+        from user_blacklist
+        where user_id = #{userId}
+        order by id desc
+    </select>
+
+    <select id="findSessionByUserIdAndSlot" resultMap="UserSessionResultMap">
+        select *
+        from user_session
+        where user_id = #{userId}
+          and device_slot = #{deviceSlot}
+        limit 1
+    </select>
+
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
+        insert into app_user (user_no, nickname, avatar_url, status, last_login_time)
+        values (#{userNo}, #{nickname}, #{avatarUrl}, #{status}, #{lastLoginTime})
+    </insert>
+
+    <insert id="insertUserAuth" useGeneratedKeys="true" keyProperty="id">
+        insert into user_auth (user_id, auth_type, auth_account, password_hash, password_salt, is_verified)
+        values (#{userId}, #{authType}, #{authAccount}, #{passwordHash}, #{passwordSalt}, #{isVerified})
+    </insert>
+
+    <insert id="insertUserProfile" useGeneratedKeys="true" keyProperty="id">
+        insert into user_profile (user_id, bio, timezone)
+        values (#{userId}, #{bio}, #{timezone})
+    </insert>
+
+    <insert id="insertUserPrivacySetting" useGeneratedKeys="true" keyProperty="id">
+        insert into user_privacy_setting (user_id, allow_friend_view_profile, allow_teammate_view_study, allow_stranger_message)
+        values (#{userId}, #{allowFriendViewProfile}, #{allowTeammateViewStudy}, #{allowStrangerMessage})
+    </insert>
+
+    <insert id="upsertSession" useGeneratedKeys="true" keyProperty="id">
+        insert into user_session (user_id, device_type, device_slot, device_id, session_token, status, login_time, logout_time)
+        values (#{userId}, #{deviceType}, #{deviceSlot}, #{deviceId}, #{sessionToken}, #{status}, #{loginTime}, #{logoutTime})
+        on duplicate key update
+            device_type = values(device_type),
+            device_id = values(device_id),
+            session_token = values(session_token),
+            status = values(status),
+            login_time = values(login_time),
+            logout_time = values(logout_time)
+    </insert>
+
+    <update id="updateUserLoginTime">
+        update app_user
+        set last_login_time = now()
+        where id = #{userId}
+    </update>
+
+    <update id="updateUserProfile">
+        update app_user
+        set nickname   = #{nickname},
+            avatar_url = #{avatarUrl}
+        where id = #{id}
+    </update>
+
+    <update id="updateProfileExtra">
+        update user_profile
+        set bio = #{bio}
+        where user_id = #{userId}
+    </update>
+
+    <update id="updatePrivacy">
+        update user_privacy_setting
+        set allow_friend_view_profile = #{allowFriendViewProfile},
+            allow_teammate_view_study = #{allowTeammateViewStudy},
+            allow_stranger_message    = #{allowStrangerMessage}
+        where user_id = #{userId}
+    </update>
+
+    <update id="updatePassword">
+        update user_auth
+        set password_hash = #{passwordHash},
+            password_salt = #{passwordSalt}
+        where user_id = #{userId}
+          and auth_type = 'email'
+    </update>
+
+    <update id="cancelAccount">
+        update app_user
+        set status = 4
+        where id = #{userId}
+    </update>
+
+    <update id="cancelSessions">
+        update user_session
+        set status = 0,
+            logout_time = #{logoutTime}
+        where user_id = #{userId}
+          and status = 1
+    </update>
+
+    <insert id="insertBlacklist">
+        insert into user_blacklist (user_id, blocked_user_id)
+        values (#{userId}, #{blockedUserId})
+    </insert>
+
+    <delete id="deleteBlacklist">
+        delete
+        from user_blacklist
+        where user_id = #{userId}
+          and blocked_user_id = #{blockedUserId}
+    </delete>
+
+</mapper>

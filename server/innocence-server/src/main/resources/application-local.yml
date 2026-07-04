@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/innocence?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: innocence
+    password: innocence123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: always
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+  mail:
+    host: smtp.qq.com
+    port: 465
+    username: ${INNOCENCE_MAIL_USERNAME:2877905731@qq.com}
+    password: ${INNOCENCE_MAIL_PASSWORD:}
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+logging:
+  level:
+    root: info
+    com.innocence.server: debug
