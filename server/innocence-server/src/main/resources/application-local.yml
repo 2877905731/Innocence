@@ -1,8 +1,10 @@
 spring:
+  config:
+    import: optional:file:./config/application-local-secret.yml
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/innocence?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-    username: innocence
-    password: innocence123
+    username: root
+    password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
@@ -32,3 +34,8 @@ logging:
   level:
     root: info
     com.innocence.server: debug
+
+innocence:
+  admin:
+    emails:
+      - 2877905731@qq.com

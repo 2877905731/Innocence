@@ -49,6 +49,27 @@ class Win32Window {
   // window properties. Returns nullptr if the window has been destroyed.
   HWND GetHandle();
 
+  // Update whether the window should stay above other windows.
+  void SetAlwaysOnTop(bool always_on_top);
+
+  // Update the native desktop shell effect.
+  void SetDesktopEffect(const std::string& desktop_effect);
+
+  // Resize the desktop widget while keeping it anchored to the top-right.
+  void SetWidgetHeight(int logical_height);
+
+  // Switch between the wider auth window and the compact desktop widget.
+  void SetWindowMode(const std::string& mode);
+
+  // Start dragging the widget from a Flutter-defined drag region.
+  void BeginWindowDrag();
+
+  // Return the widget to its default anchored position.
+  void ResetWidgetPosition();
+
+  // Hide the window while keeping the tray icon alive.
+  void HideWindowToTray();
+
   // If true, closing this window will quit the application.
   void SetQuitOnClose(bool quit_on_close);
 
@@ -71,6 +92,9 @@ class Win32Window {
   // Called when Destroy is called.
   virtual void OnDestroy();
 
+  // Called whenever the native window mode changes.
+  virtual void OnWindowModeChanged(const std::string& mode) {}
+
  private:
   friend class WindowClassRegistrar;
 
@@ -90,7 +114,45 @@ class Win32Window {
   // Update the window frame's theme to match the system theme.
   static void UpdateTheme(HWND const window);
 
+  // Apply the desktop style, including rounded corners and backdrop.
+  void ApplyDesktopWidgetChrome(HWND const window);
+
+  void ApplyDesktopBackdrop(HWND const window);
+  void AddTrayIcon(HWND const window);
+  void RemoveTrayIcon(HWND const window);
+  void PositionAuthWindow(HWND const window);
+  void PositionPageWindow(HWND const window);
+  void PositionDesktopWidget(HWND const window, int logical_height);
+  void PositionMiniWidget(HWND const window);
+  void UpdateWindowFrame(HWND const window);
+  RECT GetMonitorWorkArea(HWND const window) const;
+  void SnapWidgetToWorkArea(HWND const window);
+  void UpdateStoredWidgetPosition(HWND const window);
+  void LoadWindowState();
+  void SaveWindowState() const;
+
+  void UpdateTopMostState();
+
   bool quit_on_close_ = false;
+  bool always_on_top_ = true;
+  std::string window_mode_ = "auth";
+  std::string desktop_effect_ = "immersive_glass";
+  int widget_width_ = 560;
+  int widget_height_ = 920;
+  bool has_custom_position_ = false;
+  bool has_custom_auth_bounds_ = false;
+  bool has_custom_widget_size_ = false;
+  bool lock_widget_size_to_content_ = true;
+  bool window_state_loaded_ = false;
+  bool dragging_widget_ = false;
+  bool updating_window_position_ = false;
+  bool tray_icon_added_ = false;
+  int widget_x_ = 0;
+  int widget_y_ = 0;
+  int page_width_ = 1260;
+  int page_height_ = 860;
+  int page_x_ = 0;
+  int page_y_ = 0;
 
   // window handle for top level window.
   HWND window_handle_ = nullptr;

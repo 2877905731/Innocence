@@ -7,6 +7,8 @@ public class TodayPlanItemResponse {
     private int completed;
     private int plannedMinutes;
     private int actualMinutes;
+    private Integer startSlot;
+    private Integer endSlot;
     private int sortOrder;
 
     public Long getId() {
@@ -47,6 +49,22 @@ public class TodayPlanItemResponse {
 
     public void setActualMinutes(int actualMinutes) {
         this.actualMinutes = actualMinutes;
+    }
+
+    public Integer getStartSlot() {
+        return startSlot;
+    }
+
+    public void setStartSlot(Integer startSlot) {
+        this.startSlot = startSlot;
+    }
+
+    public Integer getEndSlot() {
+        return endSlot;
+    }
+
+    public void setEndSlot(Integer endSlot) {
+        this.endSlot = endSlot;
     }
 
     public int getSortOrder() {

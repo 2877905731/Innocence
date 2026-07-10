@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innocence.server.modules.focus.mapper.FocusSessionMapper">
+
+    <resultMap id="StudyTimerRecordResultMap" type="com.innocence.server.modules.focus.domain.StudyTimerRecord">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="taskName" column="task_name"/>
+        <result property="plannedEndTime" column="planned_end_time"/>
+        <result property="actualEndTime" column="actual_end_time"/>
+        <result property="plannedMinutes" column="planned_minutes"/>
+        <result property="durationSeconds" column="duration_seconds"/>
+        <result property="status" column="status"/>
+        <result property="bindPomodoroFlag" column="bind_pomodoro_flag"/>
+        <result property="pomodoroStudyMinutes" column="pomodoro_study_minutes"/>
+        <result property="pomodoroBreakMinutes" column="pomodoro_break_minutes"/>
+        <result property="completedPomodoroCount" column="completed_pomodoro_count"/>
+        <result property="completionNotifiedFlag" column="completion_notified_flag"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="findActiveSessionByUserId" resultMap="StudyTimerRecordResultMap">
+        select *
+        from study_timer_record
+        where user_id = #{userId}
+          and status = 'active'
+        order by id desc
+        limit 1
+    </select>
+
+    <select id="findSessionByIdAndUserId" resultMap="StudyTimerRecordResultMap">
+        select *
+        from study_timer_record
+        where id = #{sessionId}
+          and user_id = #{userId}
+        limit 1
+    </select>
+
+    <insert id="insertStudyTimerRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into study_timer_record (
+            user_id,
+            task_name,
+            planned_end_time,
+            actual_end_time,
+            planned_minutes,
+            duration_seconds,
+            status,
+            bind_pomodoro_flag,
+            pomodoro_study_minutes,
+            pomodoro_break_minutes,
+            completed_pomodoro_count,
+            completion_notified_flag
+        )
+        values (
+            #{userId},
+            #{taskName},
+            #{plannedEndTime},
+            #{actualEndTime},
+            #{plannedMinutes},
+            #{durationSeconds},
+            #{status},
+            #{bindPomodoroFlag},
+            #{pomodoroStudyMinutes},
+            #{pomodoroBreakMinutes},
+            #{completedPomodoroCount},
+            #{completionNotifiedFlag}
+        )
+    </insert>
+
+    <update id="finishStudyTimerRecord">
+        update study_timer_record
+        set actual_end_time = #{actualEndTime},
+            duration_seconds = #{durationSeconds},
+            completed_pomodoro_count = #{completedPomodoroCount},
+            status = #{status}
+        where id = #{sessionId}
+          and status = 'active'
+    </update>
+
+    <update id="markCompletionNotificationSent">
+        update study_timer_record
+        set completion_notified_flag = 1
+        where id = #{sessionId}
+          and completion_notified_flag = 0
+    </update>
+
+</mapper>

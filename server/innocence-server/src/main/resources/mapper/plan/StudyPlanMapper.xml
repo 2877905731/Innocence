@@ -22,6 +22,30 @@
         <result property="status" column="status"/>
         <result property="plannedMinutes" column="planned_minutes"/>
         <result property="actualMinutes" column="actual_minutes"/>
+        <result property="startSlot" column="start_slot"/>
+        <result property="endSlot" column="end_slot"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="WeeklyPlanTemplateResultMap" type="com.innocence.server.modules.plan.domain.WeeklyPlanTemplate">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="templateName" column="template_name"/>
+        <result property="sourcePlanName" column="source_plan_name"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="WeeklyPlanTemplateItemResultMap" type="com.innocence.server.modules.plan.domain.WeeklyPlanTemplateItem">
+        <id property="id" column="id"/>
+        <result property="templateId" column="template_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="plannedMinutes" column="planned_minutes"/>
+        <result property="startSlot" column="start_slot"/>
+        <result property="endSlot" column="end_slot"/>
         <result property="sortOrder" column="sort_order"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
@@ -39,6 +63,24 @@
         select *
         from daily_plan_item
         where plan_id = #{planId}
+        order by sort_order asc, id asc
+    </select>
+
+    <select id="findDailyPlansByUserIdAndDateRange" resultMap="DailyPlanResultMap">
+        select *
+        from daily_plan
+        where user_id = #{userId}
+          and plan_date between #{startDate} and #{endDate}
+        order by plan_date asc, id asc
+    </select>
+
+    <select id="findDailyPlanItemsByPlanIds" resultMap="DailyPlanItemResultMap">
+        select *
+        from daily_plan_item
+        where plan_id in
+        <foreach collection="planIds" item="planId" open="(" separator="," close=")">
+            #{planId}
+        </foreach>
         order by sort_order asc, id asc
     </select>
 
@@ -68,8 +110,68 @@
     </delete>
 
     <insert id="insertDailyPlanItem" useGeneratedKeys="true" keyProperty="id">
-        insert into daily_plan_item (plan_id, user_id, title, status, planned_minutes, actual_minutes, sort_order)
-        values (#{planId}, #{userId}, #{title}, #{status}, #{plannedMinutes}, #{actualMinutes}, #{sortOrder})
+        insert into daily_plan_item (plan_id, user_id, title, status, planned_minutes, actual_minutes, start_slot, end_slot, sort_order)
+        values (#{planId}, #{userId}, #{title}, #{status}, #{plannedMinutes}, #{actualMinutes}, #{startSlot}, #{endSlot}, #{sortOrder})
+    </insert>
+
+    <select id="findWeeklyTemplatesByUserId" resultMap="WeeklyPlanTemplateResultMap">
+        select *
+        from weekly_plan_template
+        where user_id = #{userId}
+        order by update_time desc, id desc
+    </select>
+
+    <select id="findWeeklyTemplateByUserIdAndName" resultMap="WeeklyPlanTemplateResultMap">
+        select *
+        from weekly_plan_template
+        where user_id = #{userId}
+          and template_name = #{templateName}
+        limit 1
+    </select>
+
+    <select id="findWeeklyTemplateByIdAndUserId" resultMap="WeeklyPlanTemplateResultMap">
+        select *
+        from weekly_plan_template
+        where id = #{templateId}
+          and user_id = #{userId}
+        limit 1
+    </select>
+
+    <select id="findWeeklyTemplateItemsByTemplateId" resultMap="WeeklyPlanTemplateItemResultMap">
+        select *
+        from weekly_plan_template_item
+        where template_id = #{templateId}
+        order by sort_order asc, id asc
+    </select>
+
+    <insert id="insertWeeklyPlanTemplate" useGeneratedKeys="true" keyProperty="id">
+        insert into weekly_plan_template (user_id, template_name, source_plan_name)
+        values (#{userId}, #{templateName}, #{sourcePlanName})
+    </insert>
+
+    <update id="updateWeeklyPlanTemplate">
+        update weekly_plan_template
+        set source_plan_name = #{sourcePlanName}
+        where id = #{id}
+          and user_id = #{userId}
+    </update>
+
+    <delete id="deleteWeeklyPlanTemplateItemsByTemplateId">
+        delete
+        from weekly_plan_template_item
+        where template_id = #{templateId}
+    </delete>
+
+    <delete id="deleteWeeklyPlanTemplateByIdAndUserId">
+        delete
+        from weekly_plan_template
+        where id = #{templateId}
+          and user_id = #{userId}
+    </delete>
+
+    <insert id="insertWeeklyPlanTemplateItem" useGeneratedKeys="true" keyProperty="id">
+        insert into weekly_plan_template_item (template_id, user_id, title, planned_minutes, start_slot, end_slot, sort_order)
+        values (#{templateId}, #{userId}, #{title}, #{plannedMinutes}, #{startSlot}, #{endSlot}, #{sortOrder})
     </insert>
 
 </mapper>

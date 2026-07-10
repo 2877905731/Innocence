@@ -57,6 +57,20 @@ class TodayPlan {
 
   bool get hasItems => items.isNotEmpty;
 
+  bool get hasScheduledItems => items.any((item) => item.hasSchedule);
+
+  List<TodayPlanItem> get scheduledItems => items
+      .where((item) => item.hasSchedule)
+      .toList()
+    ..sort((left, right) {
+      final startCompare = (left.startSlot ?? 999)
+          .compareTo(right.startSlot ?? 999);
+      if (startCompare != 0) {
+        return startCompare;
+      }
+      return left.sortOrder.compareTo(right.sortOrder);
+    });
+
   double get completionRatio {
     if (totalCount <= 0) {
       return 0;
@@ -149,6 +163,13 @@ class TodayPlan {
     final day = now.day.toString().padLeft(2, '0');
     return '${now.year}-$month-$day';
   }
+
+  static String slotLabel(int slot) {
+    final normalizedSlot = slot.clamp(0, 48).toInt();
+    final hour = normalizedSlot ~/ 2;
+    final minute = normalizedSlot.isEven ? '00' : '30';
+    return '${hour.toString().padLeft(2, '0')}:$minute';
+  }
 }
 
 class TodayPlanItem {
@@ -158,6 +179,8 @@ class TodayPlanItem {
     required this.completed,
     required this.plannedMinutes,
     required this.actualMinutes,
+    required this.startSlot,
+    required this.endSlot,
     required this.sortOrder,
   });
 
@@ -166,6 +189,8 @@ class TodayPlanItem {
   final bool completed;
   final int plannedMinutes;
   final int actualMinutes;
+  final int? startSlot;
+  final int? endSlot;
   final int sortOrder;
 
   factory TodayPlanItem.fromJson(Map<String, dynamic> json) {
@@ -175,8 +200,38 @@ class TodayPlanItem {
       completed: json['completed'] == true || json['completed'] == 1,
       plannedMinutes: TodayPlan._toInt(json['plannedMinutes']),
       actualMinutes: TodayPlan._toInt(json['actualMinutes']),
+      startSlot: _toNullableInt(json['startSlot']),
+      endSlot: _toNullableInt(json['endSlot']),
       sortOrder: TodayPlan._toInt(json['sortOrder']),
     );
+  }
+
+  bool get hasSchedule =>
+      startSlot != null && endSlot != null && endSlot! > startSlot!;
+
+  String get scheduleLabel {
+    if (!hasSchedule) {
+      return 'Flexible task';
+    }
+    return '${TodayPlan.slotLabel(startSlot!)} - ${TodayPlan.slotLabel(endSlot!)}';
+  }
+
+  String get durationLabel {
+    final minutes = plannedMinutes <= 0 && hasSchedule
+        ? (endSlot! - startSlot!) * 30
+        : plannedMinutes;
+    if (minutes <= 0) {
+      return '0 min';
+    }
+    final hours = minutes ~/ 60;
+    final remainingMinutes = minutes % 60;
+    if (hours == 0) {
+      return '$remainingMinutes min';
+    }
+    if (remainingMinutes == 0) {
+      return '$hours h';
+    }
+    return '$hours h $remainingMinutes min';
   }
 
   TodayPlanItem copyWith({
@@ -184,6 +239,8 @@ class TodayPlanItem {
     String? title,
     int? plannedMinutes,
     int? actualMinutes,
+    int? startSlot,
+    int? endSlot,
     int? sortOrder,
   }) {
     return TodayPlanItem(
@@ -192,6 +249,8 @@ class TodayPlanItem {
       completed: completed ?? this.completed,
       plannedMinutes: plannedMinutes ?? this.plannedMinutes,
       actualMinutes: actualMinutes ?? this.actualMinutes,
+      startSlot: startSlot ?? this.startSlot,
+      endSlot: endSlot ?? this.endSlot,
       sortOrder: sortOrder ?? this.sortOrder,
     );
   }
@@ -202,6 +261,18 @@ class TodayPlanItem {
       'completed': completed,
       'plannedMinutes': plannedMinutes,
       'actualMinutes': actualMinutes,
+      'startSlot': startSlot,
+      'endSlot': endSlot,
     };
+  }
+
+  static int? _toNullableInt(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+    if (value is int) {
+      return value;
+    }
+    return int.tryParse('$value');
   }
 }

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innocence.server.modules.stats.mapper.StatsMapper">
+
+    <resultMap id="StatsDayValueResultMap" type="com.innocence.server.modules.stats.domain.StatsDayValue">
+        <result property="statsDate" column="stats_date"/>
+        <result property="value" column="value"/>
+    </resultMap>
+
+    <resultMap id="StatsPlanDayValueResultMap" type="com.innocence.server.modules.stats.domain.StatsPlanDayValue">
+        <result property="statsDate" column="stats_date"/>
+        <result property="completedCount" column="completed_count"/>
+        <result property="totalCount" column="total_count"/>
+    </resultMap>
+
+    <resultMap id="StatsCheckInDayValueResultMap" type="com.innocence.server.modules.stats.domain.StatsCheckInDayValue">
+        <result property="statsDate" column="stats_date"/>
+        <result property="successCount" column="success_count"/>
+        <result property="failedAttempts" column="failed_attempts"/>
+    </resultMap>
+
+    <resultMap id="StatsFailureDayValueResultMap" type="com.innocence.server.modules.stats.domain.StatsFailureDayValue">
+        <result property="statsDate" column="stats_date"/>
+        <result property="attemptCount" column="attempt_count"/>
+        <result property="latestReason" column="latest_reason"/>
+        <result property="planCompletedCount" column="plan_completed_count"/>
+        <result property="planTotalCount" column="plan_total_count"/>
+        <result property="studyDurationMinutes" column="study_duration_minutes"/>
+        <result property="lastAttemptTime" column="last_attempt_time"/>
+    </resultMap>
+
+    <select id="findDailyStudyDuration" resultMap="StatsDayValueResultMap">
+        select date(coalesce(actual_end_time, create_time)) as stats_date,
+               cast(coalesce(sum(duration_seconds), 0) / 60 as signed) as value
+        from study_timer_record
+        where user_id = #{userId}
+          and status = 'finished'
+          and date(coalesce(actual_end_time, create_time)) between #{startDate} and #{endDate}
+        group by date(coalesce(actual_end_time, create_time))
+        order by stats_date asc
+    </select>
+
+    <select id="findDailyPomodoroCompleted" resultMap="StatsDayValueResultMap">
+        select date(coalesce(actual_end_time, create_time)) as stats_date,
+               coalesce(sum(completed_pomodoro_count), 0) as value
+        from study_timer_record
+        where user_id = #{userId}
+          and status = 'finished'
+          and date(coalesce(actual_end_time, create_time)) between #{startDate} and #{endDate}
+        group by date(coalesce(actual_end_time, create_time))
+        order by stats_date asc
+    </select>
+
+    <select id="findDailyPlanCompletion" resultMap="StatsPlanDayValueResultMap">
+        select dp.plan_date as stats_date,
+               coalesce(sum(case when dpi.status = 1 then 1 else 0 end), 0) as completed_count,
+               count(dpi.id) as total_count
+        from daily_plan dp
+                 left join daily_plan_item dpi on dp.id = dpi.plan_id
+        where dp.user_id = #{userId}
+          and dp.plan_date between #{startDate} and #{endDate}
+        group by dp.plan_date
+        order by dp.plan_date asc
+    </select>
+
+    <select id="findDailyCheckInStats" resultMap="StatsCheckInDayValueResultMap">
+        select merged.stats_date,
+               coalesce(success.success_count, 0) as success_count,
+               coalesce(failure.failed_attempts, 0) as failed_attempts
+        from (
+                 select check_in_date as stats_date
+                 from check_in_record
+                 where user_id = #{userId}
+                   and check_in_date between #{startDate} and #{endDate}
+                 union
+                 select check_in_date as stats_date
+                 from check_in_fail_record
+                 where user_id = #{userId}
+                   and check_in_date between #{startDate} and #{endDate}
+             ) merged
+                 left join (
+                     select check_in_date,
+                            count(1) as success_count
+                     from check_in_record
+                     where user_id = #{userId}
+                       and check_in_date between #{startDate} and #{endDate}
+                     group by check_in_date
+                 ) success on merged.stats_date = success.check_in_date
+                 left join (
+                     select check_in_date,
+                            coalesce(sum(attempt_count), 0) as failed_attempts
+                     from check_in_fail_record
+                     where user_id = #{userId}
+                       and check_in_date between #{startDate} and #{endDate}
+                     group by check_in_date
+                 ) failure on merged.stats_date = failure.check_in_date
+        order by merged.stats_date asc
+    </select>
+
+    <select id="findFailureRecords" resultMap="StatsFailureDayValueResultMap">
+        select check_in_date as stats_date,
+               coalesce(attempt_count, 0) as attempt_count,
+               coalesce(latest_reason, '') as latest_reason,
+               coalesce(plan_completed_count, 0) as plan_completed_count,
+               coalesce(plan_total_count, 0) as plan_total_count,
+               coalesce(study_duration_minutes, 0) as study_duration_minutes,
+               last_attempt_time
+        from check_in_fail_record
+        where user_id = #{userId}
+          and check_in_date between #{startDate} and #{endDate}
+        order by check_in_date desc, last_attempt_time desc
+    </select>
+
+</mapper>

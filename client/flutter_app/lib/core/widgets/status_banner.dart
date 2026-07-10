@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../theme/app_colors.dart';
+import 'package:innocence_flutter/core/theme/surface_palette.dart';
 
 class StatusBanner extends StatelessWidget {
   const StatusBanner({
@@ -21,23 +20,23 @@ class StatusBanner extends StatelessWidget {
         vertical: 14,
       ),
       decoration: BoxDecoration(
-        color: const Color(0x33FF8E8E),
+        color: SurfacePalette.dangerSurface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0x55FFB3B3)),
+        border: Border.all(color: SurfacePalette.dangerBorder),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(
             Icons.info_outline_rounded,
-            color: Color(0xFFFFD1D1),
+            color: SurfacePalette.dangerInk,
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               message,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textPrimary,
+                    color: SurfacePalette.dangerInk,
                   ),
             ),
           ),
@@ -47,7 +46,7 @@ class StatusBanner extends StatelessWidget {
               onPressed: onClose,
               icon: const Icon(
                 Icons.close_rounded,
-                color: Color(0xFFFFD1D1),
+                color: SurfacePalette.dangerInk,
               ),
               visualDensity: VisualDensity.compact,
             ),

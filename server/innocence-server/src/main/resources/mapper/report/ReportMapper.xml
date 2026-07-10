@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innocence.server.modules.report.mapper.ReportMapper">
+
+    <resultMap id="ReportRecordResultMap" type="com.innocence.server.modules.report.domain.ReportRecord">
+        <id property="id" column="id"/>
+        <result property="reportUserId" column="report_user_id"/>
+        <result property="reportType" column="report_type"/>
+        <result property="targetId" column="target_id"/>
+        <result property="targetUserId" column="target_user_id"/>
+        <result property="teamId" column="team_id"/>
+        <result property="reasonText" column="reason_text"/>
+        <result property="descriptionText" column="description_text"/>
+        <result property="status" column="status"/>
+        <result property="handledUserId" column="handled_user_id"/>
+        <result property="handledTime" column="handled_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="ReportListItemRowResultMap" type="com.innocence.server.modules.report.domain.ReportListItemRow">
+        <id property="reportId" column="report_id"/>
+        <result property="reportType" column="report_type"/>
+        <result property="reportStatus" column="report_status"/>
+        <result property="reasonText" column="reason_text"/>
+        <result property="reportUserId" column="report_user_id"/>
+        <result property="reportUserNo" column="report_user_no"/>
+        <result property="reportUserNickname" column="report_user_nickname"/>
+        <result property="targetId" column="target_id"/>
+        <result property="targetUserId" column="target_user_id"/>
+        <result property="targetUserNo" column="target_user_no"/>
+        <result property="targetUserNickname" column="target_user_nickname"/>
+        <result property="teamId" column="team_id"/>
+        <result property="teamName" column="team_name"/>
+        <result property="targetContent" column="target_content"/>
+        <result property="targetDeletedFlag" column="target_deleted_flag"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <resultMap id="ReportDetailRowResultMap" type="com.innocence.server.modules.report.domain.ReportDetailRow">
+        <id property="reportId" column="report_id"/>
+        <result property="reportType" column="report_type"/>
+        <result property="reportStatus" column="report_status"/>
+        <result property="reasonText" column="reason_text"/>
+        <result property="descriptionText" column="description_text"/>
+        <result property="reportUserId" column="report_user_id"/>
+        <result property="reportUserNo" column="report_user_no"/>
+        <result property="reportUserNickname" column="report_user_nickname"/>
+        <result property="targetId" column="target_id"/>
+        <result property="targetUserId" column="target_user_id"/>
+        <result property="targetUserNo" column="target_user_no"/>
+        <result property="targetUserNickname" column="target_user_nickname"/>
+        <result property="teamId" column="team_id"/>
+        <result property="teamName" column="team_name"/>
+        <result property="targetContent" column="target_content"/>
+        <result property="targetMaskedFlag" column="target_masked_flag"/>
+        <result property="targetDeletedFlag" column="target_deleted_flag"/>
+        <result property="targetDeletedReason" column="target_deleted_reason"/>
+        <result property="handledUserId" column="handled_user_id"/>
+        <result property="handledUserNo" column="handled_user_no"/>
+        <result property="handledUserNickname" column="handled_user_nickname"/>
+        <result property="handledTime" column="handled_time"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <resultMap id="ReportAuditRecordResultMap" type="com.innocence.server.modules.report.domain.ReportAuditRecord">
+        <id property="id" column="id"/>
+        <result property="reportId" column="report_id"/>
+        <result property="adminUserId" column="admin_user_id"/>
+        <result property="decision" column="decision"/>
+        <result property="deleteContentFlag" column="delete_content_flag"/>
+        <result property="punishmentType" column="punishment_type"/>
+        <result property="durationDays" column="duration_days"/>
+        <result property="reasonText" column="reason_text"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <resultMap id="ActivePunishmentRowResultMap" type="com.innocence.server.modules.report.domain.ActivePunishmentRow">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="punishmentType" column="punishment_type"/>
+        <result property="status" column="status"/>
+        <result property="durationDays" column="duration_days"/>
+        <result property="reasonText" column="reason_text"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+    </resultMap>
+
+    <resultMap id="AdminUserSearchRowResultMap" type="com.innocence.server.modules.report.domain.AdminUserSearchRow">
+        <id property="userId" column="user_id"/>
+        <result property="userNo" column="user_no"/>
+        <result property="nickname" column="nickname"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="status" column="status"/>
+        <result property="teamId" column="team_id"/>
+        <result property="teamName" column="team_name"/>
+        <result property="lastLoginTime" column="last_login_time"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <resultMap id="AdminUserDetailRowResultMap" type="com.innocence.server.modules.report.domain.AdminUserDetailRow">
+        <id property="userId" column="user_id"/>
+        <result property="userNo" column="user_no"/>
+        <result property="nickname" column="nickname"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="status" column="status"/>
+        <result property="email" column="email"/>
+        <result property="bio" column="bio"/>
+        <result property="timezone" column="timezone"/>
+        <result property="allowFriendViewProfile" column="allow_friend_view_profile"/>
+        <result property="allowTeammateViewStudy" column="allow_teammate_view_study"/>
+        <result property="allowStrangerMessage" column="allow_stranger_message"/>
+        <result property="totalStudySeconds" column="total_study_seconds"/>
+        <result property="totalCheckInDays" column="total_check_in_days"/>
+        <result property="consecutiveCheckInDays" column="consecutive_check_in_days"/>
+        <result property="teamId" column="team_id"/>
+        <result property="teamName" column="team_name"/>
+        <result property="teamInviteCode" column="team_invite_code"/>
+        <result property="teamRole" column="team_role"/>
+        <result property="teamJoinedTime" column="team_joined_time"/>
+        <result property="lastLoginTime" column="last_login_time"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <resultMap id="AdminUserReportRowResultMap" type="com.innocence.server.modules.report.domain.AdminUserReportRow">
+        <id property="reportId" column="report_id"/>
+        <result property="reportType" column="report_type"/>
+        <result property="reportStatus" column="report_status"/>
+        <result property="reasonText" column="reason_text"/>
+        <result property="descriptionText" column="description_text"/>
+        <result property="reportUserId" column="report_user_id"/>
+        <result property="reportUserNo" column="report_user_no"/>
+        <result property="reportUserNickname" column="report_user_nickname"/>
+        <result property="teamId" column="team_id"/>
+        <result property="teamName" column="team_name"/>
+        <result property="targetContent" column="target_content"/>
+        <result property="targetDeletedFlag" column="target_deleted_flag"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <resultMap id="AdminUserPunishmentRowResultMap" type="com.innocence.server.modules.report.domain.AdminUserPunishmentRow">
+        <id property="punishmentId" column="punishment_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="reportId" column="report_id"/>
+        <result property="punishmentType" column="punishment_type"/>
+        <result property="status" column="status"/>
+        <result property="durationDays" column="duration_days"/>
+        <result property="reasonText" column="reason_text"/>
+        <result property="operatorUserId" column="operator_user_id"/>
+        <result property="operatorUserNo" column="operator_user_no"/>
+        <result property="operatorUserNickname" column="operator_user_nickname"/>
+        <result property="activeFlag" column="active_flag"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <insert id="insertReportRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into report_record (
+            report_user_id,
+            report_type,
+            target_id,
+            target_user_id,
+            team_id,
+            reason_text,
+            description_text,
+            status
+        )
+        values (
+            #{reportUserId},
+            #{reportType},
+            #{targetId},
+            #{targetUserId},
+            #{teamId},
+            #{reasonText},
+            #{descriptionText},
+            #{status}
+        )
+    </insert>
+
+    <select id="findReportById" resultMap="ReportRecordResultMap">
+        select *
+        from report_record
+        where id = #{reportId}
+        limit 1
+    </select>
+
+    <select id="findReportByUserAndTarget" resultMap="ReportRecordResultMap">
+        select *
+        from report_record
+        where report_user_id = #{reportUserId}
+          and report_type = #{reportType}
+          and target_id = #{targetId}
+        limit 1
+    </select>
+
+    <select id="findReports" resultMap="ReportListItemRowResultMap">
+        select rr.id as report_id,
+               rr.report_type,
+               rr.status as report_status,
+               rr.reason_text,
+               rr.report_user_id,
+               reporter.user_no as report_user_no,
+               reporter.nickname as report_user_nickname,
+               rr.target_id,
+               rr.target_user_id,
+               target_user.user_no as target_user_no,
+               target_user.nickname as target_user_nickname,
+               rr.team_id,
+               st.team_name,
+               msg.content as target_content,
+               msg.deleted_flag as target_deleted_flag,
+               rr.create_time
+        from report_record rr
+                 left join app_user reporter on reporter.id = rr.report_user_id
+                 left join app_user target_user on target_user.id = rr.target_user_id
+                 left join study_team st on st.id = rr.team_id
+                 left join study_team_chat_message msg
+                           on rr.report_type = 'team_chat'
+                               and msg.id = rr.target_id
+        where (#{status} is null or #{status} = '' or rr.status = #{status})
+          and (#{reportType} is null or #{reportType} = '' or rr.report_type = #{reportType})
+        order by case rr.status when 'pending' then 0 else 1 end, rr.create_time desc, rr.id desc
+        limit #{limit}
+    </select>
+
+    <select id="findReportDetail" resultMap="ReportDetailRowResultMap">
+        select rr.id as report_id,
+               rr.report_type,
+               rr.status as report_status,
+               rr.reason_text,
+               rr.description_text,
+               rr.report_user_id,
+               reporter.user_no as report_user_no,
+               reporter.nickname as report_user_nickname,
+               rr.target_id,
+               rr.target_user_id,
+               target_user.user_no as target_user_no,
+               target_user.nickname as target_user_nickname,
+               rr.team_id,
+               st.team_name,
+               msg.content as target_content,
+               msg.masked_flag as target_masked_flag,
+               msg.deleted_flag as target_deleted_flag,
+               msg.deleted_reason as target_deleted_reason,
+               rr.handled_user_id,
+               handled_user.user_no as handled_user_no,
+               handled_user.nickname as handled_user_nickname,
+               rr.handled_time,
+               rr.create_time
+        from report_record rr
+                 left join app_user reporter on reporter.id = rr.report_user_id
+                 left join app_user target_user on target_user.id = rr.target_user_id
+                 left join app_user handled_user on handled_user.id = rr.handled_user_id
+                 left join study_team st on st.id = rr.team_id
+                 left join study_team_chat_message msg
+                           on rr.report_type = 'team_chat'
+                               and msg.id = rr.target_id
+        where rr.id = #{reportId}
+        limit 1
+    </select>
+
+    <select id="findAuditHistory" resultMap="ReportAuditRecordResultMap">
+        select *
+        from report_audit_record
+        where report_id = #{reportId}
+        order by create_time desc, id desc
+    </select>
+
+    <update id="updateReportHandled">
+        update report_record
+        set status = #{status},
+            handled_user_id = #{handledUserId},
+            handled_time = #{handledTime}
+        where id = #{reportId}
+          and status = 'pending'
+    </update>
+
+    <insert id="insertAuditRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into report_audit_record (
+            report_id,
+            admin_user_id,
+            decision,
+            delete_content_flag,
+            punishment_type,
+            duration_days,
+            reason_text
+        )
+        values (
+            #{reportId},
+            #{adminUserId},
+            #{decision},
+            #{deleteContentFlag},
+            #{punishmentType},
+            #{durationDays},
+            #{reasonText}
+        )
+    </insert>
+
+    <insert id="insertPunishmentRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into punishment_record (
+            user_id,
+            report_id,
+            punishment_type,
+            status,
+            duration_days,
+            reason_text,
+            operator_user_id,
+            start_time,
+            end_time
+        )
+        values (
+            #{userId},
+            #{reportId},
+            #{punishmentType},
+            #{status},
+            #{durationDays},
+            #{reasonText},
+            #{operatorUserId},
+            #{startTime},
+            #{endTime}
+        )
+    </insert>
+
+    <select id="findActivePunishment" resultMap="ActivePunishmentRowResultMap">
+        select *
+        from punishment_record
+        where user_id = #{userId}
+          and punishment_type = #{punishmentType}
+          and status = 'active'
+          and (end_time is null or end_time &gt; #{now})
+        order by start_time desc, id desc
+        limit 1
+    </select>
+
+    <select id="searchUsers" resultMap="AdminUserSearchRowResultMap">
+        select au.id as user_id,
+               au.user_no,
+               au.nickname,
+               au.avatar_url,
+               au.status,
+               stm.team_id,
+               st.team_name,
+               au.last_login_time,
+               au.create_time
+        from app_user au
+                 left join study_team_member stm
+                           on stm.user_id = au.id
+                               and stm.status = 1
+                 left join study_team st
+                           on st.id = stm.team_id
+                               and st.status = 1
+        where (#{keyword} is null or #{keyword} = ''
+            or au.user_no like concat('%', #{keyword}, '%')
+            or au.nickname like concat('%', #{keyword}, '%')
+            or st.invite_code like concat('%', #{keyword}, '%'))
+        order by au.last_login_time desc, au.id desc
+        limit #{limit}
+    </select>
+
+    <select id="findAdminUserDetail" resultMap="AdminUserDetailRowResultMap">
+        select au.id as user_id,
+               au.user_no,
+               au.nickname,
+               au.avatar_url,
+               au.status,
+               ua.auth_account as email,
+               up.bio,
+               up.timezone,
+               ups.allow_friend_view_profile,
+               ups.allow_teammate_view_study,
+               ups.allow_stranger_message,
+               coalesce(study.total_study_seconds, 0) as total_study_seconds,
+               coalesce(cis.total_days, 0) as total_check_in_days,
+               coalesce(cis.consecutive_days, 0) as consecutive_check_in_days,
+               stm.team_id,
+               st.team_name,
+               st.invite_code as team_invite_code,
+               stm.role as team_role,
+               stm.joined_time as team_joined_time,
+               au.last_login_time,
+               au.create_time
+        from app_user au
+                 left join user_auth ua
+                           on ua.user_id = au.id
+                               and ua.auth_type = 'email'
+                 left join user_profile up on up.user_id = au.id
+                 left join user_privacy_setting ups on ups.user_id = au.id
+                 left join (
+                    select user_id,
+                           sum(case when status = 'finished' then duration_seconds else 0 end) as total_study_seconds
+                    from study_timer_record
+                    group by user_id
+                 ) study on study.user_id = au.id
+                 left join check_in_summary cis on cis.user_id = au.id
+                 left join study_team_member stm
+                           on stm.user_id = au.id
+                               and stm.status = 1
+                 left join study_team st
+                           on st.id = stm.team_id
+                               and st.status = 1
+        where au.id = #{userId}
+        limit 1
+    </select>
+
+    <select id="findReportsByTargetUserId" resultMap="AdminUserReportRowResultMap">
+        select rr.id as report_id,
+               rr.report_type,
+               rr.status as report_status,
+               rr.reason_text,
+               rr.description_text,
+               rr.report_user_id,
+               reporter.user_no as report_user_no,
+               reporter.nickname as report_user_nickname,
+               rr.team_id,
+               st.team_name,
+               msg.content as target_content,
+               msg.deleted_flag as target_deleted_flag,
+               rr.create_time
+        from report_record rr
+                 left join app_user reporter on reporter.id = rr.report_user_id
+                 left join study_team st on st.id = rr.team_id
+                 left join study_team_chat_message msg
+                           on rr.report_type = 'team_chat'
+                               and msg.id = rr.target_id
+        where rr.target_user_id = #{userId}
+        order by rr.create_time desc, rr.id desc
+        limit #{limit}
+    </select>
+
+    <select id="findPunishmentsByUserId" resultMap="AdminUserPunishmentRowResultMap">
+        select pr.id as punishment_id,
+               pr.user_id,
+               pr.report_id,
+               pr.punishment_type,
+               pr.status,
+               pr.duration_days,
+               pr.reason_text,
+               pr.operator_user_id,
+               operator.user_no as operator_user_no,
+               operator.nickname as operator_user_nickname,
+               case
+                   when pr.status = 'active' and (pr.end_time is null or pr.end_time &gt; #{now})
+                       then 1
+                   else 0
+                   end as active_flag,
+               pr.start_time,
+               pr.end_time,
+               pr.create_time
+        from punishment_record pr
+                 left join app_user operator on operator.id = pr.operator_user_id
+        where pr.user_id = #{userId}
+          and (
+            #{statusFilter} is null
+                or #{statusFilter} = ''
+                or (
+                #{statusFilter} = 'active'
+                    and pr.status = 'active'
+                    and (pr.end_time is null or pr.end_time &gt; #{now})
+                )
+                or (
+                #{statusFilter} = 'history'
+                    and not (pr.status = 'active' and (pr.end_time is null or pr.end_time &gt; #{now}))
+                )
+            )
+        order by pr.start_time desc, pr.id desc
+        limit #{limit}
+    </select>
+
+    <select id="findPunishmentById" resultMap="AdminUserPunishmentRowResultMap">
+        select pr.id as punishment_id,
+               pr.user_id,
+               pr.report_id,
+               pr.punishment_type,
+               pr.status,
+               pr.duration_days,
+               pr.reason_text,
+               pr.operator_user_id,
+               operator.user_no as operator_user_no,
+               operator.nickname as operator_user_nickname,
+               case
+                   when pr.status = 'active' and (pr.end_time is null or pr.end_time &gt; now())
+                       then 1
+                   else 0
+                   end as active_flag,
+               pr.start_time,
+               pr.end_time,
+               pr.create_time
+        from punishment_record pr
+                 left join app_user operator on operator.id = pr.operator_user_id
+        where pr.id = #{punishmentId}
+        limit 1
+    </select>
+
+    <update id="liftPunishment">
+        update punishment_record
+        set status = 'lifted',
+            end_time = #{handledTime}
+        where id = #{punishmentId}
+          and status = 'active'
+    </update>
+
+</mapper>

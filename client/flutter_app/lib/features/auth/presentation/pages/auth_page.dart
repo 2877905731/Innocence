@@ -1,13 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/session_controller.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/network/api_exception.dart';
-import 'package:innocence_flutter/core/theme/app_colors.dart';
-import 'package:innocence_flutter/core/widgets/aurora_background.dart';
-import 'package:innocence_flutter/core/widgets/glass_panel.dart';
-import 'package:innocence_flutter/core/widgets/status_banner.dart';
+import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
+import 'package:innocence_flutter/core/widgets/desktop_drag_region.dart';
 
 enum AuthMode {
   passwordLogin,
@@ -19,16 +18,17 @@ class AuthPage extends StatefulWidget {
   const AuthPage({
     super.key,
     required this.sessionController,
+    required this.appLanguage,
   });
 
   final SessionController sessionController;
+  final AppLanguage appLanguage;
 
   @override
   State<AuthPage> createState() => _AuthPageState();
 }
 
 class _AuthPageState extends State<AuthPage> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
@@ -39,8 +39,15 @@ class _AuthPageState extends State<AuthPage> {
   bool _sendingCode = false;
   int _cooldownSeconds = 0;
 
+  AppLanguage get _language => widget.appLanguage;
   bool get _needsPassword => _mode != AuthMode.codeLogin;
   bool get _needsCode => _mode != AuthMode.passwordLogin;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(DesktopWidgetBridge.setWindowMode('auth'));
+  }
 
   @override
   void dispose() {
@@ -52,8 +59,9 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   Future<void> _submit() async {
-    final form = _formKey.currentState;
-    if (form == null || !form.validate()) {
+    final validationMessage = _validateInputs();
+    if (validationMessage != null) {
+      _showMessage(validationMessage);
       return;
     }
 
@@ -83,10 +91,40 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
+  String? _validateInputs() {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      return _language.isChinese ? '请输入邮箱。' : 'Please enter your email.';
+    }
+    if (!_isValidEmail(email)) {
+      return _language.isChinese ? '邮箱格式不正确。' : 'Invalid email format.';
+    }
+
+    if (_needsPassword) {
+      final password = _passwordController.text;
+      if (password.isEmpty) {
+        return _language.isChinese ? '请输入密码。' : 'Please enter your password.';
+      }
+      if (_mode == AuthMode.register && password.length < 6) {
+        return _language.isChinese
+            ? '密码至少 6 位。'
+            : 'Password must be at least 6 characters.';
+      }
+    }
+
+    if (_needsCode && _codeController.text.trim().isEmpty) {
+      return _language.isChinese
+          ? '请输入验证码。'
+          : 'Please enter the verification code.';
+    }
+
+    return null;
+  }
+
   Future<void> _sendCode() async {
     final email = _emailController.text.trim();
     if (!_isValidEmail(email)) {
-      _showMessage('Please enter a valid email first.');
+      _showMessage(_language.invalidEmailPrompt);
       return;
     }
 
@@ -104,7 +142,7 @@ class _AuthPageState extends State<AuthPage> {
         return;
       }
       _startCountdown();
-      _showMessage('Verification code sent. Please check your inbox.');
+      _showMessage(_language.verificationCodeSentPrompt);
     } on ApiException catch (error) {
       if (!mounted) {
         return;
@@ -114,7 +152,7 @@ class _AuthPageState extends State<AuthPage> {
       if (!mounted) {
         return;
       }
-      _showMessage('Failed to send the verification code.');
+      _showMessage(_language.verificationCodeFailedPrompt);
     } finally {
       if (mounted) {
         setState(() {
@@ -168,157 +206,208 @@ class _AuthPageState extends State<AuthPage> {
     return regex.hasMatch(value);
   }
 
-  String get _deviceLabel {
-    if (AppConfig.deviceType == 'android') {
-      return 'Android';
-    }
-    return 'Windows';
-  }
-
   String get _modeTitle {
     switch (_mode) {
       case AuthMode.passwordLogin:
-        return 'Password login';
+        return _language.authPasswordLoginTitle;
       case AuthMode.codeLogin:
-        return 'Code login';
+        return _language.authCodeLoginTitle;
       case AuthMode.register:
-        return 'Email register';
-    }
-  }
-
-  String get _modeDescription {
-    switch (_mode) {
-      case AuthMode.passwordLogin:
-        return 'Use email and password for your usual sign-in flow.';
-      case AuthMode.codeLogin:
-        return 'Receive a code by email for quick access on this device.';
-      case AuthMode.register:
-        return 'Create a new account and sign in right away.';
+        return _language.authRegisterTitle;
     }
   }
 
   String get _submitLabel {
     switch (_mode) {
       case AuthMode.passwordLogin:
-        return 'Enter Innocence';
+        return _language.enterInnocenceLabel;
       case AuthMode.codeLogin:
-        return 'Sign in with code';
+        return _language.authCodeSubmitLabel;
       case AuthMode.register:
-        return 'Register and sign in';
+        return _language.authRegisterSubmitLabel;
     }
   }
 
   String get _codeButtonLabel {
     if (_cooldownSeconds > 0) {
-      return 'Retry in $_cooldownSeconds s';
+      return _language.cooldownLabel(_cooldownSeconds);
     }
     if (_mode == AuthMode.register) {
-      return 'Send register code';
+      return _language.sendRegisterCodeLabel;
     }
-    return 'Send login code';
+    return _language.sendLoginCodeLabel;
   }
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final isDesktop = AppConfig.deviceType == 'windows';
     final sessionController = widget.sessionController;
 
     return Scaffold(
-      body: AuroraBackground(
-        child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final isWide = constraints.maxWidth >= 960;
-              final formCard = ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 460),
-                child: GlassPanel(
-                  child: _FormCard(
-                    formKey: _formKey,
-                    mode: _mode,
-                    modeTitle: _modeTitle,
-                    modeDescription: _modeDescription,
-                    submitLabel: _submitLabel,
-                    codeButtonLabel: _codeButtonLabel,
-                    deviceLabel: _deviceLabel,
-                    isBusy: sessionController.isBusy,
-                    sendingCode: _sendingCode,
-                    cooldownSeconds: _cooldownSeconds,
-                    bannerMessage: sessionController.bannerMessage,
-                    emailController: _emailController,
-                    passwordController: _passwordController,
-                    codeController: _codeController,
-                    needsPassword: _needsPassword,
-                    needsCode: _needsCode,
-                    obscurePassword: _obscurePassword,
-                    onModeChanged: _switchMode,
-                    onTogglePasswordVisibility: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                    onChanged: sessionController.clearBanner,
-                    onSendCode: _sendCode,
-                    onSubmit: _submit,
-                  ),
-                ),
-              );
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final contentWidth = isDesktop ? 740.0 : constraints.maxWidth - 40;
 
-              final intro = Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Innocence', style: textTheme.displaySmall),
-                  const SizedBox(height: 14),
-                  Text(
-                    'Keep phone and desktop in the same learning rhythm. '
-                    'This phase focuses on a stable account bridge first.',
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
+            return Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  isDesktop ? 48 : 20,
+                  isDesktop ? 28 : 18,
+                  isDesktop ? 48 : 20,
+                  26,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: contentWidth),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _FeatureChip(label: 'Android + Windows'),
-                      _FeatureChip(label: '1 phone + 1 desktop online'),
-                      _FeatureChip(label: 'Profile visible to friends only'),
-                      _FeatureChip(label: 'Study data visible to teammates'),
+                      _AuthHeader(
+                        isDesktop: isDesktop,
+                        isChinese: _language.isChinese,
+                      ),
+                      const SizedBox(height: 40),
+                      _AuthFormSection(
+                        mode: _mode,
+                        modeTitle: _modeTitle,
+                        submitLabel: _submitLabel,
+                        codeButtonLabel: _codeButtonLabel,
+                        isBusy: sessionController.isBusy,
+                        sendingCode: _sendingCode,
+                        cooldownSeconds: _cooldownSeconds,
+                        bannerMessage: sessionController.bannerMessage,
+                        emailController: _emailController,
+                        passwordController: _passwordController,
+                        codeController: _codeController,
+                        needsPassword: _needsPassword,
+                        needsCode: _needsCode,
+                        obscurePassword: _obscurePassword,
+                        isChinese: _language.isChinese,
+                        onModeChanged: _switchMode,
+                        onTogglePasswordVisibility: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                        onChanged: sessionController.clearBanner,
+                        onSendCode: _sendCode,
+                        onSubmit: _submit,
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  const GlassPanel(
-                    child: _IntroCard(),
-                  ),
-                ],
-              );
-
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1120),
-                    child: isWide
-                        ? Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(child: intro),
-                              const SizedBox(width: 24),
-                              formCard,
-                            ],
-                          )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              intro,
-                              const SizedBox(height: 24),
-                              formCard,
-                            ],
-                          ),
-                  ),
                 ),
-              );
-            },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _AuthHeader extends StatelessWidget {
+  const _AuthHeader({
+    required this.isDesktop,
+    required this.isChinese,
+  });
+
+  final bool isDesktop;
+  final bool isChinese;
+
+  @override
+  Widget build(BuildContext context) {
+    final titleContent = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'INNOCENCE',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: const Color(0xFF111111),
+            fontSize: isDesktop ? 50 : 36,
+            fontWeight: FontWeight.w800,
+            letterSpacing: isDesktop ? 3.2 : 2.0,
+            height: 1,
+          ),
+        ),
+        const SizedBox(height: 14),
+        Center(
+          child: Container(
+            width: isDesktop ? 300 : 200,
+            height: 2,
+            decoration: BoxDecoration(
+              color: const Color(0xFF111111),
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          isChinese ? '专注陪伴与同步学习' : 'Focused study and synced progress',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: const Color(0xFF7A8090),
+            fontSize: isDesktop ? 14 : 13,
+          ),
+        ),
+      ],
+    );
+
+    if (!isDesktop) {
+      return titleContent;
+    }
+
+    return SizedBox(
+      height: 168,
+      child: Stack(
+        children: [
+          const Positioned.fill(
+            child: DesktopDragRegion(),
+          ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Center(child: titleContent),
+            ),
+          ),
+          const Positioned(
+            top: 2,
+            right: 0,
+            child: _UnifiedCloseButton(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UnifiedCloseButton extends StatelessWidget {
+  const _UnifiedCloseButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () async {
+          await DesktopWidgetBridge.closeWindow();
+        },
+        child: Container(
+          width: 46,
+          height: 46,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: const Color(0xFFD4DAE3),
+            ),
+          ),
+          alignment: Alignment.center,
+          child: const Icon(
+            Icons.close_rounded,
+            color: Color(0xFF111111),
+            size: 19,
           ),
         ),
       ),
@@ -326,15 +415,12 @@ class _AuthPageState extends State<AuthPage> {
   }
 }
 
-class _FormCard extends StatelessWidget {
-  const _FormCard({
-    required this.formKey,
+class _AuthFormSection extends StatelessWidget {
+  const _AuthFormSection({
     required this.mode,
     required this.modeTitle,
-    required this.modeDescription,
     required this.submitLabel,
     required this.codeButtonLabel,
-    required this.deviceLabel,
     required this.isBusy,
     required this.sendingCode,
     required this.cooldownSeconds,
@@ -345,6 +431,7 @@ class _FormCard extends StatelessWidget {
     required this.needsPassword,
     required this.needsCode,
     required this.obscurePassword,
+    required this.isChinese,
     required this.onModeChanged,
     required this.onTogglePasswordVisibility,
     required this.onChanged,
@@ -352,13 +439,10 @@ class _FormCard extends StatelessWidget {
     required this.onSubmit,
   });
 
-  final GlobalKey<FormState> formKey;
   final AuthMode mode;
   final String modeTitle;
-  final String modeDescription;
   final String submitLabel;
   final String codeButtonLabel;
-  final String deviceLabel;
   final bool isBusy;
   final bool sendingCode;
   final int cooldownSeconds;
@@ -369,174 +453,173 @@ class _FormCard extends StatelessWidget {
   final bool needsPassword;
   final bool needsCode;
   final bool obscurePassword;
+  final bool isChinese;
   final ValueChanged<AuthMode> onModeChanged;
   final VoidCallback onTogglePasswordVisibility;
   final VoidCallback onChanged;
   final Future<void> Function() onSendCode;
   final Future<void> Function() onSubmit;
 
+  String get _passwordSegmentLabel => isChinese ? '密码登录' : 'Password';
+  String get _codeSegmentLabel => isChinese ? '验证码' : 'Code';
+  String get _registerSegmentLabel => isChinese ? '注册' : 'Register';
+  String get _emailLabel => isChinese ? '邮箱' : 'Email';
+  String get _emailHint => isChinese ? '请输入邮箱地址' : 'Enter your email';
+  String get _passwordLabel => isChinese ? '密码' : 'Password';
+  String get _passwordHint => isChinese ? '请输入密码' : 'Enter your password';
+  String get _newPasswordHint => isChinese ? '至少 6 位密码' : 'At least 6 characters';
+  String get _emailCodeLabel => isChinese ? '邮箱验证码' : 'Email code';
+  String get _emailCodeHint => isChinese ? '请输入收到的验证码' : 'Enter the code';
+
   @override
   Widget build(BuildContext context) {
+    final disableDesktopAutofill = AppConfig.deviceType == 'windows';
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(modeTitle, style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 8),
-        Text(modeDescription, style: Theme.of(context).textTheme.bodyMedium),
-        const SizedBox(height: 20),
-        SegmentedButton<AuthMode>(
-          showSelectedIcon: false,
-          segments: const [
-            ButtonSegment(
-              value: AuthMode.passwordLogin,
-              label: Text('Password'),
+        Text(
+          modeTitle,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Color(0xFF111111),
+            fontSize: 32,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.6,
+          ),
+        ),
+        const SizedBox(height: 28),
+        Row(
+          children: [
+            Expanded(
+              child: _AuthModeButton(
+                label: _passwordSegmentLabel,
+                selected: mode == AuthMode.passwordLogin,
+                enabled: !isBusy,
+                onTap: () => onModeChanged(AuthMode.passwordLogin),
+              ),
             ),
-            ButtonSegment(
-              value: AuthMode.codeLogin,
-              label: Text('Code'),
+            const SizedBox(width: 18),
+            Expanded(
+              child: _AuthModeButton(
+                label: _codeSegmentLabel,
+                selected: mode == AuthMode.codeLogin,
+                enabled: !isBusy,
+                onTap: () => onModeChanged(AuthMode.codeLogin),
+              ),
             ),
-            ButtonSegment(
-              value: AuthMode.register,
-              label: Text('Register'),
+            const SizedBox(width: 18),
+            Expanded(
+              child: _AuthModeButton(
+                label: _registerSegmentLabel,
+                selected: mode == AuthMode.register,
+                enabled: !isBusy,
+                onTap: () => onModeChanged(AuthMode.register),
+              ),
             ),
           ],
-          selected: {mode},
-          onSelectionChanged: isBusy
-              ? null
-              : (selection) {
-                  onModeChanged(selection.first);
-                },
         ),
         if (bannerMessage != null) ...[
           const SizedBox(height: 18),
-          StatusBanner(message: bannerMessage!),
+          _AuthBanner(message: bannerMessage!),
         ],
-        const SizedBox(height: 18),
-        Form(
-          key: formKey,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                autofillHints: const [AutofillHints.email],
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  hintText: 'Enter your registration email',
-                ),
-                onChanged: (_) => onChanged(),
-                validator: (value) {
-                  final text = value?.trim() ?? '';
-                  if (text.isEmpty) {
-                    return 'Please enter your email.';
-                  }
-                  final regex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-                  if (!regex.hasMatch(text)) {
-                    return 'Invalid email format.';
-                  }
-                  return null;
-                },
+        const SizedBox(height: 30),
+        _LabeledTextField(
+          label: _emailLabel,
+          controller: emailController,
+          hintText: _emailHint,
+          keyboardType: TextInputType.emailAddress,
+          obscureText: false,
+          autofillHints:
+              disableDesktopAutofill ? null : const [AutofillHints.email],
+          onChanged: onChanged,
+        ),
+        if (needsPassword) ...[
+          const SizedBox(height: 20),
+          _LabeledTextField(
+            label: _passwordLabel,
+            controller: passwordController,
+            hintText: mode == AuthMode.register ? _newPasswordHint : _passwordHint,
+            keyboardType: TextInputType.text,
+            obscureText: obscurePassword,
+            autofillHints: disableDesktopAutofill
+                ? null
+                : mode == AuthMode.register
+                    ? const [AutofillHints.newPassword]
+                    : const [AutofillHints.password],
+            trailing: IconButton(
+              onPressed: onTogglePasswordVisibility,
+              splashRadius: 18,
+              icon: Icon(
+                obscurePassword
+                    ? Icons.visibility_off_rounded
+                    : Icons.visibility_rounded,
+                color: const Color(0xFF7A869A),
               ),
-              if (needsPassword) ...[
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: passwordController,
-                  obscureText: obscurePassword,
-                  autofillHints: mode == AuthMode.register
-                      ? const [AutofillHints.newPassword]
-                      : const [AutofillHints.password],
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    hintText: mode == AuthMode.register
-                        ? 'At least 6 characters'
-                        : 'Enter your password',
-                    suffixIcon: IconButton(
-                      onPressed: onTogglePasswordVisibility,
-                      icon: Icon(
-                        obscurePassword
-                            ? Icons.visibility_off_rounded
-                            : Icons.visibility_rounded,
-                      ),
-                    ),
-                  ),
-                  onChanged: (_) => onChanged(),
-                  validator: (value) {
-                    final text = value ?? '';
-                    if (text.isEmpty) {
-                      return 'Please enter your password.';
-                    }
-                    if (mode == AuthMode.register && text.length < 6) {
-                      return 'Password must be at least 6 characters.';
-                    }
-                    return null;
-                  },
-                ),
-              ],
-              if (needsCode) ...[
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: codeController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Email code',
-                    hintText: 'Enter the verification code',
-                  ),
-                  onChanged: (_) => onChanged(),
-                  validator: (value) {
-                    if ((value ?? '').trim().isEmpty) {
-                      return 'Please enter the verification code.';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: OutlinedButton(
-                    onPressed: (isBusy || sendingCode || cooldownSeconds > 0)
-                        ? null
-                        : () async {
-                            await onSendCode();
-                          },
-                    child: Text(codeButtonLabel),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: isBusy
+            ),
+            onChanged: onChanged,
+          ),
+        ],
+        if (needsCode) ...[
+          const SizedBox(height: 20),
+          _LabeledTextField(
+            label: _emailCodeLabel,
+            controller: codeController,
+            hintText: _emailCodeHint,
+            keyboardType: TextInputType.number,
+            obscureText: false,
+            onChanged: onChanged,
+          ),
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerRight,
+            child: SizedBox(
+              height: 48,
+              child: OutlinedButton(
+                onPressed: (isBusy || sendingCode || cooldownSeconds > 0)
                     ? null
                     : () async {
-                        await onSubmit();
+                        await onSendCode();
                       },
-                child: isBusy
-                    ? const SizedBox.square(
-                        dimension: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(submitLabel),
-              ),
-              const SizedBox(height: 14),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(
-                    Icons.devices_rounded,
-                    color: AppColors.mint,
-                    size: 18,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF111111),
+                  side: const BorderSide(color: Color(0xFFD2D8E1)),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Current device: $deviceLabel. '
-                      'This app keeps one phone and one desktop online.',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                child: Text(codeButtonLabel),
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 28),
+        SizedBox(
+          height: 60,
+          child: ElevatedButton(
+            onPressed: isBusy
+                ? null
+                : () async {
+                    await onSubmit();
+                  },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF111111),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            child: isBusy
+                ? const SizedBox.square(
+                    dimension: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  )
+                : Text(submitLabel),
           ),
         ),
       ],
@@ -544,89 +627,232 @@ class _FormCard extends StatelessWidget {
   }
 }
 
-class _IntroCard extends StatelessWidget {
-  const _IntroCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Current scope', style: textTheme.titleMedium),
-        const SizedBox(height: 14),
-        const _IntroRow(
-          icon: Icons.mark_email_read_rounded,
-          text: 'Email + password login, email code login, and email register',
-        ),
-        const SizedBox(height: 10),
-        const _IntroRow(
-          icon: Icons.security_rounded,
-          text: 'Session restore, local device id, and profile bootstrap',
-        ),
-        const SizedBox(height: 10),
-        const _IntroRow(
-          icon: Icons.auto_awesome_rounded,
-          text: 'Glass UI direction remains for the desktop experience',
-        ),
-      ],
-    );
-  }
-}
-
-class _IntroRow extends StatelessWidget {
-  const _IntroRow({
-    required this.icon,
-    required this.text,
+class _AuthBanner extends StatelessWidget {
+  const _AuthBanner({
+    required this.message,
   });
 
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, color: AppColors.mint, size: 18),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            text,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _FeatureChip extends StatelessWidget {
-  const _FeatureChip({required this.label});
-
-  final String label;
+  final String message;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 10,
-      ),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        color: const Color(0xFFFFF3F3),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: const Color(0xFFFFD5D5),
+        ),
       ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textPrimary,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.info_outline_rounded,
+            color: Color(0xFFB64646),
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: Color(0xFF5A2A2A),
+                fontSize: 14,
+                height: 1.45,
+              ),
             ),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class _AuthModeButton extends StatelessWidget {
+  const _AuthModeButton({
+    required this.label,
+    required this.selected,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(18),
+        child: Ink(
+          height: 64,
+          decoration: BoxDecoration(
+            color: selected ? const Color(0xFF111111) : Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: selected ? const Color(0xFF111111) : const Color(0xFFD2D8E1),
+            ),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: selected ? Colors.white : const Color(0xFF111111),
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LabeledTextField extends StatefulWidget {
+  const _LabeledTextField({
+    required this.label,
+    required this.controller,
+    required this.hintText,
+    required this.keyboardType,
+    required this.obscureText,
+    required this.onChanged,
+    this.trailing,
+    this.autofillHints,
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final String hintText;
+  final TextInputType keyboardType;
+  final bool obscureText;
+  final VoidCallback onChanged;
+  final Widget? trailing;
+  final Iterable<String>? autofillHints;
+
+  @override
+  State<_LabeledTextField> createState() => _LabeledTextFieldState();
+}
+
+class _LabeledTextFieldState extends State<_LabeledTextField> {
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode()..addListener(_handleFocusChange);
+    widget.controller.addListener(_handleTextChange);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_handleTextChange);
+    _focusNode
+      ..removeListener(_handleFocusChange)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _handleFocusChange() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void _handleTextChange() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isFocused = _focusNode.hasFocus;
+    final hasText = widget.controller.text.isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.label,
+          style: const TextStyle(
+            color: Color(0xFF333333),
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 10),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          height: 60,
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isFocused
+                  ? const Color(0xFF111111)
+                  : const Color(0xFFD8DEE8),
+              width: isFocused ? 1.2 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Stack(
+                  alignment: Alignment.centerLeft,
+                  children: [
+                    if (!hasText)
+                      IgnorePointer(
+                        child: Text(
+                          widget.hintText,
+                          style: const TextStyle(
+                            color: Color(0xFF8B94A3),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    EditableText(
+                      controller: widget.controller,
+                      focusNode: _focusNode,
+                      textDirection: Directionality.of(context),
+                      keyboardType: widget.keyboardType,
+                      obscureText: widget.obscureText,
+                      autofillHints: widget.autofillHints,
+                      autocorrect: false,
+                      enableSuggestions: !widget.obscureText,
+                      minLines: 1,
+                      maxLines: 1,
+                      style: const TextStyle(
+                        color: Color(0xFF111111),
+                        fontSize: 15,
+                      ),
+                      cursorColor: const Color(0xFF111111),
+                      backgroundCursorColor: const Color(0xFF111111),
+                      selectionColor: const Color(0x33111111),
+                      rendererIgnoresPointer: false,
+                      cursorRadius: const Radius.circular(2),
+                      cursorWidth: 1.8,
+                      onChanged: (_) => widget.onChanged(),
+                    ),
+                  ],
+                ),
+              ),
+              if (widget.trailing != null) ...[
+                const SizedBox(width: 8),
+                widget.trailing!,
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

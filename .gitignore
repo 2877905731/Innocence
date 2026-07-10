@@ -18,6 +18,7 @@ out/
 
 # Flutter / Dart
 .dart_tool/
+.dart_state/
 .flutter-plugins
 .flutter-plugins-dependencies
 .metadata
@@ -28,6 +29,7 @@ build/
 # Env
 .env
 .env.*
+server/innocence-server/config/
 
 # Local temp
 tmp/

@@ -20,6 +20,8 @@ import com.innocence.server.modules.account.dto.response.BlacklistItemResponse;
 import com.innocence.server.modules.account.dto.response.CurrentSessionResponse;
 import com.innocence.server.modules.account.dto.response.PrivacySettingResponse;
 import com.innocence.server.modules.account.dto.response.UserProfileResponse;
+import com.innocence.server.modules.checkin.service.CheckInService;
+import com.innocence.server.modules.friend.mapper.FriendMapper;
 import com.innocence.server.modules.account.mapper.UserMapper;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -39,10 +41,19 @@ public class AccountService {
 
     private final UserMapper userMapper;
     private final EmailCodeService emailCodeService;
+    private final CheckInService checkInService;
+    private final FriendMapper friendMapper;
 
-    public AccountService(UserMapper userMapper, EmailCodeService emailCodeService) {
+    public AccountService(
+            UserMapper userMapper,
+            EmailCodeService emailCodeService,
+            CheckInService checkInService,
+            FriendMapper friendMapper
+    ) {
         this.userMapper = userMapper;
         this.emailCodeService = emailCodeService;
+        this.checkInService = checkInService;
+        this.friendMapper = friendMapper;
     }
 
     @Transactional
@@ -235,6 +246,9 @@ public class AccountService {
         }
         try {
             userMapper.insertBlacklist(userId, blockedUserId);
+            friendMapper.deleteFriendRelation(userId, blockedUserId);
+            friendMapper.deleteFriendRelation(blockedUserId, userId);
+            friendMapper.deleteFriendRequestsBetweenUsers(userId, blockedUserId);
         } catch (DuplicateKeyException exception) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "该用户已在黑名单中");
         }
@@ -298,6 +312,9 @@ public class AccountService {
     }
 
     private UserProfileResponse buildProfileResponse(User user, UserProfile profile) {
+        Integer totalStudySeconds = userMapper.findTotalStudySecondsByUserId(user.getId());
+        int totalCheckInDays = checkInService.getTotalCheckInDays(user.getId());
+
         UserProfileResponse response = new UserProfileResponse();
         response.setUserId(user.getId());
         response.setUserNo(user.getUserNo());
@@ -305,8 +322,8 @@ public class AccountService {
         response.setAvatarUrl(user.getAvatarUrl());
         response.setBio(profile.getBio());
         response.setTimezone(profile.getTimezone());
-        response.setStudyDurationTotal(0);
-        response.setCheckInDaysTotal(0);
+        response.setStudyDurationTotal((totalStudySeconds == null ? 0 : Math.max(totalStudySeconds, 0)) / 60);
+        response.setCheckInDaysTotal(totalCheckInDays);
         return response;
     }
 

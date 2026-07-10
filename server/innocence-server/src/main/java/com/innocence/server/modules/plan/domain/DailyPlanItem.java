@@ -11,6 +11,8 @@ public class DailyPlanItem {
     private Integer status;
     private Integer plannedMinutes;
     private Integer actualMinutes;
+    private Integer startSlot;
+    private Integer endSlot;
     private Integer sortOrder;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
@@ -69,6 +71,22 @@ public class DailyPlanItem {
 
     public void setActualMinutes(Integer actualMinutes) {
         this.actualMinutes = actualMinutes;
+    }
+
+    public Integer getStartSlot() {
+        return startSlot;
+    }
+
+    public void setStartSlot(Integer startSlot) {
+        this.startSlot = startSlot;
+    }
+
+    public Integer getEndSlot() {
+        return endSlot;
+    }
+
+    public void setEndSlot(Integer endSlot) {
+        this.endSlot = endSlot;
     }
 
     public Integer getSortOrder() {

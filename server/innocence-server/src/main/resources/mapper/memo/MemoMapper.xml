@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innocence.server.modules.memo.mapper.MemoMapper">
+
+    <resultMap id="MemoRecordResultMap" type="com.innocence.server.modules.memo.domain.MemoRecord">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="contentText" column="content_text"/>
+        <result property="sortNo" column="sort_no"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="MemoCheckItemResultMap" type="com.innocence.server.modules.memo.domain.MemoCheckItem">
+        <id property="id" column="id"/>
+        <result property="memoId" column="memo_id"/>
+        <result property="itemText" column="item_text"/>
+        <result property="checkedFlag" column="checked_flag"/>
+        <result property="sortNo" column="sort_no"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="MemoCardRowResultMap" type="com.innocence.server.modules.memo.domain.MemoCardRow">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="contentText" column="content_text"/>
+        <result property="sortNo" column="sort_no"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="totalItemCount" column="total_item_count"/>
+        <result property="checkedItemCount" column="checked_item_count"/>
+    </resultMap>
+
+    <select id="findMemoCardsByUserId" resultMap="MemoCardRowResultMap">
+        select mr.id,
+               mr.user_id,
+               mr.title,
+               coalesce(mr.content_text, '') as content_text,
+               mr.sort_no,
+               mr.create_time,
+               mr.update_time,
+               count(mci.id) as total_item_count,
+               sum(case when coalesce(mci.checked_flag, 0) = 1 then 1 else 0 end) as checked_item_count
+        from memo_record mr
+                 left join memo_check_item mci on mci.memo_id = mr.id
+        where mr.user_id = #{userId}
+        group by mr.id, mr.user_id, mr.title, mr.content_text, mr.sort_no, mr.create_time, mr.update_time
+        order by mr.update_time desc, mr.id desc
+        limit #{limit} offset #{offset}
+    </select>
+
+    <select id="countMemosByUserId" resultType="java.lang.Integer">
+        select count(*)
+        from memo_record
+        where user_id = #{userId}
+    </select>
+
+    <select id="findMemoByIdAndUserId" resultMap="MemoRecordResultMap">
+        select *
+        from memo_record
+        where id = #{memoId}
+          and user_id = #{userId}
+        limit 1
+    </select>
+
+    <select id="findCheckItemsByMemoId" resultMap="MemoCheckItemResultMap">
+        select *
+        from memo_check_item
+        where memo_id = #{memoId}
+        order by sort_no asc, id asc
+    </select>
+
+    <select id="findMaxSortNoByUserId" resultType="java.lang.Integer">
+        select max(sort_no)
+        from memo_record
+        where user_id = #{userId}
+    </select>
+
+    <insert id="insertMemo" useGeneratedKeys="true" keyProperty="id">
+        insert into memo_record (
+            user_id,
+            title,
+            content_text,
+            sort_no
+        )
+        values (
+            #{userId},
+            #{title},
+            #{contentText},
+            #{sortNo}
+        )
+    </insert>
+
+    <update id="updateMemo">
+        update memo_record
+        set title = #{title},
+            content_text = #{contentText}
+        where id = #{id}
+          and user_id = #{userId}
+    </update>
+
+    <delete id="deleteMemoByIdAndUserId">
+        delete from memo_record
+        where id = #{memoId}
+          and user_id = #{userId}
+    </delete>
+
+    <delete id="deleteCheckItemsByMemoId">
+        delete from memo_check_item
+        where memo_id = #{memoId}
+    </delete>
+
+    <insert id="insertCheckItem" useGeneratedKeys="true" keyProperty="id">
+        insert into memo_check_item (
+            memo_id,
+            item_text,
+            checked_flag,
+            sort_no
+        )
+        values (
+            #{memoId},
+            #{itemText},
+            #{checkedFlag},
+            #{sortNo}
+        )
+    </insert>
+
+</mapper>

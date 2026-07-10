@@ -97,6 +97,13 @@
         limit 1
     </select>
 
+    <select id="findTotalStudySecondsByUserId" resultType="java.lang.Integer">
+        select coalesce(sum(duration_seconds), 0)
+        from study_timer_record
+        where user_id = #{userId}
+          and status = 'finished'
+    </select>
+
     <select id="findPrivacyByUserId" resultMap="UserPrivacyResultMap">
         select *
         from user_privacy_setting
@@ -109,6 +116,15 @@
         from user_blacklist
         where user_id = #{userId}
         order by id desc
+    </select>
+
+    <select id="findSystemAnnouncementRecipientUserIds" resultType="java.lang.Long">
+        select u.id
+        from app_user u
+                 left join user_notification_setting s on s.user_id = u.id
+        where u.status = 1
+          and coalesce(s.system_announcement_enabled, 1) = 1
+        order by u.id asc
     </select>
 
     <select id="findSessionByUserIdAndSlot" resultMap="UserSessionResultMap">

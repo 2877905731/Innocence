@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innocence.server.modules.setting.mapper.SettingMapper">
+
+    <resultMap id="UserNotificationSettingResultMap" type="com.innocence.server.modules.setting.domain.UserNotificationSetting">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="mobilePushEnabled" column="mobile_push_enabled"/>
+        <result property="desktopNoticeEnabled" column="desktop_notice_enabled"/>
+        <result property="teamRemindEnabled" column="team_remind_enabled"/>
+        <result property="systemAnnouncementEnabled" column="system_announcement_enabled"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="UserWidgetSettingResultMap" type="com.innocence.server.modules.setting.domain.UserWidgetSetting">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="autoStartFlag" column="auto_start_flag"/>
+        <result property="alwaysOnTopFlag" column="always_on_top_flag"/>
+        <result property="showPlanFlag" column="show_plan_flag"/>
+        <result property="showTimerFlag" column="show_timer_flag"/>
+        <result property="showMemoFlag" column="show_memo_flag"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="UserAppearanceSettingResultMap" type="com.innocence.server.modules.setting.domain.UserAppearanceSetting">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="themeMode" column="theme_mode"/>
+        <result property="desktopEffect" column="desktop_effect"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="findNotificationSettingByUserId" resultMap="UserNotificationSettingResultMap">
+        select *
+        from user_notification_setting
+        where user_id = #{userId}
+        limit 1
+    </select>
+
+    <select id="findWidgetSettingByUserId" resultMap="UserWidgetSettingResultMap">
+        select *
+        from user_widget_setting
+        where user_id = #{userId}
+        limit 1
+    </select>
+
+    <select id="findAppearanceSettingByUserId" resultMap="UserAppearanceSettingResultMap">
+        select *
+        from user_appearance_setting
+        where user_id = #{userId}
+        limit 1
+    </select>
+
+    <insert id="insertNotificationSetting" useGeneratedKeys="true" keyProperty="id">
+        insert into user_notification_setting (
+            user_id,
+            mobile_push_enabled,
+            desktop_notice_enabled,
+            team_remind_enabled,
+            system_announcement_enabled
+        )
+        values (
+            #{userId},
+            #{mobilePushEnabled},
+            #{desktopNoticeEnabled},
+            #{teamRemindEnabled},
+            #{systemAnnouncementEnabled}
+        )
+    </insert>
+
+    <insert id="insertWidgetSetting" useGeneratedKeys="true" keyProperty="id">
+        insert into user_widget_setting (
+            user_id,
+            auto_start_flag,
+            always_on_top_flag,
+            show_plan_flag,
+            show_timer_flag,
+            show_memo_flag
+        )
+        values (
+            #{userId},
+            #{autoStartFlag},
+            #{alwaysOnTopFlag},
+            #{showPlanFlag},
+            #{showTimerFlag},
+            #{showMemoFlag}
+        )
+    </insert>
+
+    <insert id="insertAppearanceSetting" useGeneratedKeys="true" keyProperty="id">
+        insert into user_appearance_setting (
+            user_id,
+            theme_mode,
+            desktop_effect
+        )
+        values (
+            #{userId},
+            #{themeMode},
+            #{desktopEffect}
+        )
+    </insert>
+
+    <update id="updateNotificationSetting">
+        update user_notification_setting
+        set mobile_push_enabled = #{mobilePushEnabled},
+            desktop_notice_enabled = #{desktopNoticeEnabled},
+            team_remind_enabled = #{teamRemindEnabled},
+            system_announcement_enabled = #{systemAnnouncementEnabled}
+        where user_id = #{userId}
+    </update>
+
+    <update id="updateWidgetSetting">
+        update user_widget_setting
+        set auto_start_flag = #{autoStartFlag},
+            always_on_top_flag = #{alwaysOnTopFlag},
+            show_plan_flag = #{showPlanFlag},
+            show_timer_flag = #{showTimerFlag},
+            show_memo_flag = #{showMemoFlag}
+        where user_id = #{userId}
+    </update>
+
+    <update id="updateAppearanceSetting">
+        update user_appearance_setting
+        set theme_mode = #{themeMode},
+            desktop_effect = #{desktopEffect}
+        where user_id = #{userId}
+    </update>
+
+</mapper>

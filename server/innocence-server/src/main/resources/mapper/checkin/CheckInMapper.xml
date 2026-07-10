@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innocence.server.modules.checkin.mapper.CheckInMapper">
+
+    <resultMap id="CheckInRecordResultMap" type="com.innocence.server.modules.checkin.domain.CheckInRecord">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="checkInDate" column="check_in_date"/>
+        <result property="planCompletedCount" column="plan_completed_count"/>
+        <result property="planTotalCount" column="plan_total_count"/>
+        <result property="studyDurationMinutes" column="study_duration_minutes"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="CheckInSummaryResultMap" type="com.innocence.server.modules.checkin.domain.CheckInSummary">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="consecutiveDays" column="consecutive_days"/>
+        <result property="totalDays" column="total_days"/>
+        <result property="lastSuccessDate" column="last_success_date"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="CheckInFailRecordResultMap" type="com.innocence.server.modules.checkin.domain.CheckInFailRecord">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="checkInDate" column="check_in_date"/>
+        <result property="attemptCount" column="attempt_count"/>
+        <result property="latestReason" column="latest_reason"/>
+        <result property="planCompletedCount" column="plan_completed_count"/>
+        <result property="planTotalCount" column="plan_total_count"/>
+        <result property="studyDurationMinutes" column="study_duration_minutes"/>
+        <result property="lastAttemptTime" column="last_attempt_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="findCheckInRecordByUserIdAndDate" resultMap="CheckInRecordResultMap">
+        select *
+        from check_in_record
+        where user_id = #{userId}
+          and check_in_date = #{checkInDate}
+        limit 1
+    </select>
+
+    <select id="findCheckInSummaryByUserId" resultMap="CheckInSummaryResultMap">
+        select *
+        from check_in_summary
+        where user_id = #{userId}
+        limit 1
+    </select>
+
+    <select id="findCheckInFailRecordByUserIdAndDate" resultMap="CheckInFailRecordResultMap">
+        select *
+        from check_in_fail_record
+        where user_id = #{userId}
+          and check_in_date = #{checkInDate}
+        limit 1
+    </select>
+
+    <select id="countCheckInRecordsByUserId" resultType="java.lang.Integer">
+        select count(1)
+        from check_in_record
+        where user_id = #{userId}
+    </select>
+
+    <insert id="insertCheckInRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into check_in_record (
+            user_id,
+            check_in_date,
+            plan_completed_count,
+            plan_total_count,
+            study_duration_minutes
+        )
+        values (
+            #{userId},
+            #{checkInDate},
+            #{planCompletedCount},
+            #{planTotalCount},
+            #{studyDurationMinutes}
+        )
+    </insert>
+
+    <insert id="insertCheckInSummary" useGeneratedKeys="true" keyProperty="id">
+        insert into check_in_summary (
+            user_id,
+            consecutive_days,
+            total_days,
+            last_success_date
+        )
+        values (
+            #{userId},
+            #{consecutiveDays},
+            #{totalDays},
+            #{lastSuccessDate}
+        )
+    </insert>
+
+    <update id="updateCheckInSummary">
+        update check_in_summary
+        set consecutive_days = #{consecutiveDays},
+            total_days = #{totalDays},
+            last_success_date = #{lastSuccessDate}
+        where user_id = #{userId}
+    </update>
+
+    <insert id="upsertCheckInFailRecord">
+        insert into check_in_fail_record (
+            user_id,
+            check_in_date,
+            attempt_count,
+            latest_reason,
+            plan_completed_count,
+            plan_total_count,
+            study_duration_minutes,
+            last_attempt_time
+        )
+        values (
+            #{userId},
+            #{checkInDate},
+            #{attemptCount},
+            #{latestReason},
+            #{planCompletedCount},
+            #{planTotalCount},
+            #{studyDurationMinutes},
+            #{lastAttemptTime}
+        )
+        on duplicate key update
+            attempt_count = attempt_count + 1,
+            latest_reason = values(latest_reason),
+            plan_completed_count = values(plan_completed_count),
+            plan_total_count = values(plan_total_count),
+            study_duration_minutes = values(study_duration_minutes),
+            last_attempt_time = values(last_attempt_time)
+    </insert>
+
+    <delete id="deleteCheckInFailRecordByUserIdAndDate">
+        delete from check_in_fail_record
+        where user_id = #{userId}
+          and check_in_date = #{checkInDate}
+    </delete>
+
+</mapper>

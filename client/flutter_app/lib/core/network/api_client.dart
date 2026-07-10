@@ -52,6 +52,19 @@ class ApiClient {
     );
   }
 
+  Future<dynamic> delete(
+    String path, {
+    Map<String, dynamic>? body,
+    Map<String, String> headers = const {},
+  }) {
+    return _send(
+      'DELETE',
+      path,
+      body: body,
+      headers: headers,
+    );
+  }
+
   Future<dynamic> _send(
     String method,
     String path, {
@@ -79,11 +92,11 @@ class ApiClient {
           rawResponse.isEmpty ? <String, dynamic>{} : jsonDecode(rawResponse);
 
       if (payload is! Map<String, dynamic>) {
-        throw const ApiException('The server returned unreadable data.');
+        throw const ApiException('服务器返回了无法识别的数据。');
       }
 
       final apiCode = payload['code'] as int? ?? -1;
-      final message = payload['message'] as String? ?? 'Request failed.';
+      final message = payload['message'] as String? ?? '请求失败，请稍后重试。';
 
       if (response.statusCode < 200 || response.statusCode >= 300 || apiCode != 0) {
         throw ApiException(
@@ -95,11 +108,11 @@ class ApiClient {
 
       return payload['data'];
     } on SocketException {
-      throw const ApiException('Unable to connect to the server.');
+      throw const ApiException('暂时无法连接本地服务，请先启动后端服务。');
     } on HandshakeException {
-      throw const ApiException('Failed to establish a trusted connection.');
+      throw const ApiException('建立安全连接失败。');
     } on FormatException {
-      throw const ApiException('The server response format is invalid.');
+      throw const ApiException('服务器返回内容格式不正确。');
     } on HttpException catch (error) {
       throw ApiException(error.message);
     }

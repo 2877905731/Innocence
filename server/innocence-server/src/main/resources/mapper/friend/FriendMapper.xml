@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innocence.server.modules.friend.mapper.FriendMapper">
+
+    <resultMap id="FriendGroupResultMap" type="com.innocence.server.modules.friend.domain.FriendGroup">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="groupName" column="group_name"/>
+        <result property="systemFlag" column="system_flag"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="FriendGroupRowResultMap" type="com.innocence.server.modules.friend.domain.FriendGroupRow">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="groupName" column="group_name"/>
+        <result property="systemFlag" column="system_flag"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="friendCount" column="friend_count"/>
+    </resultMap>
+
+    <resultMap id="FriendRelationResultMap" type="com.innocence.server.modules.friend.domain.FriendRelation">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="friendUserId" column="friend_user_id"/>
+        <result property="groupId" column="group_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="FriendRequestResultMap" type="com.innocence.server.modules.friend.domain.FriendRequest">
+        <id property="id" column="id"/>
+        <result property="requesterUserId" column="requester_user_id"/>
+        <result property="targetUserId" column="target_user_id"/>
+        <result property="requestMessage" column="request_message"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="FriendItemRowResultMap" type="com.innocence.server.modules.friend.domain.FriendItemRow">
+        <result property="friendUserId" column="friend_user_id"/>
+        <result property="userNo" column="user_no"/>
+        <result property="nickname" column="nickname"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="bio" column="bio"/>
+        <result property="allowFriendViewProfile" column="allow_friend_view_profile"/>
+        <result property="groupId" column="group_id"/>
+        <result property="groupName" column="group_name"/>
+        <result property="sameTeamFlag" column="same_team_flag"/>
+    </resultMap>
+
+    <resultMap id="FriendRequestRowResultMap" type="com.innocence.server.modules.friend.domain.FriendRequestRow">
+        <id property="id" column="id"/>
+        <result property="requesterUserId" column="requester_user_id"/>
+        <result property="targetUserId" column="target_user_id"/>
+        <result property="requestMessage" column="request_message"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="counterpartUserId" column="counterpart_user_id"/>
+        <result property="counterpartUserNo" column="counterpart_user_no"/>
+        <result property="counterpartNickname" column="counterpart_nickname"/>
+        <result property="counterpartAvatarUrl" column="counterpart_avatar_url"/>
+        <result property="sameTeamFlag" column="same_team_flag"/>
+    </resultMap>
+
+    <resultMap id="FriendSearchRowResultMap" type="com.innocence.server.modules.friend.domain.FriendSearchRow">
+        <result property="userId" column="user_id"/>
+        <result property="userNo" column="user_no"/>
+        <result property="nickname" column="nickname"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="alreadyFriendFlag" column="already_friend_flag"/>
+        <result property="outgoingPendingFlag" column="outgoing_pending_flag"/>
+        <result property="incomingPendingFlag" column="incoming_pending_flag"/>
+        <result property="blockedByMeFlag" column="blocked_by_me_flag"/>
+        <result property="blockedMeFlag" column="blocked_me_flag"/>
+        <result property="sameTeamFlag" column="same_team_flag"/>
+    </resultMap>
+
+    <select id="findDefaultGroupByUserId" resultMap="FriendGroupResultMap">
+        select *
+        from friend_group
+        where user_id = #{userId}
+          and system_flag = 1
+        order by id asc
+        limit 1
+    </select>
+
+    <select id="findFriendGroupByIdAndUserId" resultMap="FriendGroupResultMap">
+        select *
+        from friend_group
+        where id = #{groupId}
+          and user_id = #{userId}
+        limit 1
+    </select>
+
+    <select id="findFriendGroupRowsByUserId" resultMap="FriendGroupRowResultMap">
+        select fg.id,
+               fg.user_id,
+               fg.group_name,
+               fg.system_flag,
+               fg.sort_order,
+               fg.create_time,
+               fg.update_time,
+               count(fr.id) as friend_count
+        from friend_group fg
+                 left join friend_relation fr
+                           on fr.user_id = fg.user_id
+                              and fr.group_id = fg.id
+        where fg.user_id = #{userId}
+        group by fg.id, fg.user_id, fg.group_name, fg.system_flag, fg.sort_order, fg.create_time, fg.update_time
+        order by fg.system_flag desc, fg.sort_order asc, fg.id asc
+    </select>
+
+    <select id="countCustomGroupsByUserId" resultType="java.lang.Integer">
+        select count(*)
+        from friend_group
+        where user_id = #{userId}
+          and system_flag = 0
+    </select>
+
+    <select id="findMaxGroupSortOrder" resultType="java.lang.Integer">
+        select max(sort_order)
+        from friend_group
+        where user_id = #{userId}
+    </select>
+
+    <insert id="insertFriendGroup" useGeneratedKeys="true" keyProperty="id">
+        insert into friend_group (user_id, group_name, system_flag, sort_order)
+        values (#{userId}, #{groupName}, #{systemFlag}, #{sortOrder})
+    </insert>
+
+    <select id="countFriendCount" resultType="java.lang.Integer">
+        select count(*)
+        from friend_relation
+        where user_id = #{userId}
+    </select>
+
+    <select id="findFriendRelation" resultMap="FriendRelationResultMap">
+        select *
+        from friend_relation
+        where user_id = #{userId}
+          and friend_user_id = #{friendUserId}
+        limit 1
+    </select>
+
+    <select id="findFriendItemRowsByUserId" resultMap="FriendItemRowResultMap">
+        select fr.friend_user_id,
+               u.user_no,
+               u.nickname,
+               coalesce(u.avatar_url, '') as avatar_url,
+               case
+                   when coalesce(ups.allow_friend_view_profile, 1) = 1 then coalesce(up.bio, '')
+                   else ''
+               end as bio,
+               coalesce(ups.allow_friend_view_profile, 1) as allow_friend_view_profile,
+               fr.group_id,
+               coalesce(fg.group_name, 'Default') as group_name,
+               case
+                   when tm_self.team_id is not null and tm_self.team_id = tm_friend.team_id then 1
+                   else 0
+               end as same_team_flag
+        from friend_relation fr
+                 inner join app_user u on u.id = fr.friend_user_id and u.status = 1
+                 left join user_profile up on up.user_id = fr.friend_user_id
+                 left join user_privacy_setting ups on ups.user_id = fr.friend_user_id
+                 left join friend_group fg on fg.id = fr.group_id and fg.user_id = fr.user_id
+                 left join study_team_member tm_self on tm_self.user_id = fr.user_id and tm_self.status = 1
+                 left join study_team_member tm_friend on tm_friend.user_id = fr.friend_user_id and tm_friend.status = 1
+        where fr.user_id = #{userId}
+        order by same_team_flag desc, group_name asc, u.nickname asc, u.user_no asc
+    </select>
+
+    <insert id="insertFriendRelation" useGeneratedKeys="true" keyProperty="id">
+        insert into friend_relation (user_id, friend_user_id, group_id)
+        values (#{userId}, #{friendUserId}, #{groupId})
+    </insert>
+
+    <update id="updateFriendGroup">
+        update friend_relation
+        set group_id = #{groupId}
+        where user_id = #{userId}
+          and friend_user_id = #{friendUserId}
+    </update>
+
+    <delete id="deleteFriendRelation">
+        delete from friend_relation
+        where user_id = #{userId}
+          and friend_user_id = #{friendUserId}
+    </delete>
+
+    <select id="findFriendRequestById" resultMap="FriendRequestResultMap">
+        select *
+        from friend_request
+        where id = #{requestId}
+        limit 1
+    </select>
+
+    <select id="findFriendRequestByRequesterAndTarget" resultMap="FriendRequestResultMap">
+        select *
+        from friend_request
+        where requester_user_id = #{requesterUserId}
+          and target_user_id = #{targetUserId}
+        limit 1
+    </select>
+
+    <select id="findIncomingPendingRequestRowsByUserId" resultMap="FriendRequestRowResultMap">
+        select fr.id,
+               fr.requester_user_id,
+               fr.target_user_id,
+               fr.request_message,
+               fr.status,
+               fr.create_time,
+               fr.update_time,
+               u.id as counterpart_user_id,
+               u.user_no as counterpart_user_no,
+               u.nickname as counterpart_nickname,
+               coalesce(u.avatar_url, '') as counterpart_avatar_url,
+               case
+                   when tm_self.team_id is not null and tm_self.team_id = tm_other.team_id then 1
+                   else 0
+               end as same_team_flag
+        from friend_request fr
+                 inner join app_user u on u.id = fr.requester_user_id and u.status = 1
+                 left join study_team_member tm_self on tm_self.user_id = fr.target_user_id and tm_self.status = 1
+                 left join study_team_member tm_other on tm_other.user_id = fr.requester_user_id and tm_other.status = 1
+        where fr.target_user_id = #{userId}
+          and fr.status = 'pending'
+        order by fr.create_time desc, fr.id desc
+    </select>
+
+    <select id="findOutgoingPendingRequestRowsByUserId" resultMap="FriendRequestRowResultMap">
+        select fr.id,
+               fr.requester_user_id,
+               fr.target_user_id,
+               fr.request_message,
+               fr.status,
+               fr.create_time,
+               fr.update_time,
+               u.id as counterpart_user_id,
+               u.user_no as counterpart_user_no,
+               u.nickname as counterpart_nickname,
+               coalesce(u.avatar_url, '') as counterpart_avatar_url,
+               case
+                   when tm_self.team_id is not null and tm_self.team_id = tm_other.team_id then 1
+                   else 0
+               end as same_team_flag
+        from friend_request fr
+                 inner join app_user u on u.id = fr.target_user_id and u.status = 1
+                 left join study_team_member tm_self on tm_self.user_id = fr.requester_user_id and tm_self.status = 1
+                 left join study_team_member tm_other on tm_other.user_id = fr.target_user_id and tm_other.status = 1
+        where fr.requester_user_id = #{userId}
+          and fr.status = 'pending'
+        order by fr.create_time desc, fr.id desc
+    </select>
+
+    <insert id="insertFriendRequest" useGeneratedKeys="true" keyProperty="id">
+        insert into friend_request (
+            requester_user_id,
+            target_user_id,
+            request_message,
+            status,
+            create_time
+        )
+        values (
+            #{requesterUserId},
+            #{targetUserId},
+            #{requestMessage},
+            #{status},
+            #{createTime}
+        )
+    </insert>
+
+    <update id="updateFriendRequestForResend">
+        update friend_request
+        set request_message = #{requestMessage},
+            status = #{status},
+            create_time = #{createTime}
+        where id = #{id}
+    </update>
+
+    <update id="updateFriendRequestStatusById">
+        update friend_request
+        set status = #{status}
+        where id = #{requestId}
+    </update>
+
+    <update id="updateFriendRequestStatusByUsers">
+        update friend_request
+        set status = #{status}
+        where requester_user_id = #{requesterUserId}
+          and target_user_id = #{targetUserId}
+    </update>
+
+    <delete id="deleteFriendRequestsBetweenUsers">
+        delete from friend_request
+        where (requester_user_id = #{userId} and target_user_id = #{otherUserId})
+           or (requester_user_id = #{otherUserId} and target_user_id = #{userId})
+    </delete>
+
+    <select id="countBlacklistRelation" resultType="java.lang.Integer">
+        select count(*)
+        from user_blacklist
+        where user_id = #{userId}
+          and blocked_user_id = #{blockedUserId}
+    </select>
+
+    <select id="searchFriendCandidates" resultMap="FriendSearchRowResultMap">
+        select u.id as user_id,
+               u.user_no,
+               u.nickname,
+               coalesce(u.avatar_url, '') as avatar_url,
+               case when fr.id is null then 0 else 1 end as already_friend_flag,
+               case when outgoing_req.id is null then 0 else 1 end as outgoing_pending_flag,
+               case when incoming_req.id is null then 0 else 1 end as incoming_pending_flag,
+               case when black_self.id is null then 0 else 1 end as blocked_by_me_flag,
+               case when black_other.id is null then 0 else 1 end as blocked_me_flag,
+               case
+                   when tm_self.team_id is not null and tm_self.team_id = tm_other.team_id then 1
+                   else 0
+               end as same_team_flag
+        from app_user u
+                 left join friend_relation fr
+                           on fr.user_id = #{userId}
+                              and fr.friend_user_id = u.id
+                 left join friend_request outgoing_req
+                           on outgoing_req.requester_user_id = #{userId}
+                              and outgoing_req.target_user_id = u.id
+                              and outgoing_req.status = 'pending'
+                 left join friend_request incoming_req
+                           on incoming_req.requester_user_id = u.id
+                              and incoming_req.target_user_id = #{userId}
+                              and incoming_req.status = 'pending'
+                 left join user_blacklist black_self
+                           on black_self.user_id = #{userId}
+                              and black_self.blocked_user_id = u.id
+                 left join user_blacklist black_other
+                           on black_other.user_id = u.id
+                              and black_other.blocked_user_id = #{userId}
+                 left join study_team_member tm_self
+                           on tm_self.user_id = #{userId}
+                              and tm_self.status = 1
+                 left join study_team_member tm_other
+                           on tm_other.user_id = u.id
+                              and tm_other.status = 1
+        where u.status = 1
+          and u.id &lt;&gt; #{userId}
+          and (
+            u.user_no like #{keywordLike}
+                or u.nickname like #{keywordLike}
+            )
+        order by case
+                     when u.user_no = #{exactKeyword} then 0
+                     when u.nickname = #{exactKeyword} then 1
+                     else 2
+                 end,
+                 same_team_flag desc,
+                 already_friend_flag asc,
+                 u.last_login_time desc,
+                 u.id desc
+        limit 20
+    </select>
+
+</mapper>

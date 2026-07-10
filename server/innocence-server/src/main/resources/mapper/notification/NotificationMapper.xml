@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innocence.server.modules.notification.mapper.NotificationMapper">
+
+    <resultMap id="AdminAnnouncementRowResultMap" type="com.innocence.server.modules.notification.domain.AdminAnnouncementRow">
+        <id property="announcementId" column="announcement_id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="recipientCount" column="recipient_count"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <resultMap id="AppNotificationRowResultMap" type="com.innocence.server.modules.notification.domain.AppNotificationRow">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="senderUserId" column="sender_user_id"/>
+        <result property="notificationType" column="notification_type"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="relatedType" column="related_type"/>
+        <result property="relatedId" column="related_id"/>
+        <result property="readFlag" column="read_flag"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="senderUserNo" column="sender_user_no"/>
+        <result property="senderNickname" column="sender_nickname"/>
+        <result property="senderAvatarUrl" column="sender_avatar_url"/>
+    </resultMap>
+
+    <select id="findRecentNotificationsByUserId" resultMap="AppNotificationRowResultMap">
+        select n.*,
+               coalesce(u.user_no, '') as sender_user_no,
+               coalesce(u.nickname, '') as sender_nickname,
+               coalesce(u.avatar_url, '') as sender_avatar_url
+        from app_notification n
+                 left join app_user u on u.id = n.sender_user_id
+        where n.user_id = #{userId}
+          and n.create_time &gt;= #{sinceTime}
+        order by n.create_time desc, n.id desc
+        limit #{limit}
+    </select>
+
+    <select id="countUnreadByUserId" resultType="java.lang.Integer">
+        select count(*)
+        from app_notification
+        where user_id = #{userId}
+          and read_flag = 0
+          and create_time &gt;= #{sinceTime}
+    </select>
+
+    <insert id="insertNotification" useGeneratedKeys="true" keyProperty="id">
+        insert into app_notification (
+            user_id,
+            sender_user_id,
+            notification_type,
+            title,
+            content,
+            related_type,
+            related_id,
+            read_flag,
+            create_time
+        )
+        values (
+            #{userId},
+            #{senderUserId},
+            #{notificationType},
+            #{title},
+            #{content},
+            #{relatedType},
+            #{relatedId},
+            #{readFlag},
+            #{createTime}
+        )
+    </insert>
+
+    <select id="findRecentSystemAnnouncements" resultMap="AdminAnnouncementRowResultMap">
+        select n.related_id as announcement_id,
+               max(n.title) as title,
+               max(n.content) as content,
+               count(*) as recipient_count,
+               max(n.create_time) as create_time
+        from app_notification n
+        where n.notification_type = #{notificationType}
+          and n.related_type = #{relatedType}
+          and n.related_id is not null
+        group by n.related_id
+        order by create_time desc, announcement_id desc
+        limit #{limit}
+    </select>
+
+    <delete id="deleteSystemAnnouncement">
+        delete
+        from app_notification
+        where notification_type = #{notificationType}
+          and related_type = #{relatedType}
+          and related_id = #{announcementId}
+    </delete>
+
+    <update id="markRead">
+        update app_notification
+        set read_flag = 1
+        where user_id = #{userId}
+          and id = #{notificationId}
+    </update>
+
+    <update id="markAllRead">
+        update app_notification
+        set read_flag = 1
+        where user_id = #{userId}
+          and read_flag = 0
+          and create_time &gt;= #{sinceTime}
+    </update>
+
+    <select id="countNotificationsByRecipientAndRelated" resultType="java.lang.Integer">
+        select count(*)
+        from app_notification
+        where user_id = #{userId}
+          and notification_type = #{notificationType}
+          and related_type = #{relatedType}
+          and related_id = #{relatedId}
+    </select>
+
+</mapper>

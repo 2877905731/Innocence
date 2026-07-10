@@ -22,9 +22,13 @@ public interface UserMapper {
 
     UserProfile findProfileByUserId(@Param("userId") Long userId);
 
+    Integer findTotalStudySecondsByUserId(@Param("userId") Long userId);
+
     UserPrivacySetting findPrivacyByUserId(@Param("userId") Long userId);
 
     List<UserBlacklist> findBlacklistByUserId(@Param("userId") Long userId);
+
+    List<Long> findSystemAnnouncementRecipientUserIds();
 
     UserSession findSessionByUserIdAndSlot(@Param("userId") Long userId, @Param("deviceSlot") String deviceSlot);
 

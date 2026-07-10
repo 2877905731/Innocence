@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innocence.server.modules.team.mapper.TeamMapper">
+
+    <resultMap id="StudyTeamResultMap" type="com.innocence.server.modules.team.domain.StudyTeam">
+        <id property="id" column="id"/>
+        <result property="teamName" column="team_name"/>
+        <result property="inviteCode" column="invite_code"/>
+        <result property="ownerUserId" column="owner_user_id"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="StudyTeamMemberResultMap" type="com.innocence.server.modules.team.domain.StudyTeamMember">
+        <id property="id" column="id"/>
+        <result property="teamId" column="team_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="role" column="role"/>
+        <result property="status" column="status"/>
+        <result property="joinedTime" column="joined_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="StudyTeamInvitationResultMap" type="com.innocence.server.modules.team.domain.StudyTeamInvitation">
+        <id property="id" column="id"/>
+        <result property="teamId" column="team_id"/>
+        <result property="inviterUserId" column="inviter_user_id"/>
+        <result property="inviteeUserId" column="invitee_user_id"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="TeammateStatsRowResultMap" type="com.innocence.server.modules.team.domain.TeammateStatsRow">
+        <result property="teamId" column="team_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="userNo" column="user_no"/>
+        <result property="nickname" column="nickname"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="allowTeammateViewStudy" column="allow_teammate_view_study"/>
+        <result property="studyDurationTotalMinutes" column="study_duration_total_minutes"/>
+        <result property="checkInDaysTotal" column="check_in_days_total"/>
+        <result property="todayCompletedCount" column="today_completed_count"/>
+        <result property="todayTotalCount" column="today_total_count"/>
+        <result property="todayStudyDurationMinutes" column="today_study_duration_minutes"/>
+        <result property="activeStudyFlag" column="active_study_flag"/>
+        <result property="activeTaskName" column="active_task_name"/>
+        <result property="activeStageName" column="active_stage_name"/>
+        <result property="reminderCountToday" column="reminder_count_today"/>
+    </resultMap>
+
+    <resultMap id="StudyTeamChatMessageRowResultMap" type="com.innocence.server.modules.team.domain.StudyTeamChatMessageRow">
+        <id property="id" column="id"/>
+        <result property="teamId" column="team_id"/>
+        <result property="senderUserId" column="sender_user_id"/>
+        <result property="senderUserNo" column="sender_user_no"/>
+        <result property="senderNickname" column="sender_nickname"/>
+        <result property="senderAvatarUrl" column="sender_avatar_url"/>
+        <result property="content" column="content"/>
+        <result property="maskedFlag" column="masked_flag"/>
+        <result property="deletedFlag" column="deleted_flag"/>
+        <result property="deletedReason" column="deleted_reason"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <resultMap id="AdminTeamSearchRowResultMap" type="com.innocence.server.modules.team.domain.AdminTeamSearchRow">
+        <id property="teamId" column="team_id"/>
+        <result property="teamName" column="team_name"/>
+        <result property="inviteCode" column="invite_code"/>
+        <result property="ownerUserId" column="owner_user_id"/>
+        <result property="ownerUserNo" column="owner_user_no"/>
+        <result property="ownerNickname" column="owner_nickname"/>
+        <result property="status" column="status"/>
+        <result property="memberCount" column="member_count"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="findActiveTeamById" resultMap="StudyTeamResultMap">
+        select *
+        from study_team
+        where id = #{teamId}
+          and status = 1
+        limit 1
+    </select>
+
+    <select id="findTeamById" resultMap="StudyTeamResultMap">
+        select *
+        from study_team
+        where id = #{teamId}
+        limit 1
+    </select>
+
+    <select id="findTeamByInviteCode" resultMap="StudyTeamResultMap">
+        select *
+        from study_team
+        where invite_code = #{inviteCode}
+        limit 1
+    </select>
+
+    <select id="findActiveTeamByInviteCode" resultMap="StudyTeamResultMap">
+        select *
+        from study_team
+        where invite_code = #{inviteCode}
+          and status = 1
+        limit 1
+    </select>
+
+    <select id="findActiveMemberByUserId" resultMap="StudyTeamMemberResultMap">
+        select *
+        from study_team_member
+        where user_id = #{userId}
+          and status = 1
+        limit 1
+    </select>
+
+    <select id="findActiveMembersByTeamId" resultMap="StudyTeamMemberResultMap">
+        select *
+        from study_team_member
+        where team_id = #{teamId}
+          and status = 1
+        order by case when role = 'owner' then 0 else 1 end, joined_time asc
+    </select>
+
+    <select id="findMembersByTeamId" resultMap="StudyTeamMemberResultMap">
+        select *
+        from study_team_member
+        where team_id = #{teamId}
+        order by case when role = 'owner' then 0 else 1 end, status desc, joined_time asc
+    </select>
+
+    <select id="searchTeams" resultMap="AdminTeamSearchRowResultMap">
+        select st.id as team_id,
+               st.team_name,
+               st.invite_code,
+               st.owner_user_id,
+               owner.user_no as owner_user_no,
+               owner.nickname as owner_nickname,
+               st.status,
+               coalesce(member_stats.member_count, 0) as member_count,
+               st.create_time
+        from study_team st
+                 left join app_user owner on owner.id = st.owner_user_id
+                 left join (
+                    select team_id, count(*) as member_count
+                    from study_team_member
+                    where status = 1
+                    group by team_id
+                 ) member_stats on member_stats.team_id = st.id
+        where (#{keyword} is null or #{keyword} = ''
+            or st.team_name like concat('%', #{keyword}, '%')
+            or st.invite_code like concat('%', #{keyword}, '%')
+            or owner.user_no like concat('%', #{keyword}, '%')
+            or owner.nickname like concat('%', #{keyword}, '%'))
+          and (#{status} is null or st.status = #{status})
+        order by st.status desc, st.create_time desc, st.id desc
+        limit #{limit}
+    </select>
+
+    <select id="findActiveMemberByTeamIdAndUserId" resultMap="StudyTeamMemberResultMap">
+        select *
+        from study_team_member
+        where team_id = #{teamId}
+          and user_id = #{userId}
+          and status = 1
+        limit 1
+    </select>
+
+    <select id="findTeamInvitationById" resultMap="StudyTeamInvitationResultMap">
+        select *
+        from study_team_invitation
+        where id = #{invitationId}
+        limit 1
+    </select>
+
+    <select id="findPendingInvitationByTeamIdAndInviteeUserId" resultMap="StudyTeamInvitationResultMap">
+        select *
+        from study_team_invitation
+        where team_id = #{teamId}
+          and invitee_user_id = #{inviteeUserId}
+          and status = 'pending'
+        order by create_time desc, id desc
+        limit 1
+    </select>
+
+    <select id="findActiveTeamMemberStats" resultMap="TeammateStatsRowResultMap">
+        select tm.team_id,
+               u.id as user_id,
+               u.user_no,
+               u.nickname,
+               u.avatar_url,
+               coalesce(ups.allow_teammate_view_study, 1) as allow_teammate_view_study,
+               coalesce(study.total_minutes, 0) as study_duration_total_minutes,
+               coalesce(summary.total_days, 0) as check_in_days_total,
+               coalesce(plan.completed_count, 0) as today_completed_count,
+               coalesce(plan.total_count, 0) as today_total_count,
+               coalesce(today_study.total_minutes, 0) as today_study_duration_minutes,
+               case when active.id is null then 0 else 1 end as active_study_flag,
+               coalesce(active.task_name, '') as active_task_name,
+               case when active.id is null then '' else 'study' end as active_stage_name,
+               coalesce(reminders.reminder_count_today, 0) as reminder_count_today
+        from study_team_member tm
+                 inner join app_user u on u.id = tm.user_id and u.status = 1
+                 left join user_privacy_setting ups on ups.user_id = tm.user_id
+                 left join (
+                    select user_id, floor(coalesce(sum(duration_seconds), 0) / 60) as total_minutes
+                    from study_timer_record
+                    where status = 'finished'
+                    group by user_id
+                 ) study on study.user_id = tm.user_id
+                 left join check_in_summary summary on summary.user_id = tm.user_id
+                 left join (
+                    select user_id,
+                           count(*) as total_count,
+                           sum(case when status = 1 then 1 else 0 end) as completed_count
+                    from daily_plan_item dpi
+                             inner join daily_plan dp on dp.id = dpi.plan_id
+                    where dp.plan_date = #{planDate}
+                    group by user_id
+                 ) plan on plan.user_id = tm.user_id
+                 left join (
+                    select user_id, floor(coalesce(sum(duration_seconds), 0) / 60) as total_minutes
+                    from study_timer_record
+                    where status = 'finished'
+                      and coalesce(actual_end_time, create_time) &gt;= #{rangeStart}
+                      and coalesce(actual_end_time, create_time) &lt; #{rangeEnd}
+                    group by user_id
+                 ) today_study on today_study.user_id = tm.user_id
+                 left join study_timer_record active on active.user_id = tm.user_id and active.status = 'active'
+                 left join (
+                    select to_user_id, count(*) as reminder_count_today
+                    from study_team_reminder
+                    where team_id = #{teamId}
+                      and from_user_id = #{currentUserId}
+                      and create_time &gt;= #{rangeStart}
+                      and create_time &lt; #{rangeEnd}
+                    group by to_user_id
+                 ) reminders on reminders.to_user_id = tm.user_id
+        where tm.team_id = #{teamId}
+          and tm.status = 1
+        order by case when tm.user_id = #{currentUserId} then 0 else 1 end,
+                 case when tm.role = 'owner' then 0 else 1 end,
+                 active_study_flag desc,
+                 today_completed_count desc,
+                 today_study_duration_minutes desc,
+                 tm.joined_time asc
+    </select>
+
+    <select id="findActiveTeammateStats" resultMap="TeammateStatsRowResultMap">
+        select tm.team_id,
+               u.id as user_id,
+               u.user_no,
+               u.nickname,
+               u.avatar_url,
+               coalesce(ups.allow_teammate_view_study, 1) as allow_teammate_view_study,
+               coalesce(study.total_minutes, 0) as study_duration_total_minutes,
+               coalesce(summary.total_days, 0) as check_in_days_total,
+               coalesce(plan.completed_count, 0) as today_completed_count,
+               coalesce(plan.total_count, 0) as today_total_count,
+               coalesce(today_study.total_minutes, 0) as today_study_duration_minutes,
+               case when active.id is null then 0 else 1 end as active_study_flag,
+               coalesce(active.task_name, '') as active_task_name,
+               case when active.id is null then '' else 'study' end as active_stage_name,
+               coalesce(reminders.reminder_count_today, 0) as reminder_count_today
+        from study_team_member tm
+                 inner join app_user u on u.id = tm.user_id and u.status = 1
+                 left join user_privacy_setting ups on ups.user_id = tm.user_id
+                 left join (
+                    select user_id, floor(coalesce(sum(duration_seconds), 0) / 60) as total_minutes
+                    from study_timer_record
+                    where status = 'finished'
+                    group by user_id
+                 ) study on study.user_id = tm.user_id
+                 left join check_in_summary summary on summary.user_id = tm.user_id
+                 left join (
+                    select user_id,
+                           count(*) as total_count,
+                           sum(case when status = 1 then 1 else 0 end) as completed_count
+                    from daily_plan_item dpi
+                             inner join daily_plan dp on dp.id = dpi.plan_id
+                    where dp.plan_date = #{planDate}
+                    group by user_id
+                 ) plan on plan.user_id = tm.user_id
+                 left join (
+                    select user_id, floor(coalesce(sum(duration_seconds), 0) / 60) as total_minutes
+                    from study_timer_record
+                    where status = 'finished'
+                      and coalesce(actual_end_time, create_time) &gt;= #{rangeStart}
+                      and coalesce(actual_end_time, create_time) &lt; #{rangeEnd}
+                    group by user_id
+                 ) today_study on today_study.user_id = tm.user_id
+                 left join study_timer_record active on active.user_id = tm.user_id and active.status = 'active'
+                 left join (
+                    select to_user_id, count(*) as reminder_count_today
+                    from study_team_reminder
+                    where team_id = #{teamId}
+                      and from_user_id = #{currentUserId}
+                      and create_time &gt;= #{rangeStart}
+                      and create_time &lt; #{rangeEnd}
+                    group by to_user_id
+                 ) reminders on reminders.to_user_id = tm.user_id
+        where tm.team_id = #{teamId}
+          and tm.status = 1
+          and tm.user_id &lt;&gt; #{currentUserId}
+        order by active_study_flag desc, today_completed_count desc, today_study_duration_minutes desc, tm.joined_time asc
+    </select>
+
+    <select id="countRemindersSentToday" resultType="java.lang.Integer">
+        select count(*)
+        from study_team_reminder
+        where team_id = #{teamId}
+          and from_user_id = #{fromUserId}
+          and to_user_id = #{toUserId}
+          and create_time &gt;= #{rangeStart}
+          and create_time &lt; #{rangeEnd}
+    </select>
+
+    <select id="findRecentTeamChatMessages" resultMap="StudyTeamChatMessageRowResultMap">
+        select m.id,
+               m.team_id,
+               m.sender_user_id,
+               u.user_no as sender_user_no,
+               u.nickname as sender_nickname,
+               u.avatar_url as sender_avatar_url,
+               m.content,
+               m.masked_flag,
+               m.deleted_flag,
+               m.deleted_reason,
+               m.create_time
+        from study_team_chat_message m
+                 inner join app_user u on u.id = m.sender_user_id
+        where m.team_id = #{teamId}
+          and m.create_time &gt;= #{sinceTime}
+        order by m.id desc
+        limit #{limit}
+    </select>
+
+    <select id="findTeamChatMessageById" resultMap="StudyTeamChatMessageRowResultMap">
+        select m.id,
+               m.team_id,
+               m.sender_user_id,
+               u.user_no as sender_user_no,
+               u.nickname as sender_nickname,
+               u.avatar_url as sender_avatar_url,
+               m.content,
+               m.masked_flag,
+               m.deleted_flag,
+               m.deleted_reason,
+               m.create_time
+        from study_team_chat_message m
+                 inner join app_user u on u.id = m.sender_user_id
+        where m.id = #{messageId}
+        limit 1
+    </select>
+
+    <select id="countUnreadTeamChatMessages" resultType="java.lang.Integer">
+        select count(*)
+        from study_team_chat_message m
+                 left join study_team_chat_read_state rs
+                           on rs.team_id = m.team_id
+                               and rs.user_id = #{userId}
+        where m.team_id = #{teamId}
+          and m.sender_user_id &lt;&gt; #{userId}
+          and m.create_time &gt;= #{sinceTime}
+          and m.id &gt; coalesce(rs.last_read_message_id, 0)
+    </select>
+
+    <select id="findLastReadChatMessageId" resultType="java.lang.Long">
+        select last_read_message_id
+        from study_team_chat_read_state
+        where team_id = #{teamId}
+          and user_id = #{userId}
+        limit 1
+    </select>
+
+    <insert id="insertTeam" useGeneratedKeys="true" keyProperty="id">
+        insert into study_team (team_name, invite_code, owner_user_id, status)
+        values (#{teamName}, #{inviteCode}, #{ownerUserId}, #{status})
+    </insert>
+
+    <insert id="insertTeamMember" useGeneratedKeys="true" keyProperty="id">
+        insert into study_team_member (team_id, user_id, role, status, joined_time)
+        values (#{teamId}, #{userId}, #{role}, #{status}, current_timestamp)
+        on duplicate key update
+            team_id = values(team_id),
+            role = values(role),
+            status = values(status),
+            joined_time = values(joined_time)
+    </insert>
+
+    <insert id="insertTeamInvitation" useGeneratedKeys="true" keyProperty="id">
+        insert into study_team_invitation (
+            team_id,
+            inviter_user_id,
+            invitee_user_id,
+            status,
+            create_time
+        )
+        values (
+            #{teamId},
+            #{inviterUserId},
+            #{inviteeUserId},
+            #{status},
+            #{createTime}
+        )
+    </insert>
+
+    <insert id="insertTeamChatMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into study_team_chat_message (
+            team_id,
+            sender_user_id,
+            content,
+            masked_flag,
+            deleted_flag,
+            create_time
+        )
+        values (
+            #{teamId},
+            #{senderUserId},
+            #{content},
+            #{maskedFlag},
+            #{deletedFlag},
+            #{createTime}
+        )
+    </insert>
+
+    <update id="softDeleteTeamChatMessage">
+        update study_team_chat_message
+        set deleted_flag = 1,
+            deleted_reason = #{deletedReason},
+            deleted_time = #{deletedTime}
+        where id = #{messageId}
+          and deleted_flag = 0
+    </update>
+
+    <insert id="upsertTeamChatReadState">
+        insert into study_team_chat_read_state (
+            team_id,
+            user_id,
+            last_read_message_id,
+            last_read_time
+        )
+        values (
+            #{teamId},
+            #{userId},
+            #{lastReadMessageId},
+            current_timestamp
+        )
+        on duplicate key update
+            last_read_message_id = values(last_read_message_id),
+            last_read_time = values(last_read_time)
+    </insert>
+
+    <update id="updateTeamStatus">
+        update study_team
+        set status = #{status}
+        where id = #{teamId}
+    </update>
+
+    <update id="updateTeamMembersStatusByTeamId">
+        update study_team_member
+        set status = #{status}
+        where team_id = #{teamId}
+    </update>
+
+    <update id="updateTeamMemberStatus">
+        update study_team_member
+        set status = #{status}
+        where team_id = #{teamId}
+          and user_id = #{userId}
+    </update>
+
+    <update id="updateTeamInvitationStatusById">
+        update study_team_invitation
+        set status = #{status}
+        where id = #{invitationId}
+    </update>
+
+    <insert id="insertReminder" useGeneratedKeys="true" keyProperty="id">
+        insert into study_team_reminder (team_id, from_user_id, to_user_id, reminder_type, content, create_time)
+        values (#{teamId}, #{fromUserId}, #{toUserId}, #{reminderType}, #{content}, #{createTime})
+    </insert>
+
+</mapper>
