@@ -8,6 +8,8 @@
 - `planning/Innocence-数据库表结构草案.md`
 - `planning/Innocence-接口清单草案.md`
 - `planning/Innocence-MVP第一版功能范围.md`
+- `planning/Innocence-桌面端UI实现约束.md`
+- `troubleshooting/Innocence-前端修改未生效排查.md`
 
 后续建议补充：
 
