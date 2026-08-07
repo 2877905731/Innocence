@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Innocence · Minimalism Windows 视觉基准</title>
+<meta name="description" content="Innocence Windows 桌面端极简主义主题：纯白、大量留白、十二列网格与排版层级。">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          pure: '#FFFFFF',
+          ink: '#000000',
+          carbon: '#1A1A1A',
+          graphite: '#404040',
+          neutral: '#666666',
+          quiet: '#999999',
+          line: '#E5E5E5',
+          wash: '#F5F5F5',
+          signal: '#0066FF',
+          danger: '#FF0000',
+        },
+        fontFamily: {
+          sans: ['Inter', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: light; }
+  html { scroll-behavior: smooth; }
+  body { background: #fff; }
+  .twelve-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 32px; }
+  .baseline {
+    background-size: 100% 8px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M0 7.5H8' stroke='%23000000' stroke-opacity='.018'/%3E%3C/svg%3E");
+  }
+  .hero-title {
+    font-size: clamp(6rem, 10vw, 9rem);
+    font-weight: 300;
+    line-height: .88;
+    letter-spacing: -.055em;
+  }
+  .hero-title strong { display: block; font-weight: 700; }
+  .display-heading {
+    font-size: clamp(3.5rem, 6vw, 6rem);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -.045em;
+  }
+  .quiet-action { transition: opacity 300ms ease, color 300ms ease; }
+  .quiet-action:hover { opacity: .7; }
+  .underline-link { position: relative; }
+  .underline-link::after {
+    position: absolute;
+    right: 0;
+    bottom: -.35rem;
+    left: 0;
+    height: 1px;
+    content: "";
+    background: currentColor;
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+  .underline-link:hover::after,
+  .underline-link:focus-visible::after { opacity: 1; }
+  .progress-line { position: relative; height: 1px; background: #E5E5E5; }
+  .progress-line::after { position: absolute; inset: 0 auto 0 0; width: 64%; content: ""; background: #000; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition: none !important; }
+  }
+</style>
+</head>
+<body data-target-platform="windows-desktop" class="min-w-[1024px] overflow-x-auto bg-pure font-sans text-ink antialiased">
+
+<nav class="fixed inset-x-0 top-0 z-40 bg-white">
+  <div class="mx-auto grid h-[80px] max-w-[1600px] grid-cols-12 items-center gap-8 px-12 lg:px-24">
+    <a href="#top" class="col-span-3 text-[17px] font-bold tracking-[-0.03em] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4" aria-label="Innocence 首页">INN/CNCE</a>
+    <div class="col-span-6 flex justify-center gap-12 text-sm text-neutral">
+      <a class="underline-link" href="#system">System</a>
+      <a class="underline-link" href="#workspace">Workspace</a>
+      <a class="underline-link" href="#principles">Principles</a>
+    </div>
+    <div class="col-span-3 text-right">
+      <a class="underline-link text-sm" href="#workspace">Open workspace</a>
+    </div>
+  </div>
+</nav>
+
+<header id="top" class="baseline flex min-h-screen items-center pt-20">
+  <div class="mx-auto w-full max-w-[1600px] px-12 py-24 lg:px-24 lg:py-32">
+    <div class="twelve-grid">
+      <div class="col-span-8">
+        <p class="mb-12 text-xs font-light uppercase tracking-[.24em] text-quiet">A clearer way to learn</p>
+        <h1 class="hero-title">Less noise.<strong>More progress.</strong></h1>
+      </div>
+      <div class="col-span-4 flex items-end">
+        <div class="ml-auto max-w-[340px] pb-2">
+          <p class="text-[17px] leading-[1.8] tracking-[.02em] text-graphite">删去干扰，保留计划、时间与行动。每一处留白都用于帮助注意力回到真正重要的事情。</p>
+          <a href="#system" class="quiet-action mt-12 inline-flex items-center gap-6 text-sm text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4">查看系统 <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="mt-24 grid grid-cols-12 gap-8 border-t border-line pt-6 text-xs font-light uppercase tracking-[.18em] text-quiet">
+      <span class="col-span-4">Theme 02 / Minimalism</span>
+      <span class="col-span-4 text-center">Windows desktop</span>
+      <span class="col-span-4 text-right">Grid 12 / Unit 8</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="system" class="px-12 py-32 lg:px-24 lg:py-40">
+    <div class="mx-auto max-w-[1600px]">
+      <div class="twelve-grid">
+        <div class="col-span-4">
+          <p class="text-xs font-light uppercase tracking-[.22em] text-quiet">01 / Visual system</p>
+          <h2 class="mt-8 text-4xl font-light leading-tight tracking-[-.03em]">Structure<br>comes first.</h2>
+        </div>
+        <div class="col-span-7 col-start-6">
+          <p class="max-w-[760px] text-2xl font-normal leading-[1.65] tracking-[.01em] text-carbon">极简不是把页面做空，而是让信息的优先级无需解释。十二列网格、八像素节奏和清晰的文字层级承担全部秩序。</p>
+          <div class="mt-24 grid grid-cols-3 gap-8">
+            <article>
+              <p class="text-xs font-light tracking-[.16em] text-quiet">01</p>
+              <h3 class="mt-8 text-lg font-medium">Precise grid</h3>
+              <p class="mt-4 text-sm leading-[1.8] text-neutral">所有内容服从统一列线与基线，不依靠装饰建立对齐。</p>
+            </article>
+            <article>
+              <p class="text-xs font-light tracking-[.16em] text-quiet">02</p>
+              <h3 class="mt-8 text-lg font-medium">Type hierarchy</h3>
+              <p class="mt-4 text-sm leading-[1.8] text-neutral">字号、字重与距离直接表达重要程度。</p>
+            </article>
+            <article>
+              <p class="text-xs font-light tracking-[.16em] text-quiet">03</p>
+              <h3 class="mt-8 text-lg font-medium">Useful space</h3>
+              <p class="mt-4 text-sm leading-[1.8] text-neutral">负空间隔开任务，降低一次需要处理的信息量。</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="workspace" class="bg-wash px-12 py-32 lg:px-24 lg:py-40">
+    <div class="mx-auto max-w-[1600px]">
+      <div class="mb-24 grid grid-cols-12 gap-8">
+        <div class="col-span-7">
+          <p class="text-xs font-light uppercase tracking-[.22em] text-quiet">02 / Workspace</p>
+          <h2 class="display-heading mt-8">Today,<br>at a glance.</h2>
+        </div>
+        <p class="col-span-4 col-start-9 self-end text-[17px] leading-[1.8] tracking-[.02em] text-neutral">核心状态始终可见，次要信息按需展开。没有阴影、渐变或多余容器。</p>
+      </div>
+
+      <div class="grid grid-cols-12 gap-8 bg-white p-16">
+        <div class="col-span-7 pr-8">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-xs font-light uppercase tracking-[.18em] text-quiet">Current focus</p>
+              <h3 class="mt-8 text-4xl font-light tracking-[-.035em]">完成产品需求整理</h3>
+            </div>
+            <span class="text-xs text-quiet">09:42 — 11:00</span>
+          </div>
+          <p class="mt-16 text-[96px] font-light leading-none tracking-[-.06em]">48:32</p>
+          <div class="progress-line mt-16"></div>
+          <div class="mt-5 flex justify-between text-xs text-quiet"><span>Elapsed 48 min</span><span>64%</span></div>
+        </div>
+        <aside class="col-span-4 col-start-9 border-l border-line pl-12">
+          <div class="flex justify-between text-xs font-light uppercase tracking-[.16em] text-quiet"><span>Today</span><span>03 tasks</span></div>
+          <ol class="mt-12 space-y-10">
+            <li class="flex gap-6"><span class="text-quiet">01</span><div><p class="text-sm line-through opacity-40">整理昨日记录</p><p class="mt-2 text-xs text-quiet">Completed · 08:46</p></div></li>
+            <li class="flex gap-6"><span>02</span><div><p class="text-sm">完成产品需求整理</p><p class="mt-2 text-xs text-quiet">In progress</p></div></li>
+            <li class="flex gap-6 opacity-50"><span>03</span><div><p class="text-sm">阅读与章节札记</p><p class="mt-2 text-xs text-quiet">Next · 14:00</p></div></li>
+          </ol>
+          <button class="quiet-action mt-16 w-full border border-black px-8 py-4 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">结束本次专注</button>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section id="principles" class="px-12 py-32 lg:px-24 lg:py-40">
+    <div class="mx-auto max-w-[1600px]">
+      <div class="grid grid-cols-12 gap-8">
+        <div class="col-span-5">
+          <p class="text-xs font-light uppercase tracking-[.22em] text-quiet">03 / Reduction</p>
+          <h2 class="mt-8 text-5xl font-light leading-[1.05] tracking-[-.04em]">Every element<br>earns its place.</h2>
+        </div>
+        <div class="col-span-6 col-start-7">
+          <div class="border-t border-line py-8">
+            <div class="grid grid-cols-6 gap-8"><span class="col-span-1 text-xs text-quiet">01</span><h3 class="col-span-2 text-lg">留白</h3><p class="col-span-3 text-sm leading-[1.8] text-neutral">页面至少一半空间不承载操作，让内容自然形成分组。</p></div>
+          </div>
+          <div class="border-t border-line py-8">
+            <div class="grid grid-cols-6 gap-8"><span class="col-span-1 text-xs text-quiet">02</span><h3 class="col-span-2 text-lg">排版</h3><p class="col-span-3 text-sm leading-[1.8] text-neutral">标题负责视觉冲击，正文负责稳定阅读，不增加装饰性噪音。</p></div>
+          </div>
+          <div class="border-y border-line py-8">
+            <div class="grid grid-cols-6 gap-8"><span class="col-span-1 text-xs text-quiet">03</span><h3 class="col-span-2 text-lg">交互</h3><p class="col-span-3 text-sm leading-[1.8] text-neutral">悬停只改变透明度、颜色或下划线，不位移、不缩放。</p></div>
+          </div>
+          <a href="#top" class="underline-link mt-16 inline-block text-sm text-signal focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4">返回顶部</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-black px-12 py-40 text-white lg:px-24 lg:py-48">
+    <div class="mx-auto max-w-[1600px] text-center">
+      <p class="text-xs font-light uppercase tracking-[.24em] text-white/50">Clarity creates momentum</p>
+      <h2 class="mt-10 text-[96px] font-light leading-[.9] tracking-[-.055em]">Make space<br>for progress.</h2>
+      <button class="quiet-action mt-16 border border-white px-10 py-5 text-sm tracking-[.02em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">START FOCUSING</button>
+    </div>
+  </section>
+</main>
+
+<footer class="px-12 py-10 lg:px-24">
+  <div class="mx-auto grid max-w-[1600px] grid-cols-12 gap-8 text-xs font-light text-quiet">
+    <span class="col-span-4">© 2026 Innocence</span>
+    <span class="col-span-4 text-center">Minimalism / Theme 02</span>
+    <span class="col-span-4 text-right">Designed for clarity</span>
+  </div>
+</footer>
+</body>
+</html>

@@ -3,24 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>侘寂禅意 · 让时间落下尘埃</title>
-<meta name="description" content="冥想、茶室与静心体验空间。静、慢、留白。">
+<title>Innocence · 侘寂禅意视觉基准</title>
+<meta name="description" content="Innocence Windows 桌面端侘寂禅意主题参考实现：大胆艺术字、直角面板、同系冷色与克制材质。">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
     theme: {
       extend: {
         colors: {
-          paper: '#F5F3EF',
-          linen: '#E8E5DF',
+          mist: '#F5F3EF',
+          frost: '#EAE6DF',
+          slatewash: '#D9D0C6',
+          sandwash: '#E2DDD5',
           ink: '#3A3731',
-          stone: '#7A7772',
-          moss: '#6E7263',
-          indigoink: '#43484F',
+          ash: '#7A756F',
+          mineral: '#A79D92',
+          line: '#D7D0C7',
         },
         fontFamily: {
-          serifcn: ['"Noto Serif SC"', '"Crimson Text"', 'serif'],
-          crim: ['"Crimson Text"', 'serif'],
+          serifcn: ['"Noto Serif SC"', 'serif'],
+          display: ['"Cormorant Garamond"', '"Noto Serif SC"', 'serif'],
+          sanscn: ['Inter', '"Noto Sans SC"', 'sans-serif'],
         },
       },
     },
@@ -28,247 +31,246 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300;1,500&family=Inter:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  /* 全局纸纤维纹理：透明度 4%，不参与布局 */
-  .noise-layer {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    opacity: 0.04;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  :root { color-scheme: light; }
+  html { scroll-behavior: smooth; }
+  body { background: #F5F3EF; }
+
+  /* 只保留纸纤维噪点；不使用任何渐变。 */
+  .paper-grain {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
   }
-  /* Hero 角落墨迹/水彩晕染：多层低透明径向渐变 */
-  .ink-wash {
-    background:
-      radial-gradient(ellipse 55% 38% at 88% 8%, rgba(58,55,49,0.055), transparent 62%),
-      radial-gradient(ellipse 42% 30% at 6% 86%, rgba(110,114,99,0.07), transparent 60%),
-      radial-gradient(ellipse 30% 22% at 50% 98%, rgba(232,229,223,0.6), transparent 70%);
+
+  .wordmark {
+    display: inline-flex;
+    align-items: baseline;
+    font-family: "Cormorant Garamond", "Noto Serif SC", serif;
+    font-size: clamp(2rem, 4vw, 3.65rem);
+    font-weight: 300;
+    line-height: .72;
+    letter-spacing: -.045em;
   }
-  /* 卡片：米白渐层 + 极弱内阴影 */
-  .card-paper {
-    background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(232,229,223,0.55));
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 1px 6px rgba(58,55,49,0.04);
+  .wordmark em {
+    margin-left: -.035em;
+    color: #7A756F;
+    font-weight: 300;
   }
-  /* 印章式标签 */
-  .seal {
-    display: inline-flex; align-items: center;
-    border: 1px solid rgba(67,72,79,0.4);
-    color: #43484F;
-    font-size: 11px; letter-spacing: 0.34em; text-indent: 0.34em;
-    padding: 0.28rem 0.9rem;
-    transform: rotate(-1.6deg);
-    background: rgba(255,255,255,0.35);
+  .display-title {
+    font-family: "Cormorant Garamond", "Noto Serif SC", serif;
+    font-size: clamp(5.1rem, 12.2vw, 11rem);
+    font-weight: 300;
+    line-height: .72;
+    letter-spacing: -.055em;
   }
-  .seal-moss { border-color: rgba(110,114,99,0.5); color: #5c6152; }
-  /* 动效：仅淡入/渐变，慢节奏 */
-  .fade-in { animation: fade 320ms ease both; }
-  @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
-  .hover-lift { transition: transform 280ms ease, background-color 280ms ease, border-color 280ms ease; }
-  .hover-lift:hover { transform: translateY(-2px); }
-  .hover-lift:active { transform: translateY(0); }
-  /* 尊重低运动模式：关闭所有动画与过渡 */
+  .display-title .offset {
+    display: block;
+    margin-left: clamp(1.25rem, 12vw, 10rem);
+    color: #7A756F;
+    font-style: italic;
+  }
+  .hairline-grid {
+    background-size: 28px 28px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M27.5 0V28M0 27.5H28' fill='none' stroke='%2320292B' stroke-opacity='.035'/%3E%3C/svg%3E");
+  }
+  /* 网格是纹理线，不承担色彩过渡；所有组件底色保持纯色。 */
+  .panel {
+    border: 1px solid #D7D0C7;
+    border-radius: 0;
+    background: #EAE6DF;
+    box-shadow: none;
+  }
+  .panel-deeper { background: #D9D0C6; }
+  .index-mark {
+    display: inline-grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    place-items: center;
+    border: 1px solid #A79D92;
+    color: #7A756F;
+    font-family: "Cormorant Garamond", serif;
+    font-size: .8rem;
+    letter-spacing: .12em;
+  }
+  .quiet-link { position: relative; }
+  .quiet-link::after {
+    position: absolute;
+    right: 0;
+    bottom: -.35rem;
+    left: 0;
+    height: 1px;
+    content: "";
+    background: #A79D92;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 240ms ease;
+  }
+  .quiet-link:hover::after,
+  .quiet-link:focus-visible::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+  .reveal { animation: reveal 420ms ease both; }
+  @keyframes reveal {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
   @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
     *, *::before, *::after { animation: none !important; transition: none !important; }
   }
 </style>
 </head>
-<body class="relative bg-paper text-ink font-serifcn antialiased">
-<div class="noise-layer" aria-hidden="true"></div>
+<body data-target-platform="windows-desktop" class="relative min-w-[1024px] overflow-x-auto text-ink antialiased">
+<div class="paper-grain" aria-hidden="true"></div>
 
-<!-- ═══════════ Hero ═══════════ -->
-<header class="ink-wash relative z-10 flex min-h-[92vh] flex-col justify-center">
-  <div class="mx-auto w-full max-w-5xl px-6 py-16 lg:px-10 lg:py-24">
-    <div class="fade-in max-w-2xl">
-      <span class="seal font-crim tracking-[0.34em] uppercase">Wabi · Sabi</span>
-      <h1 class="mt-12 text-4xl font-semibold leading-tight tracking-[0.18em] lg:text-6xl">
-        静 · 慢<br class="sm:hidden">留白
+<nav class="relative z-10 border-t-4 border-ink border-b border-line bg-mist">
+  <div class="mx-auto flex min-h-24 w-full max-w-[1440px] items-center justify-between px-6 md:px-10 lg:px-16">
+    <a href="#top" class="wordmark" aria-label="Innocence 首页">
+      Inno<em>cence</em>
+    </a>
+    <div class="hidden items-center gap-10 font-sanscn text-xs tracking-[0.18em] text-ash md:flex">
+      <a class="quiet-link focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-mineral" href="#rhythm">节律</a>
+      <a class="quiet-link focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-mineral" href="#practice">练习</a>
+      <a class="quiet-link focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-mineral" href="#notes">札记</a>
+    </div>
+    <span class="font-sanscn text-[10px] uppercase tracking-[0.28em] text-ash md:hidden">Wabi / 01</span>
+  </div>
+</nav>
+
+<header id="top" class="hairline-grid relative z-10 min-h-[calc(100vh-6rem)] border-b border-line bg-mist">
+  <div class="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-[1440px] flex-col justify-between px-6 py-12 md:px-10 md:py-16 lg:px-16">
+    <div class="flex items-start justify-between font-sanscn text-[10px] uppercase tracking-[0.28em] text-ash">
+      <p>Theme study · 01</p>
+      <p class="text-right">学习 / 自律 / 陪伴<br>一个安静的系统</p>
+    </div>
+
+    <div class="reveal py-16">
+      <p class="mb-8 ml-1 font-sanscn text-xs tracking-[0.32em] text-ash">让专注自然发生</p>
+      <h1 class="display-title" aria-label="A quiet way to focus">
+        A quiet way
+        <span class="offset">to focus.</span>
       </h1>
-      <p class="mt-8 text-base font-normal leading-relaxed tracking-[0.12em] text-stone lg:text-lg">
-        让时间落下尘埃
-      </p>
-      <p class="mt-3 font-crim text-sm italic tracking-[0.1em] text-stone/80">
-        一器一茶 · 一室一念
-      </p>
-      <div class="mt-14">
-        <a href="#reserve"
-           class="inline-flex items-center gap-2 rounded-md border border-moss/40 bg-white/60 px-6 py-3 text-[15px] tracking-[0.14em] text-ink transition-colors duration-300 hover:bg-white/90 hover:border-moss/60 active:translate-y-[1px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigoink/60">
-          预约安静时刻
+      <div class="mt-14 flex max-w-5xl flex-col gap-6 border-t border-line pt-6 md:ml-[30%] md:flex-row md:items-start md:justify-between">
+        <p class="max-w-xl font-serifcn text-base font-light leading-[1.95] text-ash md:text-lg">
+          不追赶，不喧哗。把计划、时间与陪伴放回同一种节律里，留下足够的空白，让每一次开始都更轻。
+        </p>
+        <a href="#rhythm" class="inline-flex shrink-0 items-center gap-5 self-start border border-mineral bg-frost px-5 py-4 font-sanscn text-[11px] tracking-[0.24em] text-ink transition-colors duration-200 hover:bg-slatewash focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mineral">
+          向下阅读 <span aria-hidden="true">↓</span>
         </a>
       </div>
     </div>
-  </div>
-  <!-- 底部极细分隔 -->
-  <div class="mx-auto w-full max-w-5xl px-6 lg:px-10" aria-hidden="true">
-    <div class="border-t border-dashed border-ink/10"></div>
+
+    <div class="flex items-end justify-between border-t border-line pt-4 font-sanscn text-[10px] uppercase tracking-[0.24em] text-ash">
+      <span>Innocence / Wabi-Sabi</span>
+      <span>2026 — Theme archive</span>
+    </div>
   </div>
 </header>
 
-<!-- ═══════════ 故事：两栏 ═══════════ -->
-<section class="relative z-10">
-  <div class="mx-auto w-full max-w-5xl px-6 py-16 lg:px-10 lg:py-24">
-    <div class="grid items-center gap-14 lg:grid-cols-2">
-      <div>
-        <h2 class="text-2xl font-semibold tracking-[0.14em] lg:text-3xl">慢，是一种选择</h2>
-        <p class="mt-8 text-[15px] leading-[1.8] text-stone">
-          我们相信，安静是有重量的。<br>
-          一件器物、一炉香、一盏茶，足以让一天慢下来。
-        </p>
-        <ul class="mt-10 space-y-6">
-          <li class="flex gap-4">
-            <span class="mt-[7px] h-[5px] w-[5px] shrink-0 rounded-full bg-moss/70" aria-hidden="true"></span>
-            <p class="text-[15px] leading-[1.75] text-ink/90">以器入道，观照双手的温度</p>
-          </li>
-          <li class="flex gap-4">
-            <span class="mt-[7px] h-[5px] w-[5px] shrink-0 rounded-full bg-moss/70" aria-hidden="true"></span>
-            <p class="text-[15px] leading-[1.75] text-ink/90">以火为伴，等候一壶水响</p>
-          </li>
-          <li class="flex gap-4">
-            <span class="mt-[7px] h-[5px] w-[5px] shrink-0 rounded-full bg-moss/70" aria-hidden="true"></span>
-            <p class="text-[15px] leading-[1.75] text-ink/90">以香为信，安放一段空白</p>
-          </li>
-        </ul>
-      </div>
-      <!-- 手绘插图：装饰性，标记为呈现用 -->
-      <div class="relative mx-auto w-full max-w-sm">
-        <div class="absolute inset-0 rounded-[12px] bg-linen/60" aria-hidden="true"></div>
-        <svg viewBox="0 0 320 380" fill="none" class="relative w-full opacity-80" aria-hidden="true" focusable="false">
-          <!-- 远山（淡墨） -->
-          <path d="M10 240 C60 180 90 210 130 190 C170 170 200 205 235 185 C265 168 290 185 310 175 L310 260 L10 260 Z" stroke="#6E7263" stroke-opacity="0.25" stroke-width="1.4" fill="none"/>
-          <!-- 山腰 -->
-          <path d="M10 265 C70 225 110 245 150 228 C190 211 230 240 270 222 L310 212 L310 290 L10 290 Z" stroke="#6E7263" stroke-opacity="0.16" stroke-width="1.2" fill="none"/>
-          <!-- 茶碗 -->
-          <ellipse cx="160" cy="318" rx="62" ry="14" stroke="#43484F" stroke-opacity="0.4" stroke-width="1.4"/>
-          <path d="M98 318 C98 350 120 366 160 366 C200 366 222 350 222 318" stroke="#43484F" stroke-opacity="0.4" stroke-width="1.4"/>
-          <!-- 蒸汽（两条短弧） -->
-          <path d="M150 300 C146 288 154 282 150 270" stroke="#7A7772" stroke-opacity="0.35" stroke-width="1.2"/>
-          <path d="M170 300 C166 290 174 284 170 274" stroke="#7A7772" stroke-opacity="0.35" stroke-width="1.2"/>
-          <!-- 一枝枝条 -->
-          <path d="M252 96 C236 130 250 168 232 208 C226 222 228 236 224 248" stroke="#43484F" stroke-opacity="0.3" stroke-width="1.2"/>
-          <path d="M238 150 C224 146 216 152 208 148" stroke="#43484F" stroke-opacity="0.25" stroke-width="1"/>
-          <path d="M234 178 C222 178 214 186 206 184" stroke="#43484F" stroke-opacity="0.25" stroke-width="1"/>
-          <!-- 落款印章 -->
-          <rect x="238" y="330" width="34" height="34" rx="3" stroke="#43484F" stroke-opacity="0.4" stroke-width="1.1"/>
-          <text x="255" y="352" text-anchor="middle" font-size="15" fill="#43484F" fill-opacity="0.45" font-family="'Noto Serif SC', serif">寂</text>
-        </svg>
-        <!-- 亚麻/纸纤维遮罩 -->
-        <div class="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-multiply" aria-hidden="true"
-             style="background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27120%27 height=%27120%27%3E%3Cfilter id=%27l%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.06 0.9%27 numOctaves=%271%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23l)%27/%3E%3C/svg%3E')"></div>
+<main>
+  <section id="rhythm" class="relative z-10 border-b border-line bg-frost">
+    <div class="mx-auto w-full max-w-[1440px] px-6 py-24 md:px-10 md:py-32 lg:px-16">
+      <div class="grid gap-14 lg:grid-cols-[.8fr_1.2fr] lg:gap-24">
+        <div>
+          <p class="font-sanscn text-[10px] uppercase tracking-[0.28em] text-ash">01 / 今日节律</p>
+          <h2 class="mt-8 font-serifcn text-4xl font-light leading-tight tracking-[-0.03em] md:text-6xl">今天，只完成<br>真正重要的事。</h2>
+          <p class="mt-8 max-w-sm font-serifcn text-[15px] leading-[1.9] text-ash">界面不抢夺注意力。状态、计划与时间被压缩成安静、清楚、可以一眼读完的信息。</p>
+        </div>
+
+        <div class="panel">
+          <div class="flex items-center justify-between border-b border-line px-6 py-5 md:px-8">
+            <div>
+              <p class="font-sanscn text-[10px] uppercase tracking-[0.24em] text-ash">Current focus</p>
+              <p class="mt-2 font-serifcn text-xl">阅读与整理</p>
+            </div>
+            <span class="index-mark">今</span>
+          </div>
+          <div class="grid md:grid-cols-[1.25fr_.75fr]">
+            <div class="border-b border-line p-6 md:border-r md:border-b-0 md:p-8">
+              <p class="font-display text-[clamp(4.5rem,9vw,8rem)] font-light leading-none tracking-[-0.05em]">42:18</p>
+              <div class="mt-8 h-px bg-line" aria-hidden="true"><div class="h-px w-[62%] bg-mineral"></div></div>
+              <div class="mt-4 flex justify-between font-sanscn text-[10px] tracking-[0.18em] text-ash">
+                <span>已专注 42 分钟</span><span>目标 68 分钟</span>
+              </div>
+            </div>
+            <div class="panel-deeper flex flex-col justify-between p-6 md:p-8">
+              <p class="font-sanscn text-[10px] uppercase tracking-[0.24em] text-ash">Next</p>
+              <div class="mt-16">
+                <p class="font-serifcn text-lg">完成章节札记</p>
+                <p class="mt-3 font-sanscn text-xs leading-6 text-ash">一件事 · 一段时间<br>结束后再决定下一步</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ═══════════ 卡片：三列 ═══════════ -->
-<section class="relative z-10">
-  <div class="mx-auto w-full max-w-5xl px-6 py-16 lg:px-10 lg:py-24">
-    <p class="font-crim text-sm italic tracking-[0.2em] text-stone/70">Our Practice</p>
-    <h2 class="mt-4 text-2xl font-semibold tracking-[0.14em] lg:text-3xl">器物 · 空间 · 气息</h2>
-    <div class="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      <!-- 卡 1 -->
-      <article class="card-paper hover-lift rounded-[12px] border border-black/5 p-5 lg:p-6 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-indigoink/50">
-        <span class="seal">壹</span>
-        <h3 class="mt-8 text-lg font-medium tracking-[0.16em]">一器 · 一茶</h3>
-        <p class="mt-3 text-sm leading-[1.8] text-stone">以一只茶碗开始，练习「只做眼前这一件事」。</p>
-        <p class="mt-6 font-crim text-xs tracking-[0.24em] text-moss">TEA · CEREMONY</p>
-      </article>
-      <!-- 卡 2 -->
-      <article class="card-paper hover-lift rounded-[12px] border border-black/5 p-5 lg:p-6 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-indigoink/50">
-        <span class="seal">贰</span>
-        <h3 class="mt-8 text-lg font-medium tracking-[0.16em]">一室 · 一念</h3>
-        <p class="mt-3 text-sm leading-[1.8] text-stone">一间安静的房间，让念头有地方落下来。</p>
-        <p class="mt-6 font-crim text-xs tracking-[0.24em] text-moss">ROOM · MEDITATION</p>
-      </article>
-      <!-- 卡 3 -->
-      <article class="card-paper hover-lift rounded-[12px] border border-black/5 p-5 lg:p-6 sm:col-span-2 lg:col-span-1 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-indigoink/50">
-        <span class="seal">叁</span>
-        <h3 class="mt-8 text-lg font-medium tracking-[0.16em]">一火 · 一香</h3>
-        <p class="mt-3 text-sm leading-[1.8] text-stone">燃一缕香，看烟怎样慢下来，人也是。</p>
-        <p class="mt-6 font-crim text-xs tracking-[0.24em] text-moss">FIRE · INCENSE</p>
-      </article>
-    </div>
-  </div>
-</section>
+  <section id="practice" class="relative z-10 border-b border-line bg-mist">
+    <div class="mx-auto w-full max-w-[1440px] px-6 py-24 md:px-10 md:py-32 lg:px-16">
+      <div class="mb-14 flex flex-col justify-between gap-8 border-b border-line pb-8 md:flex-row md:items-end">
+        <div>
+          <p class="font-sanscn text-[10px] uppercase tracking-[0.28em] text-ash">02 / 三种练习</p>
+          <h2 class="mt-6 font-display text-5xl font-light tracking-[-0.035em] md:text-7xl">Small practices,<br><em class="text-ash">lasting change.</em></h2>
+        </div>
+        <p class="max-w-sm font-serifcn text-[15px] leading-[1.9] text-ash">独立留白、直角、纯色。组件与背景只做暖灰米色的轻微层级差，不使用边框、阴影或色彩渐变。</p>
+      </div>
 
-<!-- ═══════════ 体验流程 ═══════════ -->
-<section class="relative z-10 bg-linen/50">
-  <div class="mx-auto w-full max-w-5xl px-6 py-16 lg:px-10 lg:py-24">
-    <h2 class="text-2xl font-semibold tracking-[0.14em] lg:text-3xl">如何开始</h2>
-    <div class="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-      <!-- 步骤：印章式编号 + 竖向分隔线 -->
-      <div class="relative border-l border-ink/10 pl-6">
-        <span class="seal seal-moss font-crim text-[10px]">01</span>
-        <h3 class="mt-5 text-base font-medium tracking-[0.14em]">抵步</h3>
-        <p class="mt-2 text-sm leading-[1.75] text-stone">推门，换下外界的速度。</p>
-      </div>
-      <div class="relative border-l border-ink/10 pl-6">
-        <span class="seal seal-moss font-crim text-[10px]">02</span>
-        <h3 class="mt-5 text-base font-medium tracking-[0.14em]">落座</h3>
-        <p class="mt-2 text-sm leading-[1.75] text-stone">坐定，听水声渐近。</p>
-      </div>
-      <div class="relative border-l border-ink/10 pl-6">
-        <span class="seal seal-moss font-crim text-[10px]">03</span>
-        <h3 class="mt-5 text-base font-medium tracking-[0.14em]">安顿</h3>
-        <p class="mt-2 text-sm leading-[1.75] text-stone">专注眼前，不追赶时间。</p>
-      </div>
-      <div class="relative border-l border-ink/10 pl-6">
-        <span class="seal seal-moss font-crim text-[10px]">04</span>
-        <h3 class="mt-5 text-base font-medium tracking-[0.14em]">归去</h3>
-        <p class="mt-2 text-sm leading-[1.75] text-stone">带着那点慢，回到日常。</p>
+      <div class="grid gap-7 md:grid-cols-3">
+        <article class="bg-frost p-7 md:min-h-[360px] md:p-9">
+          <div class="flex items-start justify-between"><span class="font-display text-3xl font-light italic text-mineral">壹</span><span class="font-sanscn text-[10px] tracking-[0.2em] text-ash">PLAN</span></div>
+          <h3 class="mt-24 font-serifcn text-3xl font-light">安排</h3>
+          <p class="mt-5 font-serifcn text-sm leading-[1.85] text-ash">把今天切成可以呼吸的段落，只承诺真正能完成的部分。</p>
+        </article>
+        <article class="bg-slatewash p-7 md:min-h-[360px] md:p-9">
+          <div class="flex items-start justify-between"><span class="font-display text-3xl font-light italic text-mineral">贰</span><span class="font-sanscn text-[10px] tracking-[0.2em] text-ash">FOCUS</span></div>
+          <h3 class="mt-24 font-serifcn text-3xl font-light">沉浸</h3>
+          <p class="mt-5 font-serifcn text-sm leading-[1.85] text-ash">让计时退到背景，只保留当前任务与缓慢流动的时间。</p>
+        </article>
+        <article class="bg-sandwash p-7 md:min-h-[360px] md:p-9">
+          <div class="flex items-start justify-between"><span class="font-display text-3xl font-light italic text-mineral">叁</span><span class="font-sanscn text-[10px] tracking-[0.2em] text-ash">REFLECT</span></div>
+          <h3 class="mt-24 font-serifcn text-3xl font-light">回望</h3>
+          <p class="mt-5 font-serifcn text-sm leading-[1.85] text-ash">记录完成，也接纳未完成；趋势用于理解自己，不用于制造压力。</p>
+        </article>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ═══════════ 引语 / 见证 ═══════════ -->
-<section class="relative z-10">
-  <div class="mx-auto w-full max-w-4xl px-6 py-16 lg:px-10 lg:py-24">
-    <div class="grid gap-16 md:grid-cols-2">
+  <section id="notes" class="relative z-10 border-b border-line bg-slatewash">
+    <div class="mx-auto grid w-full max-w-[1440px] gap-16 px-6 py-24 md:px-10 md:py-36 lg:grid-cols-[.7fr_1.3fr] lg:px-16">
+      <p class="font-sanscn text-[10px] uppercase tracking-[0.28em] text-ash">03 / 一段札记</p>
       <figure>
-        <blockquote class="text-lg leading-[1.7] tracking-[0.06em] text-ink/90 lg:text-[20px]">
-          「在这里，时间以另一种速度行走。<br>茶凉之前，心已经回来。」
+        <blockquote class="font-display text-[clamp(3.5rem,7vw,7rem)] font-light leading-[.92] tracking-[-0.045em]">
+          “Make room<br>for the <em class="text-ash">unfinished.</em>”
         </blockquote>
-        <figcaption class="mt-8 flex items-center gap-4">
-          <span class="seal" aria-hidden="true">茗</span>
-          <span class="text-sm tracking-[0.18em] text-stone">学员 · 秋实</span>
-        </figcaption>
-      </figure>
-      <figure>
-        <blockquote class="text-lg leading-[1.7] tracking-[0.06em] text-ink/90 lg:text-[20px]">
-          「不再追赶什么。<br>坐久了，连念头都安静下来。」
-        </blockquote>
-        <figcaption class="mt-8 flex items-center gap-4">
-          <span class="seal" aria-hidden="true">静</span>
-          <span class="text-sm tracking-[0.18em] text-stone">学员 · 素白</span>
+        <figcaption class="mt-10 flex items-center gap-5 border-t border-mineral pt-5 font-serifcn text-sm text-ash">
+          <span class="index-mark" aria-hidden="true">静</span>
+          <span>未完成并不是失败，它只是仍在生长。</span>
         </figcaption>
       </figure>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ═══════════ 收尾 CTA ═══════════ -->
-<section id="reserve" class="relative z-10">
-  <div class="mx-auto w-full max-w-5xl px-6 pb-20 lg:px-10 lg:pb-28">
-    <div class="card-paper rounded-[12px] border border-black/5 px-8 py-16 text-center lg:py-20">
-      <p class="font-crim text-sm italic tracking-[0.2em] text-stone/70">Wabi · Sabi</p>
-      <h2 class="mx-auto mt-6 max-w-md text-2xl font-semibold leading-snug tracking-[0.14em] lg:text-3xl">
-        时间，会在这里慢下来
-      </h2>
-      <div class="mt-12 flex justify-center">
-        <a href="#reserve"
-           class="inline-flex items-center gap-2 rounded-md border border-moss/40 bg-white/60 px-8 py-3 text-[15px] tracking-[0.14em] text-ink transition-colors duration-300 hover:bg-white/90 hover:border-moss/60 active:translate-y-[1px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigoink/60">
-          预约安静时刻
-        </a>
-      </div>
+  <section class="relative z-10 bg-frost">
+    <div class="mx-auto w-full max-w-[1440px] px-6 py-24 text-center md:px-10 md:py-36 lg:px-16">
+      <p class="font-sanscn text-[10px] uppercase tracking-[0.3em] text-ash">A quieter beginning</p>
+      <h2 class="mx-auto mt-8 max-w-5xl font-display text-[clamp(4rem,9vw,9rem)] font-light leading-[.8] tracking-[-0.05em]">Begin<br><em class="text-ash">gently.</em></h2>
+      <a href="#top" class="mt-16 inline-flex border border-mineral bg-mist px-8 py-4 font-sanscn text-[11px] tracking-[0.24em] transition-colors duration-200 hover:bg-slatewash focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mineral">回到开始</a>
     </div>
-  </div>
-</section>
+  </section>
+</main>
 
-<!-- ═══════════ Footer ═══════════ -->
-<footer class="relative z-10 border-t border-dashed border-ink/10">
-  <div class="mx-auto flex w-full max-w-5xl flex-col items-center gap-2 px-6 py-10 lg:px-10">
-    <p class="text-xs tracking-[0.3em] text-stone/80">侘寂禅意 · WABI SABI</p>
-    <p class="font-crim text-xs italic text-stone/60">let time settle into dust</p>
+<footer class="relative z-10 border-t border-ink bg-mist">
+  <div class="mx-auto flex w-full max-w-[1440px] flex-col gap-5 px-6 py-8 font-sanscn text-[10px] uppercase tracking-[0.22em] text-ash md:flex-row md:items-center md:justify-between md:px-10 lg:px-16">
+    <span>Innocence · 侘寂禅意</span>
+    <span>直角 / 纯色 / 暖灰 / 大字</span>
   </div>
 </footer>
-
 </body>
 </html>
