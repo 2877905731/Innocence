@@ -15,9 +15,10 @@ themes:
     status: archived_and_reference_implemented
     prompt_source: "用户提供"
   - id: theme-03
-    name: "待定"
-    family: "待定"
-    status: pending_user_prompt
+    name: "玻璃态"
+    family: "Glassmorphism"
+    status: archived_and_reference_implemented
+    prompt_source: "用户提供"
 ---
 
 # Innocence UI 设计规划
@@ -334,12 +335,511 @@ themes:
 - 参考页实测：首屏标题约 `128px / 300`，区块左右留白约 `96px`，区块上下留白约 `128px`
 - 内容映射：Innocence 导航 / 极简 Hero / 设计系统 / 今日专注工作区 / 减法原则 / 黑底 CTA
 
-### 主题三：待定
+### 主题三：玻璃态（Glassmorphism）
 
-- 状态：等待用户提供提示词
+- 存档时间：2026-08-07
+- 状态：提示词已存档，Windows 参考实现已完成（`docs/design/templates/glassmorphism.html`）
 
-## 3. 后续规划占位
+#### 2.10 提示词原文（存档）
 
-- 信息架构（页面清单 + 导航地图）：三个主题提示词收集完成后推进
-- 双端布局规范、视觉令牌结构、组件体系：同上
+````text
+请使用 TailwindCSS 创建一个玻璃态（Glassmorphism）风格的界面，通过背景模糊、透明度和光影效果创造层次丰富、现代优雅的视觉体验。
+
+**核心设计要求**
+
+1. **背景模糊效果（Backdrop Blur）**
+   - 使用 backdrop-filter 实现背景虚化
+   - 模糊半径：10px（轻微）- 40px（强烈）
+   - 必须添加 -webkit- 前缀确保 Safari 兼容性
+   - 示例：
+     ```css
+     .glass-card {
+       backdrop-filter: blur(20px);
+       -webkit-backdrop-filter: blur(20px); /* Safari 兼容 */
+     }
+
+     /* 不同强度的模糊 */
+     .glass-light { backdrop-filter: blur(10px); }
+     .glass-medium { backdrop-filter: blur(20px); }
+     .glass-strong { backdrop-filter: blur(40px); }
+     ```
+
+2. **透明度层级系统**
+   - 使用 rgba 控制透明度，创建层次感
+   - 透明度范围：0.05（极浅）- 0.2（较深）
+   - 避免超过 0.3，否则失去玻璃质感
+   - 示例：
+     ```css
+     /* 主要卡片 */
+     .glass-primary {
+       background: rgba(255, 255, 255, 0.1);
+     }
+
+     /* 次要卡片（更浅） */
+     .glass-secondary {
+       background: rgba(255, 255, 255, 0.05);
+     }
+
+     /* 强调卡片（略深） */
+     .glass-emphasis {
+       background: rgba(255, 255, 255, 0.15);
+     }
+
+     /* 黑色玻璃变体 */
+     .glass-dark {
+       background: rgba(0, 0, 0, 0.2);
+     }
+     ```
+
+3. **边缘光晕和描边**
+   - 使用半透明边框创建光感
+   - 边框透明度：0.1 - 0.3
+   - 边框宽度：1px（标准）到 2px（强调）
+   - 示例：
+     ```css
+     .glass-border {
+       border: 1px solid rgba(255, 255, 255, 0.18);
+     }
+
+     /* 渐变边框（高级技巧） */
+     .glass-border-gradient {
+       border: 1px solid transparent;
+       background-image:
+         linear-gradient(white, white),
+         linear-gradient(135deg,
+           rgba(255,255,255,0.3),
+           rgba(255,255,255,0.1),
+           rgba(255,255,255,0.2)
+         );
+       background-origin: border-box;
+       background-clip: padding-box, border-box;
+     }
+     ```
+
+4. **柔和阴影系统**
+   - 使用低透明度阴影创造深度
+   - 多层阴影叠加增强立体感
+   - 示例：
+     ```css
+     .glass-shadow {
+       box-shadow:
+         0 8px 32px 0 rgba(31, 38, 135, 0.37),
+         0 4px 16px 0 rgba(31, 38, 135, 0.2);
+     }
+
+     /* 悬停时加深阴影 */
+     .glass-shadow:hover {
+       box-shadow:
+         0 12px 48px 0 rgba(31, 38, 135, 0.45),
+         0 6px 24px 0 rgba(31, 38, 135, 0.3);
+     }
+
+     /* 轻微阴影（次要元素） */
+     .glass-shadow-light {
+       box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+     }
+     ```
+
+5. **渐变背景衬托**
+   - 玻璃效果需要丰富背景衬托
+   - 使用渐变或图像背景
+   - 示例：
+     ```css
+     /* 经典紫色渐变 */
+     .glass-bg-purple {
+       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+     }
+
+     /* 多色渐变 */
+     .glass-bg-rainbow {
+       background: linear-gradient(135deg,
+         #667eea 0%,
+         #764ba2 50%,
+         #f093fb 100%
+       );
+     }
+
+     /* 动态渐变 */
+     .glass-bg-animated {
+       background: linear-gradient(
+         135deg,
+         #667eea,
+         #764ba2,
+         #f093fb,
+         #4facfe
+       );
+       background-size: 400% 400%;
+       animation: gradientShift 15s ease infinite;
+     }
+
+     @keyframes gradientShift {
+       0%, 100% { background-position: 0% 50%; }
+       50% { background-position: 100% 50%; }
+     }
+     ```
+
+6. **圆角和形状**
+   - 使用较大圆角保持柔和感
+   - 圆角半径：12px（小）- 24px（大）
+   - 示例：
+     ```css
+     .glass-rounded-sm { border-radius: 12px; }
+     .glass-rounded-md { border-radius: 16px; }
+     .glass-rounded-lg { border-radius: 20px; }
+     .glass-rounded-xl { border-radius: 24px; }
+     ```
+
+7. **动态粒子背景（可选）**
+   - 浮动的半透明圆形元素
+   - 使用 CSS 动画创造流动感
+   - 示例：
+     ```css
+     .particle {
+       position: absolute;
+       border-radius: 50%;
+       background: linear-gradient(
+         135deg,
+         rgba(255, 255, 255, 0.2),
+         rgba(255, 255, 255, 0.05)
+       );
+       animation: float-particle 20s ease-in-out infinite;
+     }
+
+     @keyframes float-particle {
+       0%, 100% { transform: translate(0, 0) scale(1); }
+       25% { transform: translate(30px, -40px) scale(1.1); }
+       50% { transform: translate(-20px, -80px) scale(0.9); }
+       75% { transform: translate(-40px, -40px) scale(1.05); }
+     }
+     ```
+
+**配色方案（玻璃透明质感）**
+
+主色调：
+- 白色玻璃：rgba(255, 255, 255, 0.05-0.2)
+- 边框高光：rgba(255, 255, 255, 0.1-0.3)
+- 文字主色：#ffffff（白色，适用于深色背景）
+- 文字次要：rgba(255, 255, 255, 0.7-0.9)
+
+背景色（用于衬托）：
+- 经典紫色渐变：#667eea → #764ba2
+- 多色渐变：#667eea → #764ba2 → #f093fb
+- 蓝紫渐变：#667eea → #764ba2 → #f093fb → #4facfe
+- 深蓝：#1e3a8a → #1e40af
+- 深紫：#5b21b6 → #7c3aed
+
+阴影色：
+- 柔和阴影：rgba(31, 38, 135, 0.2-0.45)
+- 深色阴影：rgba(0, 0, 0, 0.1-0.3)
+
+强调色：
+- 霓虹蓝：#60a5fa
+- 霓虹紫：#a78bfa
+- 霓虹粉：#f472b6
+
+**关键 CSS 类示例**
+
+```css
+/* 玻璃态卡片（标准） */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  padding: 32px;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.45);
+  transform: translateY(-4px);
+}
+
+/* 玻璃态按钮 */
+.glass-button {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 12px 32px;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 6px 24px 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.glass-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px 0 rgba(31, 38, 135, 0.2);
+}
+
+/* 玻璃态输入框 */
+.glass-input {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 14px 18px;
+  color: #ffffff;
+  font-size: 16px;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+.glass-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* 玻璃态导航栏 */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* 玻璃态容器背景 */
+.glass-container {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  min-height: 100vh;
+  padding: 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 玻璃态进度条 */
+.glass-progress {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.glass-progress-fill {
+  background: linear-gradient(90deg, #60a5fa 0%, #a78bfa 100%);
+  height: 100%;
+  border-radius: 24px;
+  box-shadow: 0 0 16px rgba(96, 165, 250, 0.5);
+  transition: width 0.3s ease;
+}
+
+/* 玻璃态浮动按钮 */
+.glass-fab {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.glass-fab:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.45);
+  transform: scale(1.1);
+}
+```
+
+**Tailwind CSS 配置**
+
+```javascript
+// tailwind.config.js
+module.exports = {
+  theme: {
+    extend: {
+      backdropBlur: {
+        xs: '2px',
+        sm: '4px',
+        md: '10px',
+        lg: '20px',
+        xl: '40px',
+      },
+      colors: {
+        'glass-white': {
+          5: 'rgba(255, 255, 255, 0.05)',
+          10: 'rgba(255, 255, 255, 0.1)',
+          15: 'rgba(255, 255, 255, 0.15)',
+          20: 'rgba(255, 255, 255, 0.2)',
+        },
+      },
+      boxShadow: {
+        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+        'glass-hover': '0 12px 48px 0 rgba(31, 38, 135, 0.45)',
+      },
+    },
+  },
+}
+```
+
+**Tailwind CSS 类示例**
+
+```html
+<!-- 玻璃态卡片 -->
+<div class="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/[0.18] shadow-glass p-8 hover:bg-white/15 hover:shadow-glass-hover transition-all">
+  <!-- 卡片内容 -->
+</div>
+
+<!-- 玻璃态按钮 -->
+<button class="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 px-8 py-3 text-white font-semibold shadow-[0_4px_16px_0_rgba(31,38,135,0.2)] hover:bg-white/20 hover:shadow-[0_6px_24px_0_rgba(255,255,255,0.3)] transition-all">
+  Click Me
+</button>
+
+<!-- 玻璃态输入框 -->
+<input type="text" placeholder="Search..." class="bg-white/5 backdrop-blur-md rounded-xl border border-white/10 px-5 py-3.5 text-white placeholder:text-white/50 focus:bg-white/10 focus:border-white/30 focus:ring-4 focus:ring-white/10 transition-all w-full">
+
+<!-- 玻璃态导航栏 -->
+<nav class="bg-white/[0.08] backdrop-blur-[40px] border-b border-white/15 shadow-[0_4px_16px_0_rgba(31,38,135,0.2)] sticky top-0 z-100">
+  <!-- 导航内容 -->
+</nav>
+```
+
+**间距系统（基于 8px）**
+
+- xs: 8px (0.5rem)
+- sm: 16px (1rem)
+- md: 24px (1.5rem)
+- lg: 32px (2rem)
+- xl: 48px (3rem)
+- 2xl: 64px (4rem)
+- 3xl: 96px (6rem)
+
+**字体大小系统**
+
+标题：
+- h1: 48px-72px (3rem-4.5rem), font-weight: 700-800
+- h2: 36px-48px (2.25rem-3rem), font-weight: 700
+- h3: 28px-36px (1.75rem-2.25rem), font-weight: 600-700
+- h4: 24px-28px (1.5rem-1.75rem), font-weight: 600
+
+正文：
+- 大号：18px-20px (1.125rem-1.25rem)
+- 标准：16px-18px (1rem-1.125rem)
+- 小号：14px-16px (0.875rem-1rem)
+- 极小：12px-14px (0.75rem-0.875rem)
+- 行高：1.5-1.7
+
+**模糊强度系统**
+
+- 极轻：blur(5px) - 用于微妙效果
+- 轻度：blur(10px) - 用于按钮、输入框
+- 中度：blur(20px) - 用于卡片（最常用）
+- 强烈：blur(30px) - 用于主要容器
+- 极强：blur(40px) - 用于导航栏、模态框
+
+**透明度层级系统**
+
+- Level 1（最浅）：rgba(255, 255, 255, 0.05) - 次要元素
+- Level 2：rgba(255, 255, 255, 0.08) - 导航栏
+- Level 3：rgba(255, 255, 255, 0.1) - 标准卡片
+- Level 4：rgba(255, 255, 255, 0.15) - 强调卡片
+- Level 5（最深）：rgba(255, 255, 255, 0.2) - 悬停状态
+
+**重要提示**
+
+- **必须有深色或渐变背景衬托**，否则玻璃效果不明显
+- **backdrop-filter 在 Safari 需要 -webkit 前缀**，必须同时添加
+- **透明度不宜过高**，避免超过 0.3，否则失去玻璃质感
+- **边框透明度应低于背景透明度**，保持细腻的光感
+- **使用较大圆角**（12px-24px），避免直角
+- **阴影颜色使用低透明度黑色或蓝色**，不要使用彩色阴影
+- **文字必须使用白色或浅色**，确保在深色背景上可读
+- **避免使用纯黑或纯白背景**，使用渐变或图像
+- **模糊半径不宜过大**，避免超过 40px
+- **动画过渡时间建议 0.3s**，保持流畅感
+- **hover 状态应提升透明度和阴影**，增强互动反馈
+- **多层玻璃叠加时，每层透明度递减**
+- **使用 position: sticky 时注意 z-index 层级**
+- **移动端性能考虑**：过多 backdrop-filter 可能影响性能
+
+**避免事项**
+
+- ❌ 不要在浅色背景上使用玻璃效果
+- ❌ 不要使用过高的透明度（超过 0.3）
+- ❌ 不要使用模糊的阴影（使用清晰的多层阴影）
+- ❌ 不要使用锐利的边角（使用圆角）
+- ❌ 不要忽略 Safari 兼容性（必须加 -webkit 前缀）
+- ❌ 不要在文字上直接使用强模糊
+- ❌ 不要过度嵌套玻璃元素（影响性能）
+- ❌ 不要使用过暗的边框色
+- ❌ 不要在玻璃元素内使用深色背景图
+- ❌ 不要使用过多动态粒子（影响性能）
+- ❌ 不要混用玻璃效果和其他重型效果（如大型阴影）
+- ❌ 不要在小元素上使用强烈模糊
+
+**性能优化建议**
+
+- 限制 backdrop-filter 使用数量（建议不超过 10 个可见元素）
+- 使用 will-change 属性预优化动画元素
+- 移动端考虑降低模糊强度
+- 使用 CSS containment 隔离重绘区域
+- 避免在滚动容器内大量使用 backdrop-filter
+````
+
+#### 2.11 提炼的设计令牌（Windows）
+
+| 令牌 | 值 | 用途 |
+|---|---|---|
+| `glass-bg-start` | `#1E3A8A` | 深蓝渐变起点 |
+| `glass-bg-mid` | `#5B21B6` | 蓝紫渐变中段 |
+| `glass-bg-end` | `#F093FB` | 紫粉渐变终点 |
+| `glass-surface-05` | `rgba(255,255,255,0.05)` | 次要玻璃层 |
+| `glass-surface-08` | `rgba(255,255,255,0.08)` | 导航与浅层 |
+| `glass-surface-10` | `rgba(255,255,255,0.10)` | 标准卡片 |
+| `glass-surface-15` | `rgba(255,255,255,0.15)` | 强调与悬停 |
+| `glass-line` | `rgba(255,255,255,0.18)` | 玻璃边缘描边 |
+| `glass-ink` | `#FFFFFF` | 主文本 |
+| `glass-muted` | `rgba(255,255,255,0.72)` | 次级文本 |
+| `glass-blue` | `#60A5FA` | 进度与主操作 |
+| `glass-violet` | `#A78BFA` | 次级强调 |
+| `glass-pink` | `#F472B6` | 状态与装饰 |
+| 模糊 | `10 / 20 / 40px` | 控件 / 卡片 / 导航 |
+| 形状 | `12 / 16 / 20 / 24px` | 小控件至大容器圆角 |
+| 阴影 | `低透明度蓝黑多层阴影` | 层次与悬停反馈 |
+| 动效 | `300ms opacity / color / shadow` | 克制的交互反馈 |
+
+#### 2.12 参考实现
+
+- 文件：`docs/design/templates/glassmorphism.html`
+- 平台：Windows 桌面端（最小画布宽度 1024px；移动端另行设计）
+- 内容映射：Innocence 导航 / 今日陪伴 Hero / 玻璃设计系统 / 今日学习工作区 / 进度与快速操作 / 收尾 CTA
+- 实现约束：使用 TailwindCSS CDN；显式保留 `-webkit-backdrop-filter`；可见玻璃层控制在 10 个以内；提供 `prefers-reduced-motion` 降级
+
+## 3. 后续规划
+
+- 三个主题提示词与 Windows 参考实现均已齐备，待用户确认视觉方向后推进信息架构（页面清单 + 导航地图）
+- 双端布局规范、视觉令牌结构、组件体系：Windows 优先，移动端另行设计
 - 页面重建实施顺序：登录 → 主框架 → 首页 → 二级页

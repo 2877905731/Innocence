@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Innocence 玻璃态主题 Windows 参考实现" />
+  <title>Innocence / Glassmorphism</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Segoe UI', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            glass: '0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 4px 16px 0 rgba(31, 38, 135, 0.20)',
+            'glass-hover': '0 12px 48px 0 rgba(31, 38, 135, 0.45), 0 6px 24px 0 rgba(31, 38, 135, 0.30)',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --glass-white-05: rgba(255, 255, 255, 0.05);
+      --glass-white-08: rgba(255, 255, 255, 0.08);
+      --glass-white-10: rgba(255, 255, 255, 0.10);
+      --glass-white-15: rgba(255, 255, 255, 0.15);
+      --glass-line: rgba(255, 255, 255, 0.18);
+      --glass-muted: rgba(255, 255, 255, 0.72);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 1024px;
+      background: #312e81;
+      color: #fff;
+      font-family: Inter, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .glass-container {
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 14% 12%, rgba(96, 165, 250, 0.62), transparent 28%),
+        radial-gradient(circle at 87% 17%, rgba(244, 114, 182, 0.42), transparent 26%),
+        radial-gradient(circle at 71% 86%, rgba(167, 139, 250, 0.58), transparent 30%),
+        linear-gradient(135deg, #1e3a8a 0%, #5b21b6 52%, #be4d9b 100%);
+    }
+
+    .glass-container::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.35;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, black, transparent 70%);
+    }
+
+    .glass-nav,
+    .glass-panel,
+    .glass-secondary,
+    .glass-button,
+    .glass-input,
+    .glass-fab {
+      border: 1px solid var(--glass-line);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.24);
+    }
+
+    .glass-nav {
+      background: var(--glass-white-08);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+    }
+
+    .glass-panel {
+      background: var(--glass-white-10);
+      border-radius: 20px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transition: background-color 300ms ease, box-shadow 300ms ease, transform 300ms ease;
+    }
+
+    .glass-panel:hover {
+      background: var(--glass-white-15);
+      box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.40), 0 6px 24px 0 rgba(31, 38, 135, 0.24);
+      transform: translateY(-2px);
+    }
+
+    .glass-secondary {
+      background: var(--glass-white-05);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .glass-button {
+      background: var(--glass-white-10);
+      border-radius: 12px;
+      color: #fff;
+      transition: background-color 300ms ease, box-shadow 300ms ease, transform 300ms ease;
+    }
+
+    .glass-button:hover {
+      background: var(--glass-white-15);
+      box-shadow: 0 6px 24px 0 rgba(255, 255, 255, 0.22);
+      transform: translateY(-2px);
+    }
+
+    .glass-button:active { transform: translateY(0); }
+
+    .status-pill {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .glass-input {
+      background: var(--glass-white-05);
+      border-radius: 12px;
+      color: #fff;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      outline: none;
+    }
+
+    .glass-input:focus {
+      background: var(--glass-white-10);
+      border-color: rgba(255, 255, 255, 0.36);
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.10);
+    }
+
+    .glass-input::placeholder { color: rgba(255, 255, 255, 0.50); }
+
+    .glass-progress {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.10);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .glass-progress-fill {
+      height: 100%;
+      width: 72%;
+      border-radius: 24px;
+      background: linear-gradient(90deg, #60a5fa, #a78bfa);
+      box-shadow: 0 0 16px rgba(96, 165, 250, 0.50);
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.05));
+      animation: float-particle 20s ease-in-out infinite;
+    }
+
+    .particle-one { width: 180px; height: 180px; left: 45%; top: 8%; }
+    .particle-two { width: 96px; height: 96px; right: 18%; top: 54%; animation-delay: -7s; }
+    .particle-three { width: 140px; height: 140px; left: 8%; bottom: 6%; animation-delay: -13s; }
+
+    @keyframes float-particle {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(30px, -40px) scale(1.1); }
+      50% { transform: translate(-20px, -80px) scale(0.9); }
+      75% { transform: translate(-40px, -40px) scale(1.05); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      body { min-width: 0; }
+      .desktop-shell { grid-template-columns: 1fr; }
+      .desktop-sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glass-container">
+    <div class="particle particle-one" aria-hidden="true"></div>
+    <div class="particle particle-two" aria-hidden="true"></div>
+    <div class="particle particle-three" aria-hidden="true"></div>
+
+    <nav class="glass-nav sticky top-0 z-50" aria-label="主导航">
+      <div class="mx-auto flex max-w-[1440px] items-center justify-between px-12 py-5">
+        <a href="#today" class="flex items-center gap-3 text-white no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
+          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-lg font-bold ring-1 ring-white/25">I</span>
+          <span>
+            <span class="block text-sm font-semibold tracking-[0.18em]">INNOCENCE</span>
+            <span class="block text-xs text-white/60">陪伴 · 专注 · 成长</span>
+          </span>
+        </a>
+        <div class="hidden items-center gap-8 text-sm text-white/70 md:flex">
+          <a href="#today" class="border-b border-white pb-1 text-white no-underline">今日</a>
+          <a href="#focus" class="transition-opacity hover:opacity-70 no-underline">专注</a>
+          <a href="#progress" class="transition-opacity hover:opacity-70 no-underline">进度</a>
+          <a href="#settings" class="transition-opacity hover:opacity-70 no-underline">设置</a>
+        </div>
+        <button class="status-pill flex items-center gap-3 px-4 py-2.5 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white" type="button">
+          <span class="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_12px_rgba(110,231,183,0.9)]" aria-hidden="true"></span>
+          在线
+        </button>
+      </div>
+    </nav>
+
+    <main id="today" class="relative z-10 mx-auto max-w-[1440px] px-12 pb-24 pt-16">
+      <section class="mb-16 grid grid-cols-[1.3fr_0.7fr] items-end gap-12" aria-labelledby="hero-title">
+        <div>
+          <p class="mb-6 text-sm font-semibold uppercase tracking-[0.28em] text-blue-200/90">Wednesday · 07 August 2026</p>
+          <h1 id="hero-title" class="max-w-4xl text-7xl font-bold leading-[0.98] tracking-[-0.05em] text-white">让今天的专注，<br /><span class="text-blue-200">有一个清晰的开始。</span></h1>
+          <p class="mt-8 max-w-2xl text-lg leading-8 text-white/72">把计划放在眼前，把干扰留在身后。你已经完成了今天最重要的第一步。</p>
+          <div class="mt-10 flex items-center gap-4">
+            <a class="glass-button inline-flex items-center gap-3 px-7 py-3.5 font-semibold no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white" href="#focus">
+              开始专注
+              <span aria-hidden="true">→</span>
+            </a>
+            <a class="inline-flex items-center gap-2 px-4 py-3 text-sm text-white/75 underline decoration-white/30 underline-offset-4 transition-opacity hover:opacity-70" href="#progress">查看今日进度</a>
+          </div>
+        </div>
+        <div class="glass-panel p-7" aria-label="今日状态摘要">
+          <div class="mb-10 flex items-start justify-between">
+            <div>
+              <p class="text-sm text-white/60">今日完成度</p>
+              <p class="mt-2 text-6xl font-semibold tracking-[-0.06em]">72<span class="text-2xl text-white/60">%</span></p>
+            </div>
+            <span class="rounded-full bg-emerald-300/15 px-3 py-1 text-xs font-semibold text-emerald-100 ring-1 ring-emerald-200/20">进展顺利</span>
+          </div>
+          <div class="glass-progress" role="progressbar" aria-label="今日完成度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72"><div class="glass-progress-fill"></div></div>
+          <div class="mt-5 flex justify-between text-xs text-white/55"><span>已完成 4 项</span><span>共 6 项计划</span></div>
+        </div>
+      </section>
+
+      <section id="focus" class="mb-8 flex items-end justify-between" aria-labelledby="focus-title">
+        <div>
+          <p class="mb-2 text-sm font-semibold uppercase tracking-[0.22em] text-white/55">Your workspace</p>
+          <h2 id="focus-title" class="text-3xl font-semibold tracking-[-0.03em]">今日工作区</h2>
+        </div>
+        <button class="flex items-center gap-2 text-sm text-white/70 transition-opacity hover:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white" type="button">管理计划 <span aria-hidden="true">↗</span></button>
+      </section>
+
+      <section class="grid grid-cols-[1.35fr_0.65fr] gap-6" aria-label="今日工作区内容">
+        <article class="glass-panel p-8">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="mb-5 inline-flex rounded-full bg-blue-300/15 px-3 py-1 text-xs font-semibold text-blue-100 ring-1 ring-blue-100/20">当前计划 · 03</span>
+              <h3 class="text-3xl font-semibold tracking-[-0.03em]">完成产品视觉规范</h3>
+              <p class="mt-3 max-w-xl leading-7 text-white/65">整理三个主题的设计令牌，完成组件状态与桌面端导航的对照记录。</p>
+            </div>
+            <button class="rounded-full p-2 text-white/60 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" type="button" aria-label="更多计划操作">•••</button>
+          </div>
+          <div class="mt-12 grid grid-cols-3 gap-4 border-t border-white/15 pt-6">
+            <div><p class="text-xs text-white/50">预计用时</p><p class="mt-2 text-lg font-semibold">45 分钟</p></div>
+            <div><p class="text-xs text-white/50">已专注</p><p class="mt-2 text-lg font-semibold">32 分钟</p></div>
+            <div><p class="text-xs text-white/50">截止时间</p><p class="mt-2 text-lg font-semibold">18:30</p></div>
+          </div>
+        </article>
+
+        <article id="progress" class="glass-secondary p-7">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold">专注统计</h3>
+            <span class="text-xs text-white/50">本周</span>
+          </div>
+          <div class="mt-8 flex items-end gap-2" aria-label="本周专注时长柱状图">
+            <div class="flex flex-1 flex-col items-center gap-2"><div class="h-12 w-full rounded-t-lg bg-white/15"></div><span class="text-[11px] text-white/45">一</span></div>
+            <div class="flex flex-1 flex-col items-center gap-2"><div class="h-20 w-full rounded-t-lg bg-white/20"></div><span class="text-[11px] text-white/45">二</span></div>
+            <div class="flex flex-1 flex-col items-center gap-2"><div class="h-16 w-full rounded-t-lg bg-white/20"></div><span class="text-[11px] text-white/45">三</span></div>
+            <div class="flex flex-1 flex-col items-center gap-2"><div class="h-28 w-full rounded-t-lg bg-gradient-to-t from-blue-400 to-violet-300 shadow-[0_0_18px_rgba(96,165,250,0.35)]"></div><span class="text-[11px] font-semibold text-white">四</span></div>
+            <div class="flex flex-1 flex-col items-center gap-2"><div class="h-10 w-full rounded-t-lg bg-white/15"></div><span class="text-[11px] text-white/45">五</span></div>
+          </div>
+          <div class="mt-8 border-t border-white/10 pt-5"><p class="text-sm text-white/55">累计专注</p><p class="mt-1 text-3xl font-semibold">12<span class="ml-1 text-base font-normal text-white/55">小时</span></p></div>
+        </article>
+      </section>
+
+      <section class="mt-6 grid grid-cols-3 gap-6" aria-label="快速操作">
+        <article class="glass-secondary flex items-center justify-between p-6">
+          <div><p class="text-sm text-white/55">下一项计划</p><p class="mt-2 font-semibold">阅读设计参考</p></div>
+          <span class="text-2xl text-white/60" aria-hidden="true">↗</span>
+        </article>
+        <article class="glass-secondary flex items-center justify-between p-6">
+          <div><p class="text-sm text-white/55">连续学习</p><p class="mt-2 font-semibold">已坚持 12 天</p></div>
+          <span class="text-2xl text-pink-200" aria-hidden="true">✦</span>
+        </article>
+        <article id="settings" class="glass-secondary flex items-center justify-between p-6">
+          <div><p class="text-sm text-white/55">同步状态</p><p class="mt-2 font-semibold">所有设备已同步</p></div>
+          <span class="text-emerald-200" aria-hidden="true">✓</span>
+        </article>
+      </section>
+
+      <section class="mt-24 flex items-center justify-between border-t border-white/15 pt-8">
+        <div><p class="text-sm text-white/55">准备好继续了吗？</p><p class="mt-2 text-xl font-semibold">给自己 25 分钟，只做一件事。</p></div>
+        <a class="glass-button inline-flex items-center gap-3 px-6 py-3.5 font-semibold no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white" href="#focus">启动番茄钟 <span aria-hidden="true">↗</span></a>
+      </section>
+    </main>
+
+    <button class="glass-fab fixed bottom-8 right-8 z-40 flex h-14 w-14 items-center justify-center rounded-full text-2xl text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white" type="button" aria-label="快速添加计划">+</button>
+  </div>
+</body>
+</html>

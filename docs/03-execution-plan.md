@@ -133,6 +133,6 @@ phases:
         - release_candidate_confirmed
 next_actions:
   - id: NEXT-001
-    action: "等待用户提供三个主题提示词 → 进入 P00.5 UI 设计体系"
+    action: "三个主题提示词与 Windows 参考实现已齐备，等待用户确认视觉方向 → 推进 P00.5 信息架构与双端布局"
     inputs: []
 ---

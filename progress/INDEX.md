@@ -48,3 +48,10 @@ checkpoints:
     status: complete
     path: progress/0005__20260807__P00.5__DONE__theme02-minimalism-archive-and-reference.md
     title: "主题二「极简主义」提示词存档与 Windows 参考实现"
+  - sequence: "0006"
+    created_at: "2026-08-07T18:38:59+08:00"
+    phase: P00.5
+    type: DONE
+    status: complete
+    path: progress/0006__20260807__P00.5__DONE__theme03-glassmorphism-archive-and-reference.md
+    title: "主题三「玻璃态」提示词存档与 Windows 参考实现"
