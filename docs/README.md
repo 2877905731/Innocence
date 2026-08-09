@@ -38,6 +38,7 @@ README.md                    当前索引
 - `Innocence-接口清单草案.md` —— 前后端接口契约草案
 - `Innocence-数据库表结构草案.md` —— 数据库表结构草案
 - `Innocence-UI设计规划.md` —— UI 全面重写规划 + 四个主题提示词与参考实现存档（P00.5）
+- `Innocence-Windows自适应桌面体验.md` —— Windows 大/中/小自适应画布、悬浮球、断点与组件重排规范
 
 ## 排查文档（troubleshooting/）
 
@@ -52,3 +53,4 @@ README.md                    当前索引
 5. `planning/Innocence-接口清单草案.md`
 6. `planning/Innocence-数据库表结构草案.md`
 7. `troubleshooting/Innocence-前端修改未生效排查.md`
+8. `planning/Innocence-Windows自适应桌面体验.md`

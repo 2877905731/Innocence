@@ -9,7 +9,7 @@ topology:
       name: "Flutter 手机端 App（Android）"
       owner: "Innocence"
     - id: flutter_desktop
-      name: "Flutter 桌面端（Windows 主窗口 + 挂件）"
+      name: "Flutter 桌面端（Windows 自适应 Canvas + Focus Orb）"
       owner: "Innocence"
     - id: backend
       name: "Spring Boot 后端（innocence-server）"
@@ -24,7 +24,7 @@ topology:
       auth: "Bearer token（X-Device-Id / X-Device-Type 附带）"
     - from: flutter_desktop
       to: backend
-      call: "REST /api/app/v1 + WebSocket /ws/app（挂件走 /home/widget 轻量接口）"
+      call: "REST /api/app/v1 + WebSocket /ws/app（Small/Orb 状态摘要可复用 /home/widget 轻量接口）"
       auth: "Bearer token"
     - from: backend
       to: db

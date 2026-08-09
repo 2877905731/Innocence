@@ -64,12 +64,17 @@ project_specific_rules:
     enabled: true
     rule: "team 上限 5 人、一人一团队、队长专属移除/解散权限、解散后数据全删"
     verification: "团队规则验收（G03）"
+  - id: RULE-010
+    enabled: true
+    rule: "Windows 端采用 Large/Medium/Small 自适应画布 + 用户主动 Focus Orb；默认 920×760，不以小挂件启动；跨尺寸只重排布局，不重建业务状态"
+    verification: "窗口尺寸矩阵、DPI、多屏、状态连续性与四主题验收（G05/G06）"
 change_policy:
   source_of_truth: this_file
   rule_change_checkpoint: DECISION
   affected_documents_to_sync:
     - docs/03-execution-plan.md
     - docs/02-contract-and-compatibility-rules.md
+    - docs/planning/Innocence-Windows自适应桌面体验.md
 ---
 
 # 项目画像说明

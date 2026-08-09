@@ -21,6 +21,7 @@ read_order:
       - docs/06-contract-inventory.md
       - docs/08-project-profile.md
       - docs/02-contract-and-compatibility-rules.md
+      - docs/planning/Innocence-Windows自适应桌面体验.md
     purpose: task_specific_context
 ---
 
@@ -36,9 +37,9 @@ read_order:
 ## project_facts
 
 ```yaml
-project_summary: "Innocence 是面向学习、自律、陪伴和团队互助的双端产品（Flutter 手机端 + 桌面端），15 个产品模块已全部封板，第一版按 MVP 范围开发。前端 UI 于 2026-08-07 决定全面推翻重写，四个主题并存可切换，主题提示词由用户提供。"
+project_summary: "Innocence 是面向学习、自律、陪伴和团队互助的双端产品（Flutter 手机端 + 桌面端），15 个产品模块已全部封板，第一版按 MVP 范围开发。前端 UI 全面重写，四个主题并存可切换；Windows 端采用大/中/小自适应画布 + 主动悬浮球，不再以固定挂件为中心。"
 data_owner: "Innocence 自有数据；用户数据归用户，由 Innocence 服务托管"
-current_milestone: "P00 治理基线落地 → P00.5 UI 设计体系（四主题提示词与 Windows 参考实现已齐备）"
+current_milestone: "P00.5 UI 设计体系：四主题参考实现齐备；Windows 自适应桌面画布方向已批准，进入信息架构与组件密度设计"
 ```
 
 ## invariants
@@ -54,6 +55,7 @@ current_milestone: "P00 治理基线落地 → P00.5 UI 设计体系（四主题
 | NO-SILENT-NORMALIZATION | conditional | 业务语义差异必须进入决策记录，不得静默改写 |
 | UI-REWRITE | enabled | 前端页面按新设计推翻重建，不沿用旧布局；功能逻辑与数据层保留 |
 | THEME-PROMPTS-ARCHIVED | enabled | 用户提供的主题提示词必须存档（docs/planning/Innocence-UI设计规划.md），后续生成以存档为准 |
+| DESKTOP-ADAPTIVE-CANVAS | enabled | Windows 端使用 Large/Medium/Small 自适应画布与主动 Focus Orb；不得把完整页面等比缩成挂件 |
 
 ## context_policy
 

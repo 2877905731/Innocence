@@ -3,12 +3,12 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-08-10"
-latest_checkpoint: "0009"
+latest_checkpoint: "0010"
 current_phase: P00.5
 current_gate: G00.5
-state: four_themes_archived_and_windows_references_implemented
-next_sequence: "0010"
-current_goal: "P00.5 UI 设计体系进行中：主题三为 Mid-Century Modern，玻璃态恢复为主题四；四主题 Windows 参考实现均已独立完成，等待确认视觉方向后推进信息架构与双端布局"
+state: windows_adaptive_desktop_canvas_direction_approved
+next_sequence: "0011"
+current_goal: "P00.5 UI 设计体系进行中：四主题方向与 Windows 自适应桌面画布已确认；下一步推进页面信息架构、Large/Medium/Small 组件密度接口和主题映射"
 recent_baseline:
   - checkpoint: null
     result: "P00 治理基线初始化完成；暂无历史检查点"
@@ -37,18 +37,20 @@ user_decisions:
     decision: "主题三改为中世纪现代主义（Mid-Century Modern），采用 1950-60 年代有机几何、暖米色与木质色、星爆图案、几何无衬线排版和现代非对称网格；本决策替代 DEC-0010"
   - id: DEC-0012
     decision: "玻璃态恢复为第四个可选主题；中世纪现代主义与玻璃态分别使用独立临时 HTML。生成 Flutter 前端时优先参考 HTML 的构图与视觉令牌；若 AI 参考不便或转换效率较低，可忽略 HTML 代码并依据提示词、令牌和页面结构实现"
+  - id: DEC-0013
+    decision: "Windows 端不再以固定桌面挂件为中心，采用 Large/Medium/Small 三档自适应画布 + 用户主动 Focus Orb；首次登录默认 Medium 920×760，跨尺寸只重排 shell 与组件密度并保留业务状态；设计执行权交由 AI，可在提升舒适度与效率时突破旧挂件约束"
 unfinished:
   - id: TODO-002
     priority: P0
-    item: "请用户确认四主题 Windows 参考实现的视觉方向"
+    item: "完成页面清单、导航地图与 Large/Medium/Small 跨尺寸内容优先级"
     gate: G00.5
   - id: TODO-003
     priority: P1
-    item: "用户确认后推进 P00.5 信息架构 → 双端布局 → 视觉令牌 → 组件"
+    item: "定义 Flutter DesktopPresentationTier、组件 full/comfortable/compact/glance 密度接口与主题映射"
     gate: G00.5
 next_actions:
   - id: NEXT-001
-    action: "请用户确认四主题 Windows 参考实现；主题三 Mid-Century Modern 与主题四 Glassmorphism 已拆分为独立页面；移动端暂不推进"
+    action: "依据 Windows 自适应桌面体验规范推进 P00.5 信息架构和组件体系；移动端布局仍单独设计"
     inputs: []
 required_reads:
   - AGENTS.md
@@ -56,4 +58,5 @@ required_reads:
   - docs/03-execution-plan.md
   - docs/07-dataflow-and-module-map.md
   - docs/06-contract-inventory.md
+  - docs/planning/Innocence-Windows自适应桌面体验.md
   - progress/INDEX.md

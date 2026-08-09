@@ -76,3 +76,10 @@ checkpoints:
     status: complete
     path: progress/0009__20260810__P00.5__DONE__theme04-glassmorphism-restored.md
     title: "玻璃态恢复为主题四并拆分独立参考页"
+  - sequence: "0010"
+    created_at: "2026-08-10T00:00:00+08:00"
+    phase: P00.5
+    type: DECISION
+    status: complete
+    path: progress/0010__20260810__P00.5__DECISION__windows-adaptive-desktop-canvas.md
+    title: "Windows 自适应桌面画布与四形态体验决策"

@@ -54,17 +54,20 @@ phases:
     name: ui_design_system
     deliverables:
       - docs/planning/Innocence-UI设计规划.md（信息架构 + 双端布局 + 视觉令牌 + 组件）
+      - docs/planning/Innocence-Windows自适应桌面体验.md（Large / Medium / Small / Focus Orb）
       - 四个主题设计（并存可切换，提示词由用户提供并先存档）
       - 页面清单与导航地图（登录 → 主框架 → 首页 → 二级页）
     actions:
       - 四个主题提示词已存档，继续完成信息架构与组件体系
       - 按「信息架构 → 双端布局 → 视觉令牌 → 主题 → 组件」顺序产出
       - 生成 Flutter 前端时优先将 `docs/design/templates/` 中对应 HTML 作为构图、信息层级和视觉令牌参考；若 AI 参考 HTML 不便或 HTML 到 Flutter 的转换效率较低，可忽略 HTML 代码，仅依据提示词、设计令牌和页面结构实现
+      - Windows 页面按 Large / Medium / Small 三档自适应重排，Focus Orb 作为用户主动进入的最小状态；不得等比缩放完整页面
     gate:
       id: G00.5
       criteria:
         - theme_prompts_archived（提示词原文存档）
         - four_themes_designed（色彩/质感/动效可落地）
+        - desktop_adaptive_canvas_approved（四形态信息优先级、断点与状态连续性固化）
         - page_inventory_approved（页面清单与导航地图用户确认）
   - id: P01
     name: account_and_basics
@@ -112,13 +115,20 @@ phases:
         - admin_governance_working（举报→审核→处罚留痕）
         - admin_audit_trail_present
   - id: P05
-    name: desktop_experience
+    name: adaptive_desktop_experience
     actions:
-      - 桌面主窗口与挂件落地、双端视觉统一、桌面通知联动
+      - 落地 canvas / orb 原生 Windows shell；canvas 内由 Flutter 响应 Large / Medium / Small
+      - 完成窗口边缘吸附、置顶、托盘、DPI、多屏和窗口状态持久化
+      - 页面不在 P05 末尾补做响应式；P01-P04 重建页面时同步实现三档布局
+      - 完成四主题跨尺寸视觉统一与桌面通知联动
     gate:
       id: G05
       criteria:
-        - widget_renders_core_summary（当前学习/今日计划/摘要）
+        - large_canvas_supports_full_workspace（完整工作台与并列上下文）
+        - medium_canvas_is_default_and_complete（默认 920×760，日常主流程完整）
+        - small_canvas_supports_core_actions（专注、计划、消息、通知核心操作）
+        - focus_orb_restores_context（主动收纳、状态可见、恢复不丢上下文）
+        - resize_state_continuity_verified（拖拽跨断点不丢页面、草稿、滚动与计时状态）
         - cross_device_notify_working
         - visual_consistent（四主题双端一致）
   - id: P06
@@ -126,6 +136,7 @@ phases:
     actions:
       - 对照 MVP 完成标准 9 条逐条验收
       - 四主题可切换验收 + 双端观感一致验收
+      - Windows Large / Medium / Small / Focus Orb 在 100% / 125% / 150% DPI 与多屏场景验收
     gate:
       id: G06
       criteria:
@@ -134,6 +145,6 @@ phases:
         - release_candidate_confirmed
 next_actions:
   - id: NEXT-001
-    action: "主题三 Mid-Century Modern 与主题四 Glassmorphism Windows 参考实现均已独立；等待用户确认四主题视觉方向 → 推进 P00.5 信息架构与双端布局"
+    action: "四主题与 Windows 自适应桌面画布方向已确认；推进 P00.5 页面清单、导航地图、Large/Medium/Small 内容优先级与组件密度接口"
     inputs: []
 ---
