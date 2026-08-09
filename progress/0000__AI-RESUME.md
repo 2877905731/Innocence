@@ -2,13 +2,13 @@
 schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
-updated_at: "2026-08-07"
-latest_checkpoint: "0006"
+updated_at: "2026-08-10"
+latest_checkpoint: "0009"
 current_phase: P00.5
 current_gate: G00.5
-state: theme03_glassmorphism_archived_and_windows_reference_implemented
-next_sequence: "0006"
-current_goal: "P00.5 UI 设计体系进行中：Windows 优先；三主题均已存档并完成参考实现，等待用户确认视觉方向后推进信息架构与双端布局；移动端后续单独设计"
+state: four_themes_archived_and_windows_references_implemented
+next_sequence: "0010"
+current_goal: "P00.5 UI 设计体系进行中：主题三为 Mid-Century Modern，玻璃态恢复为主题四；四主题 Windows 参考实现均已独立完成，等待确认视觉方向后推进信息架构与双端布局"
 recent_baseline:
   - checkpoint: null
     result: "P00 治理基线初始化完成；暂无历史检查点"
@@ -22,7 +22,7 @@ user_decisions:
   - id: DEC-0004
     decision: "前端 UI 全面推翻重建；功能逻辑与数据层保留"
   - id: DEC-0005
-    decision: "三个主题并存可切换，主题提示词由用户提供并必须存档"
+    decision: "主题集合并存可切换，主题提示词由用户提供并必须存档；主题数量后由 DEC-0012 更新为四个"
   - id: DEC-0006
     decision: "主题一采用大胆艺术字与大尺寸排版；面板统一直角；组件与背景使用同系冷色轻微对比；禁止色彩渐变、玻璃态、强阴影与大圆角"
   - id: DEC-0007
@@ -33,10 +33,14 @@ user_decisions:
     decision: "主题二为极简主义（Minimalism）：纯白背景、黑灰层级、12 列精确网格、大量留白、排版主导与克制交互"
   - id: DEC-0010
     decision: "主题三为玻璃态（Glassmorphism）：深色渐变背景、10/20/40px 背景模糊、0.05-0.2 透明度层级、半透明描边、柔和阴影与 12-24px 圆角；Windows 优先"
+  - id: DEC-0011
+    decision: "主题三改为中世纪现代主义（Mid-Century Modern），采用 1950-60 年代有机几何、暖米色与木质色、星爆图案、几何无衬线排版和现代非对称网格；本决策替代 DEC-0010"
+  - id: DEC-0012
+    decision: "玻璃态恢复为第四个可选主题；中世纪现代主义与玻璃态分别使用独立临时 HTML。生成 Flutter 前端时优先参考 HTML 的构图与视觉令牌；若 AI 参考不便或转换效率较低，可忽略 HTML 代码并依据提示词、令牌和页面结构实现"
 unfinished:
   - id: TODO-002
     priority: P0
-    item: "请用户确认三主题 Windows 参考实现的视觉方向"
+    item: "请用户确认四主题 Windows 参考实现的视觉方向"
     gate: G00.5
   - id: TODO-003
     priority: P1
@@ -44,7 +48,7 @@ unfinished:
     gate: G00.5
 next_actions:
   - id: NEXT-001
-    action: "请用户确认三主题 Windows 参考实现；主题三提示词已存档并完成参考实现；移动端暂不推进"
+    action: "请用户确认四主题 Windows 参考实现；主题三 Mid-Century Modern 与主题四 Glassmorphism 已拆分为独立页面；移动端暂不推进"
     inputs: []
 required_reads:
   - AGENTS.md

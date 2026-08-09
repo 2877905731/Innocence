@@ -54,16 +54,17 @@ phases:
     name: ui_design_system
     deliverables:
       - docs/planning/Innocence-UI设计规划.md（信息架构 + 双端布局 + 视觉令牌 + 组件）
-      - 三个主题设计（并存可切换，提示词由用户提供并先存档）
+      - 四个主题设计（并存可切换，提示词由用户提供并先存档）
       - 页面清单与导航地图（登录 → 主框架 → 首页 → 二级页）
     actions:
-      - 待用户提供三个主题提示词，先存档再设计
+      - 四个主题提示词已存档，继续完成信息架构与组件体系
       - 按「信息架构 → 双端布局 → 视觉令牌 → 主题 → 组件」顺序产出
+      - 生成 Flutter 前端时优先将 `docs/design/templates/` 中对应 HTML 作为构图、信息层级和视觉令牌参考；若 AI 参考 HTML 不便或 HTML 到 Flutter 的转换效率较低，可忽略 HTML 代码，仅依据提示词、设计令牌和页面结构实现
     gate:
       id: G00.5
       criteria:
         - theme_prompts_archived（提示词原文存档）
-        - three_themes_designed（色彩/质感/动效可落地）
+        - four_themes_designed（色彩/质感/动效可落地）
         - page_inventory_approved（页面清单与导航地图用户确认）
   - id: P01
     name: account_and_basics
@@ -119,20 +120,20 @@ phases:
       criteria:
         - widget_renders_core_summary（当前学习/今日计划/摘要）
         - cross_device_notify_working
-        - visual_consistent（三主题双端一致）
+        - visual_consistent（四主题双端一致）
   - id: P06
     name: mvp_acceptance
     actions:
       - 对照 MVP 完成标准 9 条逐条验收
-      - 三主题可切换验收 + 双端观感一致验收
+      - 四主题可切换验收 + 双端观感一致验收
     gate:
       id: G06
       criteria:
         - mvp_9_criteria_all_passed
-        - three_themes_switchable
+        - four_themes_switchable
         - release_candidate_confirmed
 next_actions:
   - id: NEXT-001
-    action: "三个主题提示词与 Windows 参考实现已齐备，等待用户确认视觉方向 → 推进 P00.5 信息架构与双端布局"
+    action: "主题三 Mid-Century Modern 与主题四 Glassmorphism Windows 参考实现均已独立；等待用户确认四主题视觉方向 → 推进 P00.5 信息架构与双端布局"
     inputs: []
 ---

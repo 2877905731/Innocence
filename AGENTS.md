@@ -36,9 +36,9 @@ read_order:
 ## project_facts
 
 ```yaml
-project_summary: "Innocence 是面向学习、自律、陪伴和团队互助的双端产品（Flutter 手机端 + 桌面端），15 个产品模块已全部封板，第一版按 MVP 范围开发。前端 UI 于 2026-08-07 决定全面推翻重写，三个主题并存可切换，主题提示词由用户提供。"
+project_summary: "Innocence 是面向学习、自律、陪伴和团队互助的双端产品（Flutter 手机端 + 桌面端），15 个产品模块已全部封板，第一版按 MVP 范围开发。前端 UI 于 2026-08-07 决定全面推翻重写，四个主题并存可切换，主题提示词由用户提供。"
 data_owner: "Innocence 自有数据；用户数据归用户，由 Innocence 服务托管"
-current_milestone: "P00 治理基线落地 → P00.5 UI 设计体系（待用户提供三个主题提示词）"
+current_milestone: "P00 治理基线落地 → P00.5 UI 设计体系（四主题提示词与 Windows 参考实现已齐备）"
 ```
 
 ## invariants

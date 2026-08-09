@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Innocence 中世纪现代主义主题 Windows 参考实现" />
+  <title>Innocence / Mid-Century Modern</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: '#f5e6d3',
+            paper: '#fffaf2',
+            ink: '#2c2416',
+            orange: '#d97642',
+            mustard: '#d4a574',
+            olive: '#4a7c59',
+            walnut: '#6b5d4f',
+            teak: '#8b7355',
+            slateblue: '#7d9ba8',
+            coral: '#e57a77',
+          },
+          fontFamily: {
+            display: ['Futura', 'Century Gothic', 'Avenir Next', 'Segoe UI', 'sans-serif'],
+            sans: ['Inter', 'Avenir Next', 'Segoe UI', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            soft: '0 4px 15px rgba(44, 36, 22, 0.10)',
+            lift: '0 10px 24px rgba(44, 36, 22, 0.14)',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cream: #f5e6d3;
+      --paper: #fffaf2;
+      --ink: #2c2416;
+      --orange: #d97642;
+      --mustard: #d4a574;
+      --olive: #4a7c59;
+      --walnut: #6b5d4f;
+      --teak: #8b7355;
+      --slate-blue: #7d9ba8;
+      --coral: #e57a77;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: Inter, 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .mid-century-shell {
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 12% 9%, rgba(255, 255, 255, 0.82), transparent 25%),
+        radial-gradient(ellipse at 88% 20%, rgba(212, 165, 116, 0.24), transparent 28%),
+        linear-gradient(115deg, #f8ecd9 0%, #f5e6d3 58%, #ead5b9 100%);
+    }
+
+    .mid-century-shell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.18;
+      pointer-events: none;
+      background-image: repeating-linear-gradient(0deg, rgba(44, 36, 22, 0.035) 0, rgba(44, 36, 22, 0.035) 1px, transparent 1px, transparent 5px);
+    }
+
+    .wood-strip {
+      height: 12px;
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 24px, rgba(44,36,22,0.08) 24px 26px),
+        var(--walnut);
+    }
+
+    .mid-nav {
+      background: rgba(255, 250, 242, 0.96);
+      border-bottom: 1px solid rgba(107, 93, 79, 0.28);
+    }
+
+    .mid-card,
+    .mid-card-muted {
+      border-radius: 4px;
+      box-shadow: 0 4px 15px rgba(44, 36, 22, 0.10);
+      transition: transform 300ms ease, box-shadow 300ms ease, background-color 300ms ease;
+    }
+
+    .mid-card {
+      background: #fff;
+      border-left: 4px solid var(--orange);
+    }
+
+    .mid-card-muted {
+      background: rgba(255, 250, 242, 0.86);
+      border-left: 4px solid var(--mustard);
+    }
+
+    .mid-card:hover,
+    .mid-card-muted:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(44, 36, 22, 0.14);
+    }
+
+    .mid-button {
+      border-radius: 3px;
+      background: var(--orange);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(217, 118, 66, 0.24);
+      transition: transform 300ms ease, box-shadow 300ms ease, background-color 300ms ease;
+    }
+
+    .mid-button:hover {
+      background: #c96635;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(217, 118, 66, 0.30);
+    }
+
+    .mid-button:active { transform: translateY(0); }
+
+    .status-pill {
+      border: 1px solid rgba(74, 124, 89, 0.35);
+      background: rgba(74, 124, 89, 0.10);
+      border-radius: 999px;
+    }
+
+    .mid-progress {
+      height: 7px;
+      overflow: hidden;
+      border-radius: 2px;
+      background: #eadfce;
+    }
+
+    .mid-progress-fill {
+      width: 72%;
+      height: 100%;
+      background: var(--olive);
+    }
+
+    .starburst {
+      width: 112px;
+      height: 112px;
+      background: repeating-conic-gradient(from 0deg, var(--mustard) 0deg 8deg, transparent 8deg 18deg);
+      clip-path: circle(50% at 50% 50%);
+      opacity: 0.92;
+    }
+
+    .starburst::after {
+      content: '';
+      position: absolute;
+      inset: 34%;
+      border-radius: 50%;
+      background: var(--orange);
+    }
+
+    .organic-oval {
+      width: 220px;
+      height: 138px;
+      border-radius: 54% 46% 62% 38% / 44% 58% 42% 56%;
+      background: var(--olive);
+      opacity: 0.12;
+      transform: rotate(-14deg);
+    }
+
+    .geometry-triangle {
+      width: 0;
+      height: 0;
+      border-left: 70px solid transparent;
+      border-right: 70px solid transparent;
+      border-bottom: 122px solid var(--slate-blue);
+      opacity: 0.16;
+      transform: rotate(18deg);
+    }
+
+    .geometry-bar {
+      width: 180px;
+      height: 32px;
+      background: var(--coral);
+      opacity: 0.18;
+      transform: skewX(-24deg) rotate(-10deg);
+    }
+
+    .label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+    }
+
+    .focus-ring:focus-visible {
+      outline: 2px solid var(--ink);
+      outline-offset: 4px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="mid-century-shell">
+    <div class="wood-strip relative z-20" aria-hidden="true"></div>
+
+    <nav class="mid-nav sticky top-0 z-50" aria-label="主导航">
+      <div class="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-5 md:px-10 xl:px-12">
+        <a href="#today" class="focus-ring flex items-center gap-3 text-ink no-underline">
+          <span class="flex h-10 w-10 items-center justify-center rounded-[3px] bg-orange font-display text-lg font-bold text-white">I</span>
+          <span>
+            <span class="block font-display text-sm font-bold tracking-[0.18em]">INNOCENCE</span>
+            <span class="block text-xs text-walnut">陪伴 · 专注 · 成长</span>
+          </span>
+        </a>
+        <div class="hidden items-center gap-8 text-sm font-semibold text-walnut md:flex">
+          <a href="#today" class="border-b-2 border-orange pb-1 text-ink no-underline">今日</a>
+          <a href="#focus" class="no-underline transition-colors hover:text-orange">专注</a>
+          <a href="#progress" class="no-underline transition-colors hover:text-orange">进度</a>
+          <a href="#settings" class="no-underline transition-colors hover:text-orange">设置</a>
+        </div>
+        <button class="status-pill focus-ring flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-olive" type="button">
+          <span class="h-2 w-2 rounded-full bg-olive" aria-hidden="true"></span>
+          在线
+        </button>
+      </div>
+    </nav>
+
+    <main id="today" class="relative z-10 mx-auto max-w-[1440px] px-6 pb-20 pt-14 md:px-10 md:pb-24 md:pt-20 xl:px-12">
+      <div class="starburst absolute -right-4 top-10 hidden lg:block" aria-hidden="true"></div>
+      <div class="organic-oval absolute left-[44%] top-6 hidden lg:block" aria-hidden="true"></div>
+      <div class="geometry-triangle absolute -left-20 top-[520px] hidden xl:block" aria-hidden="true"></div>
+
+      <section class="mb-20 grid grid-cols-1 items-end gap-10 lg:grid-cols-12 lg:gap-7" aria-labelledby="hero-title">
+        <div class="lg:col-span-7">
+          <p class="label mb-6 text-orange">Wednesday · 07 August 2026</p>
+          <h1 id="hero-title" class="max-w-4xl font-display text-5xl font-bold leading-[1.04] tracking-[-0.045em] text-ink sm:text-6xl xl:text-[72px]">
+            给今天留一把椅子，<br /><span class="text-orange">坐下来，专心生活。</span>
+          </h1>
+          <p class="mt-8 max-w-2xl text-lg leading-8 text-walnut">把计划摆放得像一间好房子：方向清楚、光线温暖，每件重要的事都有自己的位置。</p>
+          <div class="mt-10 flex flex-wrap items-center gap-5">
+            <a class="mid-button focus-ring inline-flex items-center gap-3 px-7 py-4 text-sm font-bold uppercase tracking-[0.16em] no-underline" href="#focus">
+              开始专注 <span aria-hidden="true">→</span>
+            </a>
+            <a class="focus-ring inline-flex items-center gap-2 py-3 text-sm font-semibold text-ink underline decoration-mustard decoration-2 underline-offset-4 transition-colors hover:text-orange" href="#progress">查看今日进度</a>
+          </div>
+        </div>
+
+        <article class="mid-card relative overflow-hidden p-8 lg:col-span-4 lg:col-start-9" aria-label="今日状态摘要">
+          <div class="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-mustard/25" aria-hidden="true"></div>
+          <div class="relative mb-10 flex items-start justify-between gap-5">
+            <div>
+              <p class="label text-teak">今日完成度</p>
+              <p class="mt-3 font-display text-6xl font-bold tracking-[-0.06em] text-ink">72<span class="ml-1 text-2xl text-walnut">%</span></p>
+            </div>
+            <span class="rounded-full bg-olive/10 px-3 py-1 text-xs font-bold text-olive">进展顺利</span>
+          </div>
+          <div class="mid-progress" role="progressbar" aria-label="今日完成度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72"><div class="mid-progress-fill"></div></div>
+          <div class="mt-5 flex justify-between text-xs font-semibold text-teak"><span>已完成 4 项</span><span>共 6 项计划</span></div>
+        </article>
+      </section>
+
+      <section id="focus" class="mb-8 flex flex-col items-start justify-between gap-4 border-b border-walnut/25 pb-6 sm:flex-row sm:items-end" aria-labelledby="focus-title">
+        <div>
+          <p class="label mb-2 text-olive">Your workspace</p>
+          <h2 id="focus-title" class="font-display text-4xl font-bold tracking-[-0.035em] text-ink">今日工作区</h2>
+        </div>
+        <button class="focus-ring flex items-center gap-2 text-sm font-semibold text-walnut transition-colors hover:text-orange" type="button">管理计划 <span aria-hidden="true">↗</span></button>
+      </section>
+
+      <section class="grid grid-cols-1 gap-7 lg:grid-cols-12" aria-label="今日工作区内容">
+        <article class="mid-card p-7 md:p-10 lg:col-span-8">
+          <div class="flex flex-col items-start justify-between gap-7 sm:flex-row">
+            <div>
+              <span class="label mb-5 inline-flex bg-slateblue/15 px-3 py-1.5 text-slateblue">当前计划 · 03</span>
+              <h3 class="font-display text-3xl font-bold tracking-[-0.03em]">完成产品视觉规范</h3>
+              <p class="mt-3 max-w-xl leading-7 text-walnut">整理四套主题的设计令牌，完成组件状态与桌面端导航的对照记录。</p>
+            </div>
+            <button class="focus-ring px-2 py-1 text-xl text-teak transition-colors hover:text-orange" type="button" aria-label="更多计划操作">•••</button>
+          </div>
+          <div class="mt-12 grid grid-cols-1 gap-5 border-t border-walnut/20 pt-7 sm:grid-cols-3">
+            <div><p class="label text-teak">预计用时</p><p class="mt-2 text-lg font-bold">45 分钟</p></div>
+            <div><p class="label text-teak">已专注</p><p class="mt-2 text-lg font-bold">32 分钟</p></div>
+            <div><p class="label text-teak">截止时间</p><p class="mt-2 text-lg font-bold">18:30</p></div>
+          </div>
+        </article>
+
+        <article id="progress" class="mid-card-muted p-7 md:p-8 lg:col-span-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-display text-xl font-bold">专注统计</h3>
+            <span class="label text-teak">本周</span>
+          </div>
+          <div class="mt-9 flex h-32 items-end gap-3" aria-label="本周专注时长柱状图">
+            <div class="flex flex-1 flex-col items-center gap-2"><div class="h-12 w-full bg-mustard/45"></div><span class="text-[11px] text-teak">一</span></div>
+            <div class="flex flex-1 flex-col items-center gap-2"><div class="h-20 w-full bg-slateblue/55"></div><span class="text-[11px] text-teak">二</span></div>
+            <div class="flex flex-1 flex-col items-center gap-2"><div class="h-16 w-full bg-coral/50"></div><span class="text-[11px] text-teak">三</span></div>
+            <div class="flex flex-1 flex-col items-center gap-2"><div class="h-28 w-full bg-orange"></div><span class="text-[11px] font-bold text-ink">四</span></div>
+            <div class="flex flex-1 flex-col items-center gap-2"><div class="h-10 w-full bg-olive/45"></div><span class="text-[11px] text-teak">五</span></div>
+          </div>
+          <div class="mt-8 border-t border-walnut/20 pt-5"><p class="label text-teak">累计专注</p><p class="mt-1 font-display text-3xl font-bold">12<span class="ml-1 text-base font-normal text-walnut">小时</span></p></div>
+        </article>
+      </section>
+
+      <section class="mt-7 grid grid-cols-1 gap-7 md:grid-cols-3" aria-label="快速操作">
+        <article class="mid-card-muted flex items-center justify-between p-6">
+          <div><p class="label text-teak">下一项计划</p><p class="mt-2 font-bold">阅读设计参考</p></div>
+          <span class="text-2xl text-orange" aria-hidden="true">↗</span>
+        </article>
+        <article class="mid-card-muted flex items-center justify-between p-6">
+          <div><p class="label text-teak">连续学习</p><p class="mt-2 font-bold">已坚持 12 天</p></div>
+          <span class="text-3xl text-mustard" aria-hidden="true">✦</span>
+        </article>
+        <article id="settings" class="mid-card-muted flex items-center justify-between p-6">
+          <div><p class="label text-teak">同步状态</p><p class="mt-2 font-bold">所有设备已同步</p></div>
+          <span class="text-xl font-bold text-olive" aria-hidden="true">✓</span>
+        </article>
+      </section>
+
+      <section class="relative mt-24 overflow-hidden rounded-[4px] bg-ink px-7 py-10 text-paper md:flex md:items-center md:justify-between md:px-10">
+        <div class="geometry-bar absolute right-36 top-2" aria-hidden="true"></div>
+        <div class="relative">
+          <p class="label text-mustard">准备好继续了吗？</p>
+          <p class="mt-3 font-display text-2xl font-bold">给自己 25 分钟，只做一件事。</p>
+        </div>
+        <a class="focus-ring relative mt-7 inline-flex items-center gap-3 rounded-[3px] bg-mustard px-6 py-4 text-sm font-bold uppercase tracking-[0.14em] text-ink no-underline transition-transform hover:-translate-y-0.5 md:mt-0" href="#focus">启动番茄钟 <span aria-hidden="true">↗</span></a>
+      </section>
+    </main>
+
+    <button class="focus-ring fixed bottom-7 right-7 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-orange text-2xl text-white shadow-soft transition-transform hover:-translate-y-0.5" type="button" aria-label="快速添加计划">+</button>
+    <div class="wood-strip relative z-20" aria-hidden="true"></div>
+  </div>
+</body>
+</html>

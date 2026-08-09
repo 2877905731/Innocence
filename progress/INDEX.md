@@ -55,3 +55,24 @@ checkpoints:
     status: complete
     path: progress/0006__20260807__P00.5__DONE__theme03-glassmorphism-archive-and-reference.md
     title: "主题三「玻璃态」提示词存档与 Windows 参考实现"
+  - sequence: "0007"
+    created_at: "2026-08-10T00:00:00+08:00"
+    phase: P00.5
+    type: DECISION
+    status: complete
+    path: progress/0007__20260810__P00.5__DECISION__theme03-mid-century-modern-replacement.md
+    title: "主题三由玻璃态替换为中世纪现代主义"
+  - sequence: "0008"
+    created_at: "2026-08-10T00:00:00+08:00"
+    phase: P00.5
+    type: DONE
+    status: complete
+    path: progress/0008__20260810__P00.5__DONE__theme03-mid-century-modern-reference.md
+    title: "主题三中世纪现代主义 Windows 参考实现"
+  - sequence: "0009"
+    created_at: "2026-08-10T00:00:00+08:00"
+    phase: P00.5
+    type: DONE
+    status: complete
+    path: progress/0009__20260810__P00.5__DONE__theme04-glassmorphism-restored.md
+    title: "玻璃态恢复为主题四并拆分独立参考页"

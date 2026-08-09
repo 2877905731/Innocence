@@ -37,7 +37,7 @@ README.md                    当前索引
 - `Innocence-MVP第一版功能范围.md` —— 第一版范围边界与完成标准
 - `Innocence-接口清单草案.md` —— 前后端接口契约草案
 - `Innocence-数据库表结构草案.md` —— 数据库表结构草案
-- `Innocence-UI设计规划.md` —— UI 全面重写规划 + 三个主题提示词存档（P00.5 待创建）
+- `Innocence-UI设计规划.md` —— UI 全面重写规划 + 四个主题提示词与参考实现存档（P00.5）
 
 ## 排查文档（troubleshooting/）
 

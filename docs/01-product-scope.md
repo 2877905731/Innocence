@@ -27,7 +27,7 @@ in_scope:
     done_when: "MVP 完成标准第 8 条验收通过"
   - id: SCOPE-008
     capability: "UI 设计体系（信息架构、双端布局、视觉令牌、三个并存可切换主题、组件体系）"
-    done_when: "三主题切换生效、双端观感一致、登录到二级页全部按新设计落地"
+    done_when: "四主题切换生效、双端观感一致、登录到二级页全部按新设计落地"
 out_of_scope:
   - id: OUT-001
     item: "陌生人私信、陌生人社交广场、推荐好友/团队"
@@ -43,7 +43,7 @@ definition_of_done:
   - scope_id: SCOPE-001
     evidence: "MVP 完成标准 9 条逐条验收记录（P06 阶段门禁）"
   - scope_id: SCOPE-008
-    evidence: "三主题在设置中可切换；页面按新设计重建完成（P00.5 门禁）"
+    evidence: "四主题在设置中可切换；页面按新设计重建完成（P00.5 门禁）"
 decision_entrypoint:
   checkpoint_type: DECISION
   source: progress/

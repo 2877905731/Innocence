@@ -38,7 +38,7 @@ project_specific_rules:
     verification: "页面重建对照 docs/planning/Innocence-UI设计规划.md 验收"
   - id: RULE-003
     enabled: true
-    rule: "三个主题并存可切换：主题只注入设计令牌值，不重写页面结构"
+    rule: "四个主题并存可切换：主题只注入设计令牌值，不重写页面结构"
     verification: "设置中切换主题即时生效，页面结构不变"
   - id: RULE-004
     enabled: true
