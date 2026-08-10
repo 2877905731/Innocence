@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/core/layout/desktop_presentation.dart';
 import 'package:innocence_flutter/core/theme/surface_palette.dart';
@@ -44,6 +45,7 @@ class SettingsPage extends StatefulWidget {
     required this.onRemoveBlacklist,
     required this.onLoadCurrentDeviceSession,
     required this.onUpdateProfile,
+    required this.onUploadAvatar,
     required this.onUpdatePrivacy,
     required this.onUpdateNotifications,
     required this.onUpdateWidget,
@@ -84,6 +86,10 @@ class SettingsPage extends StatefulWidget {
     required String avatarUrl,
     required String bio,
   }) onUpdateProfile;
+  final Future<UserProfile?> Function({
+    required List<int> bytes,
+    required String filename,
+  }) onUploadAvatar;
   final Future<PrivacySetting?> Function({
     required bool allowFriendViewProfile,
     required bool allowTeammateViewStudy,
@@ -386,7 +392,6 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _editProfile() async {
     final current = _overview.accountSetting;
     final nicknameController = TextEditingController(text: current.nickname);
-    final avatarController = TextEditingController(text: current.avatarUrl);
     final bioController = TextEditingController(text: current.bio);
     final draft = await showDialog<_ProfileDraft>(
       context: context,
@@ -407,15 +412,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       hintText: _text('队友看到你的名字', 'How teammates will see you'),
                     ),
                     autofocus: true,
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: avatarController,
-                    maxLength: 255,
-                    decoration: InputDecoration(
-                      labelText: _text('头像地址', 'Avatar URL'),
-                      hintText: _text('可选的头像图片地址', 'Optional image address'),
-                    ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
@@ -442,7 +438,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 Navigator.of(context).pop(
                   _ProfileDraft(
                     nickname: nicknameController.text.trim(),
-                    avatarUrl: avatarController.text.trim(),
                     bio: bioController.text.trim(),
                   ),
                 );
@@ -454,7 +449,6 @@ class _SettingsPageState extends State<SettingsPage> {
       },
     );
     nicknameController.dispose();
-    avatarController.dispose();
     bioController.dispose();
 
     if (draft == null || draft.nickname.isEmpty) {
@@ -467,7 +461,7 @@ class _SettingsPageState extends State<SettingsPage> {
     try {
       final updatedProfile = await widget.onUpdateProfile(
         nickname: draft.nickname,
-        avatarUrl: draft.avatarUrl,
+        avatarUrl: current.avatarUrl,
         bio: draft.bio,
       );
       if (!mounted) {
@@ -980,6 +974,72 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Future<void> _uploadAvatar() async {
+    const imageTypes = XTypeGroup(
+      label: 'JPEG/PNG images',
+      extensions: ['jpg', 'jpeg', 'png'],
+      mimeTypes: ['image/jpeg', 'image/png'],
+    );
+
+    XFile? file;
+    try {
+      file = await openFile(acceptedTypeGroups: [imageTypes]);
+    } catch (_) {
+      if (mounted) {
+        _showMessage(_text(
+          '无法打开文件选择器。',
+          'Unable to open the file selector.',
+        ));
+      }
+      return;
+    }
+    if (file == null || !mounted) {
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final fileLength = await file.length();
+      if (!mounted) {
+        return;
+      }
+      if (fileLength <= 0 || fileLength > 5 * 1024 * 1024) {
+        _showMessage(_text(
+          '头像必须是大小不超过 5 MiB 的 JPEG 或 PNG 图片。',
+          'Choose a JPEG or PNG image no larger than 5 MiB.',
+        ));
+        return;
+      }
+      final bytes = await file.readAsBytes();
+      if (!mounted) {
+        return;
+      }
+      final updatedProfile = await widget.onUploadAvatar(
+        bytes: bytes,
+        filename: file.name,
+      );
+      if (!mounted) {
+        return;
+      }
+      if (updatedProfile == null) {
+        _showMessage(_text('头像上传失败。', 'Unable to upload the avatar.'));
+        return;
+      }
+      setState(() {
+        _overview = _overview.copyWith(accountSetting: updatedProfile);
+      });
+      _showMessage(_text('头像已更新。', 'Avatar updated.'));
+    } catch (_) {
+      if (mounted) {
+        _showMessage(_text('头像读取失败。', 'Unable to read the avatar file.'));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = SurfacePalette.homeTheme().textTheme;
@@ -1034,10 +1094,21 @@ class _SettingsPageState extends State<SettingsPage> {
               '这里是手机和电脑共用的熟人圈账号资料。',
               'This is the trusted-circle account profile shared on phone and desktop.',
             ),
-            trailing: OutlinedButton.icon(
-              onPressed: _isLoading ? null : _editProfile,
-              icon: const Icon(Icons.edit_rounded),
-              label: Text(_text('编辑资料', 'Edit profile')),
+            trailing: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _uploadAvatar,
+                  icon: const Icon(Icons.add_a_photo_outlined),
+                  label: Text(_text('更换头像', 'Change avatar')),
+                ),
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _editProfile,
+                  icon: const Icon(Icons.edit_rounded),
+                  label: Text(_text('编辑资料', 'Edit profile')),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1059,10 +1130,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       : account.timezone,
                 ),
                 _InfoLine(
-                  label: _text('头像地址', 'Avatar URL'),
+                  label: _text('头像', 'Avatar'),
                   value: account.avatarUrl.isEmpty
                       ? _text('未设置', 'Not set')
-                      : account.avatarUrl,
+                      : _text('已设置', 'Configured'),
                 ),
                 if (account.bio.isNotEmpty)
                   _InfoLine(
@@ -1803,12 +1874,10 @@ class _EffectOption {
 class _ProfileDraft {
   const _ProfileDraft({
     required this.nickname,
-    required this.avatarUrl,
     required this.bio,
   });
 
   final String nickname;
-  final String avatarUrl;
   final String bio;
 }
 

@@ -3,6 +3,10 @@ spring:
     name: innocence-server
   profiles:
     active: local
+  servlet:
+    multipart:
+      max-file-size: 5242880B
+      max-request-size: 6291456B
 
 server:
   port: 8080
@@ -18,3 +22,9 @@ management:
     web:
       exposure:
         include: health,info
+
+innocence:
+  avatar:
+    storage-dir: ./data/uploads/avatars
+    public-path: /uploads/avatars
+    max-bytes: 5242880

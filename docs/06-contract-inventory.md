@@ -95,6 +95,15 @@ endpoints:
     source_behavior: "将目标用户加入当前用户黑名单（接口草案 4.1）"
     evidence_status: implementation_matched_sample_pending
     trigger: "P01 隐私设置收尾时以本人、重复拉黑和权限边界回放核对"
+  - id: U13
+    method: POST
+    path: "/api/app/v1/account/avatar/upload"
+    source_behavior: "上传当前用户头像；服务端生成文件名并回写 avatarUrl（接口草案 4.1）"
+    request: "multipart/form-data，字段 file；image/jpeg 或 image/png；最大 5 MiB"
+    success: "HTTP 200，data.avatarUrl 为 public-path 下的相对 URL"
+    failures: "缺失/超限/类型不支持/无效图片返回 HTTP 400 + code=1000；会话失效返回 HTTP 401 + code=2000；存储失败返回 HTTP 500 + code=9000"
+    evidence_status: server_and_client_source_matched_http_pending
+    trigger: "P01 资料入口收尾时以正常、空文件、超限、伪图片和会话失效回放核对"
 preview_queue:
   - priority: P1
     sample: "待收样本：认证/学习/签到/统计/首页聚合 5 组正常+空+边界请求"

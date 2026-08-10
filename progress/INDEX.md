@@ -118,3 +118,17 @@ checkpoints:
     status: complete
     path: progress/0015__20260810__P01__DONE__settings-adaptive-blacklist-and-security-negative-paths.md
     title: "设置页三档编排、黑名单新增与安全负向路径"
+  - sequence: "0016"
+    created_at: "2026-08-10T11:45:00+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0016__20260810__P01__DONE__avatar-upload-contract-and-server-chain.md
+    title: "头像上传契约与服务端存储链路"
+  - sequence: "0017"
+    created_at: "2026-08-10T11:58:35+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0017__20260810__P01__DONE__avatar-upload-client-source-chain.md
+    title: "头像选择与客户端 multipart 源码链路"

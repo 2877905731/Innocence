@@ -150,6 +150,7 @@ class _InnocenceAppState extends State<InnocenceApp> {
                 widget.sessionController.loadCurrentDeviceSession,
             onUpdateMySettingProfile:
                 widget.sessionController.updateMySettingProfile,
+            onUploadMyAvatar: widget.sessionController.uploadMyAvatar,
             onUpdateMyPrivacySetting:
                 widget.sessionController.updateMyPrivacySetting,
             onUpdateNotificationSetting:

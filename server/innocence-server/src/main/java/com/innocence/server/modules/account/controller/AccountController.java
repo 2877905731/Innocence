@@ -6,11 +6,14 @@ import com.innocence.server.modules.account.dto.request.CancelAccountRequest;
 import com.innocence.server.modules.account.dto.request.UpdatePrivacyRequest;
 import com.innocence.server.modules.account.dto.request.UpdateProfileRequest;
 import com.innocence.server.modules.account.dto.response.BlacklistItemResponse;
+import com.innocence.server.modules.account.dto.response.AvatarUploadResponse;
 import com.innocence.server.modules.account.dto.response.CurrentSessionResponse;
 import com.innocence.server.modules.account.dto.response.PrivacySettingResponse;
 import com.innocence.server.modules.account.dto.response.UserProfileResponse;
 import com.innocence.server.modules.account.service.AccountService;
+import com.innocence.server.modules.account.service.AvatarUploadService;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,7 +22,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -29,9 +34,11 @@ import java.util.Map;
 public class AccountController {
 
     private final AccountService accountService;
+    private final AvatarUploadService avatarUploadService;
 
-    public AccountController(AccountService accountService) {
+    public AccountController(AccountService accountService, AvatarUploadService avatarUploadService) {
         this.accountService = accountService;
+        this.avatarUploadService = avatarUploadService;
     }
 
     @GetMapping("/profile")
@@ -42,6 +49,13 @@ public class AccountController {
     @PutMapping("/profile")
     public ApiResponse<UserProfileResponse> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
         return ApiResponse.success(accountService.updateMyProfile(currentUserId(), request));
+    }
+
+    @PostMapping(value = "/avatar/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<AvatarUploadResponse> uploadAvatar(
+            @RequestPart(name = "file", required = false) MultipartFile file
+    ) {
+        return ApiResponse.success(avatarUploadService.uploadForUser(currentUserId(), file));
     }
 
     @GetMapping("/privacy")

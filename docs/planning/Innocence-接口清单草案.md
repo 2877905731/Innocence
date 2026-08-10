@@ -72,9 +72,13 @@
 
 ### 2.6 文件上传建议
 
-- 头像上传单独走文件接口
-- 使用 `multipart/form-data`
-- 文件存储可先走本地映射目录，后续切对象存储
+- 头像上传单独走文件接口：`POST /api/app/v1/account/avatar/upload`
+- 使用 `multipart/form-data`，文件字段名固定为 `file`
+- 第一版仅接受 `image/jpeg`、`image/png`，单文件最大 5 MiB；服务端必须校验图片内容可解码，不能仅相信扩展名或客户端 MIME
+- 文件名由服务端生成 UUID，原始文件名不进入存储路径；本地写入 `innocence.avatar.storage-dir`，默认 `./data/uploads/avatars`
+- 成功返回 `data.avatarUrl`，默认形如 `/uploads/avatars/{uuid}.jpg` 或 `/uploads/avatars/{uuid}.png`，同时更新当前用户 `app_user.avatar_url`
+- 上传接口必须经过当前会话鉴权；缺文件、超限、类型不支持、伪图片均返回业务错误，不创建假入口或写入 `avatarUrl`
+- 存储抽象保留对象存储切换边界：客户端只依赖返回的 `avatarUrl`，不依赖本地目录、原始文件名或具体存储实现
 
 ## 3. 通道划分建议
 

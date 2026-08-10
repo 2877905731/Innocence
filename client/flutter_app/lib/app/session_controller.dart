@@ -1201,6 +1201,31 @@ class SessionController extends ChangeNotifier {
     return updatedProfile;
   }
 
+  Future<UserProfile?> uploadMyAvatar({
+    required List<int> bytes,
+    required String filename,
+  }) async {
+    final currentSession = _session;
+    if (currentSession == null) {
+      return null;
+    }
+
+    UserProfile? updatedProfile;
+    await _runBusyAction(() async {
+      await _settingsApi.uploadAvatar(
+        currentSession,
+        bytes: bytes,
+        filename: filename,
+      );
+      updatedProfile = await _authApi.getProfile(currentSession);
+      _syncProfile(updatedProfile!);
+      _bannerMessage = _message('头像已更新。', 'Avatar updated.');
+    },
+        fallbackMessage:
+            _message('头像上传失败。', 'Failed to upload the avatar.'));
+    return updatedProfile;
+  }
+
   Future<PrivacySetting?> updateMyPrivacySetting({
     required bool allowFriendViewProfile,
     required bool allowTeammateViewStudy,

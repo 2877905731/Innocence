@@ -92,5 +92,5 @@ project_boundary:
     - Dart feature 模型
 fixtures:
   - path: "暂无（契约样本未收，P01 起回放收样）"
-    contract: "U01-U12"
+    contract: "U01-U13"
 ---

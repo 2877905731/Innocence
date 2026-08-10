@@ -405,6 +405,7 @@ class HomePage extends StatelessWidget {
     required this.onRemoveBlacklist,
     required this.onLoadCurrentDeviceSession,
     required this.onUpdateMySettingProfile,
+    required this.onUploadMyAvatar,
     required this.onUpdateMyPrivacySetting,
     required this.onUpdateNotificationSetting,
     required this.onUpdateWidgetSetting,
@@ -534,6 +535,10 @@ class HomePage extends StatelessWidget {
     required String avatarUrl,
     required String bio,
   }) onUpdateMySettingProfile;
+  final Future<UserProfile?> Function({
+    required List<int> bytes,
+    required String filename,
+  }) onUploadMyAvatar;
   final Future<PrivacySetting?> Function({
     required bool allowFriendViewProfile,
     required bool allowTeammateViewStudy,
@@ -870,6 +875,7 @@ class HomePage extends StatelessWidget {
             onRemoveBlacklist: onRemoveBlacklist,
             onLoadCurrentDeviceSession: onLoadCurrentDeviceSession,
             onUpdateProfile: onUpdateMySettingProfile,
+            onUploadAvatar: onUploadMyAvatar,
             onUpdatePrivacy: onUpdateMyPrivacySetting,
             onUpdateNotifications: onUpdateNotificationSetting,
             onUpdateWidget: onUpdateWidgetSetting,

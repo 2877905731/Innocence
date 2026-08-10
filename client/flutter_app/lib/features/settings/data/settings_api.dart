@@ -94,6 +94,41 @@ class SettingsApi {
     );
   }
 
+  Future<String> uploadAvatar(
+    AppSession session, {
+    required List<int> bytes,
+    required String filename,
+  }) async {
+    if (bytes.isEmpty) {
+      throw const ApiException('请选择头像文件。');
+    }
+    if (bytes.length > 5 * 1024 * 1024) {
+      throw const ApiException('头像文件不能超过 5 MiB。');
+    }
+
+    final normalizedFilename = filename.trim().toLowerCase();
+    final contentType = switch (normalizedFilename) {
+      String value when value.endsWith('.jpg') || value.endsWith('.jpeg') =>
+        'image/jpeg',
+      String value when value.endsWith('.png') => 'image/png',
+      _ => throw const ApiException('头像仅支持 JPEG 或 PNG 图片。'),
+    };
+    final data = await _apiClient.postMultipart(
+      'account/avatar/upload',
+      fieldName: 'file',
+      bytes: bytes,
+      filename: filename,
+      contentType: contentType,
+      headers: session.authHeaders,
+    );
+    final response = _requireMap(data, '头像上传响应无效。');
+    final avatarUrl = '${response['avatarUrl'] ?? ''}'.trim();
+    if (avatarUrl.isEmpty) {
+      throw const ApiException('头像上传响应缺少 avatarUrl。');
+    }
+    return avatarUrl;
+  }
+
   Future<PrivacySetting> updatePrivacy(
     AppSession session, {
     required bool allowFriendViewProfile,

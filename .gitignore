@@ -31,6 +31,9 @@ build/
 .env.*
 server/innocence-server/config/
 
+# Runtime uploads
+data/uploads/
+
 # Local temp
 tmp/
 temp/

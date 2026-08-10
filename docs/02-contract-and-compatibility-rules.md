@@ -78,6 +78,9 @@ compatibility:
 - 分页结构：`{ pageNo, pageSize, total, list }`
 - 时间统一 ISO 8601；需同步的写接口返回 `syncVersion` + `updateTime`；客户端提交带 `clientTime` / `clientVersion` / `deviceId`
 - 头像上传走 `multipart/form-data`，本地映射目录存储，后续切对象存储
+- 头像上传固定使用 `POST /api/app/v1/account/avatar/upload`：字段名为 `file`，仅接受 `image/jpeg` 与 `image/png`，单文件上限 5 MiB；服务端不信任原始文件名，生成 UUID 文件名并写入 `innocence.avatar.storage-dir`
+- 上传成功返回 `{ avatarUrl }`，URL 为 `innocence.avatar.public-path/{uuid}.{jpg|png}`，并同步更新当前登录用户的 `app_user.avatar_url`
+- 缺失文件、超限、类型不支持、图片内容无效返回 `1000`；未登录仍由会话拦截返回 `401/2000`；存储失败返回 `9000`，错误响应不得暴露本地路径
 
 ## 通道划分（已确认）
 
