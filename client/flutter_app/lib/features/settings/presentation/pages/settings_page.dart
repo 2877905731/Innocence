@@ -870,7 +870,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildSectionNavigation(DesktopPresentationTier tier) {
-    final items = _SettingsSectionId.values;
+    const items = _SettingsSectionId.values;
     if (tier == DesktopPresentationTier.medium) {
       return Container(
         width: double.infinity,
@@ -1719,9 +1719,8 @@ class _SettingsSurface extends StatelessWidget {
   const _SettingsSurface({
     required this.section,
     required this.child,
-    this.padding = const EdgeInsets.all(18),
     this.lightStyle = false,
-  });
+  }) : padding = const EdgeInsets.all(18);
 
   final _SettingsSectionId section;
   final Widget child;

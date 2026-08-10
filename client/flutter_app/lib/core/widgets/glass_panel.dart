@@ -87,13 +87,13 @@ class _DesktopGlassPanel extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(radius),
-            gradient: LinearGradient(
+            gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                const Color(0x40171C22),
-                const Color(0x3410151B),
-                const Color(0x4811161D),
+                Color(0x40171C22),
+                Color(0x3410151B),
+                Color(0x4811161D),
               ],
             ),
             border: Border.all(
@@ -112,11 +112,11 @@ class _DesktopGlassPanel extends StatelessWidget {
                 spreadRadius: -10,
                 offset: const Offset(-4, -4),
               ),
-              BoxShadow(
-                color: const Color(0x22DCE6F2),
+              const BoxShadow(
+                color: Color(0x22DCE6F2),
                 blurRadius: 18,
                 spreadRadius: -12,
-                offset: const Offset(12, -8),
+                offset: Offset(12, -8),
               ),
             ],
           ),
@@ -141,14 +141,14 @@ class _DesktopGlassPanel extends StatelessWidget {
                   ),
                 ),
               ),
-              Positioned(
+              const Positioned(
                 top: -40,
                 right: -18,
                 child: IgnorePointer(
                   child: _GlassGlow(
                     width: 196,
                     height: 124,
-                    colors: const [
+                    colors: [
                       Color(0x38E2EAF4),
                       Color(0x00E2EAF4),
                     ],

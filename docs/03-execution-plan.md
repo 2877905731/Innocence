@@ -77,12 +77,12 @@ phases:
     actions:
       - 认证/会话/权限/设置模块收尾；会话槽位、黑名单、租户边界与头像上传服务端真实 HTTP 回放已完成
       - 按新 UI 重建：登录、注册、找回密码、资料、隐私、设置页面
-      - 首批已实现 DesktopPresentationTier、自适应 6+2 主 Shell、88×88 Focus Orb，以及登录/注册/验证码/重置密码入口；Flutter 工具链验证待补
+      - DesktopPresentationTier、自适应 6+2 主 Shell、88×88 Focus Orb、认证入口与设置资料链路已通过 Flutter analyze、16 项测试和 Windows Release 构建；DPI 与真实文件选择待实机验收
     gate:
       id: G01
       status: in_progress
       criteria:
-        - auth_flow_ui_redesigned
+        - auth_flow_ui_redesigned（源码、部件测试与 Windows Release 构建已通过；DPI 实机待验收）
         - session_policy_verified（1 手机 + 1 电脑；真实 HTTP 回放已通过）
         - negative_tests_passed（拉黑/越权访问；服务层与真实 HTTP 回放已通过）
   - id: P02

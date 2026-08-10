@@ -98,13 +98,12 @@ class DesktopPresentationSpec {
     );
   }
 
-  const DesktopPresentationSpec.orb({required bool reduceMotion})
+  const DesktopPresentationSpec.orb({required this.reduceMotion})
       : surface = DesktopWindowSurface.orb,
         tier = null,
         defaultDensity = ComponentPresentationDensity.glance,
         navigation = NavigationPresentation.none,
-        showContextPane = false,
-        reduceMotion = reduceMotion;
+        showContextPane = false;
 }
 
 class DesktopPresentationPolicy {

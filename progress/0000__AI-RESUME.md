@@ -3,15 +3,13 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-08-10"
-latest_checkpoint: "0018"
+latest_checkpoint: "0019"
 current_phase: P01
 current_gate: G01
-state: p01_server_http_negative_matrix_verified_flutter_toolchain_pending
-next_sequence: "0019"
-current_goal: "P01 账户与基础进行中：服务端会话、权限与头像上传真实 HTTP 矩阵已完成；继续 Flutter 工具链、Windows 构建与 DPI 验收"
+state: p01_flutter_automated_toolchain_verified_runtime_dpi_pending
+next_sequence: "0020"
+current_goal: "P01 账户与基础进行中：服务端 HTTP 与 Flutter 自动化工具链已完成；继续 Windows 真实文件选择、头像上传和 100%/125%/150% DPI 实机验收"
 recent_baseline:
-  - checkpoint: "0014"
-    result: "设置页补齐黑名单读取/解除确认与当前设备会话状态；新增 U09-U11 契约登记、模型解析测试源码和非玻璃平面设置表面；Dart 分隔符、后端路由对齐与 diff check 通过，Flutter/Dart SDK 仍不可用"
   - checkpoint: "0015"
     result: "设置页完成 Large/Medium/Small 三档独立编排与黑名单新增入口；新增会话、认证、拉黑和跨租户权限负向测试，定向 Maven 7 项通过；Flutter/Dart SDK、数据库集成环境和头像上传后端路由仍不可用"
   - checkpoint: "0016"
@@ -20,6 +18,8 @@ recent_baseline:
     result: "资料页完成 JPEG/PNG 文件选择、5 MiB 前置校验、multipart 调用和资料刷新源码；file_selector 依赖按官方元数据锁定；Flutter/Dart SDK 不可用，尚未执行 pub get/analyze/test"
   - checkpoint: "0018"
     result: "隔离 MySQL/Redis 环境完成 U09-U13 真实 HTTP 矩阵；发现并修复 code=9000 被错误映射为 HTTP 400 的缺陷，完整 Maven 16 项通过；Flutter/Dart SDK 仍不可用"
+  - checkpoint: "0019"
+    result: "Flutter 3.44.9 Stable / Dart 3.12.2 与中国镜像配置完成；pub get、analyze、Flutter 16 项测试和 Windows Release 构建通过，file_selector 原生插件注册生成；实机 DPI 与真实文件选择待验收"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
@@ -52,19 +52,19 @@ user_decisions:
 unfinished:
   - id: TODO-005
     priority: P0
-    item: "执行 flutter analyze、flutter test 和 Windows 100%/125%/150% DPI 实机验收；当前环境未安装 Flutter/Dart SDK"
+    item: "执行 Windows Large/Medium/Small 在 100%/125%/150% DPI 的实机验收；flutter analyze、16 项测试和 Windows Release 构建已通过"
     gate: G01
   - id: TODO-006
     priority: P1
-    item: "验证资料页文件选择器与客户端 multipart 调用；服务端正常及负向 HTTP 路径已完成，当前 Flutter/Dart SDK 不可用，尚未执行 pub get/analyze/test 和 Windows 构建"
+    item: "在 Windows Release 实机验证资料页文件选择器、multipart 调用、头像展示与资料刷新；源码、插件注册、客户端负向测试和服务端 HTTP 矩阵已完成"
     gate: G01
 next_actions:
   - id: NEXT-001
-    action: "Flutter SDK 可用后先执行 flutter pub get 并核对锁文件，再执行 flutter analyze、flutter test 和 Windows 构建"
-    inputs: ["Flutter SDK", "Dart SDK"]
+    action: "启动隔离 MySQL/Redis 与后端，运行 Windows Release，使用合成账号完成真实头像选择、上传、静态资源展示与资料刷新"
+    inputs: ["Windows Release", "MySQL/Redis 集成环境", "合成图片"]
   - id: NEXT-002
-    action: "Windows 构建成功后执行 Large/Medium/Small 在 100%/125%/150% DPI 的实机验收，并核对头像选择、上传和资料刷新"
-    inputs: ["Flutter Windows 构建", "Windows DPI 环境"]
+    action: "执行 Large/Medium/Small 在 100%/125%/150% DPI 的窗口重排、滚动、命中区域和状态连续性验收"
+    inputs: ["Windows Release", "Windows DPI 环境"]
 required_reads:
   - AGENTS.md
   - docs/08-project-profile.md

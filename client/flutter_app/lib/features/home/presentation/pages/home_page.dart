@@ -1372,7 +1372,7 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    GlassPanel(
+                    const GlassPanel(
                       lightStyle: true,
                       child: _RoadmapCard(
                         settingsConnected: true,
@@ -1954,7 +1954,7 @@ class _DesktopWidgetHome extends StatelessWidget {
                             value: planProgress,
                             backgroundColor:
                                 Colors.white.withValues(alpha: 0.06),
-                            valueColor: AlwaysStoppedAnimation<Color>(
+                            valueColor: const AlwaysStoppedAnimation<Color>(
                               AppColors.mint,
                             ),
                           ),
@@ -4590,7 +4590,7 @@ class _ChatReportDialogState extends State<_ChatReportDialog> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedReason,
+                initialValue: _selectedReason,
                 decoration: InputDecoration(
                   labelText: _text('举报原因', 'Reason'),
                 ),
@@ -5653,8 +5653,7 @@ class _DesktopWidgetHomeV2 extends StatefulWidget {
     required this.onEditTodayPlan,
     required this.onToggleTodayPlanItem,
     required this.onRemindTeammate,
-    this.bannerMessage,
-  });
+  }) : bannerMessage = null;
 
   final AppLanguage appLanguage;
   final UserProfile profile;
@@ -7461,7 +7460,7 @@ class _DesktopDragHandle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = SurfacePalette.subtle;
+    const color = SurfacePalette.subtle;
 
     return Row(
       mainAxisSize: MainAxisSize.min,

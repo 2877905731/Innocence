@@ -43,7 +43,7 @@ class AuroraBackground extends StatelessWidget {
                 color: Color(0x06000000),
               ),
             ),
-            Positioned.fill(
+            const Positioned.fill(
               child: IgnorePointer(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -52,7 +52,7 @@ class AuroraBackground extends StatelessWidget {
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.white,
-                        const Color(0xFFF7F8FA),
+                        Color(0xFFF7F8FA),
                       ],
                     ),
                   ),

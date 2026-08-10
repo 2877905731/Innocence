@@ -14,7 +14,6 @@ import 'package:innocence_flutter/features/home/presentation/pages/home_page.dar
 
 import 'app_language.dart';
 import 'session_controller.dart';
-import 'team_workspace_snapshot.dart';
 
 class InnocenceApp extends StatefulWidget {
   const InnocenceApp({

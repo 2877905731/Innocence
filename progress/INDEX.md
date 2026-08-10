@@ -139,3 +139,10 @@ checkpoints:
     status: complete
     path: progress/0018__20260810__P01__DONE__server-http-negative-matrix-and-error-mapping.md
     title: "会话、黑名单与头像上传真实 HTTP 负向矩阵"
+  - sequence: "0019"
+    created_at: "2026-08-10T14:30:42+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0019__20260810__P01__DONE__flutter-toolchain-and-windows-release-verification.md
+    title: "Flutter 工具链与 Windows Release 自动化验收"

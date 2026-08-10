@@ -262,7 +262,7 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
               Expanded(
                 child: ListView(
                   children: [
-                    _SectionTitle(
+                    const _SectionTitle(
                       title: 'Time axis',
                       subtitle:
                           '48 half-hour units. Existing blocks are highlighted.',
@@ -306,14 +306,14 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
                       ),
                     ],
                     const SizedBox(height: 24),
-                    _SectionTitle(
+                    const _SectionTitle(
                       title: 'Scheduled blocks',
                       subtitle:
                           'Name each block and optionally mark it completed.',
                     ),
                     const SizedBox(height: 12),
                     if (_blocks.isEmpty)
-                      _EmptyStateCard(
+                      const _EmptyStateCard(
                         message:
                             'No time blocks yet. Tap the time axis above to create your first block.',
                       )
@@ -336,14 +336,14 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
                         );
                       }),
                     const SizedBox(height: 24),
-                    _SectionTitle(
+                    const _SectionTitle(
                       title: 'Flexible tasks',
                       subtitle:
                           'These tasks do not need fixed time blocks, but still appear in today progress.',
                     ),
                     const SizedBox(height: 12),
                     if (_flexibleTasks.isEmpty)
-                      _EmptyStateCard(
+                      const _EmptyStateCard(
                         message:
                             'No flexible tasks yet. Add one if you want extra checklist items outside the timeline.',
                       )

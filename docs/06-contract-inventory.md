@@ -102,8 +102,8 @@ endpoints:
     request: "multipart/form-data，字段 file；image/jpeg 或 image/png；最大 5 MiB"
     success: "HTTP 200，data.avatarUrl 为 public-path 下的相对 URL"
     failures: "缺失/超限/类型不支持/无效图片返回 HTTP 400 + code=1000；会话失效返回 HTTP 401 + code=2000；存储失败返回 HTTP 500 + code=9000"
-    evidence_status: server_client_source_and_server_http_verified_client_toolchain_pending
-    trigger: "2026-08-10 已完成正常、缺失、超限、伪图片、会话失效、跨租户和存储失败真实 HTTP 回放；Flutter 客户端工具链验收待补"
+    evidence_status: server_http_and_client_toolchain_verified_runtime_picker_pending
+    trigger: "2026-08-10 已完成服务端正常/负向 HTTP 回放、Flutter pub get/analyze/test 与 Windows Release 构建；真实文件选择和 DPI 实机验收待补"
 preview_queue:
   - priority: P1
     sample: "待收样本：认证/学习/签到/统计/首页聚合 5 组正常+空+边界请求"

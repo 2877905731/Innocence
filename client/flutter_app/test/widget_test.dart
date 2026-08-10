@@ -34,14 +34,21 @@ void main() {
     expect(find.text('Password'), findsWidgets);
     expect(find.text('Forgot password?'), findsOneWidget);
 
-    await tester.tap(find.text('Forgot password?'));
+    final forgotPasswordLink = find.text('Forgot password?');
+    await tester.ensureVisible(forgotPasswordLink);
+    await tester.tap(forgotPasswordLink);
     await tester.pumpAndSettle();
 
     expect(find.text('Reset password'), findsNWidgets(2));
     expect(find.text('Send reset code'), findsOneWidget);
     expect(find.text('Back to sign in'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Reset password'));
+    final resetPasswordButton = find.widgetWithText(
+      ElevatedButton,
+      'Reset password',
+    );
+    await tester.ensureVisible(resetPasswordButton);
+    await tester.tap(resetPasswordButton);
     await tester.pump();
 
     expect(find.text('Please enter your email.'), findsOneWidget);
