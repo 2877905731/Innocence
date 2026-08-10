@@ -3,15 +3,13 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-08-10"
-latest_checkpoint: "0017"
+latest_checkpoint: "0018"
 current_phase: P01
 current_gate: G01
-state: p01_avatar_upload_client_source_chain_implemented_toolchain_pending
-next_sequence: "0018"
-current_goal: "P01 账户与基础进行中：继续资料、隐私、设置页面重建，并完成会话、权限负向路径和 Flutter 工具链验收"
+state: p01_server_http_negative_matrix_verified_flutter_toolchain_pending
+next_sequence: "0019"
+current_goal: "P01 账户与基础进行中：服务端会话、权限与头像上传真实 HTTP 矩阵已完成；继续 Flutter 工具链、Windows 构建与 DPI 验收"
 recent_baseline:
-  - checkpoint: "0013"
-    result: "DesktopPresentationTier、自适应 6+2 主 Shell、88×88 Focus Orb 和认证重置入口已完成源码实现与结构一致性检查；Flutter/Dart SDK 不可用，尚未执行 analyze/test"
   - checkpoint: "0014"
     result: "设置页补齐黑名单读取/解除确认与当前设备会话状态；新增 U09-U11 契约登记、模型解析测试源码和非玻璃平面设置表面；Dart 分隔符、后端路由对齐与 diff check 通过，Flutter/Dart SDK 仍不可用"
   - checkpoint: "0015"
@@ -20,6 +18,8 @@ recent_baseline:
     result: "固化 U13 头像上传契约并完成 Spring multipart 路由、本地存储、JPEG/PNG 内容校验、当前用户资料回写和失败清理；定向 Maven 头像与既有安全测试通过；完整 contextLoads 仍因本机 MySQL 认证失败"
   - checkpoint: "0017"
     result: "资料页完成 JPEG/PNG 文件选择、5 MiB 前置校验、multipart 调用和资料刷新源码；file_selector 依赖按官方元数据锁定；Flutter/Dart SDK 不可用，尚未执行 pub get/analyze/test"
+  - checkpoint: "0018"
+    result: "隔离 MySQL/Redis 环境完成 U09-U13 真实 HTTP 矩阵；发现并修复 code=9000 被错误映射为 HTTP 400 的缺陷，完整 Maven 16 项通过；Flutter/Dart SDK 仍不可用"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
@@ -56,19 +56,15 @@ unfinished:
     gate: G01
   - id: TODO-006
     priority: P1
-    item: "验证资料页头像选择与 multipart 调用；客户端源码已完成，当前 Flutter/Dart SDK 不可用，尚未执行 pub get/analyze/test 和 Windows 构建"
-    gate: G01
-  - id: TODO-007
-    priority: P0
-    item: "在可用数据库集成环境回放 1 手机 + 1 电脑真实会话冲突、拉黑越权和租户隔离 HTTP 路径；服务层负向单元测试已覆盖"
+    item: "验证资料页文件选择器与客户端 multipart 调用；服务端正常及负向 HTTP 路径已完成，当前 Flutter/Dart SDK 不可用，尚未执行 pub get/analyze/test 和 Windows 构建"
     gate: G01
 next_actions:
   - id: NEXT-001
     action: "Flutter SDK 可用后先执行 flutter pub get 并核对锁文件，再执行 flutter analyze、flutter test 和 Windows 构建"
     inputs: ["Flutter SDK", "Dart SDK"]
   - id: NEXT-002
-    action: "数据库集成环境可用后回放正常上传、空文件、超限、伪图片、会话失效和跨用户边界 HTTP 路径；随后执行 Windows 三档 DPI 验收"
-    inputs: ["MySQL/Redis 集成环境", "U13"]
+    action: "Windows 构建成功后执行 Large/Medium/Small 在 100%/125%/150% DPI 的实机验收，并核对头像选择、上传和资料刷新"
+    inputs: ["Flutter Windows 构建", "Windows DPI 环境"]
 required_reads:
   - AGENTS.md
   - docs/08-project-profile.md

@@ -24,6 +24,7 @@ public class GlobalExceptionHandler {
             case ErrorCode.FORBIDDEN -> HttpStatus.FORBIDDEN;
             case ErrorCode.NOT_FOUND -> HttpStatus.NOT_FOUND;
             case ErrorCode.TOO_MANY_REQUESTS -> HttpStatus.TOO_MANY_REQUESTS;
+            case ErrorCode.INTERNAL_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
             default -> HttpStatus.BAD_REQUEST;
         };
         return ResponseEntity

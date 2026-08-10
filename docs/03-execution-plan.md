@@ -75,7 +75,7 @@ phases:
   - id: P01
     name: account_and_basics
     actions:
-      - 认证/会话/权限/设置模块收尾（已实现部分验收）
+      - 认证/会话/权限/设置模块收尾；会话槽位、黑名单、租户边界与头像上传服务端真实 HTTP 回放已完成
       - 按新 UI 重建：登录、注册、找回密码、资料、隐私、设置页面
       - 首批已实现 DesktopPresentationTier、自适应 6+2 主 Shell、88×88 Focus Orb，以及登录/注册/验证码/重置密码入口；Flutter 工具链验证待补
     gate:
@@ -83,8 +83,8 @@ phases:
       status: in_progress
       criteria:
         - auth_flow_ui_redesigned
-        - session_policy_verified（1 手机 + 1 电脑）
-        - negative_tests_passed（拉黑/越权访问）
+        - session_policy_verified（1 手机 + 1 电脑；真实 HTTP 回放已通过）
+        - negative_tests_passed（拉黑/越权访问；服务层与真实 HTTP 回放已通过）
   - id: P02
     name: learning_core_loop
     actions:

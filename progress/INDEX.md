@@ -132,3 +132,10 @@ checkpoints:
     status: complete
     path: progress/0017__20260810__P01__DONE__avatar-upload-client-source-chain.md
     title: "头像选择与客户端 multipart 源码链路"
+  - sequence: "0018"
+    created_at: "2026-08-10T12:16:19+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0018__20260810__P01__DONE__server-http-negative-matrix-and-error-mapping.md
+    title: "会话、黑名单与头像上传真实 HTTP 负向矩阵"

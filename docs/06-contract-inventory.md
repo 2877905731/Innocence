@@ -75,26 +75,26 @@ endpoints:
     method: GET
     path: "/api/app/v1/account/blacklist"
     source_behavior: "获取当前用户黑名单（接口草案 4.1）"
-    evidence_status: implementation_matched_sample_pending
-    trigger: "P01 隐私设置收尾时以脱敏空/非空回放核对"
+    evidence_status: http_replay_verified
+    trigger: "2026-08-10 已以合成用户完成空/非空黑名单真实 HTTP 回放"
   - id: U10
     method: DELETE
     path: "/api/app/v1/account/blacklist/{targetUserId}"
     source_behavior: "解除当前用户的黑名单关系（接口草案 4.1）"
-    evidence_status: implementation_matched_sample_pending
-    trigger: "P01 隐私设置收尾时以权限拒绝回放核对"
+    evidence_status: http_replay_verified
+    trigger: "2026-08-10 已完成所属用户解除与跨租户身份不匹配拒绝真实 HTTP 回放"
   - id: U11
     method: GET
     path: "/api/app/v1/account/sessions/current"
     source_behavior: "读取当前设备会话状态（接口草案 4.1）"
-    evidence_status: implementation_matched_sample_pending
-    trigger: "P01 会话策略收尾时以替换/当前设备回放核对"
+    evidence_status: http_replay_verified
+    trigger: "2026-08-10 已完成手机与电脑并存、同槽桌面替换及旧会话拒绝真实 HTTP 回放"
   - id: U12
     method: POST
     path: "/api/app/v1/account/blacklist/{targetUserId}"
     source_behavior: "将目标用户加入当前用户黑名单（接口草案 4.1）"
-    evidence_status: implementation_matched_sample_pending
-    trigger: "P01 隐私设置收尾时以本人、重复拉黑和权限边界回放核对"
+    evidence_status: http_replay_verified
+    trigger: "2026-08-10 已完成正常、本人、重复拉黑和跨租户身份不匹配真实 HTTP 回放"
   - id: U13
     method: POST
     path: "/api/app/v1/account/avatar/upload"
@@ -102,8 +102,8 @@ endpoints:
     request: "multipart/form-data，字段 file；image/jpeg 或 image/png；最大 5 MiB"
     success: "HTTP 200，data.avatarUrl 为 public-path 下的相对 URL"
     failures: "缺失/超限/类型不支持/无效图片返回 HTTP 400 + code=1000；会话失效返回 HTTP 401 + code=2000；存储失败返回 HTTP 500 + code=9000"
-    evidence_status: server_and_client_source_matched_http_pending
-    trigger: "P01 资料入口收尾时以正常、空文件、超限、伪图片和会话失效回放核对"
+    evidence_status: server_client_source_and_server_http_verified_client_toolchain_pending
+    trigger: "2026-08-10 已完成正常、缺失、超限、伪图片、会话失效、跨租户和存储失败真实 HTTP 回放；Flutter 客户端工具链验收待补"
 preview_queue:
   - priority: P1
     sample: "待收样本：认证/学习/签到/统计/首页聚合 5 组正常+空+边界请求"
