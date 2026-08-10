@@ -1316,7 +1316,6 @@ class SessionController extends ChangeNotifier {
         );
         await _applyDesktopShellSettings(
           widgetSetting: updatedSetting!,
-          appearanceSetting: _settingOverview.appearanceSetting,
         );
       }
       _bannerMessage = _message('挂件设置已更新。', 'Widget settings updated.');
@@ -1328,7 +1327,6 @@ class SessionController extends ChangeNotifier {
 
   Future<AppearanceSetting?> updateAppearanceSetting({
     required String themeMode,
-    required String desktopEffect,
   }) async {
     final currentSession = _session;
     if (currentSession == null) {
@@ -1340,15 +1338,10 @@ class SessionController extends ChangeNotifier {
       updatedSetting = await _settingsApi.updateAppearance(
         currentSession,
         themeMode: themeMode,
-        desktopEffect: desktopEffect,
       );
       if (updatedSetting != null) {
         _settingOverview = _settingOverview.copyWith(
           appearanceSetting: updatedSetting,
-        );
-        await _applyDesktopShellSettings(
-          widgetSetting: _settingOverview.widgetSetting,
-          appearanceSetting: updatedSetting!,
         );
       }
       _bannerMessage = _message('外观设置已更新。', 'Appearance settings updated.');
@@ -2522,7 +2515,6 @@ class SessionController extends ChangeNotifier {
     unawaited(
       _applyDesktopShellSettings(
         widgetSetting: overview.widgetSetting,
-        appearanceSetting: overview.appearanceSetting,
       ),
     );
   }
@@ -2560,11 +2552,9 @@ class SessionController extends ChangeNotifier {
 
   Future<void> _applyDesktopShellSettings({
     required WidgetSetting widgetSetting,
-    required AppearanceSetting appearanceSetting,
   }) {
     return DesktopWidgetBridge.applySettings(
       widgetSetting: widgetSetting,
-      appearanceSetting: appearanceSetting,
     );
   }
 

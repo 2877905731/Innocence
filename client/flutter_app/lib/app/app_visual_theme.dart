@@ -8,6 +8,29 @@ enum AppVisualTheme {
   glass,
 }
 
+@immutable
+class AppVisualThemeMarker extends ThemeExtension<AppVisualThemeMarker> {
+  const AppVisualThemeMarker(this.visualTheme);
+
+  final AppVisualTheme visualTheme;
+
+  @override
+  AppVisualThemeMarker copyWith({AppVisualTheme? visualTheme}) {
+    return AppVisualThemeMarker(visualTheme ?? this.visualTheme);
+  }
+
+  @override
+  AppVisualThemeMarker lerp(
+    covariant AppVisualThemeMarker? other,
+    double t,
+  ) {
+    if (other == null) {
+      return this;
+    }
+    return t < 0.5 ? this : other;
+  }
+}
+
 extension AppVisualThemeX on AppVisualTheme {
   String get storageValue => switch (this) {
         AppVisualTheme.minimalism => 'minimalism',
@@ -51,8 +74,8 @@ class AppVisualThemeController extends ChangeNotifier {
       return;
     }
     _currentTheme = theme;
-    await _preferences.setString(_themeKey, theme.storageValue);
     notifyListeners();
+    await _preferences.setString(_themeKey, theme.storageValue);
   }
 }
 
@@ -101,16 +124,16 @@ class AppVisualTokens {
             isGlass: false,
           ),
         AppVisualTheme.wabiSabi => const AppVisualTokens(
-            canvas: Color(0xFFF1ECE2),
-            panel: Color(0xFFF8F4EB),
-            softPanel: Color(0xFFE6DED0),
-            ink: Color(0xFF332F2A),
-            muted: Color(0xFF746B60),
-            line: Color(0xFFD4C9B9),
-            accent: Color(0xFFA7563A),
-            onAccent: Color(0xFFFFFAF1),
-            artOne: Color(0xFF6D7966),
-            artTwo: Color(0xFFD6BBA2),
+            canvas: Color(0xFFECE3D3),
+            panel: Color(0xFFF6F0E4),
+            softPanel: Color(0xFFDDD0BC),
+            ink: Color(0xFF3D332A),
+            muted: Color(0xFF766858),
+            line: Color(0xFFC9B99F),
+            accent: Color(0xFF76533C),
+            onAccent: Color(0xFFFFFAEF),
+            artOne: Color(0xFF5E4736),
+            artTwo: Color(0xFFB69D7D),
             isDark: false,
             isGlass: false,
           ),
@@ -130,11 +153,11 @@ class AppVisualTokens {
           ),
         AppVisualTheme.glass => const AppVisualTokens(
             canvas: Color(0xFF08111F),
-            panel: Color(0xE619273A),
-            softPanel: Color(0xB622324A),
+            panel: Color(0x3D101D3B),
+            softPanel: Color(0x3014264A),
             ink: Color(0xFFF5F8FF),
-            muted: Color(0xFFA9B8CE),
-            line: Color(0x4DABC6EC),
+            muted: Color(0xFFD2DDF0),
+            line: Color(0x5CBCD3F2),
             accent: Color(0xFF88E3D0),
             onAccent: Color(0xFF0B1E26),
             artOne: Color(0xFF789BFF),
@@ -144,7 +167,7 @@ class AppVisualTokens {
           ),
       };
 
-  ThemeData toThemeData() {
+  ThemeData toThemeData(AppVisualTheme visualTheme) {
     final scheme = ColorScheme.fromSeed(
       seedColor: accent,
       brightness: isDark ? Brightness.dark : Brightness.light,
@@ -152,8 +175,13 @@ class AppVisualTokens {
       primary: accent,
       onPrimary: onAccent,
       surface: panel,
+      surfaceContainerLowest: canvas,
+      surfaceContainerLow: softPanel,
+      surfaceContainer: softPanel,
+      surfaceContainerHigh: softPanel,
       onSurface: ink,
       outline: line,
+      outlineVariant: line.withValues(alpha: 0.62),
     );
     final inputBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(4),
@@ -162,6 +190,7 @@ class AppVisualTokens {
 
     return ThemeData(
       useMaterial3: true,
+      extensions: [AppVisualThemeMarker(visualTheme)],
       brightness: isDark ? Brightness.dark : Brightness.light,
       colorScheme: scheme,
       scaffoldBackgroundColor: canvas,
@@ -231,6 +260,27 @@ class AppVisualTokens {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       ),
+      tooltipTheme: isGlass
+          ? TooltipThemeData(
+              decoration: BoxDecoration(
+                color: const Color(0xE6101D3B),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0x5CFFFFFF)),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x551F2687),
+                    blurRadius: 18,
+                    offset: Offset(0, 8),
+                  ),
+                ],
+              ),
+              textStyle: TextStyle(
+                color: ink,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            )
+          : null,
     );
   }
 }

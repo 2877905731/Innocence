@@ -27,4 +27,60 @@ void main() {
 
     expect(restored.currentTheme, AppVisualTheme.midCentury);
   });
+
+  testWidgets('theme changes rebuild the global ThemeData immediately', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final controller = AppVisualThemeController(preferences);
+
+    await tester.pumpWidget(
+      AnimatedBuilder(
+        animation: controller,
+        builder: (context, _) {
+          final visualTheme = controller.currentTheme;
+          return MaterialApp(
+            theme: AppVisualTokens.of(visualTheme).toThemeData(visualTheme),
+            home: Builder(
+              builder: (context) {
+                final marker = Theme.of(
+                  context,
+                ).extension<AppVisualThemeMarker>();
+                return Text(marker!.visualTheme.storageValue);
+              },
+            ),
+          );
+        },
+      ),
+    );
+    expect(find.text('minimalism'), findsOneWidget);
+
+    await controller.updateTheme(AppVisualTheme.wabiSabi);
+    await tester.pumpAndSettle();
+    expect(find.text('wabi_sabi'), findsOneWidget);
+  });
+
+  test('wabi-sabi stays within the brown and deep-beige palette', () {
+    final tokens = AppVisualTokens.of(AppVisualTheme.wabiSabi);
+
+    expect(tokens.canvas, const Color(0xFFECE3D3));
+    expect(tokens.accent, const Color(0xFF76533C));
+    expect(tokens.artOne, const Color(0xFF5E4736));
+    expect(tokens.artTwo, const Color(0xFFB69D7D));
+    expect(tokens.isDark, isFalse);
+    expect(tokens.isGlass, isFalse);
+  });
+
+  test('ThemeData keeps the selected visual theme marker', () {
+    final theme = AppVisualTokens.of(
+      AppVisualTheme.wabiSabi,
+    ).toThemeData(AppVisualTheme.wabiSabi);
+
+    expect(
+      theme.extension<AppVisualThemeMarker>()?.visualTheme,
+      AppVisualTheme.wabiSabi,
+    );
+    expect(theme.scaffoldBackgroundColor, const Color(0xFFECE3D3));
+  });
 }

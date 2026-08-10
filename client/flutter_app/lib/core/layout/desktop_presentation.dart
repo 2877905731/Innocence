@@ -110,6 +110,7 @@ class DesktopPresentationPolicy {
   DesktopPresentationPolicy._();
 
   static const Size minimumCanvasSize = Size(380, 520);
+  static const Size focusOrbSize = Size.square(72);
   static const Size mediumThreshold = Size(760, 620);
   static const Size largeThreshold = Size(1180, 720);
   static const double hysteresis = 32;
@@ -254,7 +255,8 @@ class DesktopPresentation extends InheritedWidget {
   static DesktopPresentationSpec of(BuildContext context) {
     final scope =
         context.dependOnInheritedWidgetOfExactType<DesktopPresentation>();
-    assert(scope != null, 'DesktopPresentationLayout is missing above context.');
+    assert(
+        scope != null, 'DesktopPresentationLayout is missing above context.');
     return scope!.spec;
   }
 

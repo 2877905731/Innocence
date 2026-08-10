@@ -863,8 +863,7 @@
 | --- | --- | --- |
 | id | bigint PK | 主键 |
 | user_id | bigint UK | 用户 ID |
-| desktop_glass_flag | tinyint | 毛玻璃效果开关，可默认开 |
-| transparency_level | tinyint | 透明度等级 |
+| theme_mode | varchar(16) | 内容明暗偏好：`light` / `dark` |
 | create_time | datetime | 创建时间 |
 | update_time | datetime | 更新时间 |
 

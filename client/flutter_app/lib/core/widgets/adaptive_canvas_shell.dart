@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/core/layout/desktop_presentation.dart';
 import 'package:innocence_flutter/core/widgets/desktop_close_button.dart';
 import 'package:innocence_flutter/core/widgets/desktop_drag_region.dart';
+import 'package:innocence_flutter/core/widgets/wabi_sabi_paper.dart';
 
 @immutable
 class AdaptiveCanvasDestination {
@@ -28,6 +30,7 @@ class AdaptiveCanvasDestination {
 class AdaptiveCanvasShell extends StatelessWidget {
   const AdaptiveCanvasShell({
     super.key,
+    required this.visualTheme,
     required this.destinations,
     required this.selectedDestinationId,
     required this.onDestinationSelected,
@@ -42,6 +45,7 @@ class AdaptiveCanvasShell extends StatelessWidget {
   });
 
   final List<AdaptiveCanvasDestination> destinations;
+  final AppVisualTheme visualTheme;
   final String selectedDestinationId;
   final ValueChanged<String> onDestinationSelected;
   final String pageTitle;
@@ -61,44 +65,65 @@ class AdaptiveCanvasShell extends StatelessWidget {
     return DesktopPresentationLayout(
       surface: DesktopWindowSurface.canvas,
       builder: (context, spec) {
-        final palette = _CanvasPalette.of(context);
+        final palette = _CanvasPalette.of(context, visualTheme);
         final body = bodyBuilder(context, spec);
+        final content = SafeArea(
+          child: switch (spec.navigation) {
+            NavigationPresentation.rail ||
+            NavigationPresentation.compactRail =>
+              _RailCanvas(
+                palette: palette,
+                spec: spec,
+                destinations: destinations,
+                selectedDestinationId: selectedDestinationId,
+                onDestinationSelected: onDestinationSelected,
+                pageTitle: pageTitle,
+                pageSubtitle: pageSubtitle,
+                userDisplayName: userDisplayName,
+                syncLabel: syncLabel,
+                isRefreshing: isRefreshing,
+                onRefresh: onRefresh,
+                onOpenFocusOrb: onOpenFocusOrb,
+                body: body,
+              ),
+            NavigationPresentation.bottomBar => _SmallCanvas(
+                palette: palette,
+                destinations: destinations,
+                selectedDestinationId: selectedDestinationId,
+                onDestinationSelected: onDestinationSelected,
+                pageTitle: pageTitle,
+                userDisplayName: userDisplayName,
+                isRefreshing: isRefreshing,
+                onRefresh: onRefresh,
+                onOpenFocusOrb: onOpenFocusOrb,
+                body: body,
+              ),
+            NavigationPresentation.none => body,
+          },
+        );
 
+        final themedContent = switch (visualTheme) {
+          AppVisualTheme.wabiSabi =>
+            WabiSabiPaper(color: palette.background, child: content),
+          AppVisualTheme.glass => DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF173B91),
+                    Color(0xFF5424B6),
+                    Color(0xFFBE4D9B),
+                  ],
+                ),
+              ),
+              child: content,
+            ),
+          _ => content,
+        };
         return Scaffold(
           backgroundColor: palette.background,
-          body: SafeArea(
-            child: switch (spec.navigation) {
-              NavigationPresentation.rail ||
-              NavigationPresentation.compactRail => _RailCanvas(
-                  palette: palette,
-                  spec: spec,
-                  destinations: destinations,
-                  selectedDestinationId: selectedDestinationId,
-                  onDestinationSelected: onDestinationSelected,
-                  pageTitle: pageTitle,
-                  pageSubtitle: pageSubtitle,
-                  userDisplayName: userDisplayName,
-                  syncLabel: syncLabel,
-                  isRefreshing: isRefreshing,
-                  onRefresh: onRefresh,
-                  onOpenFocusOrb: onOpenFocusOrb,
-                  body: body,
-                ),
-              NavigationPresentation.bottomBar => _SmallCanvas(
-                  palette: palette,
-                  destinations: destinations,
-                  selectedDestinationId: selectedDestinationId,
-                  onDestinationSelected: onDestinationSelected,
-                  pageTitle: pageTitle,
-                  userDisplayName: userDisplayName,
-                  isRefreshing: isRefreshing,
-                  onRefresh: onRefresh,
-                  onOpenFocusOrb: onOpenFocusOrb,
-                  body: body,
-                ),
-              NavigationPresentation.none => body,
-            },
-          ),
+          body: themedContent,
         );
       },
     );
@@ -161,8 +186,7 @@ class _RailCanvas extends StatelessWidget {
                     palette: palette,
                     destination: primary[index],
                     selected: primary[index].id == selectedDestinationId,
-                    onPressed: () =>
-                        onDestinationSelected(primary[index].id),
+                    onPressed: () => onDestinationSelected(primary[index].id),
                   ),
                 ),
               ),
@@ -179,8 +203,7 @@ class _RailCanvas extends StatelessWidget {
                     palette: palette,
                     destination: destination,
                     selected: destination.id == selectedDestinationId,
-                    onPressed: () =>
-                        onDestinationSelected(destination.id),
+                    onPressed: () => onDestinationSelected(destination.id),
                   ),
                 ),
               ),
@@ -240,8 +263,7 @@ class _SmallCanvas extends StatelessWidget {
   Widget build(BuildContext context) {
     final smallPrimary =
         destinations.where((item) => item.smallPrimary).take(4).toList();
-    final overflow =
-        destinations.where((item) => !item.smallPrimary).toList();
+    final overflow = destinations.where((item) => !item.smallPrimary).toList();
 
     return Column(
       children: [
@@ -337,8 +359,7 @@ class _SmallCanvas extends StatelessWidget {
                       palette: palette,
                       destination: destination,
                       selected: destination.id == selectedDestinationId,
-                      onPressed: () =>
-                          onDestinationSelected(destination.id),
+                      onPressed: () => onDestinationSelected(destination.id),
                     ),
                   ),
                 )
@@ -467,13 +488,16 @@ class _BrandMark extends StatelessWidget {
       height: 42,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: palette.ink,
-        border: Border.all(color: palette.ink),
+        color: palette.isGlass ? const Color(0x24FFFFFF) : palette.ink,
+        border: Border.all(
+          color: palette.isGlass ? const Color(0x52FFFFFF) : palette.ink,
+        ),
+        borderRadius: BorderRadius.circular(palette.isGlass ? 12 : 0),
       ),
       child: Text(
         'I',
         style: TextStyle(
-          color: palette.navigation,
+          color: palette.isGlass ? palette.ink : palette.navigation,
           fontSize: 20,
           fontWeight: FontWeight.w900,
           height: 1,
@@ -680,6 +704,7 @@ class _CanvasPalette {
     required this.accentSoft,
     required this.success,
     required this.danger,
+    required this.isGlass,
   });
 
   final Color background;
@@ -692,34 +717,30 @@ class _CanvasPalette {
   final Color accentSoft;
   final Color success;
   final Color danger;
+  final bool isGlass;
 
-  static _CanvasPalette of(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    if (dark) {
-      return const _CanvasPalette(
-        background: Color(0xFF1B1A18),
-        navigation: Color(0xFF24221F),
-        surface: Color(0xFF2D2A26),
-        ink: Color(0xFFF2EBDD),
-        muted: Color(0xFFB8AFA1),
-        rule: Color(0xFF4A453E),
-        accent: Color(0xFFD27A5E),
-        accentSoft: Color(0xFF554038),
-        success: Color(0xFF9AA47D),
-        danger: Color(0xFFE48777),
-      );
-    }
-    return const _CanvasPalette(
-      background: Color(0xFFE8E2D7),
-      navigation: Color(0xFFF4EEE3),
-      surface: Color(0xFFF8F3EA),
-      ink: Color(0xFF272420),
-      muted: Color(0xFF726B62),
-      rule: Color(0xFFBFB5A7),
-      accent: Color(0xFFB9573F),
-      accentSoft: Color(0xFFE3B9A9),
-      success: Color(0xFF778063),
-      danger: Color(0xFFB84F46),
+  static _CanvasPalette of(
+    BuildContext context,
+    AppVisualTheme visualTheme,
+  ) {
+    final tokens = AppVisualTokens.of(visualTheme);
+    final colors = Theme.of(context).colorScheme;
+    final glass = visualTheme == AppVisualTheme.glass;
+    return _CanvasPalette(
+      background: glass ? const Color(0xFF173B91) : tokens.canvas,
+      navigation: glass ? const Color(0x42101B38) : tokens.softPanel,
+      surface: glass ? const Color(0x32101D3B) : tokens.panel,
+      ink: tokens.ink,
+      muted: tokens.muted,
+      rule: glass ? const Color(0x32FFFFFF) : tokens.line,
+      accent: tokens.accent,
+      accentSoft: Color.alphaBlend(
+        tokens.accent.withValues(alpha: tokens.isDark ? 0.24 : 0.18),
+        tokens.softPanel,
+      ),
+      success: colors.tertiary,
+      danger: colors.error,
+      isGlass: glass,
     );
   }
 }

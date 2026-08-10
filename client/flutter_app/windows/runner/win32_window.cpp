@@ -5,6 +5,7 @@
 #include <dwmapi.h>
 #include <flutter_windows.h>
 #include <shellapi.h>
+#include <windowsx.h>
 
 #include "resource.h"
 
@@ -27,54 +28,39 @@ namespace {
 #define DWMWA_SYSTEMBACKDROP_TYPE 38
 #endif
 
-enum ACCENT_STATE {
-  ACCENT_DISABLED = 0,
-  ACCENT_ENABLE_GRADIENT = 1,
-  ACCENT_ENABLE_TRANSPARENTGRADIENT = 2,
-  ACCENT_ENABLE_BLURBEHIND = 3,
-  ACCENT_ENABLE_ACRYLICBLURBEHIND = 4
-};
+#ifndef DWMWA_BORDER_COLOR
+#define DWMWA_BORDER_COLOR 34
+#endif
 
-struct ACCENT_POLICY {
-  int accent_state;
-  int accent_flags;
-  int gradient_color;
-  int animation_id;
-};
+#ifndef DWMWA_NCRENDERING_POLICY
+#define DWMWA_NCRENDERING_POLICY 2
+#endif
 
-struct WINDOWCOMPOSITIONATTRIBDATA {
-  int attribute;
-  PVOID data;
-  SIZE_T size_of_data;
-};
-
-constexpr int kWindowCompositionAccentPolicy = 19;
 constexpr int kWidgetWidth = 560;
 constexpr int kWidgetMinWidth = 520;
 constexpr int kWidgetMaxWidth = 980;
 constexpr int kWidgetHeight = 920;
 constexpr int kWidgetMinHeight = 380;
 constexpr int kWidgetMaxHeight = 940;
-constexpr int kPageDefaultWidth = 920;
-constexpr int kPageDefaultHeight = 760;
+constexpr int kPageDefaultWidth = 1360;
+constexpr int kPageDefaultHeight = 820;
+constexpr int kPageDefaultWorkWidthPercent = 84;
+constexpr int kPageDefaultWorkHeightPercent = 82;
 constexpr int kPageMinWidth = 380;
 constexpr int kPageMinHeight = 520;
-constexpr int kMiniWidgetWidth = 88;
-constexpr int kMiniWidgetHeight = 88;
+constexpr DWORD kPageStateVersion = 2;
+constexpr int kMiniWidgetWidth = 72;
+constexpr int kMiniWidgetHeight = 72;
 constexpr int kAuthWidth = 920;
 constexpr int kAuthHeight = 760;
 constexpr int kWidgetMarginRight = 32;
 constexpr int kWidgetMarginTop = 24;
 constexpr int kWidgetSnapThreshold = 28;
-constexpr DWORD kAcrylicTint = 0x92707070;
 constexpr int kWindowCornerRound = 2;
 constexpr UINT kTrayIconMessage = WM_APP + 1;
 constexpr UINT_PTR kTrayIconId = 1;
 constexpr const wchar_t kWindowStateRegKey[] =
     L"Software\\Innocence\\WindowState";
-
-using SetWindowCompositionAttribute =
-    BOOL(WINAPI*)(HWND, WINDOWCOMPOSITIONATTRIBDATA*);
 
 constexpr const wchar_t kWindowClassName[] = L"FLUTTER_RUNNER_WIN32_WINDOW";
 
@@ -82,16 +68,6 @@ constexpr const wchar_t kWindowClassName[] = L"FLUTTER_RUNNER_WIN32_WINDOW";
 static int g_active_window_count = 0;
 
 using EnableNonClientDpiScaling = BOOL __stdcall(HWND hwnd);
-
-DWORD AcrylicTintForEffect(const std::string& desktop_effect) {
-  if (desktop_effect == "soft_glass") {
-    return 0x847A7A7A;
-  }
-  if (desktop_effect == "focus_glow") {
-    return 0x9A777C82;
-  }
-  return kAcrylicTint;
-}
 
 int ClampInt(int value, int min_value, int max_value) {
   return std::min(std::max(value, min_value), max_value);
@@ -253,6 +229,40 @@ Win32Window::MessageHandler(HWND hwnd,
                             WPARAM const wparam,
                             LPARAM const lparam) noexcept {
   switch (message) {
+    case WM_NCCALCSIZE:
+      // The Flutter surface owns the complete visual frame. Keeping any DWM
+      // non-client area leaves a dark strip above an otherwise frameless app.
+      if (wparam == TRUE) {
+        return 0;
+      }
+      break;
+
+    case WM_NCHITTEST: {
+      if (window_mode_ == "mini") {
+        return HTCLIENT;
+      }
+      RECT window_rect = {};
+      if (!GetWindowRect(hwnd, &window_rect)) {
+        break;
+      }
+      const int x = GET_X_LPARAM(lparam);
+      const int y = GET_Y_LPARAM(lparam);
+      const int grip = Scale(9, WindowScaleFactor(hwnd));
+      const bool left = x < window_rect.left + grip;
+      const bool right = x >= window_rect.right - grip;
+      const bool top = y < window_rect.top + grip;
+      const bool bottom = y >= window_rect.bottom - grip;
+      if (top && left) return HTTOPLEFT;
+      if (top && right) return HTTOPRIGHT;
+      if (bottom && left) return HTBOTTOMLEFT;
+      if (bottom && right) return HTBOTTOMRIGHT;
+      if (left) return HTLEFT;
+      if (right) return HTRIGHT;
+      if (top) return HTTOP;
+      if (bottom) return HTBOTTOM;
+      return HTCLIENT;
+    }
+
     case WM_DESTROY:
       window_handle_ = nullptr;
       Destroy();
@@ -309,6 +319,9 @@ Win32Window::MessageHandler(HWND hwnd,
         // Size and position the child window.
         MoveWindow(child_content_, rect.left, rect.top, rect.right - rect.left,
                    rect.bottom - rect.top, TRUE);
+      }
+      if (window_mode_ == "mini") {
+        ApplyMiniWindowRegion(hwnd);
       }
       if (!updating_window_position_ && window_mode_ == "page" &&
           wparam != SIZE_MINIMIZED) {
@@ -446,13 +459,6 @@ void Win32Window::SetAlwaysOnTop(bool always_on_top) {
   UpdateTopMostState();
 }
 
-void Win32Window::SetDesktopEffect(const std::string& desktop_effect) {
-  desktop_effect_ = desktop_effect;
-  if (window_handle_ != nullptr) {
-    ApplyDesktopBackdrop(window_handle_);
-  }
-}
-
 void Win32Window::SetWidgetHeight(int logical_height) {
   if (!lock_widget_size_to_content_) {
     return;
@@ -469,6 +475,21 @@ void Win32Window::SetWidgetHeight(int logical_height) {
 
 void Win32Window::SetWindowMode(const std::string& mode) {
   const std::string previous_mode = window_mode_;
+  // Capture the normal Canvas bounds at the transition boundary. WM_SIZE and
+  // WM_MOVE can be coalesced while the top-level window is reshaped into the
+  // Orb, so their cached values are not reliable enough for restoration.
+  if (window_handle_ != nullptr && previous_mode == "page" && mode == "mini") {
+    WINDOWPLACEMENT placement = {};
+    placement.length = sizeof(WINDOWPLACEMENT);
+    if (GetWindowPlacement(window_handle_, &placement)) {
+      const RECT& normal = placement.rcNormalPosition;
+      page_x_ = normal.left;
+      page_y_ = normal.top;
+      page_width_ = ClampInt(normal.right - normal.left, kPageMinWidth, 4096);
+      page_height_ = ClampInt(normal.bottom - normal.top, kPageMinHeight, 4096);
+      has_custom_auth_bounds_ = true;
+    }
+  }
   if (mode == "widget") {
     window_mode_ = "widget";
   } else if (mode == "mini") {
@@ -489,6 +510,9 @@ void Win32Window::SetWindowMode(const std::string& mode) {
 
   UpdateWindowFrame(window_handle_);
   ApplyDesktopBackdrop(window_handle_);
+  if (window_mode_ != "mini") {
+    SetWindowRgn(window_handle_, nullptr, TRUE);
+  }
   if (window_mode_ == "widget") {
     PositionDesktopWidget(window_handle_, widget_height_);
     OnWindowModeChanged(window_mode_);
@@ -500,12 +524,12 @@ void Win32Window::SetWindowMode(const std::string& mode) {
     return;
   }
   if (window_mode_ == "page") {
+    ShowWindow(window_handle_, SW_RESTORE);
     PositionPageWindow(window_handle_);
     OnWindowModeChanged(window_mode_);
     return;
   }
 
-  has_custom_auth_bounds_ = false;
   PositionAuthWindow(window_handle_);
   OnWindowModeChanged(window_mode_);
 }
@@ -578,9 +602,11 @@ void Win32Window::UpdateWindowFrame(HWND const window) {
   style &= ~WS_CAPTION;
   style |= WS_SYSMENU;
   if (window_mode_ == "mini") {
-    style &= ~(WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME);
+    style &= ~(WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
   } else {
-    style |= WS_MINIMIZEBOX | WS_THICKFRAME;
+    // WS_THICKFRAME is required for the native resize loop. WM_NCCALCSIZE and
+    // the disabled DWM non-client rendering keep the frame visually absent.
+    style |= WS_THICKFRAME | WS_MINIMIZEBOX;
   }
   if (window_mode_ == "page") {
     style |= WS_MAXIMIZEBOX;
@@ -602,39 +628,23 @@ void Win32Window::UpdateWindowFrame(HWND const window) {
 }
 
 void Win32Window::ApplyDesktopBackdrop(HWND const window) {
-  const int corner_preference = kWindowCornerRound;
+  const int non_client_rendering_policy = 1;  // DWMNCRP_DISABLED
+  DwmSetWindowAttribute(window, DWMWA_NCRENDERING_POLICY,
+                        &non_client_rendering_policy,
+                        sizeof(non_client_rendering_policy));
+
+  const int corner_preference = window_mode_ == "mini" ? 1 : kWindowCornerRound;
   DwmSetWindowAttribute(window, DWMWA_WINDOW_CORNER_PREFERENCE,
                         &corner_preference, sizeof(corner_preference));
 
-  const bool is_desktop_shell_mode =
-      window_mode_ == "widget" || window_mode_ == "mini";
-  MARGINS margins =
-      is_desktop_shell_mode ? MARGINS{-1} : MARGINS{0, 0, 0, 0};
+  // The application draws its own themed surfaces. Suppress the DWM border so
+  // frameless Canvas windows do not acquire a black strip around the client.
+  const COLORREF border_color = 0xFFFFFFFE;
+  DwmSetWindowAttribute(window, DWMWA_BORDER_COLOR, &border_color,
+                        sizeof(border_color));
+
+  MARGINS margins = {0, 0, 0, 0};
   DwmExtendFrameIntoClientArea(window, &margins);
-
-  HMODULE user32_module = GetModuleHandleA("user32.dll");
-  auto set_window_composition_attribute =
-      reinterpret_cast<SetWindowCompositionAttribute>(GetProcAddress(
-          user32_module, "SetWindowCompositionAttribute"));
-  if (set_window_composition_attribute != nullptr) {
-    ACCENT_POLICY accent = {};
-    if (is_desktop_shell_mode) {
-      accent.accent_state = ACCENT_ENABLE_ACRYLICBLURBEHIND;
-      accent.accent_flags = 2;
-      accent.gradient_color =
-          static_cast<int>(AcrylicTintForEffect(desktop_effect_));
-    } else {
-      accent.accent_state = ACCENT_DISABLED;
-      accent.accent_flags = 0;
-      accent.gradient_color = 0;
-    }
-
-    WINDOWCOMPOSITIONATTRIBDATA data = {};
-    data.attribute = kWindowCompositionAccentPolicy;
-    data.data = &accent;
-    data.size_of_data = sizeof(accent);
-    set_window_composition_attribute(window, &data);
-  }
 }
 
 void Win32Window::AddTrayIcon(HWND const window) {
@@ -782,11 +792,24 @@ void Win32Window::PositionAuthWindow(HWND const window) {
 
 void Win32Window::PositionPageWindow(HWND const window) {
   if (has_custom_auth_bounds_) {
+    RECT work_area = GetMonitorWorkArea(window);
+    const int target_width = std::min(
+        page_width_, static_cast<int>(work_area.right - work_area.left));
+    const int target_height = std::min(
+        page_height_, static_cast<int>(work_area.bottom - work_area.top));
+    const int target_x = ClampInt(page_x_, static_cast<int>(work_area.left),
+                                  static_cast<int>(work_area.right) - target_width);
+    const int target_y = ClampInt(page_y_, static_cast<int>(work_area.top),
+                                  static_cast<int>(work_area.bottom) - target_height);
     updating_window_position_ = true;
-    SetWindowPos(window, HWND_NOTOPMOST, page_x_,
-                 page_y_, page_width_, page_height_,
+    SetWindowPos(window, HWND_NOTOPMOST, target_x,
+                 target_y, target_width, target_height,
                  SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_FRAMECHANGED);
     updating_window_position_ = false;
+    page_x_ = target_x;
+    page_y_ = target_y;
+    page_width_ = target_width;
+    page_height_ = target_height;
     return;
   }
 
@@ -795,8 +818,14 @@ void Win32Window::PositionPageWindow(HWND const window) {
   const int work_width = static_cast<int>(work_area.right - work_area.left);
   const int work_height = static_cast<int>(work_area.bottom - work_area.top);
   const double scale_factor = WindowScaleFactor(window);
-  const int target_width = Scale(page_width_, scale_factor);
-  const int target_height = Scale(page_height_, scale_factor);
+  const int minimum_width = Scale(kPageMinWidth, scale_factor);
+  const int minimum_height = Scale(kPageMinHeight, scale_factor);
+  const int target_width = ClampInt(
+      work_width * kPageDefaultWorkWidthPercent / 100,
+      std::min(minimum_width, work_width), work_width);
+  const int target_height = ClampInt(
+      work_height * kPageDefaultWorkHeightPercent / 100,
+      std::min(minimum_height, work_height), work_height);
   const int auth_x = static_cast<int>(work_area.left) +
                      std::max(0, (work_width - target_width) / 2);
   const int auth_y = static_cast<int>(work_area.top) +
@@ -869,6 +898,7 @@ void Win32Window::PositionMiniWidget(HWND const window) {
   SetWindowPos(window, insert_after, widget_x, widget_y, mini_width,
                mini_height,
                SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+  ApplyMiniWindowRegion(window);
   updating_window_position_ = false;
 
   widget_x_ = widget_x;
@@ -877,6 +907,22 @@ void Win32Window::PositionMiniWidget(HWND const window) {
     has_custom_position_ = true;
   }
   SaveWindowState();
+}
+
+void Win32Window::ApplyMiniWindowRegion(HWND const window) {
+  if (window_mode_ != "mini") {
+    return;
+  }
+  RECT bounds = {};
+  if (!GetWindowRect(window, &bounds)) {
+    return;
+  }
+  const int width = bounds.right - bounds.left;
+  const int height = bounds.bottom - bounds.top;
+  HRGN orb_region = CreateEllipticRgn(0, 0, width + 1, height + 1);
+  if (SetWindowRgn(window, orb_region, TRUE) == 0) {
+    DeleteObject(orb_region);
+  }
 }
 
 void Win32Window::UpdateTopMostState() {
@@ -936,24 +982,25 @@ void Win32Window::LoadWindowState() {
   if (!has_custom_widget_size_) {
     lock_widget_size_to_content_ = true;
   }
-  if (read_dword(L"PageWidth", stored_value)) {
-    page_width_ = ClampInt(static_cast<int>(stored_value), kPageMinWidth, 4096);
+  DWORD page_width = 0;
+  DWORD page_height = 0;
+  DWORD page_x = 0;
+  DWORD page_y = 0;
+  DWORD page_state_version = 0;
+  if (read_dword(L"PageStateVersion", page_state_version) &&
+      page_state_version == kPageStateVersion &&
+      read_dword(L"PageWidth", page_width) &&
+      read_dword(L"PageHeight", page_height) &&
+      read_dword(L"PageX", page_x) && read_dword(L"PageY", page_y)) {
+    page_width_ = ClampInt(static_cast<int>(page_width), kPageMinWidth, 4096);
+    page_height_ = ClampInt(static_cast<int>(page_height), kPageMinHeight, 4096);
+    page_x_ = static_cast<int>(page_x);
+    page_y_ = static_cast<int>(page_y);
+    has_custom_auth_bounds_ = true;
   } else {
     page_width_ = kPageDefaultWidth;
-  }
-  if (read_dword(L"PageHeight", stored_value)) {
-    page_height_ =
-        ClampInt(static_cast<int>(stored_value), kPageMinHeight, 4096);
-  } else {
     page_height_ = kPageDefaultHeight;
-  }
-  if (read_dword(L"PageX", stored_value)) {
-    page_x_ = static_cast<int>(stored_value);
-    has_custom_auth_bounds_ = true;
-  }
-  if (read_dword(L"PageY", stored_value)) {
-    page_y_ = static_cast<int>(stored_value);
-    has_custom_auth_bounds_ = true;
+    has_custom_auth_bounds_ = false;
   }
 
   RegCloseKey(state_key);
@@ -976,10 +1023,12 @@ void Win32Window::SaveWindowState() const {
   write_dword(L"WidgetHeight", static_cast<DWORD>(widget_height_));
   write_dword(L"WidgetX", static_cast<DWORD>(widget_x_));
   write_dword(L"WidgetY", static_cast<DWORD>(widget_y_));
-  write_dword(L"PageWidth", static_cast<DWORD>(page_width_));
-  write_dword(L"PageHeight", static_cast<DWORD>(page_height_));
-  write_dword(L"PageX", static_cast<DWORD>(page_x_));
-  write_dword(L"PageY", static_cast<DWORD>(page_y_));
-
+  if (has_custom_auth_bounds_) {
+    write_dword(L"PageStateVersion", kPageStateVersion);
+    write_dword(L"PageWidth", static_cast<DWORD>(page_width_));
+    write_dword(L"PageHeight", static_cast<DWORD>(page_height_));
+    write_dword(L"PageX", static_cast<DWORD>(page_x_));
+    write_dword(L"PageY", static_cast<DWORD>(page_y_));
+  }
   RegCloseKey(state_key);
 }

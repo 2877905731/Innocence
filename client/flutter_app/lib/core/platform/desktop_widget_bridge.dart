@@ -1,7 +1,6 @@
 import 'package:flutter/services.dart';
 
 import 'package:innocence_flutter/core/config/app_config.dart';
-import 'package:innocence_flutter/features/settings/domain/models/appearance_setting.dart';
 import 'package:innocence_flutter/features/settings/domain/models/widget_setting.dart';
 
 class DesktopWidgetBridge {
@@ -41,7 +40,6 @@ class DesktopWidgetBridge {
 
   static Future<void> applySettings({
     required WidgetSetting widgetSetting,
-    required AppearanceSetting appearanceSetting,
   }) async {
     if (AppConfig.deviceType != 'windows') {
       return;
@@ -58,12 +56,6 @@ class DesktopWidgetBridge {
         'setAutoStart',
         <String, bool>{
           'enabled': widgetSetting.autoStart,
-        },
-      );
-      await _channel.invokeMethod<void>(
-        'setDesktopEffect',
-        <String, String>{
-          'effect': appearanceSetting.desktopEffect,
         },
       );
     } on MissingPluginException {

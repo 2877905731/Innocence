@@ -6,6 +6,7 @@ import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/widgets/desktop_close_button.dart';
 import 'package:innocence_flutter/core/widgets/desktop_drag_region.dart';
+import 'package:innocence_flutter/core/widgets/wabi_sabi_paper.dart';
 
 class AuthExperience extends StatelessWidget {
   const AuthExperience({
@@ -36,6 +37,13 @@ class AuthExperience extends StatelessWidget {
       backgroundColor: tokens.canvas,
       body: Stack(
         children: [
+          if (visualTheme == AppVisualTheme.wabiSabi)
+            Positioned.fill(
+              child: WabiSabiPaper(
+                color: tokens.canvas,
+                child: const SizedBox.expand(),
+              ),
+            ),
           Positioned.fill(
             child: CustomPaint(
               painter: _AuthArtworkPainter(
@@ -657,9 +665,11 @@ class _AuthArtworkPainter extends CustomPainter {
       ..color = tokens.line
           .withValues(alpha: theme == AppVisualTheme.glass ? 0.28 : 0.48)
       ..strokeWidth = 1;
-    const spacing = 72.0;
-    for (double x = 24; x < size.width; x += spacing) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), linePaint);
+    if (theme != AppVisualTheme.wabiSabi) {
+      const spacing = 72.0;
+      for (double x = 24; x < size.width; x += spacing) {
+        canvas.drawLine(Offset(x, 0), Offset(x, size.height), linePaint);
+      }
     }
 
     final artPaint = Paint()..style = PaintingStyle.fill;
@@ -689,6 +699,19 @@ class _AuthArtworkPainter extends CustomPainter {
           artPaint,
         );
       case AppVisualTheme.wabiSabi:
+        final letterRule = Paint()
+          ..color = tokens.artOne.withValues(alpha: 0.1)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.1;
+        final letterPath = Path()
+          ..moveTo(size.width * 0.035, size.height * 0.59)
+          ..quadraticBezierTo(
+            size.width * 0.31,
+            size.height * 0.565,
+            size.width * 0.54,
+            size.height * 0.6,
+          );
+        canvas.drawPath(letterPath, letterRule);
         final ensoCenter = Offset(size.width * 0.14, size.height * 0.82);
         artPaint
           ..style = PaintingStyle.stroke

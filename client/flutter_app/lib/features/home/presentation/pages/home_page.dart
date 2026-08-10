@@ -209,17 +209,6 @@ String _checkInActionLabel(BuildContext context, CheckInStatus status) {
   return _contextText(context, '尝试签到', 'Try check-in');
 }
 
-String _desktopEffectLabel(BuildContext context, AppearanceSetting appearance) {
-  switch (appearance.desktopEffect) {
-    case 'soft_glass':
-      return _contextText(context, '柔光毛玻璃', 'Soft glass');
-    case 'focus_glow':
-      return _contextText(context, '专注光效', 'Focus glow');
-    default:
-      return _contextText(context, '沉浸毛玻璃', 'Immersive glass');
-  }
-}
-
 String _notificationTypeLabel(BuildContext context, AppNotificationItem item) {
   switch (item.notificationType) {
     case 'friend_request':
@@ -563,7 +552,6 @@ class HomePage extends StatelessWidget {
   }) onUpdateWidgetSetting;
   final Future<AppearanceSetting?> Function({
     required String themeMode,
-    required String desktopEffect,
   }) onUpdateAppearanceSetting;
   final Future<bool> Function() onClearSettingsCache;
   final Future<void> Function(String email) onSendCancelAccountCode;
@@ -864,6 +852,9 @@ class HomePage extends StatelessWidget {
 
   Future<void> _openSettingsCenter(BuildContext context) async {
     final navigator = Navigator.of(context);
+    final currentVisualTheme =
+        Theme.of(context).extension<AppVisualThemeMarker>()?.visualTheme ??
+            visualTheme;
     final latestOverview = await onLoadSettingsOverview();
     if (!context.mounted) {
       return;
@@ -873,7 +864,7 @@ class HomePage extends StatelessWidget {
         builder: (context) {
           return SettingsPage(
             onChangeLanguage: onChangeLanguage,
-            visualTheme: visualTheme,
+            visualTheme: currentVisualTheme,
             onChangeVisualTheme: onChangeVisualTheme,
             initialOverview: latestOverview ?? settingOverview,
             onRefresh: onLoadSettingsOverview,
@@ -950,10 +941,14 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final currentVisualTheme =
+        Theme.of(context).extension<AppVisualThemeMarker>()?.visualTheme ??
+            visualTheme;
 
     if (AppConfig.deviceType == 'windows') {
       return AdaptiveDesktopHome(
         appLanguage: appLanguage,
+        visualTheme: currentVisualTheme,
         profile: profile,
         focusSession: focusSession,
         checkInStatus: checkInStatus,
@@ -1484,23 +1479,11 @@ class _DesktopWidgetHome extends StatelessWidget {
         .toList();
   }
 
-  Color _accentColor() {
-    switch (settingOverview.appearanceSetting.desktopEffect) {
-      case 'soft_glass':
-        return AppColors.mint;
-      case 'focus_glow':
-        return const Color(0xFFFFD66B);
-      default:
-        return AppColors.glow;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final widgetSetting = settingOverview.widgetSetting;
-    final appearance = settingOverview.appearanceSetting;
-    final accentColor = _accentColor();
+    final accentColor = Theme.of(context).colorScheme.primary;
     final latestNotification =
         notificationOverview.hasItems ? notificationOverview.items.first : null;
     final latestTeamChat = teamChatOverview.latestMessage;
@@ -1600,8 +1583,8 @@ class _DesktopWidgetHome extends StatelessWidget {
                                   Text(
                                     _contextText(
                                       context,
-                                      'Windows 挂件 · ${_desktopEffectLabel(context, appearance)}',
-                                      'Windows widget · ${_desktopEffectLabel(context, appearance)}',
+                                      'Windows 桌面端',
+                                      'Windows desktop',
                                     ),
                                     style: textTheme.bodyMedium?.copyWith(
                                       color: SurfacePalette.muted,
@@ -5775,17 +5758,6 @@ class _DesktopWidgetHomeV2State extends State<_DesktopWidgetHomeV2> {
         .toList();
   }
 
-  Color _accentColor() {
-    switch (widget.settingOverview.appearanceSetting.desktopEffect) {
-      case 'soft_glass':
-        return AppColors.mint;
-      case 'focus_glow':
-        return const Color(0xFFFFD66B);
-      default:
-        return AppColors.glow;
-    }
-  }
-
   bool get _isChinese => isChineseLocale(context);
 
   String _text(String zh, String en) {
@@ -5919,17 +5891,16 @@ class _DesktopWidgetHomeV2State extends State<_DesktopWidgetHomeV2> {
     Color accentColor,
     String headerMessage,
   ) {
-    final appearance = widget.settingOverview.appearanceSetting;
     final displayName = _profileDisplayName(context, widget.profile);
     final profileInitial = _profileInitial(displayName);
     final desktopSubtitle = _collapsedMode
         ? _text(
-            '双击展开 | ${_desktopEffectLabel(context, appearance)}',
-            'Double-tap to expand | ${_desktopEffectLabel(context, appearance)}',
+            '双击展开',
+            'Double-tap to expand',
           )
         : _text(
-            '拖动移动 | 双击切换紧凑 | ${_desktopEffectLabel(context, appearance)}',
-            'Drag to move | Double-tap to compact | ${_desktopEffectLabel(context, appearance)}',
+            '拖动移动 | 双击切换紧凑',
+            'Drag to move | Double-tap to compact',
           );
 
     return GlassPanel(
@@ -7166,7 +7137,7 @@ class _DesktopWidgetHomeV2State extends State<_DesktopWidgetHomeV2> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final widgetSetting = widget.settingOverview.widgetSetting;
-    final accentColor = _accentColor();
+    final accentColor = Theme.of(context).colorScheme.primary;
     final latestNotification = widget.notificationOverview.hasItems
         ? widget.notificationOverview.items.first
         : null;

@@ -77,7 +77,7 @@ phases:
     actions:
       - 认证/会话/权限/设置模块收尾；会话槽位、黑名单、租户边界与头像上传服务端真实 HTTP 回放已完成
       - 按新 UI 重建：登录、注册、找回密码、资料、隐私、设置页面
-      - DesktopPresentationTier、自适应 6+2 主 Shell、88×88 Focus Orb、认证入口与设置资料链路已通过 Flutter analyze、16 项测试和 Windows Release 构建；DPI 与真实文件选择待实机验收
+      - DesktopPresentationTier、自适应 6+2 主 Shell、72×72 圆形 Focus Orb、认证入口与设置资料链路已落地；设置页与 Orb 必须绑定当前视觉主题，DPI 与真实文件选择待实机验收
     gate:
       id: G01
       status: in_progress
@@ -123,14 +123,15 @@ phases:
     name: adaptive_desktop_experience
     actions:
       - 落地 canvas / orb 原生 Windows shell；canvas 内由 Flutter 响应 Large / Medium / Small
-      - 完成窗口边缘吸附、置顶、托盘、DPI、多屏和窗口状态持久化
+      - 完成窗口边缘吸附、置顶、托盘、DPI、多屏和安全状态持久化；首次 Canvas 按当前显示器工作区约 `84% × 82%` 居中显示为适中 Large，之后严格恢复用户上次的 Canvas 尺寸与位置
       - 页面不在 P05 末尾补做响应式；P01-P04 重建页面时同步实现三档布局
       - 完成四主题跨尺寸视觉统一与桌面通知联动
     gate:
       id: G05
       criteria:
         - large_canvas_supports_full_workspace（完整工作台与并列上下文）
-        - medium_canvas_is_default_and_complete（默认 920×760，日常主流程完整）
+        - large_canvas_is_first_launch_default（首次按工作区约 84%×82% 居中，接近 Codex 桌面窗口占屏比例，完整但不过度占屏）
+        - canvas_bounds_are_user_memory（用户拖拽后的 Canvas 尺寸与位置跨设置页、Orb 和后续启动保持；仅对旧版过大历史值执行一次迁移）
         - small_canvas_supports_core_actions（专注、计划、消息、通知核心操作）
         - focus_orb_restores_context（主动收纳、状态可见、恢复不丢上下文）
         - resize_state_continuity_verified（拖拽跨断点不丢页面、草稿、滚动与计时状态）

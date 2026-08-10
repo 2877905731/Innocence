@@ -2,13 +2,13 @@
 schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
-updated_at: "2026-08-10"
-latest_checkpoint: "0022"
+updated_at: "2026-08-11"
+latest_checkpoint: "0032"
 current_phase: P01
 current_gate: G01
-state: p01_backend_identity_hardened_runtime_visual_dpi_pending
-next_sequence: "0023"
-current_goal: "P01 账户与基础进行中：后端会话身份绑定已收口，登录/语言入口已全量重写，四主题品牌字与艺术装置已分化并通过 Flutter 自动化与 Windows Release 构建；继续实机视觉、头像上传和 DPI 验收"
+state: p01_memo_desktop_editor_surface_corrected
+next_sequence: "0033"
+current_goal: "P01 账户与基础进行中：玻璃态主页、设置页和二级页共享动态背景与主题表面；备忘录新建/编辑已改为响应式桌面大面板；继续四主题逐页视觉、头像上传和 DPI 验收"
 recent_baseline:
   - checkpoint: "0015"
     result: "设置页完成 Large/Medium/Small 三档独立编排与黑名单新增入口；新增会话、认证、拉黑和跨租户权限负向测试，定向 Maven 7 项通过；Flutter/Dart SDK、数据库集成环境和头像上传后端路由仍不可用"
@@ -26,6 +26,16 @@ recent_baseline:
     result: "补齐 POST /api/app/v1/auth/logout；按 Bearer token 撤销当前设备活动会话并写入 logout_time；隔离 MySQL/Redis 完整上下文与全部 20 项后端测试通过"
   - checkpoint: "0022"
     result: "补齐 GET /api/app/v1/stats/trend；支持 7d/30d 并返回 xAxis + series；隔离 MySQL/Redis 完整上下文与全部 23 项后端测试通过"
+  - checkpoint: "0023"
+    result: "侘寂主题按用户决策收敛为暖灰米纸、胡桃棕与深米色；认证页和 Windows 自适应主页接入纸纤维、亚麻编织、轻刷痕与信封折线；flutter analyze、19 项测试、定向色板测试及 Windows Release 构建通过，人工视觉/DPI 仍待验收"
+  - checkpoint: "0024"
+    result: "设置页与 Focus Orb 已全面绑定当前视觉主题，桌面特效全链路删除，Orb 纠偏为 72×72 圆形进度环；flutter analyze、21 项 Flutter 测试、25 项 Maven 测试与 Windows Release 构建通过，已启动 PID 27304"
+  - checkpoint: "0025"
+    result: "Orb 移除 Tooltip 与透明外圈；HomePage 改从全局主题标记解析当前主题；Canvas 跨启动固定回到居中 920×760；flutter analyze、22 项测试与 Windows Release 构建通过，DPI 144 实测窗口 920×760"
+  - checkpoint: "0031"
+    result: "共享 GlassPanel、导航、设置面板、主页卡片和空状态全部改为主题感知表面；玻璃态移除固定白卡与近黑条带，备忘录内部组件改用 ColorScheme；flutter analyze、25 项测试、git diff --check 与 Windows Release 构建通过"
+  - checkpoint: "0032"
+    result: "备忘录新建/编辑弹窗改为响应式桌面大面板：Large 窗口最大约 820px 宽、76% 高，正文和清单保持滚动；flutter analyze、25 项测试与 Windows Release 构建通过，待推送"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
@@ -57,10 +67,24 @@ user_decisions:
     decision: "用户确认 Windows 页面清单、6+2 导航分组、Small 四项主导航、跨尺寸优先级与组件接口；G00.5 通过，进入 P01"
   - id: DEC-0015
     decision: "认证页四主题必须使用独立品牌字与艺术装置；纯白保持克制，侘寂强调残缺墨印，中世纪现代允许高饱和几何色块拼接，玻璃态强调发光层叠和轨道"
+  - id: DEC-0016
+    decision: "侘寂背景使用纸纤维、亚麻编织、轻微刷痕与手写信封气质；辅助色以棕色和深米色为主，移除不协调的橙色与绿色；本决策覆盖既有侘寂色板冲突项"
+  - id: DEC-0017
+    decision: "设置页和 Focus Orb 的所有颜色/UI 必须绑定当前四主题；删除独立桌面特效及其全局毛玻璃计划规定；Orb 回归 72×72 圆形进度环草图，覆盖 0013 的 88×88 方形实现"
+  - id: DEC-0018
+    decision: "Focus Orb 禁止在小窗口中显示 Tooltip 或透明外圈；主界面必须跟随设置页的全局主题切换；旧窗口尺寸策略已由 DEC-0020 覆盖。"
+  - id: DEC-0019
+    decision: "玻璃态恢复提示词和示例 HTML 的动态背景、漂浮光团、微粒、Hover 上浮与发光；覆盖全局禁用循环运动/持续发光和 Large 材质降级规则。Canvas 彻底无非客户区，主题作为本地视觉偏好切换时不调用服务端外观接口。"
+  - id: DEC-0020
+    decision: "Windows Canvas 首次按当前工作区约 84%×82% 居中打开；之后跨设置页、Focus Orb 和应用重启记忆用户调整的尺寸与位置。此决策覆盖固定 920×760 / 1240×780 和不跨启动恢复的旧约束。"
+  - id: DEC-0021
+    decision: "共享页面表面必须跟随当前四主题；玻璃态统一使用深色半透明蓝紫表面、浅色描边和模糊发光，禁止 lightStyle 强制白卡、嵌套空状态使用不透明近黑底或页面控件复用旧浅色固定色。"
+  - id: DEC-0022
+    decision: "备忘录新建与编辑采用响应式桌面大面板，最大约 820px 宽并按窗口高度限制滚动；小窗口自动收缩，不改变数据契约。"
 unfinished:
   - id: TODO-005
     priority: P0
-    item: "执行 Windows Large/Medium/Small 在 100%/125%/150% DPI 的实机验收；flutter analyze、19 项测试和 Windows Release 构建已通过"
+    item: "执行 Windows Large/Medium/Small/Focus Orb 在 100%/125%/150% DPI 的实机验收；150% DPI 启动窗口已验证为 920×760，flutter analyze、22 项 Flutter 测试、25 项 Maven 测试和 Windows Release 构建已通过"
     gate: G01
   - id: TODO-006
     priority: P1
@@ -78,7 +102,7 @@ next_actions:
     action: "执行 Large/Medium/Small 在 100%/125%/150% DPI 的窗口重排、滚动、命中区域和状态连续性验收"
     inputs: ["Windows Release", "Windows DPI 环境"]
   - id: NEXT-003
-    action: "手动切换纯白、侘寂、中世纪现代和玻璃态，验收品牌字、艺术装置、表单对比度与 Small/Medium 不溢出"
+    action: "手动切换纯白、侘寂、中世纪现代和玻璃态，验收设置页与 72×72 圆形 Orb 同步变色、表单对比度与 Small/Medium 不溢出"
     inputs: ["Windows Release", "四主题本地偏好"]
 required_reads:
   - AGENTS.md

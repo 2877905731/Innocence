@@ -7,7 +7,6 @@ public class UserAppearanceSetting {
     private Long id;
     private Long userId;
     private String themeMode;
-    private String desktopEffect;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
@@ -33,14 +32,6 @@ public class UserAppearanceSetting {
 
     public void setThemeMode(String themeMode) {
         this.themeMode = themeMode;
-    }
-
-    public String getDesktopEffect() {
-        return desktopEffect;
-    }
-
-    public void setDesktopEffect(String desktopEffect) {
-        this.desktopEffect = desktopEffect;
     }
 
     public LocalDateTime getCreateTime() {

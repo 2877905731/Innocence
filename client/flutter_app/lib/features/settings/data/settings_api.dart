@@ -196,14 +196,12 @@ class SettingsApi {
   Future<AppearanceSetting> updateAppearance(
     AppSession session, {
     required String themeMode,
-    required String desktopEffect,
   }) async {
     final data = await _apiClient.put(
       'settings/appearance',
       headers: session.authHeaders,
       body: {
         'themeMode': themeMode,
-        'desktopEffect': desktopEffect,
       },
     );
     return AppearanceSetting.fromJson(

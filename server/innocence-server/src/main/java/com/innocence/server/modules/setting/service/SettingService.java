@@ -26,9 +26,6 @@ public class SettingService {
 
     private static final String THEME_DARK = "dark";
     private static final String THEME_LIGHT = "light";
-    private static final String EFFECT_IMMERSIVE_GLASS = "immersive_glass";
-    private static final String EFFECT_SOFT_GLASS = "soft_glass";
-    private static final String EFFECT_FOCUS_GLOW = "focus_glow";
 
     private final SettingMapper settingMapper;
     private final AccountService accountService;
@@ -115,7 +112,6 @@ public class SettingService {
     ) {
         UserAppearanceSetting setting = ensureAppearanceSetting(userId);
         setting.setThemeMode(normalizeThemeMode(request.getThemeMode()));
-        setting.setDesktopEffect(normalizeDesktopEffect(request.getDesktopEffect()));
         settingMapper.updateAppearanceSetting(setting);
         return buildAppearanceResponse(setting);
     }
@@ -167,7 +163,6 @@ public class SettingService {
         UserAppearanceSetting created = new UserAppearanceSetting();
         created.setUserId(userId);
         created.setThemeMode(THEME_DARK);
-        created.setDesktopEffect(EFFECT_IMMERSIVE_GLASS);
         settingMapper.insertAppearanceSetting(created);
         return created;
     }
@@ -194,7 +189,6 @@ public class SettingService {
     private AppearanceSettingResponse buildAppearanceResponse(UserAppearanceSetting setting) {
         AppearanceSettingResponse response = new AppearanceSettingResponse();
         response.setThemeMode(normalizeThemeMode(setting.getThemeMode()));
-        response.setDesktopEffect(normalizeDesktopEffect(setting.getDesktopEffect()));
         return response;
     }
 
@@ -220,14 +214,4 @@ public class SettingService {
         };
     }
 
-    private String normalizeDesktopEffect(String value) {
-        String normalized = value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
-        return switch (normalized) {
-            case EFFECT_IMMERSIVE_GLASS, EFFECT_SOFT_GLASS, EFFECT_FOCUS_GLOW -> normalized;
-            default -> throw new BusinessException(
-                    ErrorCode.BAD_REQUEST,
-                    "Desktop effect is invalid."
-            );
-        };
-    }
 }

@@ -31,7 +31,6 @@
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
         <result property="themeMode" column="theme_mode"/>
-        <result property="desktopEffect" column="desktop_effect"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
@@ -96,13 +95,11 @@
     <insert id="insertAppearanceSetting" useGeneratedKeys="true" keyProperty="id">
         insert into user_appearance_setting (
             user_id,
-            theme_mode,
-            desktop_effect
+            theme_mode
         )
         values (
             #{userId},
-            #{themeMode},
-            #{desktopEffect}
+            #{themeMode}
         )
     </insert>
 
@@ -127,8 +124,7 @@
 
     <update id="updateAppearanceSetting">
         update user_appearance_setting
-        set theme_mode = #{themeMode},
-            desktop_effect = #{desktopEffect}
+        set theme_mode = #{themeMode}
         where user_id = #{userId}
     </update>
 

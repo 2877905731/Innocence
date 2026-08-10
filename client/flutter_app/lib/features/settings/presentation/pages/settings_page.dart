@@ -1,10 +1,12 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/core/layout/desktop_presentation.dart';
-import 'package:innocence_flutter/core/theme/surface_palette.dart';
 import 'package:innocence_flutter/core/utils/localized_text.dart';
 import 'package:innocence_flutter/core/widgets/secondary_page_scaffold.dart';
 import 'package:innocence_flutter/features/admin/domain/models/admin_report_models.dart';
@@ -114,7 +116,6 @@ class SettingsPage extends StatefulWidget {
   }) onUpdateWidget;
   final Future<AppearanceSetting?> Function({
     required String themeMode,
-    required String desktopEffect,
   }) onUpdateAppearance;
   final Future<bool> Function() onClearCache;
   final Future<void> Function(String email) onSendCancelCode;
@@ -183,6 +184,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   late SettingOverview _overview;
+  late AppVisualTheme _visualTheme;
   List<BlacklistItem> _blacklist = const [];
   CurrentDeviceSession? _currentDeviceSession;
   bool _isLoading = false;
@@ -204,26 +206,29 @@ class _SettingsPageState extends State<SettingsPage> {
     return _text('我', 'Me');
   }
 
-  String _appearanceThemeLabel(AppearanceSetting appearance) {
-    return appearance.isLightMode ? _text('浅色', 'Light') : _text('深色', 'Dark');
-  }
-
-  String _appearanceEffectLabel(AppearanceSetting appearance) {
-    switch (appearance.desktopEffect) {
-      case 'soft_glass':
-        return _text('柔和玻璃', 'Soft glass');
-      case 'focus_glow':
-        return _text('专注光效', 'Focus glow');
-      default:
-        return _text('沉浸毛玻璃', 'Immersive glass');
-    }
-  }
-
   @override
   void initState() {
     super.initState();
     _overview = widget.initialOverview;
+    _visualTheme = widget.visualTheme;
     _loadPrivacyContext();
+  }
+
+  @override
+  void didUpdateWidget(covariant SettingsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.visualTheme != widget.visualTheme &&
+        _visualTheme != widget.visualTheme) {
+      _visualTheme = widget.visualTheme;
+    }
+  }
+
+  void _changeVisualTheme(AppVisualTheme visualTheme) {
+    if (_visualTheme == visualTheme) {
+      return;
+    }
+    setState(() => _visualTheme = visualTheme);
+    widget.onChangeVisualTheme(visualTheme);
   }
 
   Future<void> _loadPrivacyContext() async {
@@ -596,35 +601,6 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  Future<void> _updateAppearance(AppearanceSetting next) async {
-    setState(() {
-      _isLoading = true;
-    });
-    try {
-      final updated = await widget.onUpdateAppearance(
-        themeMode: next.themeMode,
-        desktopEffect: next.desktopEffect,
-      );
-      if (!mounted) {
-        return;
-      }
-      if (updated == null) {
-        _showMessage(_text('外观设置保存失败。', 'Unable to save appearance settings.'));
-        return;
-      }
-      setState(() {
-        _overview = _overview.copyWith(appearanceSetting: updated);
-      });
-      _showMessage(_text('外观设置已更新。', 'Appearance settings updated.'));
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
   Future<void> _changeLanguage(AppLanguage language) async {
     if (_isLoading) {
       return;
@@ -876,13 +852,35 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildSectionNavigation(DesktopPresentationTier tier) {
     const items = _SettingsSectionId.values;
+    final visualTheme =
+        Theme.of(context).extension<AppVisualThemeMarker>()?.visualTheme ??
+            _visualTheme;
+    final tokens = AppVisualTokens.of(visualTheme);
+    final glass = visualTheme == AppVisualTheme.glass;
+    final radius = switch (visualTheme) {
+      AppVisualTheme.minimalism || AppVisualTheme.wabiSabi => 0.0,
+      AppVisualTheme.midCentury => 16.0,
+      AppVisualTheme.glass => 20.0,
+    };
     if (tier == DesktopPresentationTier.medium) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: SurfacePalette.softSurface,
-          border: Border.all(color: SurfacePalette.border),
+          color: glass ? const Color(0x36101D3B) : tokens.softPanel,
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(
+            color: glass ? const Color(0x3FFFFFFF) : tokens.line,
+          ),
+          boxShadow: glass
+              ? const [
+                  BoxShadow(
+                    color: Color(0x305F8CFF),
+                    blurRadius: 28,
+                    offset: Offset(0, 12),
+                  ),
+                ]
+              : null,
         ),
         child: Wrap(
           spacing: 8,
@@ -906,8 +904,20 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Container(
       decoration: BoxDecoration(
-        color: SurfacePalette.softSurface,
-        border: Border.all(color: SurfacePalette.border),
+        color: glass ? const Color(0x36101D3B) : tokens.softPanel,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(
+          color: glass ? const Color(0x3FFFFFFF) : tokens.line,
+        ),
+        boxShadow: glass
+            ? const [
+                BoxShadow(
+                  color: Color(0x305F8CFF),
+                  blurRadius: 30,
+                  offset: Offset(0, 14),
+                ),
+              ]
+            : null,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1047,12 +1057,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = SurfacePalette.homeTheme().textTheme;
+    final textTheme = Theme.of(context).textTheme;
     final account = _overview.accountSetting;
     final privacy = _overview.privacySetting;
     final notifications = _overview.notificationSetting;
     final widgetSetting = _overview.widgetSetting;
-    final appearance = _overview.appearanceSetting;
 
     return DesktopPresentationLayout(
       surface: DesktopWindowSurface.canvas,
@@ -1060,7 +1069,6 @@ class _SettingsPageState extends State<SettingsPage> {
         final sectionChildren = <Widget>[
           _SettingsSurface(
             section: _SettingsSectionId.language,
-            lightStyle: true,
             child: _SettingSection(
               title: _text('语言', 'Language'),
               subtitle: _text(
@@ -1093,7 +1101,6 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 16),
           _SettingsSurface(
             section: _SettingsSectionId.account,
-            lightStyle: true,
             child: _SettingSection(
               title: _text('账号', 'Account'),
               subtitle: _text(
@@ -1153,7 +1160,6 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 16),
           _SettingsSurface(
             section: _SettingsSectionId.privacy,
-            lightStyle: true,
             child: _SettingSection(
               title: _text('隐私', 'Privacy'),
               subtitle: _text(
@@ -1262,7 +1268,6 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 16),
           _SettingsSurface(
             section: _SettingsSectionId.session,
-            lightStyle: true,
             child: _SettingSection(
               title: _text('当前设备会话', 'Current device session'),
               subtitle: _text(
@@ -1306,7 +1311,6 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 16),
           _SettingsSurface(
             section: _SettingsSectionId.notifications,
-            lightStyle: true,
             child: _SettingSection(
               title: _text('通知', 'Notifications'),
               subtitle: _text(
@@ -1389,7 +1393,6 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 16),
           _SettingsSurface(
             section: _SettingsSectionId.desktop,
-            lightStyle: true,
             child: _SettingSection(
               title: _text('桌面体验', 'Desktop experience'),
               subtitle: _text(
@@ -1486,7 +1489,6 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 16),
           _SettingsSurface(
             section: _SettingsSectionId.appearance,
-            lightStyle: true,
             child: _SettingSection(
               title: _text('外观', 'Appearance'),
               subtitle: _text(
@@ -1505,13 +1507,15 @@ class _SettingsPageState extends State<SettingsPage> {
                     spacing: 10,
                     runSpacing: 10,
                     children: AppVisualTheme.values.map((theme) {
-                      final selected = widget.visualTheme == theme;
+                      final selected = _visualTheme == theme;
                       final tokens = AppVisualTokens.of(theme);
                       return ChoiceChip(
                         key: ValueKey(
                             'settings-visual-theme-${theme.storageValue}'),
                         selected: selected,
-                        onSelected: (_) => widget.onChangeVisualTheme(theme),
+                        onSelected: _isLoading
+                            ? null
+                            : (_) => _changeVisualTheme(theme),
                         avatar: Container(
                           width: 14,
                           height: 14,
@@ -1531,108 +1535,13 @@ class _SettingsPageState extends State<SettingsPage> {
                       );
                     }).toList(),
                   ),
-                  const SizedBox(height: 20),
-                  const Divider(color: SurfacePalette.borderSoft),
-                  const SizedBox(height: 16),
-                  Text(
-                    _text('内容明暗偏好', 'Content contrast'),
-                    style: textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 10),
-                  SegmentedButton<String>(
-                    segments: [
-                      ButtonSegment<String>(
-                        value: 'dark',
-                        label: Text(_text('深色', 'Dark')),
-                        icon: const Icon(Icons.dark_mode_rounded),
-                      ),
-                      ButtonSegment<String>(
-                        value: 'light',
-                        label: Text(_text('浅色', 'Light')),
-                        icon: const Icon(Icons.light_mode_rounded),
-                      ),
-                    ],
-                    selected: {appearance.themeMode},
-                    onSelectionChanged: _isLoading
-                        ? null
-                        : (selection) async {
-                            final nextValue = selection.first;
-                            await _updateAppearance(
-                              appearance.copyWith(themeMode: nextValue),
-                            );
-                          },
-                  ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 18),
                   _InfoLine(
                     label: _text('当前主题', 'Current theme'),
-                    value: _appearanceThemeLabel(appearance),
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    _text('桌面效果', 'Desktop effect'),
-                    style: textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: [
-                      _EffectOption(
-                        value: 'immersive_glass',
-                        label: _text('沉浸毛玻璃', 'Immersive glass'),
-                        hint: _text(
-                          '更偏沉浸式的桌面层次感',
-                          'Apple-style translucent layer',
-                        ),
-                      ),
-                      _EffectOption(
-                        value: 'soft_glass',
-                        label: _text('柔和玻璃', 'Soft glass'),
-                        hint: _text(
-                          '更轻、更柔和的透明感',
-                          'Lighter, calmer translucency',
-                        ),
-                      ),
-                      _EffectOption(
-                        value: 'focus_glow',
-                        label: _text('专注光效', 'Focus glow'),
-                        hint: _text(
-                          '更强调专注氛围的光感',
-                          'Glow-forward study atmosphere',
-                        ),
-                      ),
-                    ].map((option) {
-                      final selected = appearance.desktopEffect == option.value;
-                      return ChoiceChip(
-                        selected: selected,
-                        onSelected: _isLoading
-                            ? null
-                            : (_) async {
-                                await _updateAppearance(
-                                  appearance.copyWith(
-                                    desktopEffect: option.value,
-                                  ),
-                                );
-                              },
-                        label: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(option.label),
-                            const SizedBox(height: 2),
-                            Text(
-                              option.hint,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 12),
-                  _InfoLine(
-                    label: _text('当前桌面效果', 'Current desktop effect'),
-                    value: _appearanceEffectLabel(appearance),
+                    value: _visualTheme.label(
+                      isChinese:
+                          Localizations.localeOf(context).languageCode == 'zh',
+                    ),
                   ),
                 ],
               ),
@@ -1641,7 +1550,6 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 16),
           _SettingsSurface(
             section: _SettingsSectionId.admin,
-            lightStyle: true,
             child: _SettingSection(
               title: _text('后台管理', 'Admin tools'),
               subtitle: _text(
@@ -1679,7 +1587,6 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 16),
           _SettingsSurface(
             section: _SettingsSectionId.quickActions,
-            lightStyle: true,
             child: _SettingSection(
               title: _text('快捷操作', 'Quick actions'),
               subtitle: _text(
@@ -1712,7 +1619,6 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 16),
           _SettingsSurface(
             section: _SettingsSectionId.danger,
-            lightStyle: true,
             child: _SettingSection(
               title: _text('危险操作', 'Danger zone'),
               subtitle: _text(
@@ -1737,6 +1643,7 @@ class _SettingsPageState extends State<SettingsPage> {
               growable: false,
             );
         return SecondaryPageScaffold(
+          visualTheme: _visualTheme,
           backLabel: _text('返回', 'Back'),
           title: _text('系统设置', 'System settings'),
           description: _text(
@@ -1762,30 +1669,86 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
-class _SettingsSurface extends StatelessWidget {
+class _SettingsSurface extends StatefulWidget {
   const _SettingsSurface({
     required this.section,
     required this.child,
-    this.lightStyle = false,
   }) : padding = const EdgeInsets.all(18);
 
   final _SettingsSectionId section;
   final Widget child;
   final EdgeInsets padding;
-  final bool lightStyle;
+
+  @override
+  State<_SettingsSurface> createState() => _SettingsSurfaceState();
+}
+
+class _SettingsSurfaceState extends State<_SettingsSurface> {
+  bool _hovered = false;
 
   @override
   Widget build(BuildContext context) {
+    final visualTheme =
+        Theme.of(context).extension<AppVisualThemeMarker>()?.visualTheme ??
+            AppVisualTheme.minimalism;
+    final tokens = AppVisualTokens.of(visualTheme);
+    final radius = switch (visualTheme) {
+      AppVisualTheme.minimalism || AppVisualTheme.wabiSabi => 0.0,
+      AppVisualTheme.midCentury => 18.0,
+      AppVisualTheme.glass => 22.0,
+    };
+    final glass = visualTheme == AppVisualTheme.glass;
     return KeyedSubtree(
-      key: ValueKey('settings.${section.name}'),
-      child: Container(
-        padding: padding,
-        decoration: BoxDecoration(
-          color:
-              lightStyle ? SurfacePalette.surface : SurfacePalette.softSurface,
-          border: Border.all(color: SurfacePalette.border),
+      key: ValueKey('settings.${widget.section.name}'),
+      child: MouseRegion(
+        onEnter: glass ? (_) => setState(() => _hovered = true) : null,
+        onExit: glass ? (_) => setState(() => _hovered = false) : null,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          transform:
+              Matrix4.translationValues(0, glass && _hovered ? -4 : 0, 0),
+          padding: glass ? EdgeInsets.zero : widget.padding,
+          decoration: BoxDecoration(
+            color: glass
+                ? (_hovered ? const Color(0x52172A55) : const Color(0x3D101D3B))
+                : tokens.panel,
+            borderRadius: BorderRadius.circular(radius),
+            border: Border.all(
+              color: glass
+                  ? (_hovered
+                      ? const Color(0x70FFFFFF)
+                      : const Color(0x3FFFFFFF))
+                  : tokens.line,
+            ),
+            boxShadow: glass
+                ? [
+                    BoxShadow(
+                      color: _hovered
+                          ? const Color(0x665F8CFF)
+                          : tokens.artOne.withValues(alpha: 0.18),
+                      blurRadius: _hovered ? 44 : 28,
+                      offset: Offset(0, _hovered ? 18 : 12),
+                    ),
+                  ]
+                : null,
+          ),
+          child: glass
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(radius),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(
+                      sigmaX: _hovered ? 24 : 18,
+                      sigmaY: _hovered ? 24 : 18,
+                    ),
+                    child: Padding(
+                      padding: widget.padding,
+                      child: widget.child,
+                    ),
+                  ),
+                )
+              : widget.child,
         ),
-        child: child,
       ),
     );
   }
@@ -1856,7 +1819,7 @@ class _InfoLine extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: SurfacePalette.ink,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
           ),
@@ -1879,14 +1842,20 @@ class _StaticHintRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final visualTheme =
+        Theme.of(context).extension<AppVisualThemeMarker>()?.visualTheme;
+    final glass = visualTheme == AppVisualTheme.glass;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 6),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: SurfacePalette.softSurface,
+        color: glass ? const Color(0x18FFFFFF) : scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: SurfacePalette.borderSoft),
+        border: Border.all(
+          color: glass ? const Color(0x38FFFFFF) : scheme.outlineVariant,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1894,7 +1863,7 @@ class _StaticHintRow extends StatelessWidget {
           Text(
             '$title：$value',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: SurfacePalette.ink,
+                  color: scheme.onSurface,
                 ),
           ),
           const SizedBox(height: 6),
@@ -1903,18 +1872,6 @@ class _StaticHintRow extends StatelessWidget {
       ),
     );
   }
-}
-
-class _EffectOption {
-  const _EffectOption({
-    required this.value,
-    required this.label,
-    required this.hint,
-  });
-
-  final String value;
-  final String label;
-  final String hint;
 }
 
 class _ProfileDraft {
@@ -2088,7 +2045,7 @@ class _CancelAccountDialogState extends State<_CancelAccountDialog> {
                 Text(
                   _message!,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: SurfacePalette.ink,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                 ),
               ],

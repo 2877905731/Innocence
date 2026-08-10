@@ -167,3 +167,73 @@ checkpoints:
     status: complete
     path: progress/0022__20260810__P02__DONE__stats-trend-endpoint.md
     title: "统计趋势接口投影"
+  - sequence: "0023"
+    created_at: "2026-08-10T21:17:32+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0023__20260810__P01__DECISION__wabi-sabi-paper-texture-and-brown-palette.md
+    title: "侘寂纸张材质与棕色辅助色校正"
+  - sequence: "0024"
+    created_at: "2026-08-10T21:52:00+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0024__20260810__P01__CORRECTION__theme-bound-settings-and-circular-focus-orb.md
+    title: "设置页主题绑定、桌面特效删除与圆形 Focus Orb 纠偏"
+  - sequence: "0025"
+    created_at: "2026-08-10T22:04:13+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0025__20260810__P01__CORRECTION__orb-clipping-theme-propagation-and-safe-startup.md
+    title: "Focus Orb 裁切、全局主题传播与安全启动尺寸纠偏"
+  - sequence: "0026"
+    created_at: "2026-08-10T23:10:00+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0026__20260810__P01__CORRECTION__canvas-theme-tokens-and-orb-bounds-restore.md
+    title: "Canvas 四主题令牌与 Focus Orb 原窗口边界恢复纠偏"
+  - sequence: "0027"
+    created_at: "2026-08-10T23:48:00+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0027__20260810__P01__CORRECTION__four-theme-home-chrome-orb-and-window-memory.md
+    title: "四主题独立首页、无黑边 Shell、纯圆 Orb 与窗口记忆纠偏"
+  - sequence: "0028"
+    created_at: "2026-08-10T23:59:00+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0028__20260810__P01__CORRECTION__glass-motion-frameless-resize-and-local-theme.md
+    title: "玻璃态动态表现、彻底无框缩放与本地主题切换纠偏"
+  - sequence: "0029"
+    created_at: "2026-08-11T00:25:00+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0029__20260811__P01__CORRECTION__glass-settings-resizable-canvas-and-versioned-window-memory.md
+    title: "玻璃态设置页、可缩放 Canvas 与带版本窗口记忆纠偏"
+  - sequence: "0030"
+    created_at: "2026-08-11T00:35:00+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0030__20260811__P01__CORRECTION__ui-plan-native-resize-capability-alignment.md
+    title: "UI 规划与原生缩放能力位对齐"
+  - sequence: "0031"
+    created_at: "2026-08-11T00:21:21+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0031__20260811__P01__CORRECTION__glass-cross-page-surface-consistency.md
+    title: "玻璃态跨页表面与空状态一致性纠偏"
+  - sequence: "0032"
+    created_at: "2026-08-11T00:38:36+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0032__20260811__P01__CORRECTION__memo-desktop-editor-surface.md
+    title: "备忘录桌面大面板与响应式编辑器纠偏"

@@ -74,7 +74,6 @@ CREATE TABLE IF NOT EXISTS user_appearance_setting
     id             BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id        BIGINT      NOT NULL UNIQUE,
     theme_mode     VARCHAR(16) NOT NULL DEFAULT 'dark',
-    desktop_effect VARCHAR(32) NOT NULL DEFAULT 'immersive_glass',
     create_time    DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time    DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

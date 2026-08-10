@@ -98,6 +98,7 @@ void main() {
     test('keeps Focus Orb outside the canvas tier system', () {
       const orb = DesktopPresentationSpec.orb(reduceMotion: true);
 
+      expect(DesktopPresentationPolicy.focusOrbSize, const Size.square(72));
       expect(orb.surface, DesktopWindowSurface.orb);
       expect(orb.tier, isNull);
       expect(orb.defaultDensity, ComponentPresentationDensity.glance);

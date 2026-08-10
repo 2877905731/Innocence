@@ -138,25 +138,6 @@ void FlutterWindow::RegisterDesktopWidgetChannel() {
           return;
         }
 
-        if (call.method_name() == "setDesktopEffect") {
-          const auto* arguments =
-              std::get_if<flutter::EncodableMap>(call.arguments());
-          std::string effect = "immersive_glass";
-          if (arguments != nullptr) {
-            const auto found =
-                arguments->find(flutter::EncodableValue("effect"));
-            if (found != arguments->end()) {
-              if (const auto value =
-                      std::get_if<std::string>(&found->second)) {
-                effect = *value;
-              }
-            }
-          }
-          SetDesktopEffect(effect);
-          result->Success();
-          return;
-        }
-
         if (call.method_name() == "setWindowHeight") {
           const auto* arguments =
               std::get_if<flutter::EncodableMap>(call.arguments());

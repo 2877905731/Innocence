@@ -368,15 +368,15 @@
 | `/settings/profile` | GET | 获取设置总览 | 无 | `accountSetting` `notificationSetting` `widgetSetting` `appearanceSetting` |
 | `/settings/notifications` | GET | 获取通知设置 | 无 | `mobilePushEnabled` `desktopNoticeEnabled` `teamRemindEnabled` `systemAnnouncementEnabled` |
 | `/settings/notifications` | PUT | 更新通知设置 | 同上字段 | `notificationSetting` |
-| `/settings/appearance` | GET | 获取外观设置 | 无 | `themeMode` `desktopEffect` |
-| `/settings/appearance` | PUT | 更新外观设置 | `themeMode` `desktopEffect` | `appearanceSetting` |
+| `/settings/appearance` | GET | 获取外观设置 | 无 | `themeMode` |
+| `/settings/appearance` | PUT | 更新外观设置 | `themeMode` | `appearanceSetting` |
 | `/settings/widget` | GET | 获取桌面挂件设置 | 无 | `autoStart` `alwaysOnTop` `showModules` |
 | `/settings/widget` | PUT | 更新桌面挂件设置 | `autoStart` `alwaysOnTop` `showModules` | `widgetSetting` |
 | `/settings/cache/clear` | POST | 清理缓存 | 无 | `success` |
 
 接口说明：
 
-- 外观设置要预留桌面端毛玻璃、半透明、沉浸光效相关配置位。
+- 外观设置只保留内容明暗 `themeMode`；四套视觉主题由客户端本地持久化，不再预留独立桌面效果字段。
 - 通知开关按渠道和类型分别控制。
 - 设置模块与账户、隐私、通知、桌面挂件体验强关联。
 
@@ -539,7 +539,7 @@
 - 实时部分建议使用 `WebSocket + Redis` 做在线分发。
 - 聊天消息、提醒、通知建议统一抽象未读状态，避免每个模块单独算红点。
 - 首页和桌面挂件尽量走聚合接口，不要让前端一次加载十几个独立接口。
-- 桌面端 UI 已经明确要求毛玻璃、半透明、沉浸光效，接口层要尽量支持轻量高频刷新，不要返回过重对象。
+- 桌面端 UI 根据客户端当前主题呈现；接口层只提供业务状态并支持轻量高频刷新，不传递视觉特效或过重对象。
 
 ## 9. 当前文档结论
 

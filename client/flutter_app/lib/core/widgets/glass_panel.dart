@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/theme/surface_palette.dart';
 
@@ -22,6 +23,16 @@ class GlassPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visualTheme =
+        Theme.of(context).extension<AppVisualThemeMarker>()?.visualTheme;
+    if (visualTheme != null) {
+      return _ThemeAwarePanel(
+        visualTheme: visualTheme,
+        padding: padding,
+        child: child,
+      );
+    }
+
     if (lightStyle) {
       return Container(
         padding: padding,
@@ -62,6 +73,106 @@ class GlassPanel extends StatelessWidget {
           ),
           child: child,
         ),
+      ),
+    );
+  }
+}
+
+class _ThemeAwarePanel extends StatefulWidget {
+  const _ThemeAwarePanel({
+    required this.visualTheme,
+    required this.padding,
+    required this.child,
+  });
+
+  final AppVisualTheme visualTheme;
+  final EdgeInsets padding;
+  final Widget child;
+
+  @override
+  State<_ThemeAwarePanel> createState() => _ThemeAwarePanelState();
+}
+
+class _ThemeAwarePanelState extends State<_ThemeAwarePanel> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppVisualTokens.of(widget.visualTheme);
+    final glass = widget.visualTheme == AppVisualTheme.glass;
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final radius = switch (widget.visualTheme) {
+      AppVisualTheme.minimalism || AppVisualTheme.wabiSabi => 0.0,
+      AppVisualTheme.midCentury => 18.0,
+      AppVisualTheme.glass => 22.0,
+    };
+    final decoration = switch (widget.visualTheme) {
+      AppVisualTheme.minimalism => BoxDecoration(
+          color: tokens.panel,
+          border: Border(top: BorderSide(color: tokens.ink, width: 2)),
+        ),
+      AppVisualTheme.wabiSabi => BoxDecoration(color: tokens.panel),
+      AppVisualTheme.midCentury => BoxDecoration(
+          color: tokens.panel,
+          borderRadius: const BorderRadius.only(
+            topRight: Radius.circular(28),
+            bottomLeft: Radius.circular(8),
+          ),
+          border: Border(left: BorderSide(color: tokens.accent, width: 4)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x1F2C2416),
+              blurRadius: 18,
+              offset: Offset(0, 8),
+            ),
+          ],
+        ),
+      AppVisualTheme.glass => BoxDecoration(
+          color: _hovered ? const Color(0x52172A55) : const Color(0x3D101D3B),
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(
+            color: _hovered ? const Color(0x78FFFFFF) : const Color(0x48FFFFFF),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color:
+                  _hovered ? const Color(0x665F8CFF) : const Color(0x351F2687),
+              blurRadius: _hovered ? 44 : 28,
+              spreadRadius: -5,
+              offset: Offset(0, _hovered ? 16 : 10),
+            ),
+          ],
+        ),
+    };
+
+    final content = glass
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(radius),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                sigmaX: _hovered ? 24 : 18,
+                sigmaY: _hovered ? 24 : 18,
+              ),
+              child: Padding(padding: widget.padding, child: widget.child),
+            ),
+          )
+        : Padding(padding: widget.padding, child: widget.child);
+
+    return MouseRegion(
+      onEnter: glass ? (_) => setState(() => _hovered = true) : null,
+      onExit: glass ? (_) => setState(() => _hovered = false) : null,
+      child: AnimatedContainer(
+        duration:
+            reduceMotion ? Duration.zero : const Duration(milliseconds: 260),
+        curve: Curves.easeOutCubic,
+        transform: Matrix4.translationValues(
+          0,
+          glass && _hovered && !reduceMotion ? -4 : 0,
+          0,
+        ),
+        decoration: decoration,
+        child: content,
       ),
     );
   }

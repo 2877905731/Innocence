@@ -1,6 +1,6 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:innocence_flutter/core/theme/app_colors.dart';
-import 'package:innocence_flutter/core/theme/surface_palette.dart';
 import 'package:innocence_flutter/core/utils/localized_text.dart';
 import 'package:innocence_flutter/core/widgets/glass_panel.dart';
 import 'package:innocence_flutter/core/widgets/secondary_page_scaffold.dart';
@@ -319,6 +319,7 @@ class _MemoCardTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -334,7 +335,7 @@ class _MemoCardTile extends StatelessWidget {
                 Text(
                   displayTitle,
                   style: textTheme.titleMedium?.copyWith(
-                    color: SurfacePalette.ink,
+                    color: scheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -371,7 +372,7 @@ class _MemoCardTile extends StatelessWidget {
           Text(
             summaryText,
             style: textTheme.bodyLarge?.copyWith(
-              color: SurfacePalette.ink,
+              color: scheme.onSurface,
             ),
           ),
         if (memo.content.trim().isNotEmpty && memo.checkItems.isNotEmpty)
@@ -389,14 +390,14 @@ class _MemoCardTile extends StatelessWidget {
                         : Icons.radio_button_unchecked_rounded,
                     size: 18,
                     color:
-                        item.checked ? AppColors.mint : SurfacePalette.subtle,
+                        item.checked ? scheme.primary : scheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       item.itemText,
                       style: textTheme.bodyMedium?.copyWith(
-                        color: SurfacePalette.ink,
+                        color: scheme.onSurface,
                         decoration:
                             item.checked ? TextDecoration.lineThrough : null,
                       ),
@@ -458,17 +459,18 @@ class _MemoTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: SurfacePalette.softSurface,
+        color: scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: SurfacePalette.border),
+        border: Border.all(color: scheme.outlineVariant),
       ),
       child: Text(
         label,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: SurfacePalette.ink,
+              color: scheme.onSurface,
             ),
       ),
     );
@@ -581,101 +583,118 @@ class _MemoEditorDialogState extends State<_MemoEditorDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final viewport = MediaQuery.sizeOf(context);
+    final dialogWidth = math.min(
+      (viewport.width * 0.68).clamp(460.0, 820.0).toDouble(),
+      math.max(360.0, viewport.width - 48),
+    );
+    final dialogHeight = math.min(
+      (viewport.height * 0.76).clamp(460.0, 760.0).toDouble(),
+      math.max(360.0, viewport.height - 48),
+    );
     return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      titlePadding: const EdgeInsets.fromLTRB(32, 28, 32, 8),
+      contentPadding: const EdgeInsets.fromLTRB(32, 12, 32, 8),
+      actionsPadding: const EdgeInsets.fromLTRB(32, 8, 32, 24),
       title: Text(
         widget.initialMemo == null
             ? _text('新建备忘录', 'New memo')
             : _text('编辑备忘录', 'Edit memo'),
       ),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                  labelText: _text('标题', 'Title'),
-                  hintText: _text('可选标题', 'Optional title'),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _contentController,
-                minLines: 4,
-                maxLines: 8,
-                decoration: InputDecoration(
-                  labelText: _text('文字内容', 'Text note'),
-                  hintText: _text('在这里写下备忘内容', 'Write your memo text here'),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: _addChecklistItem,
-                    icon: const Icon(Icons.add_task_rounded),
-                    label: Text(_text('添加清单', 'Add checklist')),
+      content: SizedBox(
+        width: dialogWidth,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: dialogHeight),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: _titleController,
+                  decoration: InputDecoration(
+                    labelText: _text('标题', 'Title'),
+                    hintText: _text('可选标题', 'Optional title'),
                   ),
-                  _MemoTag(
-                    label: widget.isChinese
-                        ? '${_items.where((item) => item.checked).length}/${_items.length} 已勾选'
-                        : '${_items.where((item) => item.checked).length}/${_items.length} checked',
-                  ),
-                ],
-              ),
-              if (_items.isNotEmpty) ...[
+                ),
                 const SizedBox(height: 16),
-                ..._items.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final item = entry.value;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: SurfacePalette.softSurface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: SurfacePalette.border),
-                      ),
-                      child: Row(
-                        children: [
-                          Checkbox(
-                            value: item.checked,
-                            onChanged: (value) {
-                              setState(() {
-                                _items[index] = item.copyWith(
-                                  checked: value ?? false,
-                                );
-                              });
-                            },
-                          ),
-                          Expanded(
-                            child: Text(
-                              item.itemText,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _items.removeAt(index);
-                              });
-                            },
-                            icon: const Icon(Icons.close_rounded),
-                          ),
-                        ],
-                      ),
+                TextField(
+                  controller: _contentController,
+                  minLines: 4,
+                  maxLines: 8,
+                  decoration: InputDecoration(
+                    labelText: _text('文字内容', 'Text note'),
+                    hintText: _text('在这里写下备忘内容', 'Write your memo text here'),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: _addChecklistItem,
+                      icon: const Icon(Icons.add_task_rounded),
+                      label: Text(_text('添加清单', 'Add checklist')),
                     ),
-                  );
-                }),
+                    _MemoTag(
+                      label: widget.isChinese
+                          ? '${_items.where((item) => item.checked).length}/${_items.length} 已勾选'
+                          : '${_items.where((item) => item.checked).length}/${_items.length} checked',
+                    ),
+                  ],
+                ),
+                if (_items.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  ..._items.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final item = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: scheme.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: scheme.outlineVariant),
+                        ),
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: item.checked,
+                              onChanged: (value) {
+                                setState(() {
+                                  _items[index] = item.copyWith(
+                                    checked: value ?? false,
+                                  );
+                                });
+                              },
+                            ),
+                            Expanded(
+                              child: Text(
+                                item.itemText,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _items.removeAt(index);
+                                });
+                              },
+                              icon: const Icon(Icons.close_rounded),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

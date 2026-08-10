@@ -52,9 +52,6 @@ class Win32Window {
   // Update whether the window should stay above other windows.
   void SetAlwaysOnTop(bool always_on_top);
 
-  // Update the native desktop shell effect.
-  void SetDesktopEffect(const std::string& desktop_effect);
-
   // Resize the desktop widget while keeping it anchored to the top-right.
   void SetWidgetHeight(int logical_height);
 
@@ -127,6 +124,7 @@ class Win32Window {
   void PositionPageWindow(HWND const window);
   void PositionDesktopWidget(HWND const window, int logical_height);
   void PositionMiniWidget(HWND const window);
+  void ApplyMiniWindowRegion(HWND const window);
   void UpdateWindowFrame(HWND const window);
   RECT GetMonitorWorkArea(HWND const window) const;
   void SnapWidgetToWorkArea(HWND const window);
@@ -139,7 +137,6 @@ class Win32Window {
   bool quit_on_close_ = false;
   bool always_on_top_ = false;
   std::string window_mode_ = "auth";
-  std::string desktop_effect_ = "immersive_glass";
   int widget_width_ = 560;
   int widget_height_ = 920;
   bool has_custom_position_ = false;
@@ -152,8 +149,8 @@ class Win32Window {
   bool tray_icon_added_ = false;
   int widget_x_ = 0;
   int widget_y_ = 0;
-  int page_width_ = 920;
-  int page_height_ = 760;
+  int page_width_ = 1360;
+  int page_height_ = 820;
   int page_x_ = 0;
   int page_y_ = 0;
 

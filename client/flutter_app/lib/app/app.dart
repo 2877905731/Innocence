@@ -50,7 +50,7 @@ class _InnocenceAppState extends State<InnocenceApp> {
         return MaterialApp(
           title: 'Innocence',
           debugShowCheckedModeBanner: false,
-          theme: visualTokens.toThemeData(),
+          theme: visualTokens.toThemeData(visualTheme),
           themeMode: visualTokens.isDark ? ThemeMode.dark : ThemeMode.light,
           locale: language.locale,
           supportedLocales: const [

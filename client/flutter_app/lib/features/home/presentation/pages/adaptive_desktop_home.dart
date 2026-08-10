@@ -1,13 +1,16 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
 import 'package:innocence_flutter/app/app_language.dart';
+import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/core/layout/desktop_presentation.dart';
 import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
 import 'package:innocence_flutter/core/widgets/adaptive_canvas_shell.dart';
-import 'package:innocence_flutter/core/widgets/desktop_drag_region.dart';
+import 'package:innocence_flutter/core/widgets/glass_motion_backdrop.dart';
 import 'package:innocence_flutter/core/widgets/status_banner.dart';
+import 'package:innocence_flutter/core/widgets/wabi_sabi_paper.dart';
 import 'package:innocence_flutter/features/account/domain/models/user_profile.dart';
 import 'package:innocence_flutter/features/checkin/domain/models/check_in_status.dart';
 import 'package:innocence_flutter/features/focus/domain/models/focus_session.dart';
@@ -23,6 +26,7 @@ class AdaptiveDesktopHome extends StatefulWidget {
   const AdaptiveDesktopHome({
     super.key,
     required this.appLanguage,
+    required this.visualTheme,
     required this.profile,
     required this.focusSession,
     required this.checkInStatus,
@@ -51,6 +55,7 @@ class AdaptiveDesktopHome extends StatefulWidget {
   });
 
   final AppLanguage appLanguage;
+  final AppVisualTheme visualTheme;
   final UserProfile profile;
   final FocusSession focusSession;
   final CheckInStatus checkInStatus;
@@ -229,11 +234,13 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
       case 'plans':
         return _text('安排时间，也给变化留出余地', 'Plan time, leave room for change');
       case 'focus':
-        return _text('一次只做好眼前这一件事', 'Give the current task your full attention');
+        return _text(
+            '一次只做好眼前这一件事', 'Give the current task your full attention');
       case 'companions':
         return _text('与可信的人一起保持节奏', 'Stay in rhythm with people you trust');
       case 'inbox':
-        return _text('消息、提醒与通知集中处理', 'Messages, reminders and notices in one place');
+        return _text(
+            '消息、提醒与通知集中处理', 'Messages, reminders and notices in one place');
       case 'stats':
         return _text('看见积累，不制造压力', 'See progress without adding pressure');
       default:
@@ -265,7 +272,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
         surface: DesktopWindowSurface.orb,
         builder: (context, spec) => _FocusOrb(
           session: widget.focusSession,
-          isChinese: _isChinese,
+          visualTheme: widget.visualTheme,
           isBusy: widget.isBusy,
           onRestore: _restoreCanvas,
           onAction: _handleOrbAction,
@@ -274,6 +281,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
     }
 
     return AdaptiveCanvasShell(
+      visualTheme: widget.visualTheme,
       destinations: _destinations,
       selectedDestinationId: _selectedDestinationId,
       onDestinationSelected: _selectDestination,
@@ -301,11 +309,12 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
   }
 
   Widget _buildHomePage(DesktopPresentationSpec spec) {
-    final palette = _HomePalette.of(context);
+    final palette = _HomePalette.of(context, widget.visualTheme);
     return _PageCanvas(
       pageKey: const PageStorageKey<String>('desktop.home'),
       spec: spec,
       palette: palette,
+      visualTheme: widget.visualTheme,
       children: [
         if (widget.bannerMessage != null) ...[
           StatusBanner(
@@ -316,7 +325,8 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
         ],
         _HeroStatement(
           palette: palette,
-          eyebrow: _text('INNOCENCE · DAILY CANVAS', 'INNOCENCE · DAILY CANVAS'),
+          eyebrow:
+              _text('INNOCENCE · DAILY CANVAS', 'INNOCENCE · DAILY CANVAS'),
           title: widget.focusSession.active
               ? _text('此刻，保持专注。', 'Stay with this moment.')
               : _text('今天，从一件事开始。', 'Begin today with one thing.'),
@@ -373,7 +383,8 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
             _MetricData(
               label: _text('计划完成率', 'Plan completion'),
               value: '${widget.statsOverview.planCompletionRate}%',
-              note: _text('今日 ${widget.todayPlan.completedCount}/${widget.todayPlan.totalCount}',
+              note: _text(
+                  '今日 ${widget.todayPlan.completedCount}/${widget.todayPlan.totalCount}',
                   'Today ${widget.todayPlan.completedCount}/${widget.todayPlan.totalCount}'),
             ),
             _MetricData(
@@ -424,11 +435,12 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
   }
 
   Widget _buildPlansPage(DesktopPresentationSpec spec) {
-    final palette = _HomePalette.of(context);
+    final palette = _HomePalette.of(context, widget.visualTheme);
     return _PageCanvas(
       pageKey: const PageStorageKey<String>('desktop.plans'),
       spec: spec,
       palette: palette,
+      visualTheme: widget.visualTheme,
       children: [
         _SectionLead(
           palette: palette,
@@ -470,12 +482,14 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
             _SummaryLine(
               icon: Icons.date_range_outlined,
               title: _text('长计划', 'Weekly plan'),
-              detail: _text('组织一周并复用日计划模板', 'Organize a week and reuse daily templates'),
+              detail: _text(
+                  '组织一周并复用日计划模板', 'Organize a week and reuse daily templates'),
             ),
             _SummaryLine(
               icon: Icons.route_outlined,
               title: _text('超长计划', 'Long-term plan'),
-              detail: _text('按天推进更长期的目标', 'Move longer goals forward day by day'),
+              detail:
+                  _text('按天推进更长期的目标', 'Move longer goals forward day by day'),
             ),
           ],
         ),
@@ -484,11 +498,12 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
   }
 
   Widget _buildFocusPage(DesktopPresentationSpec spec) {
-    final palette = _HomePalette.of(context);
+    final palette = _HomePalette.of(context, widget.visualTheme);
     return _PageCanvas(
       pageKey: const PageStorageKey<String>('desktop.focus'),
       spec: spec,
       palette: palette,
+      visualTheme: widget.visualTheme,
       children: [
         _FocusPanel(
           palette: palette,
@@ -530,7 +545,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
   }
 
   Widget _buildCompanionsPage(DesktopPresentationSpec spec) {
-    final palette = _HomePalette.of(context);
+    final palette = _HomePalette.of(context, widget.visualTheme);
     final teammates = widget.teamOverview.members
         .where((member) => member.userId != widget.profile.userId)
         .take(spec.tier == DesktopPresentationTier.small ? 3 : 5)
@@ -539,6 +554,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
       pageKey: const PageStorageKey<String>('desktop.companions'),
       spec: spec,
       palette: palette,
+      visualTheme: widget.visualTheme,
       children: [
         _ResponsivePair(
           spec: spec,
@@ -548,11 +564,13 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
             palette: palette,
             icon: Icons.people_outline_rounded,
             title: _text('好友', 'Friends'),
-            value: '${widget.friendOverview.friendCount}/${widget.friendOverview.maxFriendCount}',
+            value:
+                '${widget.friendOverview.friendCount}/${widget.friendOverview.maxFriendCount}',
             description: widget.friendOverview.incomingRequests.isEmpty
                 ? _text('熟人关系保持轻量、清晰和可控。',
                     'Keep trusted relationships light and clear.')
-                : _text('${widget.friendOverview.incomingRequests.length} 个申请待处理',
+                : _text(
+                    '${widget.friendOverview.incomingRequests.length} 个申请待处理',
                     '${widget.friendOverview.incomingRequests.length} requests waiting'),
             actionLabel: _text('打开好友中心', 'Open friends'),
             onAction: widget.onOpenFriends,
@@ -614,13 +632,14 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
   }
 
   Widget _buildInboxPage(DesktopPresentationSpec spec) {
-    final palette = _HomePalette.of(context);
+    final palette = _HomePalette.of(context, widget.visualTheme);
     final notifications = widget.notificationOverview.previewItems;
     final latestTeamMessage = widget.teamChatOverview.latestMessage;
     return _PageCanvas(
       pageKey: const PageStorageKey<String>('desktop.inbox'),
       spec: spec,
       palette: palette,
+      visualTheme: widget.visualTheme,
       children: [
         _ResponsivePair(
           spec: spec,
@@ -634,7 +653,8 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
                 _PanelTitle(
                   palette: palette,
                   title: _text('通知', 'Notifications'),
-                  subtitle: _text('${widget.notificationOverview.unreadCount} 条未读',
+                  subtitle: _text(
+                      '${widget.notificationOverview.unreadCount} 条未读',
                       '${widget.notificationOverview.unreadCount} unread'),
                   actionLabel: _text('全部查看', 'View all'),
                   onAction: widget.onOpenNotifications,
@@ -680,11 +700,12 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
   }
 
   Widget _buildStatsPage(DesktopPresentationSpec spec) {
-    final palette = _HomePalette.of(context);
+    final palette = _HomePalette.of(context, widget.visualTheme);
     return _PageCanvas(
       pageKey: const PageStorageKey<String>('desktop.stats'),
       spec: spec,
       palette: palette,
+      visualTheme: widget.visualTheme,
       children: [
         _SectionLead(
           palette: palette,
@@ -737,140 +758,83 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
 class _FocusOrb extends StatelessWidget {
   const _FocusOrb({
     required this.session,
-    required this.isChinese,
+    required this.visualTheme,
     required this.isBusy,
     required this.onRestore,
     required this.onAction,
   });
 
   final FocusSession session;
-  final bool isChinese;
+  final AppVisualTheme visualTheme;
   final bool isBusy;
   final Future<void> Function() onRestore;
   final Future<void> Function() onAction;
 
-  String _text(String zh, String en) => isChinese ? zh : en;
-
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final background = dark
-        ? const Color(0xFF24221F)
-        : const Color(0xFFF4EEE3);
-    final ink = dark ? const Color(0xFFF2EBDD) : const Color(0xFF272420);
-    final muted = dark ? const Color(0xFFB8AFA1) : const Color(0xFF726B62);
-    final rule = dark ? const Color(0xFF4A453E) : const Color(0xFFBFB5A7);
+    final tokens = AppVisualTokens.of(visualTheme);
+    final totalSeconds = session.plannedMinutes * 60;
+    final progress = session.active && totalSeconds > 0
+        ? (session.elapsedSeconds / totalSeconds).clamp(0.0, 1.0)
+        : 0.0;
+    final remainingMinutes = (session.remainingSeconds / 60).ceil();
+    final centerLabel = session.active ? '$remainingMinutes' : '';
 
     return Scaffold(
-      backgroundColor: background,
-      body: Stack(
-        children: [
-          const Positioned.fill(child: DesktopDragRegion()),
-          Positioned.fill(
+      backgroundColor: Colors.transparent,
+      body: MouseRegion(
+        cursor: SystemMouseCursors.move,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => unawaited(onRestore()),
+          onDoubleTap: isBusy ? null : () => unawaited(onAction()),
+          onPanStart: (_) => unawaited(DesktopWidgetBridge.startWindowDrag()),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: tokens.panel,
+              border: Border.all(color: tokens.line, width: 1.5),
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(2),
-              child: Column(
+              padding: const EdgeInsets.all(7),
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  SizedBox(
-                    height: 40,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: DesktopDragRegion(
-                            child: _OrbActionButton(
-                              tooltip:
-                                  _text('拖动或返回画布', 'Drag or restore canvas'),
-                              icon: Icons.open_in_full_rounded,
-                              color: ink,
-                              borderColor: rule,
-                              onPressed: () => unawaited(onRestore()),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 2),
-                        SizedBox(
-                          width: 40,
-                          child: _OrbActionButton(
-                            tooltip: _text('关闭', 'Close'),
-                            icon: Icons.close_rounded,
-                            color: muted,
-                            borderColor: rule,
-                            onPressed: () =>
-                                unawaited(DesktopWidgetBridge.closeWindow()),
-                          ),
-                        ),
-                      ],
+                  SizedBox.expand(
+                    child: CircularProgressIndicator(
+                      value: progress,
+                      strokeWidth: 6,
+                      strokeCap: StrokeCap.round,
+                      backgroundColor: tokens.softPanel,
+                      valueColor: AlwaysStoppedAnimation<Color>(tokens.accent),
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: isBusy ? null : () => unawaited(onAction()),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: ink,
-                        side: BorderSide(color: rule),
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        shape: const RoundedRectangleBorder(),
-                      ),
-                      icon: Icon(
-                        session.active
-                            ? Icons.stop_rounded
-                            : Icons.play_arrow_rounded,
-                        size: 14,
-                      ),
-                      label: Text(
-                        session.active
-                            ? session.remainingLabel
-                            : _text('开始', 'Start'),
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          fontFeatures: [FontFeature.tabularFigures()],
-                        ),
-                      ),
-                    ),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 180),
+                    child: session.active
+                        ? Text(
+                            centerLabel,
+                            key: ValueKey(centerLabel),
+                            style: TextStyle(
+                              color: tokens.ink,
+                              fontSize: 16,
+                              height: 1,
+                              fontWeight: FontWeight.w800,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
+                          )
+                        : Icon(
+                            Icons.play_arrow_rounded,
+                            key: const ValueKey('idle'),
+                            color: isBusy ? tokens.muted : tokens.ink,
+                            size: 22,
+                          ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _OrbActionButton extends StatelessWidget {
-  const _OrbActionButton({
-    required this.tooltip,
-    required this.icon,
-    required this.color,
-    required this.borderColor,
-    required this.onPressed,
-  });
-
-  final String tooltip;
-  final IconData icon;
-  final Color color;
-  final Color borderColor;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          child: Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              border: Border.all(color: borderColor),
-            ),
-            child: Icon(icon, color: color, size: 15),
           ),
         ),
       ),
@@ -883,12 +847,14 @@ class _PageCanvas extends StatelessWidget {
     required this.pageKey,
     required this.spec,
     required this.palette,
+    required this.visualTheme,
     required this.children,
   });
 
   final PageStorageKey<String> pageKey;
   final DesktopPresentationSpec spec;
   final _HomePalette palette;
+  final AppVisualTheme visualTheme;
   final List<Widget> children;
 
   @override
@@ -904,22 +870,24 @@ class _PageCanvas extends StatelessWidget {
       DesktopPresentationTier.small || null => double.infinity,
     };
 
-    return ColoredBox(
-      color: palette.background,
-      child: SingleChildScrollView(
-        key: pageKey,
-        padding: EdgeInsets.fromLTRB(horizontal, 24, horizontal, 32),
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: maxWidth),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: children,
-            ),
+    final content = SingleChildScrollView(
+      key: pageKey,
+      padding: EdgeInsets.fromLTRB(horizontal, 24, horizontal, 32),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
           ),
         ),
       ),
+    );
+    return _ThemedHomeBackdrop(
+      visualTheme: visualTheme,
+      palette: palette,
+      child: content,
     );
   }
 }
@@ -977,40 +945,103 @@ class _HeroStatement extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final decoration = switch (palette.visualTheme) {
+      AppVisualTheme.minimalism => BoxDecoration(
+          color: palette.background,
+          border: Border(
+            top: BorderSide(color: palette.ink, width: 2),
+            bottom: BorderSide(color: palette.rule),
+          ),
+        ),
+      AppVisualTheme.wabiSabi => BoxDecoration(
+          color: palette.surface,
+          border: Border(left: BorderSide(color: palette.accent, width: 3)),
+        ),
+      AppVisualTheme.midCentury => BoxDecoration(
+          color: palette.ink,
+          borderRadius: const BorderRadius.only(
+            topRight: Radius.circular(54),
+            bottomLeft: Radius.circular(18),
+          ),
+          boxShadow: const [
+            BoxShadow(
+                color: Color(0x242C2416), blurRadius: 18, offset: Offset(0, 8)),
+          ],
+        ),
+      AppVisualTheme.glass => const BoxDecoration(
+          color: Colors.transparent,
+        ),
+    };
+    final darkHero = palette.visualTheme == AppVisualTheme.midCentury ||
+        palette.visualTheme == AppVisualTheme.glass;
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 26),
-      color: palette.ink,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: EdgeInsets.fromLTRB(
+        palette.visualTheme == AppVisualTheme.minimalism ? 4 : 28,
+        28,
+        28,
+        30,
+      ),
+      decoration: decoration,
+      child: Stack(
         children: [
-          Text(
-            eyebrow,
-            style: TextStyle(
-              color: palette.accentSoft,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.4,
+          if (palette.visualTheme == AppVisualTheme.midCentury)
+            const Positioned(right: 4, top: 0, child: _MidCenturyOrnament()),
+          if (palette.visualTheme == AppVisualTheme.glass)
+            Positioned(
+              right: 12,
+              top: 2,
+              child: Icon(Icons.blur_circular_rounded,
+                  size: 88, color: palette.accent.withValues(alpha: 0.22)),
             ),
-          ),
-          const SizedBox(height: 18),
-          Text(
-            title,
-            style: TextStyle(
-              color: palette.onInk,
-              fontSize: 32,
-              height: 1.08,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1.0,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            description,
-            style: TextStyle(
-              color: palette.onInkMuted,
-              fontSize: 14,
-              height: 1.5,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                eyebrow,
+                style: TextStyle(
+                  color: palette.visualTheme == AppVisualTheme.glass
+                      ? palette.accent
+                      : darkHero
+                          ? palette.accentSoft
+                          : palette.accent,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.4,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                title,
+                style: TextStyle(
+                  color: darkHero ? palette.onInk : palette.ink,
+                  fontSize: switch (palette.visualTheme) {
+                    AppVisualTheme.minimalism => 42,
+                    AppVisualTheme.glass => 52,
+                    _ => 34,
+                  },
+                  height: 1.08,
+                  fontWeight: palette.visualTheme == AppVisualTheme.wabiSabi
+                      ? FontWeight.w500
+                      : FontWeight.w800,
+                  fontStyle: palette.visualTheme == AppVisualTheme.wabiSabi
+                      ? FontStyle.italic
+                      : FontStyle.normal,
+                  letterSpacing:
+                      palette.visualTheme == AppVisualTheme.minimalism
+                          ? -1.8
+                          : -1.0,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                description,
+                style: TextStyle(
+                  color: darkHero ? palette.onInkMuted : palette.muted,
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -1049,7 +1080,8 @@ class _FocusPanel extends StatelessWidget {
             palette: palette,
             title: _text('当前专注', 'Focus now'),
             subtitle: session.active
-                ? _text('结束于 ${session.endTimeLabel}', 'Ends at ${session.endTimeLabel}')
+                ? _text('结束于 ${session.endTimeLabel}',
+                    'Ends at ${session.endTimeLabel}')
                 : _text('设置结束时间后开始', 'Set an end time to begin'),
           ),
           SizedBox(height: expanded ? 34 : 24),
@@ -1094,10 +1126,25 @@ class _FocusPanel extends StatelessWidget {
                     : _text('开始专注', 'Start focus'),
               ),
               style: FilledButton.styleFrom(
-                backgroundColor: palette.ink,
-                foregroundColor: palette.onInk,
+                backgroundColor: palette.visualTheme == AppVisualTheme.glass
+                    ? const Color(0x24FFFFFF)
+                    : palette.ink,
+                foregroundColor: palette.visualTheme == AppVisualTheme.glass
+                    ? palette.ink
+                    : palette.onInk,
                 minimumSize: const Size.fromHeight(48),
-                shape: const RoundedRectangleBorder(),
+                side: palette.visualTheme == AppVisualTheme.glass
+                    ? const BorderSide(color: Color(0x42FFFFFF))
+                    : BorderSide.none,
+                elevation: 0,
+                shadowColor: palette.visualTheme == AppVisualTheme.glass
+                    ? palette.accent.withValues(alpha: .5)
+                    : null,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    palette.visualTheme == AppVisualTheme.glass ? 12 : 0,
+                  ),
+                ),
               ),
             ),
           ),
@@ -1136,7 +1183,8 @@ class _PlanPanel extends StatelessWidget {
       ComponentPresentationDensity.full => 8,
       ComponentPresentationDensity.comfortable => 6,
       ComponentPresentationDensity.compact ||
-      ComponentPresentationDensity.glance => 4,
+      ComponentPresentationDensity.glance =>
+        4,
     };
     final entries = plan.items.asMap().entries.take(limit).toList();
     return _Panel(
@@ -1173,8 +1221,7 @@ class _PlanPanel extends StatelessWidget {
                 palette: palette,
                 item: entry.value,
                 isBusy: isBusy,
-                onChanged: (completed) =>
-                    onToggle(entry.key, completed),
+                onChanged: (completed) => onToggle(entry.key, completed),
               ),
             ),
           if (plan.items.length > entries.length) ...[
@@ -1308,9 +1355,10 @@ class _CheckInPanel extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           OutlinedButton.icon(
-            onPressed: isBusy || status.checkedInToday || !status.canCheckInToday
-                ? null
-                : () => unawaited(onSubmit()),
+            onPressed:
+                isBusy || status.checkedInToday || !status.canCheckInToday
+                    ? null
+                    : () => unawaited(onSubmit()),
             icon: const Icon(Icons.done_rounded),
             label: Text(
               status.checkedInToday
@@ -1387,41 +1435,44 @@ class _MetricTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minHeight: 130),
-      padding: const EdgeInsets.all(18),
-      color: palette.surfaceStrong,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            metric.label,
-            style: TextStyle(
-              color: palette.muted,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+    return _HoverSurface(
+      palette: palette,
+      emphasized: false,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 130),
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              metric.label,
+              style: TextStyle(
+                color: palette.muted,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          const Spacer(),
-          Text(
-            metric.value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: palette.ink,
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.6,
+            const Spacer(),
+            Text(
+              metric.value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: palette.ink,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.6,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            metric.note,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: palette.muted, fontSize: 11),
-          ),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              metric.note,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: palette.muted, fontSize: 11),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1592,12 +1643,22 @@ class _SectionLead extends StatelessWidget {
             ),
           ),
           FilledButton(
-            onPressed:
-                onAction == null ? null : () => unawaited(onAction!()),
+            onPressed: onAction == null ? null : () => unawaited(onAction!()),
             style: FilledButton.styleFrom(
-              backgroundColor: palette.ink,
-              foregroundColor: palette.onInk,
-              shape: const RoundedRectangleBorder(),
+              backgroundColor: palette.visualTheme == AppVisualTheme.glass
+                  ? const Color(0x24FFFFFF)
+                  : palette.ink,
+              foregroundColor: palette.visualTheme == AppVisualTheme.glass
+                  ? palette.ink
+                  : palette.onInk,
+              side: palette.visualTheme == AppVisualTheme.glass
+                  ? const BorderSide(color: Color(0x52FFFFFF))
+                  : BorderSide.none,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(
+                  palette.visualTheme == AppVisualTheme.glass ? 12 : 0,
+                ),
+              ),
               minimumSize: const Size(160, 46),
             ),
             child: Text(actionLabel),
@@ -1621,16 +1682,76 @@ class _Panel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        color: emphasized ? palette.surfaceStrong : palette.surface,
-        border: Border.all(
-          color: emphasized ? palette.ink : palette.rule,
-          width: emphasized ? 1.2 : 1,
-        ),
+    return _HoverSurface(
+      palette: palette,
+      emphasized: emphasized,
+      child: Padding(
+        padding: const EdgeInsets.all(22),
+        child: child,
       ),
-      child: child,
+    );
+  }
+}
+
+class _HoverSurface extends StatefulWidget {
+  const _HoverSurface({
+    required this.palette,
+    required this.emphasized,
+    required this.child,
+  });
+
+  final _HomePalette palette;
+  final bool emphasized;
+  final Widget child;
+
+  @override
+  State<_HoverSurface> createState() => _HoverSurfaceState();
+}
+
+class _HoverSurfaceState extends State<_HoverSurface> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final glass = widget.palette.visualTheme == AppVisualTheme.glass;
+    final mid = widget.palette.visualTheme == AppVisualTheme.midCentury;
+    final lift = _hovered && !reduceMotion
+        ? glass
+            ? -5.0
+            : mid
+                ? -3.0
+                : -1.0
+        : 0.0;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: AnimatedContainer(
+        duration:
+            reduceMotion ? Duration.zero : const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+        transform: Matrix4.translationValues(0, lift, 0),
+        transformAlignment: Alignment.center,
+        decoration: widget.palette.panelDecoration(
+          emphasized: widget.emphasized,
+          hovered: _hovered,
+        ),
+        child: glass
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(
+                  widget.emphasized ? 22 : 16,
+                ),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(
+                    sigmaX: _hovered ? 24 : 18,
+                    sigmaY: _hovered ? 24 : 18,
+                  ),
+                  child: widget.child,
+                ),
+              )
+            : widget.child,
+      ),
     );
   }
 }
@@ -1783,10 +1904,15 @@ class _EmptyMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final glass = palette.visualTheme == AppVisualTheme.glass;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
-      color: palette.background,
+      decoration: BoxDecoration(
+        color: glass ? const Color(0x32101D3B) : palette.background,
+        borderRadius: BorderRadius.circular(glass ? 12 : 0),
+        border: glass ? Border.all(color: const Color(0x42FFFFFF)) : null,
+      ),
       child: Row(
         children: [
           Icon(icon, color: palette.muted),
@@ -1816,6 +1942,7 @@ class _HomePalette {
     required this.accentSoft,
     required this.onInk,
     required this.onInkMuted,
+    required this.visualTheme,
   });
 
   final Color background;
@@ -1828,33 +1955,184 @@ class _HomePalette {
   final Color accentSoft;
   final Color onInk;
   final Color onInkMuted;
+  final AppVisualTheme visualTheme;
 
-  static _HomePalette of(BuildContext context) {
-    if (Theme.of(context).brightness == Brightness.dark) {
-      return const _HomePalette(
-        background: Color(0xFF1B1A18),
-        surface: Color(0xFF292724),
-        surfaceStrong: Color(0xFF332F2A),
-        ink: Color(0xFFF2EBDD),
-        muted: Color(0xFFB8AFA1),
-        rule: Color(0xFF4A453E),
-        accent: Color(0xFFD27A5E),
-        accentSoft: Color(0xFF554038),
-        onInk: Color(0xFF24211E),
-        onInkMuted: Color(0xFF655F57),
-      );
-    }
-    return const _HomePalette(
-      background: Color(0xFFE8E2D7),
-      surface: Color(0xFFF8F3EA),
-      surfaceStrong: Color(0xFFDDD3C5),
-      ink: Color(0xFF272420),
-      muted: Color(0xFF726B62),
-      rule: Color(0xFFBFB5A7),
-      accent: Color(0xFFB9573F),
-      accentSoft: Color(0xFFE3B9A9),
-      onInk: Color(0xFFF7F0E4),
-      onInkMuted: Color(0xFFD2C7B8),
+  BoxDecoration panelDecoration({
+    required bool emphasized,
+    bool hovered = false,
+  }) {
+    return switch (visualTheme) {
+      AppVisualTheme.minimalism => BoxDecoration(
+          color: emphasized ? background : surface,
+          border: Border(
+            top: BorderSide(
+                color: emphasized ? ink : rule, width: emphasized ? 2 : 1),
+          ),
+        ),
+      AppVisualTheme.wabiSabi => BoxDecoration(
+          color: emphasized ? surfaceStrong : surface,
+        ),
+      AppVisualTheme.midCentury => BoxDecoration(
+          color: emphasized ? surfaceStrong : surface,
+          borderRadius: const BorderRadius.only(
+            topRight: Radius.circular(28),
+            bottomLeft: Radius.circular(8),
+          ),
+          border: Border(left: BorderSide(color: accent, width: 4)),
+          boxShadow: const [
+            BoxShadow(
+                color: Color(0x1F2C2416), blurRadius: 15, offset: Offset(0, 5)),
+          ],
+        ),
+      AppVisualTheme.glass => BoxDecoration(
+          color: hovered
+              ? const Color(0x52172A55)
+              : emphasized
+                  ? const Color(0x4214264A)
+                  : const Color(0x32101D3B),
+          borderRadius: BorderRadius.circular(emphasized ? 22 : 16),
+          border: Border.all(
+            color: hovered ? const Color(0x66FFFFFF) : const Color(0x32FFFFFF),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color:
+                  hovered ? const Color(0x665F8CFF) : const Color(0x301F2687),
+              blurRadius: hovered ? 46 : (emphasized ? 32 : 22),
+              spreadRadius: hovered ? -2 : -7,
+              offset: Offset(0, hovered ? 14 : 8),
+            ),
+            if (hovered)
+              const BoxShadow(
+                color: Color(0x30FFFFFF),
+                blurRadius: 20,
+                spreadRadius: -8,
+              ),
+          ],
+        ),
+    };
+  }
+
+  static _HomePalette of(
+    BuildContext context,
+    AppVisualTheme visualTheme,
+  ) {
+    final tokens = AppVisualTokens.of(visualTheme);
+    final glass = visualTheme == AppVisualTheme.glass;
+    return _HomePalette(
+      background: tokens.canvas,
+      surface: glass ? const Color(0x32101D3B) : tokens.panel,
+      surfaceStrong: glass ? const Color(0x4214264A) : tokens.softPanel,
+      ink: tokens.ink,
+      muted: tokens.muted,
+      rule: glass ? const Color(0x32FFFFFF) : tokens.line,
+      accent: tokens.accent,
+      accentSoft: Color.alphaBlend(
+        tokens.accent.withValues(alpha: tokens.isDark ? 0.24 : 0.18),
+        tokens.softPanel,
+      ),
+      onInk: glass ? tokens.ink : tokens.onAccent,
+      onInkMuted: glass
+          ? tokens.muted
+          : Color.alphaBlend(
+              tokens.muted.withValues(alpha: 0.72),
+              tokens.onAccent,
+            ),
+      visualTheme: visualTheme,
     );
   }
+}
+
+class _ThemedHomeBackdrop extends StatelessWidget {
+  const _ThemedHomeBackdrop({
+    required this.visualTheme,
+    required this.palette,
+    required this.child,
+  });
+
+  final AppVisualTheme visualTheme;
+  final _HomePalette palette;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (visualTheme == AppVisualTheme.wabiSabi) {
+      return WabiSabiPaper(color: palette.background, child: child);
+    }
+    if (visualTheme == AppVisualTheme.glass) {
+      return GlassMotionBackdrop(child: child);
+    }
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: palette.background,
+      ),
+      child: CustomPaint(
+        painter: _HomeBackdropPainter(visualTheme, palette),
+        child: child,
+      ),
+    );
+  }
+}
+
+class _HomeBackdropPainter extends CustomPainter {
+  const _HomeBackdropPainter(this.visualTheme, this.palette);
+  final AppVisualTheme visualTheme;
+  final _HomePalette palette;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (visualTheme == AppVisualTheme.minimalism) {
+      final paint = Paint()..color = palette.ink.withValues(alpha: 0.025);
+      for (double y = 8; y < size.height; y += 8) {
+        canvas.drawLine(
+            Offset.zero.translate(0, y), Offset(size.width, y), paint);
+      }
+    } else if (visualTheme == AppVisualTheme.midCentury) {
+      canvas.drawCircle(Offset(size.width - 72, 92), 58,
+          Paint()..color = const Color(0x33E5A536));
+      canvas.drawRect(Rect.fromLTWH(size.width - 150, 146, 112, 24),
+          Paint()..color = const Color(0x26D45632));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _HomeBackdropPainter oldDelegate) =>
+      oldDelegate.visualTheme != visualTheme || oldDelegate.palette != palette;
+}
+
+class _MidCenturyOrnament extends StatelessWidget {
+  const _MidCenturyOrnament();
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: 112,
+        height: 82,
+        child: Stack(children: [
+          Positioned(
+              right: 0,
+              child: Container(
+                  width: 58,
+                  height: 58,
+                  decoration: const BoxDecoration(
+                      color: Color(0xFFE5A536), shape: BoxShape.circle))),
+          Positioned(
+              right: 42,
+              top: 28,
+              child: Transform.rotate(
+                angle: .55,
+                child: Container(
+                    width: 54, height: 28, color: const Color(0xFFD45632)),
+              )),
+          Positioned(
+              right: 78,
+              top: 4,
+              child: Container(
+                  width: 22,
+                  height: 64,
+                  decoration: const BoxDecoration(
+                      color: Color(0xFF2E7771),
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(22),
+                          bottomRight: Radius.circular(22))))),
+        ]),
+      );
 }
