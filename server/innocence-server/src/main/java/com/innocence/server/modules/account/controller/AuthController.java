@@ -9,9 +9,11 @@ import com.innocence.server.modules.account.dto.request.ResetPasswordRequest;
 import com.innocence.server.modules.account.dto.response.AuthTokenResponse;
 import com.innocence.server.modules.account.service.AccountService;
 import com.innocence.server.modules.account.service.EmailCodeService;
+import com.innocence.server.modules.account.service.SessionAuthService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,10 +25,16 @@ public class AuthController {
 
     private final AccountService accountService;
     private final EmailCodeService emailCodeService;
+    private final SessionAuthService sessionAuthService;
 
-    public AuthController(AccountService accountService, EmailCodeService emailCodeService) {
+    public AuthController(
+            AccountService accountService,
+            EmailCodeService emailCodeService,
+            SessionAuthService sessionAuthService
+    ) {
         this.accountService = accountService;
         this.emailCodeService = emailCodeService;
+        this.sessionAuthService = sessionAuthService;
     }
 
     @PostMapping("/email/send-register-code")
@@ -63,5 +71,25 @@ public class AuthController {
     public ApiResponse<Map<String, Object>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         accountService.resetPassword(request);
         return ApiResponse.success(Map.of("success", true));
+    }
+
+    @PostMapping("/logout")
+    public ApiResponse<Map<String, Object>> logout(
+            @RequestHeader(name = "X-Device-Type", required = false) String deviceType,
+            @RequestHeader(name = "Authorization", defaultValue = "") String authorization
+    ) {
+        sessionAuthService.logoutActiveSession(deviceType, extractBearerToken(authorization));
+        return ApiResponse.success(Map.of("success", true));
+    }
+
+    private String extractBearerToken(String authorization) {
+        if (authorization == null || authorization.isBlank()) {
+            return "";
+        }
+        String prefix = "Bearer ";
+        if (!authorization.regionMatches(true, 0, prefix, 0, prefix.length())) {
+            return "";
+        }
+        return authorization.substring(prefix.length()).trim();
     }
 }

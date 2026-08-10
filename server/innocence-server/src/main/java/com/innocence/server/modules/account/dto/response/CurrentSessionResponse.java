@@ -1,5 +1,7 @@
 package com.innocence.server.modules.account.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class CurrentSessionResponse {
 
     private String deviceType;
@@ -7,6 +9,7 @@ public class CurrentSessionResponse {
     private String deviceId;
     private Integer online;
     private Integer replaced;
+    @JsonIgnore
     private String sessionToken;
     private String loginTime;
     private String logoutTime;

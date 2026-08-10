@@ -19,18 +19,27 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String userIdHeader = request.getHeader("X-User-Id");
-        if (userIdHeader == null || userIdHeader.isBlank()) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "缺少用户身份，请重新登录");
-        }
-        Long userId = Long.valueOf(userIdHeader);
         String deviceType = request.getHeader("X-Device-Type");
-        String authorization = request.getHeader("Authorization");
-        String sessionToken = authorization == null ? "" : authorization.replace("Bearer", "").trim();
+        String sessionToken = extractBearerToken(request.getHeader("Authorization"));
 
-        sessionAuthService.requireActiveSession(userId, deviceType, sessionToken);
+        Long userId = sessionAuthService.requireActiveSession(deviceType, sessionToken).getUserId();
         RequestUserContext.setUserId(userId);
         return true;
+    }
+
+    private String extractBearerToken(String authorization) {
+        if (authorization == null || authorization.isBlank()) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "缺少登录凭据，请重新登录");
+        }
+        String prefix = "Bearer ";
+        if (!authorization.regionMatches(true, 0, prefix, 0, prefix.length())) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "登录凭据格式不正确");
+        }
+        String token = authorization.substring(prefix.length()).trim();
+        if (token.isBlank()) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "缺少登录凭据，请重新登录");
+        }
+        return token;
     }
 
     @Override

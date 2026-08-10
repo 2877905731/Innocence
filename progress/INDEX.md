@@ -146,3 +146,24 @@ checkpoints:
     status: complete
     path: progress/0019__20260810__P01__DONE__flutter-toolchain-and-windows-release-verification.md
     title: "Flutter 工具链与 Windows Release 自动化验收"
+  - sequence: "0020"
+    created_at: "2026-08-10T16:08:00+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0020__20260810__P01__DONE__backend-session-identity-hardening.md
+    title: "后端会话身份绑定与凭据回传收口"
+  - sequence: "0021"
+    created_at: "2026-08-10T16:14:00+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0021__20260810__P01__DONE__auth-logout-endpoint.md
+    title: "认证当前设备退出登录接口"
+  - sequence: "0022"
+    created_at: "2026-08-10T16:23:00+08:00"
+    phase: P02
+    type: DONE
+    status: complete
+    path: progress/0022__20260810__P02__DONE__stats-trend-endpoint.md
+    title: "统计趋势接口投影"

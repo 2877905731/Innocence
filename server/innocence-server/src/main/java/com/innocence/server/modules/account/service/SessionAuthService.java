@@ -6,6 +6,8 @@ import com.innocence.server.modules.account.domain.UserSession;
 import com.innocence.server.modules.account.mapper.UserMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class SessionAuthService {
 
@@ -35,6 +37,27 @@ public class SessionAuthService {
         return session;
     }
 
+    /**
+     * Resolves the authenticated user from the bearer session itself.
+     * The caller must not provide a user id that is trusted as identity input.
+     */
+    public UserSession requireActiveSession(String deviceType, String sessionToken) {
+        if (sessionToken == null || sessionToken.isBlank()) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "登录已失效，请重新登录");
+        }
+        String deviceSlot = resolveDeviceSlot(deviceType);
+        UserSession session = userMapper.findActiveSessionByTokenAndSlot(sessionToken, deviceSlot);
+        if (session == null || session.getUserId() == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "登录已失效，请重新登录");
+        }
+        return session;
+    }
+
+    public void logoutActiveSession(String deviceType, String sessionToken) {
+        UserSession session = requireActiveSession(deviceType, sessionToken);
+        userMapper.logoutSessionById(session.getId(), LocalDateTime.now());
+    }
+
     private String normalizeDeviceType(String deviceType) {
         String normalized = deviceType.trim().toLowerCase();
         return switch (normalized) {
@@ -42,5 +65,9 @@ public class SessionAuthService {
             case "windows", "desktop", "pc" -> "windows";
             default -> throw new BusinessException(ErrorCode.UNAUTHORIZED, "不支持的设备类型");
         };
+    }
+
+    private String resolveDeviceSlot(String deviceType) {
+        return "windows".equals(normalizeDeviceType(deviceType)) ? "desktop" : "mobile";
     }
 }

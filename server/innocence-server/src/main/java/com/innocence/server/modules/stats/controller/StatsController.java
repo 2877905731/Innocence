@@ -3,6 +3,7 @@ package com.innocence.server.modules.stats.controller;
 import com.innocence.server.common.api.ApiResponse;
 import com.innocence.server.common.web.RequestUserContext;
 import com.innocence.server.modules.stats.dto.response.StatsOverviewResponse;
+import com.innocence.server.modules.stats.dto.response.StatsTrendResponse;
 import com.innocence.server.modules.stats.service.StatsService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +25,13 @@ public class StatsController {
             @RequestParam(name = "days", required = false) Integer days
     ) {
         return ApiResponse.success(statsService.getOverview(currentUserId(), days));
+    }
+
+    @GetMapping("/trend")
+    public ApiResponse<StatsTrendResponse> getTrend(
+            @RequestParam(name = "rangeType", required = false) String rangeType
+    ) {
+        return ApiResponse.success(statsService.getTrend(currentUserId(), rangeType));
     }
 
     private Long currentUserId() {

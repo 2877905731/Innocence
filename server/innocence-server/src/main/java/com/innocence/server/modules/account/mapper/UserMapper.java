@@ -32,6 +32,10 @@ public interface UserMapper {
 
     UserSession findSessionByUserIdAndSlot(@Param("userId") Long userId, @Param("deviceSlot") String deviceSlot);
 
+    UserSession findActiveSessionByTokenAndSlot(@Param("sessionToken") String sessionToken, @Param("deviceSlot") String deviceSlot);
+
+    int logoutSessionById(@Param("sessionId") Long sessionId, @Param("logoutTime") java.time.LocalDateTime logoutTime);
+
     void insertUser(User user);
 
     void insertUserAuth(UserAuth userAuth);

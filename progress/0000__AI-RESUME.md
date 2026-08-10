@@ -3,12 +3,12 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-08-10"
-latest_checkpoint: "0019"
+latest_checkpoint: "0022"
 current_phase: P01
 current_gate: G01
-state: p01_auth_visual_rewrite_automated_verified_runtime_visual_dpi_pending
-next_sequence: "0020"
-current_goal: "P01 账户与基础进行中：登录/语言入口已全量重写，四主题品牌字与艺术装置已分化并通过 Flutter 19 项测试与 Windows Release 构建；继续实机视觉、头像上传和 DPI 验收"
+state: p01_backend_identity_hardened_runtime_visual_dpi_pending
+next_sequence: "0023"
+current_goal: "P01 账户与基础进行中：后端会话身份绑定已收口，登录/语言入口已全量重写，四主题品牌字与艺术装置已分化并通过 Flutter 自动化与 Windows Release 构建；继续实机视觉、头像上传和 DPI 验收"
 recent_baseline:
   - checkpoint: "0015"
     result: "设置页完成 Large/Medium/Small 三档独立编排与黑名单新增入口；新增会话、认证、拉黑和跨租户权限负向测试，定向 Maven 7 项通过；Flutter/Dart SDK、数据库集成环境和头像上传后端路由仍不可用"
@@ -20,6 +20,12 @@ recent_baseline:
     result: "隔离 MySQL/Redis 环境完成 U09-U13 真实 HTTP 矩阵；发现并修复 code=9000 被错误映射为 HTTP 400 的缺陷，完整 Maven 16 项通过；Flutter/Dart SDK 仍不可用"
   - checkpoint: "0019"
     result: "Flutter 3.44.9 Stable / Dart 3.12.2 与中国镜像配置完成；pub get、analyze、Flutter 16 项测试和 Windows Release 构建通过，file_selector 原生插件注册生成；实机 DPI 与真实文件选择待验收"
+  - checkpoint: "0020"
+    result: "后端鉴权不再信任客户端 X-User-Id，改由 Bearer session token + 设备槽位反查活动会话；当前会话响应不再暴露 sessionToken；隔离 MySQL/Redis 完整 Spring 上下文与全部测试通过"
+  - checkpoint: "0021"
+    result: "补齐 POST /api/app/v1/auth/logout；按 Bearer token 撤销当前设备活动会话并写入 logout_time；隔离 MySQL/Redis 完整上下文与全部 20 项后端测试通过"
+  - checkpoint: "0022"
+    result: "补齐 GET /api/app/v1/stats/trend；支持 7d/30d 并返回 xAxis + series；隔离 MySQL/Redis 完整上下文与全部 23 项后端测试通过"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"

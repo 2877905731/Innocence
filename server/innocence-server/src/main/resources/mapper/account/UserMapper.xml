@@ -135,6 +135,23 @@
         limit 1
     </select>
 
+    <select id="findActiveSessionByTokenAndSlot" resultMap="UserSessionResultMap">
+        select *
+        from user_session
+        where session_token = #{sessionToken}
+          and device_slot = #{deviceSlot}
+          and status = 1
+        limit 1
+    </select>
+
+    <update id="logoutSessionById">
+        update user_session
+        set status = 0,
+            logout_time = #{logoutTime}
+        where id = #{sessionId}
+          and status = 1
+    </update>
+
     <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
         insert into app_user (user_no, nickname, avatar_url, status, last_login_time)
         values (#{userNo}, #{nickname}, #{avatarUrl}, #{status}, #{lastLoginTime})

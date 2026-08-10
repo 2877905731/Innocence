@@ -9,6 +9,8 @@ import com.innocence.server.modules.stats.domain.StatsPlanDayValue;
 import com.innocence.server.modules.stats.dto.response.StatsFailureRecordResponse;
 import com.innocence.server.modules.stats.dto.response.StatsOverviewResponse;
 import com.innocence.server.modules.stats.dto.response.StatsTrendPointResponse;
+import com.innocence.server.modules.stats.dto.response.StatsTrendResponse;
+import com.innocence.server.modules.stats.dto.response.StatsTrendSeriesResponse;
 import com.innocence.server.modules.stats.mapper.StatsMapper;
 import com.innocence.server.modules.team.dto.response.TeammateStatsResponse;
 import com.innocence.server.modules.team.service.TeamService;
@@ -22,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 
 @Service
 public class StatsService {
@@ -127,6 +130,35 @@ public class StatsService {
         return response;
     }
 
+    @Transactional(readOnly = true)
+    public StatsTrendResponse getTrend(Long userId, String rangeType) {
+        int rangeDays = normalizeRangeType(rangeType);
+        StatsOverviewResponse overview = getOverview(userId, rangeDays);
+
+        List<String> xAxis = new ArrayList<>();
+        List<Integer> studyDuration = new ArrayList<>();
+        List<Integer> pomodoroCompleted = new ArrayList<>();
+        List<Integer> planCompletionRate = new ArrayList<>();
+        List<Integer> checkInSuccessRate = new ArrayList<>();
+        for (StatsTrendPointResponse point : overview.getTrend()) {
+            xAxis.add(point.getLabel());
+            studyDuration.add(point.getStudyDurationMinutes());
+            pomodoroCompleted.add(point.getPomodoroCompletedCount());
+            planCompletionRate.add(point.getPlanCompletionRate());
+            checkInSuccessRate.add(point.getCheckInSuccessRate());
+        }
+
+        StatsTrendResponse response = new StatsTrendResponse();
+        response.setXAxis(xAxis);
+        response.setSeries(List.of(
+                new StatsTrendSeriesResponse("studyDurationMinutes", studyDuration),
+                new StatsTrendSeriesResponse("pomodoroCompletedCount", pomodoroCompleted),
+                new StatsTrendSeriesResponse("planCompletionRate", planCompletionRate),
+                new StatsTrendSeriesResponse("checkInSuccessRate", checkInSuccessRate)
+        ));
+        return response;
+    }
+
     private int normalizeRangeDays(Integer rangeDays) {
         if (rangeDays == null) {
             return 7;
@@ -135,6 +167,17 @@ public class StatsService {
             return rangeDays;
         }
         throw new BusinessException(ErrorCode.BAD_REQUEST, "Stats range supports only 7 or 30 days.");
+    }
+
+    private int normalizeRangeType(String rangeType) {
+        if (rangeType == null || rangeType.isBlank()) {
+            return 7;
+        }
+        return switch (rangeType.trim().toLowerCase(Locale.ROOT)) {
+            case "7d" -> 7;
+            case "30d" -> 30;
+            default -> throw new BusinessException(ErrorCode.BAD_REQUEST, "Stats rangeType supports only 7d or 30d.");
+        };
     }
 
     private Map<LocalDate, Integer> toDayValueMap(List<StatsDayValue> rows) {

@@ -74,7 +74,7 @@ public class AccountController {
             @RequestHeader(name = "X-Device-Id") String deviceId,
             @RequestHeader(name = "Authorization", defaultValue = "") String authorization
     ) {
-        String sessionToken = authorization.replace("Bearer", "").trim();
+        String sessionToken = extractBearerToken(authorization);
         return ApiResponse.success(accountService.getCurrentSession(currentUserId(), deviceType, deviceId, sessionToken));
     }
 
@@ -107,5 +107,16 @@ public class AccountController {
             throw new IllegalStateException("Missing authenticated user context");
         }
         return userId;
+    }
+
+    private String extractBearerToken(String authorization) {
+        if (authorization == null || authorization.isBlank()) {
+            return "";
+        }
+        String prefix = "Bearer ";
+        if (!authorization.regionMatches(true, 0, prefix, 0, prefix.length())) {
+            return "";
+        }
+        return authorization.substring(prefix.length()).trim();
     }
 }

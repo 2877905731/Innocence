@@ -193,14 +193,12 @@ public class AccountService {
         if (session == null) {
             response.setOnline(0);
             response.setReplaced(0);
-            response.setSessionToken("");
             response.setLoginTime("");
             response.setLogoutTime("");
             return response;
         }
 
         response.setDeviceId(session.getDeviceId());
-        response.setSessionToken(session.getSessionToken());
         response.setOnline(session.getStatus());
         response.setReplaced(isCurrentDeviceReplaced(session, deviceId, sessionToken) ? 1 : 0);
         response.setLoginTime(formatTime(session.getLoginTime()));
