@@ -401,6 +401,7 @@ class HomePage extends StatelessWidget {
     required this.onDeleteMemo,
     required this.onLoadSettingsOverview,
     required this.onLoadBlacklist,
+    required this.onAddBlacklist,
     required this.onRemoveBlacklist,
     required this.onLoadCurrentDeviceSession,
     required this.onUpdateMySettingProfile,
@@ -525,6 +526,7 @@ class HomePage extends StatelessWidget {
   final Future<MemoOverview?> Function(int memoId) onDeleteMemo;
   final Future<SettingOverview?> Function() onLoadSettingsOverview;
   final Future<List<BlacklistItem>> Function() onLoadBlacklist;
+  final Future<bool> Function(int targetUserId) onAddBlacklist;
   final Future<bool> Function(int blockedUserId) onRemoveBlacklist;
   final Future<CurrentDeviceSession?> Function() onLoadCurrentDeviceSession;
   final Future<UserProfile?> Function({
@@ -864,6 +866,7 @@ class HomePage extends StatelessWidget {
             initialOverview: latestOverview ?? settingOverview,
             onRefresh: onLoadSettingsOverview,
             onLoadBlacklist: onLoadBlacklist,
+            onAddBlacklist: onAddBlacklist,
             onRemoveBlacklist: onRemoveBlacklist,
             onLoadCurrentDeviceSession: onLoadCurrentDeviceSession,
             onUpdateProfile: onUpdateMySettingProfile,

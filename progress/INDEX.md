@@ -111,3 +111,10 @@ checkpoints:
     status: complete
     path: progress/0014__20260810__P01__DONE__settings-privacy-and-session-context.md
     title: "设置隐私黑名单与当前设备会话上下文"
+  - sequence: "0015"
+    created_at: "2026-08-10T11:30:38+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0015__20260810__P01__DONE__settings-adaptive-blacklist-and-security-negative-paths.md
+    title: "设置页三档编排、黑名单新增与安全负向路径"

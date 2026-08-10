@@ -40,6 +40,17 @@ class SettingsApi {
         .toList(growable: false);
   }
 
+  Future<bool> addBlacklist(
+    AppSession session,
+    int targetUserId,
+  ) async {
+    final data = await _apiClient.post(
+      'account/blacklist/$targetUserId',
+      headers: session.authHeaders,
+    );
+    return _readSuccess(data);
+  }
+
   Future<bool> removeBlacklist(
     AppSession session,
     int blockedUserId,

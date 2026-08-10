@@ -1113,6 +1113,26 @@ class SessionController extends ChangeNotifier {
     return latest;
   }
 
+  Future<bool> addBlacklist(int targetUserId) async {
+    final currentSession = _session;
+    if (currentSession == null || targetUserId <= 0) {
+      return false;
+    }
+
+    var added = false;
+    await _runBusyAction(() async {
+      added = await _settingsApi.addBlacklist(currentSession, targetUserId);
+      if (added) {
+        _blacklist = await _settingsApi.getBlacklist(currentSession);
+        _bannerMessage = _message('已加入黑名单。', 'Added to the blacklist.');
+      }
+    }, fallbackMessage: _message(
+      '加入黑名单失败。',
+      'Failed to add the blacklist entry.',
+    ));
+    return added;
+  }
+
   Future<bool> removeBlacklist(int blockedUserId) async {
     final currentSession = _session;
     if (currentSession == null || blockedUserId <= 0) {

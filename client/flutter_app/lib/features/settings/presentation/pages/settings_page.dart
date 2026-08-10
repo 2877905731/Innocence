@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:innocence_flutter/app/app_language.dart';
+import 'package:innocence_flutter/core/layout/desktop_presentation.dart';
 import 'package:innocence_flutter/core/theme/surface_palette.dart';
 import 'package:innocence_flutter/core/utils/localized_text.dart';
 import 'package:innocence_flutter/core/widgets/secondary_page_scaffold.dart';
@@ -17,6 +18,20 @@ import 'package:innocence_flutter/features/settings/domain/models/notification_s
 import 'package:innocence_flutter/features/settings/domain/models/privacy_setting.dart';
 import 'package:innocence_flutter/features/settings/domain/models/setting_overview.dart';
 import 'package:innocence_flutter/features/settings/domain/models/widget_setting.dart';
+import 'package:innocence_flutter/features/settings/presentation/settings_presentation.dart';
+
+enum _SettingsSectionId {
+  language,
+  account,
+  privacy,
+  session,
+  notifications,
+  desktop,
+  appearance,
+  admin,
+  quickActions,
+  danger,
+}
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
@@ -25,6 +40,7 @@ class SettingsPage extends StatefulWidget {
     required this.initialOverview,
     required this.onRefresh,
     required this.onLoadBlacklist,
+    required this.onAddBlacklist,
     required this.onRemoveBlacklist,
     required this.onLoadCurrentDeviceSession,
     required this.onUpdateProfile,
@@ -60,6 +76,7 @@ class SettingsPage extends StatefulWidget {
   final SettingOverview initialOverview;
   final Future<SettingOverview?> Function() onRefresh;
   final Future<List<BlacklistItem>> Function() onLoadBlacklist;
+  final Future<bool> Function(int targetUserId) onAddBlacklist;
   final Future<bool> Function(int blockedUserId) onRemoveBlacklist;
   final Future<CurrentDeviceSession?> Function() onLoadCurrentDeviceSession;
   final Future<UserProfile?> Function({
@@ -159,6 +176,8 @@ class _SettingsPageState extends State<SettingsPage> {
   CurrentDeviceSession? _currentDeviceSession;
   bool _isLoading = false;
   bool _isPrivacyContextLoading = true;
+  _SettingsSectionId _selectedSection = _SettingsSectionId.account;
+  bool _smallDetailOpen = false;
 
   String _text(String zh, String en) {
     return localizedText(context, zh, en);
@@ -250,6 +269,76 @@ class _SettingsPageState extends State<SettingsPage> {
           _text('当前无法刷新设置，请稍后再试。', 'Unable to refresh settings right now.'),
     );
     await _loadPrivacyContext();
+  }
+
+  Future<void> _addBlacklist() async {
+    final controller = TextEditingController();
+    final rawUserId = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(_text('加入黑名单', 'Add to blacklist')),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: TextField(
+            controller: controller,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: InputDecoration(
+              labelText: _text('用户 ID', 'User ID'),
+              helperText: _text(
+                '拉黑会解除现有好友关系并阻止后续互动。',
+                'Blocking removes the friend relationship and stops interaction.',
+              ),
+            ),
+            onSubmitted: (value) => Navigator.of(context).pop(value.trim()),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(_text('取消', 'Cancel')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+            child: Text(_text('确认拉黑', 'Block user')),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (rawUserId == null || !mounted) {
+      return;
+    }
+    final targetUserId = int.tryParse(rawUserId) ?? 0;
+    if (targetUserId <= 0) {
+      _showMessage(_text('请输入有效的用户 ID。', 'Enter a valid user ID.'));
+      return;
+    }
+    if (targetUserId == _overview.accountSetting.userId) {
+      _showMessage(_text('不能拉黑自己。', 'You cannot block yourself.'));
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final added = await widget.onAddBlacklist(targetUserId);
+      if (!mounted) {
+        return;
+      }
+      if (!added) {
+        _showMessage(_text('加入黑名单失败。', 'Unable to add the entry.'));
+        return;
+      }
+      await _loadPrivacyContext();
+      if (mounted) {
+        _showMessage(_text('已加入黑名单。', 'Added to the blacklist.'));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _removeBlacklist(BlacklistItem item) async {
@@ -746,6 +835,151 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  String _sectionLabel(_SettingsSectionId section) {
+    return switch (section) {
+      _SettingsSectionId.language => _text('语言', 'Language'),
+      _SettingsSectionId.account => _text('账户资料', 'Account profile'),
+      _SettingsSectionId.privacy => _text('隐私与黑名单', 'Privacy & blacklist'),
+      _SettingsSectionId.session => _text('设备会话', 'Device session'),
+      _SettingsSectionId.notifications => _text('通知', 'Notifications'),
+      _SettingsSectionId.desktop => _text('桌面体验', 'Desktop experience'),
+      _SettingsSectionId.appearance => _text('外观', 'Appearance'),
+      _SettingsSectionId.admin => _text('后台管理', 'Admin tools'),
+      _SettingsSectionId.quickActions => _text('关于与维护', 'About & maintenance'),
+      _SettingsSectionId.danger => _text('注销账号', 'Cancel account'),
+    };
+  }
+
+  IconData _sectionIcon(_SettingsSectionId section) {
+    return switch (section) {
+      _SettingsSectionId.language => Icons.translate_rounded,
+      _SettingsSectionId.account => Icons.person_outline_rounded,
+      _SettingsSectionId.privacy => Icons.shield_outlined,
+      _SettingsSectionId.session => Icons.devices_rounded,
+      _SettingsSectionId.notifications => Icons.notifications_none_rounded,
+      _SettingsSectionId.desktop => Icons.desktop_windows_outlined,
+      _SettingsSectionId.appearance => Icons.palette_outlined,
+      _SettingsSectionId.admin => Icons.admin_panel_settings_outlined,
+      _SettingsSectionId.quickActions => Icons.info_outline_rounded,
+      _SettingsSectionId.danger => Icons.person_off_outlined,
+    };
+  }
+
+  void _selectSection(
+    _SettingsSectionId section, {
+    required bool openSmallDetail,
+  }) {
+    setState(() {
+      _selectedSection = section;
+      _smallDetailOpen = openSmallDetail;
+    });
+  }
+
+  Widget _buildSectionNavigation(DesktopPresentationTier tier) {
+    final items = _SettingsSectionId.values;
+    if (tier == DesktopPresentationTier.medium) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: SurfacePalette.softSurface,
+          border: Border.all(color: SurfacePalette.border),
+        ),
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: items
+              .map(
+                (section) => ChoiceChip(
+                  selected: section == _selectedSection,
+                  avatar: Icon(_sectionIcon(section), size: 18),
+                  label: Text(_sectionLabel(section)),
+                  onSelected: (_) => _selectSection(
+                    section,
+                    openSmallDetail: false,
+                  ),
+                ),
+              )
+              .toList(growable: false),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: SurfacePalette.softSurface,
+        border: Border.all(color: SurfacePalette.border),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: items
+            .map(
+              (section) => ListTile(
+                selected: tier == DesktopPresentationTier.large &&
+                    section == _selectedSection,
+                leading: Icon(_sectionIcon(section)),
+                title: Text(_sectionLabel(section)),
+                trailing: tier == DesktopPresentationTier.small
+                    ? const Icon(Icons.chevron_right_rounded)
+                    : null,
+                onTap: () => _selectSection(
+                  section,
+                  openSmallDetail: tier == DesktopPresentationTier.small,
+                ),
+              ),
+            )
+            .toList(growable: false),
+      ),
+    );
+  }
+
+  List<Widget> _composeAdaptiveSections(
+    DesktopPresentationTier tier,
+    List<_SettingsSurface> panes,
+  ) {
+    final selectedPane = panes.firstWhere(
+      (pane) => pane.section == _selectedSection,
+      orElse: () => panes.first,
+    );
+    final navigation = _buildSectionNavigation(tier);
+
+    switch (SettingsPresentationPolicy.resolve(tier)) {
+      case SettingsPageComposition.splitPane:
+        return [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(width: 244, child: navigation),
+              const SizedBox(width: 18),
+              Expanded(child: selectedPane),
+            ],
+          ),
+        ];
+      case SettingsPageComposition.groupedForm:
+        return [
+          navigation,
+          const SizedBox(height: 16),
+          selectedPane,
+        ];
+      case SettingsPageComposition.listDetail:
+        if (!_smallDetailOpen) {
+          return [navigation];
+        }
+        return [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => setState(() => _smallDetailOpen = false),
+              icon: const Icon(Icons.arrow_back_rounded),
+              label: Text(_text('设置列表', 'Settings list')),
+            ),
+          ),
+          const SizedBox(height: 8),
+          selectedPane,
+        ];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = SurfacePalette.homeTheme().textTheme;
@@ -755,27 +989,12 @@ class _SettingsPageState extends State<SettingsPage> {
     final widgetSetting = _overview.widgetSetting;
     final appearance = _overview.appearanceSetting;
 
-    return SecondaryPageScaffold(
-      backLabel: _text('返回', 'Back'),
-      title: _text('系统设置', 'System settings'),
-      description: _text(
-        '在这里统一管理账号、隐私、通知、挂件行为和桌面显示风格。',
-        'Control account, privacy, notifications, widget behavior, and the desktop look from one place.',
-      ),
-      headerActions: [
-        OutlinedButton.icon(
-          onPressed: _isLoading ? null : _refresh,
-          icon: _isLoading
-              ? const SizedBox.square(
-                  dimension: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.refresh_rounded),
-          label: Text(_text('刷新', 'Refresh')),
-        ),
-      ],
-      children: [
+    return DesktopPresentationLayout(
+      surface: DesktopWindowSurface.canvas,
+      builder: (context, spec) {
+        final sectionChildren = <Widget>[
         _SettingsSurface(
+          section: _SettingsSectionId.language,
           lightStyle: true,
           child: _SettingSection(
             title: _text('语言', 'Language'),
@@ -807,6 +1026,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         const SizedBox(height: 16),
         _SettingsSurface(
+          section: _SettingsSectionId.account,
           lightStyle: true,
           child: _SettingSection(
             title: _text('账号', 'Account'),
@@ -855,6 +1075,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         const SizedBox(height: 16),
         _SettingsSurface(
+          section: _SettingsSectionId.privacy,
           lightStyle: true,
           child: _SettingSection(
             title: _text('隐私', 'Privacy'),
@@ -903,9 +1124,20 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                Text(
-                  _text('黑名单', 'Blacklist'),
-                  style: Theme.of(context).textTheme.titleMedium,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _text('黑名单', 'Blacklist'),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: _isLoading ? null : _addBlacklist,
+                      icon: const Icon(Icons.person_add_disabled_rounded),
+                      label: Text(_text('添加', 'Add')),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -952,6 +1184,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         const SizedBox(height: 16),
         _SettingsSurface(
+          section: _SettingsSectionId.session,
           lightStyle: true,
           child: _SettingSection(
             title: _text('当前设备会话', 'Current device session'),
@@ -994,6 +1227,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         const SizedBox(height: 16),
         _SettingsSurface(
+          section: _SettingsSectionId.notifications,
           lightStyle: true,
           child: _SettingSection(
             title: _text('通知', 'Notifications'),
@@ -1075,6 +1309,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         const SizedBox(height: 16),
         _SettingsSurface(
+          section: _SettingsSectionId.desktop,
           lightStyle: true,
           child: _SettingSection(
             title: _text('桌面体验', 'Desktop experience'),
@@ -1170,6 +1405,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         const SizedBox(height: 16),
         _SettingsSurface(
+          section: _SettingsSectionId.appearance,
           lightStyle: true,
           child: _SettingSection(
             title: _text('外观', 'Appearance'),
@@ -1286,6 +1522,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         const SizedBox(height: 16),
         _SettingsSurface(
+          section: _SettingsSectionId.admin,
           lightStyle: true,
           child: _SettingSection(
             title: _text('后台管理', 'Admin tools'),
@@ -1323,6 +1560,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         const SizedBox(height: 16),
         _SettingsSurface(
+          section: _SettingsSectionId.quickActions,
           lightStyle: true,
           child: _SettingSection(
             title: _text('快捷操作', 'Quick actions'),
@@ -1355,6 +1593,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         const SizedBox(height: 16),
         _SettingsSurface(
+          section: _SettingsSectionId.danger,
           lightStyle: true,
           child: _SettingSection(
             title: _text('危险操作', 'Danger zone'),
@@ -1375,31 +1614,62 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
         ),
-      ],
+        ];
+        final panes = sectionChildren.whereType<_SettingsSurface>().toList(
+              growable: false,
+            );
+        return SecondaryPageScaffold(
+          backLabel: _text('返回', 'Back'),
+          title: _text('系统设置', 'System settings'),
+          description: _text(
+            '统一管理账户、隐私、通知、Canvas、Focus Orb 与外观。',
+            'Manage account, privacy, notifications, Canvas, Focus Orb, and appearance.',
+          ),
+          headerActions: [
+            OutlinedButton.icon(
+              onPressed: _isLoading ? null : _refresh,
+              icon: _isLoading
+                  ? const SizedBox.square(
+                      dimension: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.refresh_rounded),
+              label: Text(_text('刷新', 'Refresh')),
+            ),
+          ],
+          children: _composeAdaptiveSections(spec.tier!, panes),
+        );
+      },
     );
   }
 }
 
 class _SettingsSurface extends StatelessWidget {
   const _SettingsSurface({
+    required this.section,
     required this.child,
     this.padding = const EdgeInsets.all(18),
     this.lightStyle = false,
   });
 
+  final _SettingsSectionId section;
   final Widget child;
   final EdgeInsets padding;
   final bool lightStyle;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: padding,
-      decoration: BoxDecoration(
-        color: lightStyle ? SurfacePalette.surface : SurfacePalette.softSurface,
-        border: Border.all(color: SurfacePalette.border),
+    return KeyedSubtree(
+      key: ValueKey('settings.${section.name}'),
+      child: Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color:
+              lightStyle ? SurfacePalette.surface : SurfacePalette.softSurface,
+          border: Border.all(color: SurfacePalette.border),
+        ),
+        child: child,
       ),
-      child: child,
     );
   }
 }

@@ -144,6 +144,7 @@ class _InnocenceAppState extends State<InnocenceApp> {
             onLoadSettingsOverview:
                 widget.sessionController.loadSettingsOverview,
             onLoadBlacklist: widget.sessionController.loadBlacklist,
+            onAddBlacklist: widget.sessionController.addBlacklist,
             onRemoveBlacklist: widget.sessionController.removeBlacklist,
             onLoadCurrentDeviceSession:
                 widget.sessionController.loadCurrentDeviceSession,

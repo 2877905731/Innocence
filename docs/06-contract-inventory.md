@@ -89,6 +89,12 @@ endpoints:
     source_behavior: "读取当前设备会话状态（接口草案 4.1）"
     evidence_status: implementation_matched_sample_pending
     trigger: "P01 会话策略收尾时以替换/当前设备回放核对"
+  - id: U12
+    method: POST
+    path: "/api/app/v1/account/blacklist/{targetUserId}"
+    source_behavior: "将目标用户加入当前用户黑名单（接口草案 4.1）"
+    evidence_status: implementation_matched_sample_pending
+    trigger: "P01 隐私设置收尾时以本人、重复拉黑和权限边界回放核对"
 preview_queue:
   - priority: P1
     sample: "待收样本：认证/学习/签到/统计/首页聚合 5 组正常+空+边界请求"
