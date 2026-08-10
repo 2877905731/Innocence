@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:innocence_flutter/app/app_language.dart';
+import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/core/layout/desktop_presentation.dart';
 import 'package:innocence_flutter/core/theme/surface_palette.dart';
 import 'package:innocence_flutter/core/utils/localized_text.dart';
@@ -38,6 +39,8 @@ class SettingsPage extends StatefulWidget {
   const SettingsPage({
     super.key,
     required this.onChangeLanguage,
+    required this.visualTheme,
+    required this.onChangeVisualTheme,
     required this.initialOverview,
     required this.onRefresh,
     required this.onLoadBlacklist,
@@ -75,6 +78,8 @@ class SettingsPage extends StatefulWidget {
     AppLanguage language, {
     bool confirmStartup,
   }) onChangeLanguage;
+  final AppVisualTheme visualTheme;
+  final ValueChanged<AppVisualTheme> onChangeVisualTheme;
   final SettingOverview initialOverview;
   final Future<SettingOverview?> Function() onRefresh;
   final Future<List<BlacklistItem>> Function() onLoadBlacklist;
@@ -1053,638 +1058,680 @@ class _SettingsPageState extends State<SettingsPage> {
       surface: DesktopWindowSurface.canvas,
       builder: (context, spec) {
         final sectionChildren = <Widget>[
-        _SettingsSurface(
-          section: _SettingsSectionId.language,
-          lightStyle: true,
-          child: _SettingSection(
-            title: _text('语言', 'Language'),
-            subtitle: _text(
-              '这里可以切换进入软件后的显示语言。',
-              'Switch the display language used after entering the app.',
-            ),
-            child: Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: AppLanguage.values.map((language) {
-                final selected = Localizations.localeOf(context).languageCode ==
-                    language.locale.languageCode;
-                return ChoiceChip(
-                  selected: selected,
-                  label: Text(language.label),
-                  onSelected: _isLoading
-                      ? null
-                      : (_) async {
-                          if (selected) {
-                            return;
-                          }
-                          await _changeLanguage(language);
-                        },
-                );
-              }).toList(),
+          _SettingsSurface(
+            section: _SettingsSectionId.language,
+            lightStyle: true,
+            child: _SettingSection(
+              title: _text('语言', 'Language'),
+              subtitle: _text(
+                '这里可以切换进入软件后的显示语言。',
+                'Switch the display language used after entering the app.',
+              ),
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: AppLanguage.values.map((language) {
+                  final selected =
+                      Localizations.localeOf(context).languageCode ==
+                          language.locale.languageCode;
+                  return ChoiceChip(
+                    selected: selected,
+                    label: Text(language.label),
+                    onSelected: _isLoading
+                        ? null
+                        : (_) async {
+                            if (selected) {
+                              return;
+                            }
+                            await _changeLanguage(language);
+                          },
+                  );
+                }).toList(),
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _SettingsSurface(
-          section: _SettingsSectionId.account,
-          lightStyle: true,
-          child: _SettingSection(
-            title: _text('账号', 'Account'),
-            subtitle: _text(
-              '这里是手机和电脑共用的熟人圈账号资料。',
-              'This is the trusted-circle account profile shared on phone and desktop.',
-            ),
-            trailing: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: _isLoading ? null : _uploadAvatar,
-                  icon: const Icon(Icons.add_a_photo_outlined),
-                  label: Text(_text('更换头像', 'Change avatar')),
-                ),
-                OutlinedButton.icon(
-                  onPressed: _isLoading ? null : _editProfile,
-                  icon: const Icon(Icons.edit_rounded),
-                  label: Text(_text('编辑资料', 'Edit profile')),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _InfoLine(
-                  label: _text('昵称', 'Nickname'),
-                  value: _accountDisplayName(account),
-                ),
-                _InfoLine(
-                  label: _text('用户号', 'User No'),
-                  value: account.userNo.isEmpty
-                      ? _text('待生成', 'Pending')
-                      : account.userNo,
-                ),
-                _InfoLine(
-                  label: _text('时区', 'Timezone'),
-                  value: account.timezone.isEmpty
-                      ? 'Asia/Shanghai'
-                      : account.timezone,
-                ),
-                _InfoLine(
-                  label: _text('头像', 'Avatar'),
-                  value: account.avatarUrl.isEmpty
-                      ? _text('未设置', 'Not set')
-                      : _text('已设置', 'Configured'),
-                ),
-                if (account.bio.isNotEmpty)
+          const SizedBox(height: 16),
+          _SettingsSurface(
+            section: _SettingsSectionId.account,
+            lightStyle: true,
+            child: _SettingSection(
+              title: _text('账号', 'Account'),
+              subtitle: _text(
+                '这里是手机和电脑共用的熟人圈账号资料。',
+                'This is the trusted-circle account profile shared on phone and desktop.',
+              ),
+              trailing: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _uploadAvatar,
+                    icon: const Icon(Icons.add_a_photo_outlined),
+                    label: Text(_text('更换头像', 'Change avatar')),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _editProfile,
+                    icon: const Icon(Icons.edit_rounded),
+                    label: Text(_text('编辑资料', 'Edit profile')),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   _InfoLine(
-                    label: _text('简介', 'Bio'),
-                    value: account.bio,
+                    label: _text('昵称', 'Nickname'),
+                    value: _accountDisplayName(account),
                   ),
-              ],
+                  _InfoLine(
+                    label: _text('用户号', 'User No'),
+                    value: account.userNo.isEmpty
+                        ? _text('待生成', 'Pending')
+                        : account.userNo,
+                  ),
+                  _InfoLine(
+                    label: _text('时区', 'Timezone'),
+                    value: account.timezone.isEmpty
+                        ? 'Asia/Shanghai'
+                        : account.timezone,
+                  ),
+                  _InfoLine(
+                    label: _text('头像', 'Avatar'),
+                    value: account.avatarUrl.isEmpty
+                        ? _text('未设置', 'Not set')
+                        : _text('已设置', 'Configured'),
+                  ),
+                  if (account.bio.isNotEmpty)
+                    _InfoLine(
+                      label: _text('简介', 'Bio'),
+                      value: account.bio,
+                    ),
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _SettingsSurface(
-          section: _SettingsSectionId.privacy,
-          lightStyle: true,
-          child: _SettingSection(
-            title: _text('隐私', 'Privacy'),
-            subtitle: _text(
-              '只有好友能看资料，只有队友能看学习数据。',
-              'Only friends can view profile details, and only teammates can view study data.',
-            ),
-            child: Column(
-              children: [
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: privacy.allowFriendViewProfile,
-                  onChanged: _isLoading
-                      ? null
-                      : (value) => _setFriendProfileVisible(value),
-                  title: Text(_text('好友可见资料', 'Friends can view profile')),
-                  subtitle: Text(
-                    _text(
-                      '详细资料仅对你的好友开放。',
-                      'Keep your detailed profile visible only inside your friend list.',
-                    ),
-                  ),
-                ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: privacy.allowTeammateViewStudy,
-                  onChanged: _isLoading
-                      ? null
-                      : (value) => _setTeammateStudyVisible(value),
-                  title: Text(
-                    _text('队友可见学习数据', 'Teammates can view study data'),
-                  ),
-                  subtitle: Text(
-                    _text(
-                      '允许队友查看学习时长和计划完成进度。',
-                      'Let teammates see duration and completion progress inside the team.',
-                    ),
-                  ),
-                ),
-                _StaticHintRow(
-                  title: _text('陌生人私信规则', 'Stranger message policy'),
-                  value: _text('已拦截', 'Blocked'),
-                  note: _text(
-                    '当前产品方向下，陌生人不能给你发送私信。',
-                    'Strangers cannot send private messages in this product direction.',
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _text('黑名单', 'Blacklist'),
-                        style: Theme.of(context).textTheme.titleMedium,
+          const SizedBox(height: 16),
+          _SettingsSurface(
+            section: _SettingsSectionId.privacy,
+            lightStyle: true,
+            child: _SettingSection(
+              title: _text('隐私', 'Privacy'),
+              subtitle: _text(
+                '只有好友能看资料，只有队友能看学习数据。',
+                'Only friends can view profile details, and only teammates can view study data.',
+              ),
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: privacy.allowFriendViewProfile,
+                    onChanged: _isLoading
+                        ? null
+                        : (value) => _setFriendProfileVisible(value),
+                    title: Text(_text('好友可见资料', 'Friends can view profile')),
+                    subtitle: Text(
+                      _text(
+                        '详细资料仅对你的好友开放。',
+                        'Keep your detailed profile visible only inside your friend list.',
                       ),
                     ),
-                    OutlinedButton.icon(
-                      onPressed: _isLoading ? null : _addBlacklist,
-                      icon: const Icon(Icons.person_add_disabled_rounded),
-                      label: Text(_text('添加', 'Add')),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: privacy.allowTeammateViewStudy,
+                    onChanged: _isLoading
+                        ? null
+                        : (value) => _setTeammateStudyVisible(value),
+                    title: Text(
+                      _text('队友可见学习数据', 'Teammates can view study data'),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  _text(
-                    '被拉黑的账号不会出现在好友互动入口中。',
-                    'Blocked accounts stay out of friend interaction entry points.',
+                    subtitle: Text(
+                      _text(
+                        '允许队友查看学习时长和计划完成进度。',
+                        'Let teammates see duration and completion progress inside the team.',
+                      ),
+                    ),
                   ),
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 8),
-                if (_isPrivacyContextLoading)
-                  const LinearProgressIndicator()
-                else if (_blacklist.isEmpty)
-                  Text(
-                    _text('黑名单为空。', 'Your blacklist is empty.'),
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  )
-                else
-                  Column(
-                    children: _blacklist
-                        .map(
-                          (item) => ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: const Icon(Icons.block_rounded),
-                            title: Text(
-                              '${_text('用户', 'User')} #${item.blockedUserId}',
-                            ),
-                            subtitle: item.createTime.isEmpty
-                                ? null
-                                : Text(item.createTime),
-                            trailing: TextButton(
-                              onPressed: _isLoading
-                                  ? null
-                                  : () => _removeBlacklist(item),
-                              child: Text(_text('解除', 'Remove')),
-                            ),
-                          ),
-                        )
-                        .toList(growable: false),
+                  _StaticHintRow(
+                    title: _text('陌生人私信规则', 'Stranger message policy'),
+                    value: _text('已拦截', 'Blocked'),
+                    note: _text(
+                      '当前产品方向下，陌生人不能给你发送私信。',
+                      'Strangers cannot send private messages in this product direction.',
+                    ),
                   ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        _SettingsSurface(
-          section: _SettingsSectionId.session,
-          lightStyle: true,
-          child: _SettingSection(
-            title: _text('当前设备会话', 'Current device session'),
-            subtitle: _text(
-              '账号同时保留 1 台手机和 1 台 Windows 电脑会话。',
-              'One phone session and one Windows session are kept per account.',
-            ),
-            child: _currentDeviceSession == null
-                ? Text(
-                    _isPrivacyContextLoading
-                        ? _text('正在核对会话状态…', 'Checking session status…')
-                        : _text('当前会话状态暂不可用。', 'Session status is unavailable.'),
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 14),
+                  Row(
                     children: [
-                      _InfoLine(
-                        label: _text('设备', 'Device'),
-                        value: _deviceLabel(_currentDeviceSession!),
-                      ),
-                      _InfoLine(
-                        label: _text('状态', 'Status'),
-                        value: _sessionStateLabel(_currentDeviceSession!),
-                      ),
-                      _InfoLine(
-                        label: _text('设备标识', 'Device ID'),
-                        value: _currentDeviceSession!.deviceId.isEmpty
-                            ? _text('未提供', 'Unavailable')
-                            : _currentDeviceSession!.deviceId,
-                      ),
-                      if (_currentDeviceSession!.loginTime.isNotEmpty)
-                        _InfoLine(
-                          label: _text('登录时间', 'Login time'),
-                          value: _currentDeviceSession!.loginTime,
+                      Expanded(
+                        child: Text(
+                          _text('黑名单', 'Blacklist'),
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: _isLoading ? null : _addBlacklist,
+                        icon: const Icon(Icons.person_add_disabled_rounded),
+                        label: Text(_text('添加', 'Add')),
+                      ),
                     ],
                   ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        _SettingsSurface(
-          section: _SettingsSectionId.notifications,
-          lightStyle: true,
-          child: _SettingSection(
-            title: _text('通知', 'Notifications'),
-            subtitle: _text(
-              '学习核心事件支持手机推送和桌面系统通知。',
-              'Mobile push plus desktop system notices for core study events.',
-            ),
-            child: Column(
-              children: [
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: notifications.mobilePushEnabled,
-                  onChanged: _isLoading
-                      ? null
-                      : (value) => _updateNotifications(
-                            notifications.copyWith(mobilePushEnabled: value),
-                          ),
-                  title: Text(_text('手机推送', 'Mobile push')),
-                  subtitle: Text(
+                  const SizedBox(height: 6),
+                  Text(
                     _text(
-                      '向安卓应用发送推送提醒。',
-                      'Send push updates to the Android app.',
+                      '被拉黑的账号不会出现在好友互动入口中。',
+                      'Blocked accounts stay out of friend interaction entry points.',
                     ),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
-                ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: notifications.desktopNoticeEnabled,
-                  onChanged: _isLoading
-                      ? null
-                      : (value) => _updateNotifications(
-                            notifications.copyWith(desktopNoticeEnabled: value),
-                          ),
-                  title: Text(_text('桌面通知', 'Desktop notice')),
-                  subtitle: Text(
-                    _text(
-                      '使用 Windows 系统通知展示挂件事件。',
-                      'Use Windows system notifications for widget events.',
-                    ),
-                  ),
-                ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: notifications.teamRemindEnabled,
-                  onChanged: _isLoading
-                      ? null
-                      : (value) => _updateNotifications(
-                            notifications.copyWith(teamRemindEnabled: value),
-                          ),
-                  title: Text(_text('队友提醒', 'Teammate reminders')),
-                  subtitle: Text(
-                    _text(
-                      '接收队友发来的提醒消息。',
-                      'Receive reminders sent by your teammates.',
-                    ),
-                  ),
-                ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: notifications.systemAnnouncementEnabled,
-                  onChanged: _isLoading
-                      ? null
-                      : (value) => _updateNotifications(
-                            notifications.copyWith(
-                              systemAnnouncementEnabled: value,
+                  const SizedBox(height: 8),
+                  if (_isPrivacyContextLoading)
+                    const LinearProgressIndicator()
+                  else if (_blacklist.isEmpty)
+                    Text(
+                      _text('黑名单为空。', 'Your blacklist is empty.'),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    )
+                  else
+                    Column(
+                      children: _blacklist
+                          .map(
+                            (item) => ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              leading: const Icon(Icons.block_rounded),
+                              title: Text(
+                                '${_text('用户', 'User')} #${item.blockedUserId}',
+                              ),
+                              subtitle: item.createTime.isEmpty
+                                  ? null
+                                  : Text(item.createTime),
+                              trailing: TextButton(
+                                onPressed: _isLoading
+                                    ? null
+                                    : () => _removeBlacklist(item),
+                                child: Text(_text('解除', 'Remove')),
+                              ),
                             ),
-                          ),
-                  title: Text(_text('系统公告', 'System announcements')),
-                  subtitle: Text(
-                    _text(
-                      '保留项目级的重要通知。',
-                      'Keep project-level updates visible.',
+                          )
+                          .toList(growable: false),
                     ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _SettingsSurface(
-          section: _SettingsSectionId.desktop,
-          lightStyle: true,
-          child: _SettingSection(
-            title: _text('桌面体验', 'Desktop experience'),
-            subtitle: _text(
-              '这里控制 Canvas 与 Focus Orb 的窗口行为。',
-              'Control Canvas and Focus Orb window behavior here.',
-            ),
-            child: Column(
-              children: [
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: widgetSetting.autoStart,
-                  onChanged: _isLoading
-                      ? null
-                      : (value) => _updateWidgetSetting(
-                            widgetSetting.copyWith(autoStart: value),
+          const SizedBox(height: 16),
+          _SettingsSurface(
+            section: _SettingsSectionId.session,
+            lightStyle: true,
+            child: _SettingSection(
+              title: _text('当前设备会话', 'Current device session'),
+              subtitle: _text(
+                '账号同时保留 1 台手机和 1 台 Windows 电脑会话。',
+                'One phone session and one Windows session are kept per account.',
+              ),
+              child: _currentDeviceSession == null
+                  ? Text(
+                      _isPrivacyContextLoading
+                          ? _text('正在核对会话状态…', 'Checking session status…')
+                          : _text(
+                              '当前会话状态暂不可用。', 'Session status is unavailable.'),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _InfoLine(
+                          label: _text('设备', 'Device'),
+                          value: _deviceLabel(_currentDeviceSession!),
+                        ),
+                        _InfoLine(
+                          label: _text('状态', 'Status'),
+                          value: _sessionStateLabel(_currentDeviceSession!),
+                        ),
+                        _InfoLine(
+                          label: _text('设备标识', 'Device ID'),
+                          value: _currentDeviceSession!.deviceId.isEmpty
+                              ? _text('未提供', 'Unavailable')
+                              : _currentDeviceSession!.deviceId,
+                        ),
+                        if (_currentDeviceSession!.loginTime.isNotEmpty)
+                          _InfoLine(
+                            label: _text('登录时间', 'Login time'),
+                            value: _currentDeviceSession!.loginTime,
                           ),
-                   title: Text(_text('开机启动 Canvas', 'Auto start Canvas')),
-                  subtitle: Text(
-                    _text(
-                       '随 Windows 一起启动桌面画布。',
-                       'Launch the desktop Canvas with Windows.',
+                      ],
                     ),
-                  ),
-                ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: widgetSetting.alwaysOnTop,
-                  onChanged: _isLoading
-                      ? null
-                      : (value) => _updateWidgetSetting(
-                            widgetSetting.copyWith(alwaysOnTop: value),
-                          ),
-                   title: Text(_text('Focus Orb 始终置顶', 'Keep Focus Orb on top')),
-                  subtitle: Text(
-                    _text(
-                       '让主动收纳后的 Focus Orb 保持在其他窗口上方。',
-                       'Keep the Focus Orb above other windows when stowed.',
-                    ),
-                  ),
-                ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: widgetSetting.showPlan,
-                  onChanged: _isLoading
-                      ? null
-                      : (value) => _updateWidgetSetting(
-                            widgetSetting.copyWith(showPlan: value),
-                          ),
-                   title: Text(_text('Orb 显示下一计划', 'Show next plan in Orb')),
-                  subtitle: Text(
-                    _text(
-                       '在 Focus Orb 中显示下一项计划摘要。',
-                       'Display the next plan summary in Focus Orb.',
-                    ),
-                  ),
-                ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: widgetSetting.showTimer,
-                  onChanged: _isLoading
-                      ? null
-                      : (value) => _updateWidgetSetting(
-                            widgetSetting.copyWith(showTimer: value),
-                          ),
-                   title: Text(_text('Orb 显示计时器', 'Show timer in Orb')),
-                  subtitle: Text(
-                    _text(
-                       '显示 Focus Orb 的当前学习计时器和番茄状态。',
-                       'Display the active timer and pomodoro state in Focus Orb.',
-                    ),
-                  ),
-                ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: widgetSetting.showMemo,
-                  onChanged: _isLoading
-                      ? null
-                      : (value) => _updateWidgetSetting(
-                            widgetSetting.copyWith(showMemo: value),
-                          ),
-                   title: Text(_text('Orb 显示备忘录', 'Show memo in Orb')),
-                  subtitle: Text(
-                    _text(
-                       '在 Canvas 摘要中显示备忘录卡片；Orb 不显示正文。',
-                       'Show memo cards in Canvas summaries; Orb never shows body text.',
-                    ),
-                  ),
-                ),
-              ],
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _SettingsSurface(
-          section: _SettingsSectionId.appearance,
-          lightStyle: true,
-          child: _SettingSection(
-            title: _text('外观', 'Appearance'),
-            subtitle: _text(
-              '这里可以切换明暗模式，并预留桌面视觉风格选项。',
-              'Switch between light and dark, and prepare the desktop style.',
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _text('主题模式', 'Theme mode'),
-                  style: textTheme.titleSmall,
-                ),
-                const SizedBox(height: 10),
-                SegmentedButton<String>(
-                  segments: [
-                    ButtonSegment<String>(
-                      value: 'dark',
-                      label: Text(_text('深色', 'Dark')),
-                      icon: const Icon(Icons.dark_mode_rounded),
-                    ),
-                    ButtonSegment<String>(
-                      value: 'light',
-                      label: Text(_text('浅色', 'Light')),
-                      icon: const Icon(Icons.light_mode_rounded),
-                    ),
-                  ],
-                  selected: {appearance.themeMode},
-                  onSelectionChanged: _isLoading
-                      ? null
-                      : (selection) async {
-                          final nextValue = selection.first;
-                          await _updateAppearance(
-                            appearance.copyWith(themeMode: nextValue),
-                          );
-                        },
-                ),
-                const SizedBox(height: 12),
-                _InfoLine(
-                  label: _text('当前主题', 'Current theme'),
-                  value: _appearanceThemeLabel(appearance),
-                ),
-                const SizedBox(height: 18),
-                Text(
-                  _text('桌面效果', 'Desktop effect'),
-                  style: textTheme.titleSmall,
-                ),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: [
-                    _EffectOption(
-                      value: 'immersive_glass',
-                      label: _text('沉浸毛玻璃', 'Immersive glass'),
-                      hint: _text(
-                        '更偏沉浸式的桌面层次感',
-                        'Apple-style translucent layer',
+          const SizedBox(height: 16),
+          _SettingsSurface(
+            section: _SettingsSectionId.notifications,
+            lightStyle: true,
+            child: _SettingSection(
+              title: _text('通知', 'Notifications'),
+              subtitle: _text(
+                '学习核心事件支持手机推送和桌面系统通知。',
+                'Mobile push plus desktop system notices for core study events.',
+              ),
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: notifications.mobilePushEnabled,
+                    onChanged: _isLoading
+                        ? null
+                        : (value) => _updateNotifications(
+                              notifications.copyWith(mobilePushEnabled: value),
+                            ),
+                    title: Text(_text('手机推送', 'Mobile push')),
+                    subtitle: Text(
+                      _text(
+                        '向安卓应用发送推送提醒。',
+                        'Send push updates to the Android app.',
                       ),
                     ),
-                    _EffectOption(
-                      value: 'soft_glass',
-                      label: _text('柔和玻璃', 'Soft glass'),
-                      hint: _text(
-                        '更轻、更柔和的透明感',
-                        'Lighter, calmer translucency',
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: notifications.desktopNoticeEnabled,
+                    onChanged: _isLoading
+                        ? null
+                        : (value) => _updateNotifications(
+                              notifications.copyWith(
+                                  desktopNoticeEnabled: value),
+                            ),
+                    title: Text(_text('桌面通知', 'Desktop notice')),
+                    subtitle: Text(
+                      _text(
+                        '使用 Windows 系统通知展示挂件事件。',
+                        'Use Windows system notifications for widget events.',
                       ),
                     ),
-                    _EffectOption(
-                      value: 'focus_glow',
-                      label: _text('专注光效', 'Focus glow'),
-                      hint: _text(
-                        '更强调专注氛围的光感',
-                        'Glow-forward study atmosphere',
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: notifications.teamRemindEnabled,
+                    onChanged: _isLoading
+                        ? null
+                        : (value) => _updateNotifications(
+                              notifications.copyWith(teamRemindEnabled: value),
+                            ),
+                    title: Text(_text('队友提醒', 'Teammate reminders')),
+                    subtitle: Text(
+                      _text(
+                        '接收队友发来的提醒消息。',
+                        'Receive reminders sent by your teammates.',
                       ),
                     ),
-                  ].map((option) {
-                    final selected = appearance.desktopEffect == option.value;
-                    return ChoiceChip(
-                      selected: selected,
-                      onSelected: _isLoading
-                          ? null
-                          : (_) async {
-                              await _updateAppearance(
-                                appearance.copyWith(
-                                  desktopEffect: option.value,
-                                ),
-                              );
-                            },
-                      label: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(option.label),
-                          const SizedBox(height: 2),
-                          Text(
-                            option.hint,
-                            style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: notifications.systemAnnouncementEnabled,
+                    onChanged: _isLoading
+                        ? null
+                        : (value) => _updateNotifications(
+                              notifications.copyWith(
+                                systemAnnouncementEnabled: value,
+                              ),
+                            ),
+                    title: Text(_text('系统公告', 'System announcements')),
+                    subtitle: Text(
+                      _text(
+                        '保留项目级的重要通知。',
+                        'Keep project-level updates visible.',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _SettingsSurface(
+            section: _SettingsSectionId.desktop,
+            lightStyle: true,
+            child: _SettingSection(
+              title: _text('桌面体验', 'Desktop experience'),
+              subtitle: _text(
+                '这里控制 Canvas 与 Focus Orb 的窗口行为。',
+                'Control Canvas and Focus Orb window behavior here.',
+              ),
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: widgetSetting.autoStart,
+                    onChanged: _isLoading
+                        ? null
+                        : (value) => _updateWidgetSetting(
+                              widgetSetting.copyWith(autoStart: value),
+                            ),
+                    title: Text(_text('开机启动 Canvas', 'Auto start Canvas')),
+                    subtitle: Text(
+                      _text(
+                        '随 Windows 一起启动桌面画布。',
+                        'Launch the desktop Canvas with Windows.',
+                      ),
+                    ),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: widgetSetting.alwaysOnTop,
+                    onChanged: _isLoading
+                        ? null
+                        : (value) => _updateWidgetSetting(
+                              widgetSetting.copyWith(alwaysOnTop: value),
+                            ),
+                    title:
+                        Text(_text('Focus Orb 始终置顶', 'Keep Focus Orb on top')),
+                    subtitle: Text(
+                      _text(
+                        '让主动收纳后的 Focus Orb 保持在其他窗口上方。',
+                        'Keep the Focus Orb above other windows when stowed.',
+                      ),
+                    ),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: widgetSetting.showPlan,
+                    onChanged: _isLoading
+                        ? null
+                        : (value) => _updateWidgetSetting(
+                              widgetSetting.copyWith(showPlan: value),
+                            ),
+                    title: Text(_text('Orb 显示下一计划', 'Show next plan in Orb')),
+                    subtitle: Text(
+                      _text(
+                        '在 Focus Orb 中显示下一项计划摘要。',
+                        'Display the next plan summary in Focus Orb.',
+                      ),
+                    ),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: widgetSetting.showTimer,
+                    onChanged: _isLoading
+                        ? null
+                        : (value) => _updateWidgetSetting(
+                              widgetSetting.copyWith(showTimer: value),
+                            ),
+                    title: Text(_text('Orb 显示计时器', 'Show timer in Orb')),
+                    subtitle: Text(
+                      _text(
+                        '显示 Focus Orb 的当前学习计时器和番茄状态。',
+                        'Display the active timer and pomodoro state in Focus Orb.',
+                      ),
+                    ),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: widgetSetting.showMemo,
+                    onChanged: _isLoading
+                        ? null
+                        : (value) => _updateWidgetSetting(
+                              widgetSetting.copyWith(showMemo: value),
+                            ),
+                    title: Text(_text('Orb 显示备忘录', 'Show memo in Orb')),
+                    subtitle: Text(
+                      _text(
+                        '在 Canvas 摘要中显示备忘录卡片；Orb 不显示正文。',
+                        'Show memo cards in Canvas summaries; Orb never shows body text.',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _SettingsSurface(
+            section: _SettingsSectionId.appearance,
+            lightStyle: true,
+            child: _SettingSection(
+              title: _text('外观', 'Appearance'),
+              subtitle: _text(
+                '切换完整视觉主题。选择保存在本机，下次启动和登录时会自动恢复。',
+                'Switch the complete visual theme. It is restored on the next launch and sign-in.',
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _text('视觉主题', 'Visual theme'),
+                    style: textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: AppVisualTheme.values.map((theme) {
+                      final selected = widget.visualTheme == theme;
+                      final tokens = AppVisualTokens.of(theme);
+                      return ChoiceChip(
+                        key: ValueKey(
+                            'settings-visual-theme-${theme.storageValue}'),
+                        selected: selected,
+                        onSelected: (_) => widget.onChangeVisualTheme(theme),
+                        avatar: Container(
+                          width: 14,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            color: tokens.canvas,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: tokens.accent, width: 3),
                           ),
-                        ],
+                        ),
+                        label: Text(
+                          theme.label(
+                            isChinese:
+                                Localizations.localeOf(context).languageCode ==
+                                    'zh',
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 20),
+                  const Divider(color: SurfacePalette.borderSoft),
+                  const SizedBox(height: 16),
+                  Text(
+                    _text('内容明暗偏好', 'Content contrast'),
+                    style: textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 10),
+                  SegmentedButton<String>(
+                    segments: [
+                      ButtonSegment<String>(
+                        value: 'dark',
+                        label: Text(_text('深色', 'Dark')),
+                        icon: const Icon(Icons.dark_mode_rounded),
                       ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 12),
-                _InfoLine(
-                  label: _text('当前桌面效果', 'Current desktop effect'),
-                  value: _appearanceEffectLabel(appearance),
-                ),
-              ],
+                      ButtonSegment<String>(
+                        value: 'light',
+                        label: Text(_text('浅色', 'Light')),
+                        icon: const Icon(Icons.light_mode_rounded),
+                      ),
+                    ],
+                    selected: {appearance.themeMode},
+                    onSelectionChanged: _isLoading
+                        ? null
+                        : (selection) async {
+                            final nextValue = selection.first;
+                            await _updateAppearance(
+                              appearance.copyWith(themeMode: nextValue),
+                            );
+                          },
+                  ),
+                  const SizedBox(height: 12),
+                  _InfoLine(
+                    label: _text('当前主题', 'Current theme'),
+                    value: _appearanceThemeLabel(appearance),
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    _text('桌面效果', 'Desktop effect'),
+                    style: textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      _EffectOption(
+                        value: 'immersive_glass',
+                        label: _text('沉浸毛玻璃', 'Immersive glass'),
+                        hint: _text(
+                          '更偏沉浸式的桌面层次感',
+                          'Apple-style translucent layer',
+                        ),
+                      ),
+                      _EffectOption(
+                        value: 'soft_glass',
+                        label: _text('柔和玻璃', 'Soft glass'),
+                        hint: _text(
+                          '更轻、更柔和的透明感',
+                          'Lighter, calmer translucency',
+                        ),
+                      ),
+                      _EffectOption(
+                        value: 'focus_glow',
+                        label: _text('专注光效', 'Focus glow'),
+                        hint: _text(
+                          '更强调专注氛围的光感',
+                          'Glow-forward study atmosphere',
+                        ),
+                      ),
+                    ].map((option) {
+                      final selected = appearance.desktopEffect == option.value;
+                      return ChoiceChip(
+                        selected: selected,
+                        onSelected: _isLoading
+                            ? null
+                            : (_) async {
+                                await _updateAppearance(
+                                  appearance.copyWith(
+                                    desktopEffect: option.value,
+                                  ),
+                                );
+                              },
+                        label: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(option.label),
+                            const SizedBox(height: 2),
+                            Text(
+                              option.hint,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 12),
+                  _InfoLine(
+                    label: _text('当前桌面效果', 'Current desktop effect'),
+                    value: _appearanceEffectLabel(appearance),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _SettingsSurface(
-          section: _SettingsSectionId.admin,
-          lightStyle: true,
-          child: _SettingSection(
-            title: _text('后台管理', 'Admin tools'),
-            subtitle: _text(
-              '这里放简版举报、用户、团队和公告管理入口。',
-              'Moderation tools for reports, users, teams, and system announcements.',
-            ),
-            child: Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                FilledButton.tonalIcon(
-                  onPressed: _isLoading ? null : _openAdminAnnouncementPage,
-                  icon: const Icon(Icons.campaign_rounded),
-                  label: Text(_text('公告管理', 'Open announcements')),
-                ),
-                FilledButton.tonalIcon(
-                  onPressed: _isLoading ? null : _openAdminTeamPage,
-                  icon: const Icon(Icons.groups_rounded),
-                  label: Text(_text('团队管理', 'Open team management')),
-                ),
-                FilledButton.tonalIcon(
-                  onPressed: _isLoading ? null : _openAdminUserPage,
-                  icon: const Icon(Icons.manage_accounts_rounded),
-                  label: Text(_text('用户管理', 'Open user management')),
-                ),
-                FilledButton.tonalIcon(
-                  onPressed: _isLoading ? null : _openAdminReportPage,
-                  icon: const Icon(Icons.admin_panel_settings_rounded),
-                  label: Text(_text('举报审核', 'Open report moderation')),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        _SettingsSurface(
-          section: _SettingsSectionId.quickActions,
-          lightStyle: true,
-          child: _SettingSection(
-            title: _text('快捷操作', 'Quick actions'),
-            subtitle: _text(
-              '当前设备的一些轻量维护操作。',
-              'Lightweight maintenance actions for the current device.',
-            ),
-            child: Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: _isLoading ? null : _clearCache,
-                  icon: const Icon(Icons.cleaning_services_rounded),
-                  label: Text(_text('清理缓存', 'Clear cache')),
-                ),
-                OutlinedButton.icon(
-                  onPressed: _isLoading ? null : _logout,
-                  icon: const Icon(Icons.logout_rounded),
-                  label: Text(_text('退出登录', 'Sign out')),
-                ),
-                OutlinedButton.icon(
-                  onPressed: _isLoading ? null : _closeApp,
-                  icon: const Icon(Icons.power_settings_new_rounded),
-                  label: Text(_text('退出程序', 'Close app')),
-                ),
-              ],
+          const SizedBox(height: 16),
+          _SettingsSurface(
+            section: _SettingsSectionId.admin,
+            lightStyle: true,
+            child: _SettingSection(
+              title: _text('后台管理', 'Admin tools'),
+              subtitle: _text(
+                '这里放简版举报、用户、团队和公告管理入口。',
+                'Moderation tools for reports, users, teams, and system announcements.',
+              ),
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  FilledButton.tonalIcon(
+                    onPressed: _isLoading ? null : _openAdminAnnouncementPage,
+                    icon: const Icon(Icons.campaign_rounded),
+                    label: Text(_text('公告管理', 'Open announcements')),
+                  ),
+                  FilledButton.tonalIcon(
+                    onPressed: _isLoading ? null : _openAdminTeamPage,
+                    icon: const Icon(Icons.groups_rounded),
+                    label: Text(_text('团队管理', 'Open team management')),
+                  ),
+                  FilledButton.tonalIcon(
+                    onPressed: _isLoading ? null : _openAdminUserPage,
+                    icon: const Icon(Icons.manage_accounts_rounded),
+                    label: Text(_text('用户管理', 'Open user management')),
+                  ),
+                  FilledButton.tonalIcon(
+                    onPressed: _isLoading ? null : _openAdminReportPage,
+                    icon: const Icon(Icons.admin_panel_settings_rounded),
+                    label: Text(_text('举报审核', 'Open report moderation')),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        _SettingsSurface(
-          section: _SettingsSectionId.danger,
-          lightStyle: true,
-          child: _SettingSection(
-            title: _text('危险操作', 'Danger zone'),
-            subtitle: _text(
-              '当前版本中，注销账号会立即生效，请谨慎操作。',
-              'Account cancellation takes effect immediately. Please use it carefully.',
-            ),
-            child: Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                FilledButton.tonalIcon(
-                  onPressed: _isLoading ? null : _cancelAccount,
-                  icon: const Icon(Icons.person_off_rounded),
-                  label: Text(_text('注销账号', 'Cancel account')),
-                ),
-              ],
+          const SizedBox(height: 16),
+          _SettingsSurface(
+            section: _SettingsSectionId.quickActions,
+            lightStyle: true,
+            child: _SettingSection(
+              title: _text('快捷操作', 'Quick actions'),
+              subtitle: _text(
+                '当前设备的一些轻量维护操作。',
+                'Lightweight maintenance actions for the current device.',
+              ),
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _clearCache,
+                    icon: const Icon(Icons.cleaning_services_rounded),
+                    label: Text(_text('清理缓存', 'Clear cache')),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _logout,
+                    icon: const Icon(Icons.logout_rounded),
+                    label: Text(_text('退出登录', 'Sign out')),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _closeApp,
+                    icon: const Icon(Icons.power_settings_new_rounded),
+                    label: Text(_text('退出程序', 'Close app')),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+          const SizedBox(height: 16),
+          _SettingsSurface(
+            section: _SettingsSectionId.danger,
+            lightStyle: true,
+            child: _SettingSection(
+              title: _text('危险操作', 'Danger zone'),
+              subtitle: _text(
+                '当前版本中，注销账号会立即生效，请谨慎操作。',
+                'Account cancellation takes effect immediately. Please use it carefully.',
+              ),
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  FilledButton.tonalIcon(
+                    onPressed: _isLoading ? null : _cancelAccount,
+                    icon: const Icon(Icons.person_off_rounded),
+                    label: Text(_text('注销账号', 'Cancel account')),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ];
         final panes = sectionChildren.whereType<_SettingsSurface>().toList(
               growable: false,

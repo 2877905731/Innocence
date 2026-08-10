@@ -171,6 +171,20 @@ class DesktopWidgetBridge {
     await showOrbWindow();
   }
 
+  static Future<void> minimizeWindow() async {
+    if (AppConfig.deviceType != 'windows') {
+      return;
+    }
+
+    try {
+      await _channel.invokeMethod<void>('minimizeWindow');
+    } on MissingPluginException {
+      // Ignore when the current platform does not expose the desktop bridge.
+    } on PlatformException {
+      // Keep the app usable even if the native shell minimize action fails.
+    }
+  }
+
   static Future<void> showPageWindow() async {
     await showCanvasWindow();
   }

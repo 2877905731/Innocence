@@ -540,6 +540,13 @@ void Win32Window::HideWindowToTray() {
   ShowWindow(window_handle_, SW_HIDE);
 }
 
+void Win32Window::MinimizeWindow() {
+  if (window_handle_ == nullptr) {
+    return;
+  }
+  ShowWindow(window_handle_, SW_MINIMIZE);
+}
+
 void Win32Window::SetQuitOnClose(bool quit_on_close) {
   quit_on_close_ = quit_on_close;
 }
@@ -748,14 +755,14 @@ void Win32Window::PositionAuthWindow(HWND const window) {
   }
 
   if (window_mode_ == "auth" && has_custom_auth_bounds_) {
-    SetWindowPos(window, always_on_top_ ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0,
+    SetWindowPos(window, HWND_NOTOPMOST, 0, 0,
                  0, 0,
                  SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE |
                      SWP_SHOWWINDOW | SWP_FRAMECHANGED);
     return;
   }
 
-  const HWND insert_after = always_on_top_ ? HWND_TOPMOST : HWND_NOTOPMOST;
+  const HWND insert_after = HWND_NOTOPMOST;
   RECT work_area = GetMonitorWorkArea(window);
   const int work_width = static_cast<int>(work_area.right - work_area.left);
   const int work_height = static_cast<int>(work_area.bottom - work_area.top);
@@ -776,14 +783,14 @@ void Win32Window::PositionAuthWindow(HWND const window) {
 void Win32Window::PositionPageWindow(HWND const window) {
   if (has_custom_auth_bounds_) {
     updating_window_position_ = true;
-    SetWindowPos(window, always_on_top_ ? HWND_TOPMOST : HWND_NOTOPMOST, page_x_,
+    SetWindowPos(window, HWND_NOTOPMOST, page_x_,
                  page_y_, page_width_, page_height_,
                  SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_FRAMECHANGED);
     updating_window_position_ = false;
     return;
   }
 
-  const HWND insert_after = always_on_top_ ? HWND_TOPMOST : HWND_NOTOPMOST;
+  const HWND insert_after = HWND_NOTOPMOST;
   RECT work_area = GetMonitorWorkArea(window);
   const int work_width = static_cast<int>(work_area.right - work_area.left);
   const int work_height = static_cast<int>(work_area.bottom - work_area.top);
@@ -877,7 +884,9 @@ void Win32Window::UpdateTopMostState() {
     return;
   }
 
-  SetWindowPos(window_handle_, always_on_top_ ? HWND_TOPMOST : HWND_NOTOPMOST, 0,
+  const bool effective_topmost =
+      always_on_top_ && (window_mode_ == "widget" || window_mode_ == "mini");
+  SetWindowPos(window_handle_, effective_topmost ? HWND_TOPMOST : HWND_NOTOPMOST, 0,
                0, 0, 0,
                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
 }

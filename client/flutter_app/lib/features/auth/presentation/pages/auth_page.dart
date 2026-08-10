@@ -2,12 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:innocence_flutter/app/app_language.dart';
+import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/app/session_controller.dart';
-import 'package:innocence_flutter/core/config/app_config.dart';
-import 'package:innocence_flutter/core/layout/desktop_presentation.dart';
 import 'package:innocence_flutter/core/network/api_exception.dart';
 import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
-import 'package:innocence_flutter/core/widgets/desktop_drag_region.dart';
+import 'package:innocence_flutter/features/auth/presentation/widgets/auth_experience.dart';
 
 enum AuthMode {
   passwordLogin,
@@ -21,10 +20,14 @@ class AuthPage extends StatefulWidget {
     super.key,
     required this.sessionController,
     required this.appLanguage,
+    required this.visualTheme,
+    required this.onThemeChanged,
   });
 
   final SessionController sessionController;
   final AppLanguage appLanguage;
+  final AppVisualTheme visualTheme;
+  final ValueChanged<AppVisualTheme> onThemeChanged;
 
   @override
   State<AuthPage> createState() => _AuthPageState();
@@ -76,42 +79,34 @@ class _AuthPageState extends State<AuthPage> {
     FocusScope.of(context).unfocus();
     widget.sessionController.clearBanner();
 
-    if (_mode == AuthMode.passwordLogin) {
-      await widget.sessionController.loginWithPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
-      return;
+    switch (_mode) {
+      case AuthMode.passwordLogin:
+        return widget.sessionController.loginWithPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+      case AuthMode.codeLogin:
+        return widget.sessionController.loginWithCode(
+          email: _emailController.text.trim(),
+          emailCode: _codeController.text.trim(),
+        );
+      case AuthMode.register:
+        return widget.sessionController.register(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          emailCode: _codeController.text.trim(),
+        );
+      case AuthMode.passwordReset:
+        final succeeded = await widget.sessionController.resetPassword(
+          email: _emailController.text.trim(),
+          emailCode: _codeController.text.trim(),
+          newPassword: _passwordController.text,
+        );
+        if (succeeded && mounted) {
+          _codeController.clear();
+          setState(() => _mode = AuthMode.passwordLogin);
+        }
     }
-
-    if (_mode == AuthMode.codeLogin) {
-      await widget.sessionController.loginWithCode(
-        email: _emailController.text.trim(),
-        emailCode: _codeController.text.trim(),
-      );
-      return;
-    }
-
-    if (_mode == AuthMode.passwordReset) {
-      final succeeded = await widget.sessionController.resetPassword(
-        email: _emailController.text.trim(),
-        emailCode: _codeController.text.trim(),
-        newPassword: _passwordController.text,
-      );
-      if (succeeded && mounted) {
-        _codeController.clear();
-        setState(() {
-          _mode = AuthMode.passwordLogin;
-        });
-      }
-      return;
-    }
-
-    await widget.sessionController.register(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-      emailCode: _codeController.text.trim(),
-    );
   }
 
   String? _validateInputs() {
@@ -122,7 +117,6 @@ class _AuthPageState extends State<AuthPage> {
     if (!_isValidEmail(email)) {
       return _language.isChinese ? '邮箱格式不正确。' : 'Invalid email format.';
     }
-
     if (_needsPassword) {
       final password = _passwordController.text;
       if (password.isEmpty) {
@@ -135,13 +129,11 @@ class _AuthPageState extends State<AuthPage> {
             : 'Password must be at least 6 characters.';
       }
     }
-
     if (_needsCode && _codeController.text.trim().isEmpty) {
       return _language.isChinese
           ? '请输入验证码。'
           : 'Please enter the verification code.';
     }
-
     return null;
   }
 
@@ -151,11 +143,7 @@ class _AuthPageState extends State<AuthPage> {
       _showMessage(_language.invalidEmailPrompt);
       return;
     }
-
-    setState(() {
-      _sendingCode = true;
-    });
-
+    setState(() => _sendingCode = true);
     try {
       if (_mode == AuthMode.register) {
         await widget.sessionController.sendRegisterCode(email);
@@ -170,29 +158,23 @@ class _AuthPageState extends State<AuthPage> {
       _startCountdown();
       _showMessage(_language.verificationCodeSentPrompt);
     } on ApiException catch (error) {
-      if (!mounted) {
-        return;
+      if (mounted) {
+        _showMessage(error.message);
       }
-      _showMessage(error.message);
     } catch (_) {
-      if (!mounted) {
-        return;
+      if (mounted) {
+        _showMessage(_language.verificationCodeFailedPrompt);
       }
-      _showMessage(_language.verificationCodeFailedPrompt);
     } finally {
       if (mounted) {
-        setState(() {
-          _sendingCode = false;
-        });
+        setState(() => _sendingCode = false);
       }
     }
   }
 
   void _startCountdown() {
     _codeTimer?.cancel();
-    setState(() {
-      _cooldownSeconds = 60;
-    });
+    setState(() => _cooldownSeconds = 60);
     _codeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         timer.cancel();
@@ -200,21 +182,16 @@ class _AuthPageState extends State<AuthPage> {
       }
       if (_cooldownSeconds <= 1) {
         timer.cancel();
-        setState(() {
-          _cooldownSeconds = 0;
-        });
-        return;
+        setState(() => _cooldownSeconds = 0);
+      } else {
+        setState(() => _cooldownSeconds -= 1);
       }
-      setState(() {
-        _cooldownSeconds -= 1;
-      });
     });
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _switchMode(AuthMode mode) {
@@ -222,41 +199,43 @@ class _AuthPageState extends State<AuthPage> {
       return;
     }
     widget.sessionController.clearBanner();
-    setState(() {
-      _mode = mode;
-    });
+    setState(() => _mode = mode);
   }
 
   bool _isValidEmail(String value) {
-    final regex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-    return regex.hasMatch(value);
+    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value);
   }
 
-  String get _modeTitle {
-    switch (_mode) {
-      case AuthMode.passwordLogin:
-        return _language.authPasswordLoginTitle;
-      case AuthMode.codeLogin:
-        return _language.authCodeLoginTitle;
-      case AuthMode.register:
-        return _language.authRegisterTitle;
-      case AuthMode.passwordReset:
-        return _language.isChinese ? '重置密码' : 'Reset password';
-    }
-  }
+  String get _modeTitle => switch (_mode) {
+        AuthMode.passwordLogin => _language.authPasswordLoginTitle,
+        AuthMode.codeLogin => _language.authCodeLoginTitle,
+        AuthMode.register => _language.authRegisterTitle,
+        AuthMode.passwordReset =>
+          _language.isChinese ? '重置密码' : 'Reset password',
+      };
 
-  String get _submitLabel {
-    switch (_mode) {
-      case AuthMode.passwordLogin:
-        return _language.enterInnocenceLabel;
-      case AuthMode.codeLogin:
-        return _language.authCodeSubmitLabel;
-      case AuthMode.register:
-        return _language.authRegisterSubmitLabel;
-      case AuthMode.passwordReset:
-        return _language.isChinese ? '确认重置密码' : 'Reset password';
-    }
-  }
+  String get _modeDescription => switch (_mode) {
+        AuthMode.passwordLogin => _language.isChinese
+            ? '欢迎回来。从一个清晰的选择开始今天。'
+            : 'Welcome back. Begin today with one clear choice.',
+        AuthMode.codeLogin => _language.isChinese
+            ? '不用记住密码，使用邮箱验证码进入。'
+            : 'Enter with a one-time email code, no password needed.',
+        AuthMode.register => _language.isChinese
+            ? '创建一个安静的学习空间，它会记住你的节奏。'
+            : 'Create a quiet study space that remembers your rhythm.',
+        AuthMode.passwordReset => _language.isChinese
+            ? '验证邮箱后，为账户设置新密码。'
+            : 'Verify your email, then choose a new password.',
+      };
+
+  String get _submitLabel => switch (_mode) {
+        AuthMode.passwordLogin => _language.enterInnocenceLabel,
+        AuthMode.codeLogin => _language.authCodeSubmitLabel,
+        AuthMode.register => _language.authRegisterSubmitLabel,
+        AuthMode.passwordReset =>
+          _language.isChinese ? '确认重置密码' : 'Reset password',
+      };
 
   String get _codeButtonLabel {
     if (_cooldownSeconds > 0) {
@@ -273,173 +252,181 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = AppConfig.deviceType == 'windows';
-    final sessionController = widget.sessionController;
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFE4DED3),
-      body: SafeArea(
-        child: DesktopPresentationLayout(
-          surface: DesktopWindowSurface.auth,
-          builder: (context, spec) {
-            final splitLayout = isDesktop &&
-                spec.tier != DesktopPresentationTier.small;
-            final form = Container(
-              padding: EdgeInsets.all(splitLayout ? 34 : 24),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF7F1E7),
-                border: Border.all(color: const Color(0xFFB9B0A3)),
-              ),
-              child: _AuthFormSection(
-                mode: _mode,
-                modeTitle: _modeTitle,
-                submitLabel: _submitLabel,
-                codeButtonLabel: _codeButtonLabel,
-                isBusy: sessionController.isBusy,
-                sendingCode: _sendingCode,
-                cooldownSeconds: _cooldownSeconds,
-                bannerMessage: sessionController.bannerMessage,
-                emailController: _emailController,
-                passwordController: _passwordController,
-                codeController: _codeController,
-                needsPassword: _needsPassword,
-                needsCode: _needsCode,
-                obscurePassword: _obscurePassword,
-                isChinese: _language.isChinese,
-                onModeChanged: _switchMode,
-                onForgotPassword: () =>
-                    _switchMode(AuthMode.passwordReset),
-                onTogglePasswordVisibility: () {
-                  setState(() {
-                    _obscurePassword = !_obscurePassword;
-                  });
-                },
-                onChanged: sessionController.clearBanner,
-                onSendCode: _sendCode,
-                onSubmit: _submit,
-              ),
-            );
-
-            return Stack(
-              children: [
-                if (isDesktop)
-                  const Positioned.fill(child: DesktopDragRegion()),
-                Positioned.fill(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(
-                      splitLayout ? 32 : 18,
-                      splitLayout ? 46 : 70,
-                      splitLayout ? 32 : 18,
-                      28,
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1060),
-                        child: splitLayout
-                            ? IntrinsicHeight(
-                                child: Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    Expanded(
-                                      flex: 4,
-                                      child: _AuthHeader(
-                                        isDesktop: isDesktop,
-                                        isChinese: _language.isChinese,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 18),
-                                    Expanded(flex: 6, child: form),
-                                  ],
-                                ),
-                              )
-                            : Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.stretch,
-                                children: [
-                                  _AuthHeader(
-                                    isDesktop: false,
-                                    isChinese: _language.isChinese,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  form,
-                                ],
-                              ),
-                      ),
-                    ),
-                  ),
-                ),
-                if (isDesktop)
-                  const Positioned(
-                    top: 12,
-                    right: 12,
-                    child: _UnifiedCloseButton(),
-                  ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class _AuthHeader extends StatelessWidget {
-  const _AuthHeader({
-    required this.isDesktop,
-    required this.isChinese,
-  });
-
-  final bool isDesktop;
-  final bool isChinese;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(isDesktop ? 34 : 24),
-      color: const Color(0xFF2B2925),
+    final tokens = AppVisualTokens.of(widget.visualTheme);
+    return AuthExperience(
+      language: _language,
+      visualTheme: widget.visualTheme,
+      onThemeChanged: widget.onThemeChanged,
+      stageNumber: '02',
+      title: _modeTitle,
+      description: _modeDescription,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'INNOCENCE',
-                style: TextStyle(
-                  color: Color(0xFFF6EEE1),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 2.4,
+          if (_mode != AuthMode.passwordReset)
+            _ModeRail(
+              mode: _mode,
+              language: _language,
+              tokens: tokens,
+              onChanged: _switchMode,
+            )
+          else
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => _switchMode(AuthMode.passwordLogin),
+                icon: const Icon(Icons.arrow_back_rounded, size: 17),
+                label: Text(_language.isChinese ? '返回登录' : 'Back to sign in'),
+                style: TextButton.styleFrom(foregroundColor: tokens.ink),
+              ),
+            ),
+          const SizedBox(height: 22),
+          TextField(
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            autofillHints: const [AutofillHints.email],
+            onChanged: (_) => widget.sessionController.clearBanner(),
+            decoration: InputDecoration(
+              labelText: _language.isChinese ? '邮箱' : 'Email',
+              hintText: 'name@example.com',
+              prefixIcon: const Icon(Icons.alternate_email_rounded, size: 19),
+            ),
+          ),
+          if (_needsPassword) ...[
+            const SizedBox(height: 14),
+            TextField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              autofillHints: _mode == AuthMode.passwordLogin
+                  ? const [AutofillHints.password]
+                  : const [AutofillHints.newPassword],
+              onChanged: (_) => widget.sessionController.clearBanner(),
+              onSubmitted: (_) => _submit(),
+              decoration: InputDecoration(
+                labelText: _mode == AuthMode.passwordReset
+                    ? (_language.isChinese ? '新密码' : 'New password')
+                    : (_language.isChinese ? '密码' : 'Password'),
+                prefixIcon: const Icon(Icons.lock_outline_rounded, size: 19),
+                suffixIcon: IconButton(
+                  tooltip: _obscurePassword
+                      ? (_language.isChinese ? '显示密码' : 'Show password')
+                      : (_language.isChinese ? '隐藏密码' : 'Hide password'),
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    size: 19,
+                  ),
                 ),
               ),
-              const SizedBox(height: 18),
-              Container(width: 54, height: 4, color: const Color(0xFFBD6048)),
-            ],
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: isDesktop ? 36 : 24),
-            child: Text(
-              isChinese ? '把注意力，\n留给真正重要的事。' : 'Keep your attention\nfor what matters.',
-              style: TextStyle(
-                color: const Color(0xFFF6EEE1),
-                fontSize: isDesktop ? 34 : 28,
-                fontWeight: FontWeight.w800,
-                height: 1.15,
-                letterSpacing: -0.8,
+            ),
+          ],
+          if (_needsCode) ...[
+            const SizedBox(height: 14),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final codeField = TextField(
+                  controller: _codeController,
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => widget.sessionController.clearBanner(),
+                  onSubmitted: (_) => _submit(),
+                  decoration: InputDecoration(
+                    labelText:
+                        _language.isChinese ? '验证码' : 'Verification code',
+                    prefixIcon: const Icon(Icons.password_rounded, size: 19),
+                  ),
+                );
+                final sendButton = OutlinedButton(
+                  onPressed:
+                      _sendingCode || _cooldownSeconds > 0 ? null : _sendCode,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(132, 54),
+                    foregroundColor: tokens.ink,
+                    side: BorderSide(color: tokens.line),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4)),
+                  ),
+                  child: _sendingCode
+                      ? SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: tokens.accent,
+                          ),
+                        )
+                      : Text(_codeButtonLabel),
+                );
+                if (constraints.maxWidth < 420) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      codeField,
+                      const SizedBox(height: 10),
+                      sendButton
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(child: codeField),
+                    const SizedBox(width: 10),
+                    sendButton,
+                  ],
+                );
+              },
+            ),
+          ],
+          if (_mode == AuthMode.passwordLogin)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => _switchMode(AuthMode.passwordReset),
+                style: TextButton.styleFrom(foregroundColor: tokens.muted),
+                child: Text(_language.isChinese ? '忘记密码？' : 'Forgot password?'),
+              ),
+            )
+          else
+            const SizedBox(height: 18),
+          if (widget.sessionController.bannerMessage != null) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              color: tokens.softPanel,
+              child: Text(
+                widget.sessionController.bannerMessage!,
+                style: TextStyle(color: tokens.ink, fontSize: 13),
               ),
             ),
+            const SizedBox(height: 14),
+          ],
+          ElevatedButton(
+            onPressed: widget.sessionController.isBusy ? null : _submit,
+            child: widget.sessionController.isBusy
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: tokens.onAccent,
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(_submitLabel),
+                      const Icon(Icons.arrow_forward_rounded, size: 19),
+                    ],
+                  ),
           ),
+          const SizedBox(height: 18),
           Text(
-            isChinese
-                ? '计划、专注与陪伴，在手机和 Windows 之间保持同一条节奏。'
-                : 'Plans, focus and companionship stay in rhythm across phone and Windows.',
-            style: const TextStyle(
-              color: Color(0xFFCFC4B5),
-              fontSize: 13,
-              height: 1.55,
-            ),
+            _language.isChinese
+                ? '登录即表示你同意将学习数据安全保存在 Innocence。'
+                : 'By continuing, your study data stays safely with Innocence.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: tokens.muted, fontSize: 11.5, height: 1.45),
           ),
         ],
       ),
@@ -447,537 +434,60 @@ class _AuthHeader extends StatelessWidget {
   }
 }
 
-class _UnifiedCloseButton extends StatelessWidget {
-  const _UnifiedCloseButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () async {
-          await DesktopWidgetBridge.closeWindow();
-        },
-        child: Container(
-          width: 46,
-          height: 46,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF7F1E7),
-            border: Border.all(
-              color: const Color(0xFFB9B0A3),
-            ),
-          ),
-          alignment: Alignment.center,
-          child: const Icon(
-            Icons.close_rounded,
-            color: Color(0xFF111111),
-            size: 19,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AuthFormSection extends StatelessWidget {
-  const _AuthFormSection({
+class _ModeRail extends StatelessWidget {
+  const _ModeRail({
     required this.mode,
-    required this.modeTitle,
-    required this.submitLabel,
-    required this.codeButtonLabel,
-    required this.isBusy,
-    required this.sendingCode,
-    required this.cooldownSeconds,
-    required this.bannerMessage,
-    required this.emailController,
-    required this.passwordController,
-    required this.codeController,
-    required this.needsPassword,
-    required this.needsCode,
-    required this.obscurePassword,
-    required this.isChinese,
-    required this.onModeChanged,
-    required this.onForgotPassword,
-    required this.onTogglePasswordVisibility,
+    required this.language,
+    required this.tokens,
     required this.onChanged,
-    required this.onSendCode,
-    required this.onSubmit,
   });
 
   final AuthMode mode;
-  final String modeTitle;
-  final String submitLabel;
-  final String codeButtonLabel;
-  final bool isBusy;
-  final bool sendingCode;
-  final int cooldownSeconds;
-  final String? bannerMessage;
-  final TextEditingController emailController;
-  final TextEditingController passwordController;
-  final TextEditingController codeController;
-  final bool needsPassword;
-  final bool needsCode;
-  final bool obscurePassword;
-  final bool isChinese;
-  final ValueChanged<AuthMode> onModeChanged;
-  final VoidCallback onForgotPassword;
-  final VoidCallback onTogglePasswordVisibility;
-  final VoidCallback onChanged;
-  final Future<void> Function() onSendCode;
-  final Future<void> Function() onSubmit;
-
-  String get _passwordSegmentLabel => isChinese ? '密码登录' : 'Password';
-  String get _codeSegmentLabel => isChinese ? '验证码' : 'Code';
-  String get _registerSegmentLabel => isChinese ? '注册' : 'Register';
-  String get _emailLabel => isChinese ? '邮箱' : 'Email';
-  String get _emailHint => isChinese ? '请输入邮箱地址' : 'Enter your email';
-  String get _passwordLabel => isChinese ? '密码' : 'Password';
-  String get _passwordHint => isChinese ? '请输入密码' : 'Enter your password';
-  String get _newPasswordHint => isChinese ? '至少 6 位密码' : 'At least 6 characters';
-  String get _emailCodeLabel => isChinese ? '邮箱验证码' : 'Email code';
-  String get _emailCodeHint => isChinese ? '请输入收到的验证码' : 'Enter the code';
-
-  String get _modeDescription {
-    switch (mode) {
-      case AuthMode.passwordLogin:
-        return isChinese
-            ? '使用邮箱和密码进入你的学习空间。'
-            : 'Use email and password to enter your study space.';
-      case AuthMode.codeLogin:
-        return isChinese
-            ? '通过邮箱验证码快速登录当前设备。'
-            : 'Use an email code for quick access on this device.';
-      case AuthMode.register:
-        return isChinese
-            ? '创建账号后，将直接进入你的今日画布。'
-            : 'Create an account and enter your daily canvas.';
-      case AuthMode.passwordReset:
-        return isChinese
-            ? '验证邮箱后设置一组新密码。'
-            : 'Verify your email and choose a new password.';
-    }
-  }
+  final AppLanguage language;
+  final AppVisualTokens tokens;
+  final ValueChanged<AuthMode> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final disableDesktopAutofill = AppConfig.deviceType == 'windows';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          modeTitle,
-          style: const TextStyle(
-            color: Color(0xFF26231F),
-            fontSize: 32,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.6,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          _modeDescription,
-          style: const TextStyle(
-            color: Color(0xFF6F685F),
-            fontSize: 14,
-            height: 1.45,
-          ),
-        ),
-        const SizedBox(height: 24),
-        if (mode == AuthMode.passwordReset)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: isBusy
-                  ? null
-                  : () => onModeChanged(AuthMode.passwordLogin),
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF7B3F32),
-                padding: EdgeInsets.zero,
-              ),
-              icon: const Icon(Icons.arrow_back_rounded, size: 17),
-              label: Text(isChinese ? '返回登录' : 'Back to sign in'),
-            ),
-          )
-        else
-          Row(
-            children: [
-              Expanded(
-                child: _AuthModeButton(
-                  label: _passwordSegmentLabel,
-                  selected: mode == AuthMode.passwordLogin,
-                  enabled: !isBusy,
-                  onTap: () => onModeChanged(AuthMode.passwordLogin),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _AuthModeButton(
-                  label: _codeSegmentLabel,
-                  selected: mode == AuthMode.codeLogin,
-                  enabled: !isBusy,
-                  onTap: () => onModeChanged(AuthMode.codeLogin),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _AuthModeButton(
-                  label: _registerSegmentLabel,
-                  selected: mode == AuthMode.register,
-                  enabled: !isBusy,
-                  onTap: () => onModeChanged(AuthMode.register),
-                ),
-              ),
-            ],
-          ),
-        if (bannerMessage != null) ...[
-          const SizedBox(height: 18),
-          _AuthBanner(message: bannerMessage!),
-        ],
-        const SizedBox(height: 30),
-        _LabeledTextField(
-          label: _emailLabel,
-          controller: emailController,
-          hintText: _emailHint,
-          keyboardType: TextInputType.emailAddress,
-          obscureText: false,
-          autofillHints:
-              disableDesktopAutofill ? null : const [AutofillHints.email],
-          onChanged: onChanged,
-        ),
-        if (needsPassword) ...[
-          const SizedBox(height: 20),
-          _LabeledTextField(
-            label: _passwordLabel,
-            controller: passwordController,
-            hintText:
-                mode == AuthMode.register || mode == AuthMode.passwordReset
-                    ? _newPasswordHint
-                    : _passwordHint,
-            keyboardType: TextInputType.text,
-            obscureText: obscurePassword,
-            autofillHints: disableDesktopAutofill
-                ? null
-                : mode == AuthMode.register || mode == AuthMode.passwordReset
-                    ? const [AutofillHints.newPassword]
-                    : const [AutofillHints.password],
-            trailing: IconButton(
-              onPressed: onTogglePasswordVisibility,
-              splashRadius: 18,
-              icon: Icon(
-                obscurePassword
-                    ? Icons.visibility_off_rounded
-                    : Icons.visibility_rounded,
-                color: const Color(0xFF7A869A),
-              ),
-            ),
-            onChanged: onChanged,
-          ),
-        ],
-        if (mode == AuthMode.passwordLogin) ...[
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: isBusy ? null : onForgotPassword,
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF7B3F32),
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-              ),
-              child: Text(isChinese ? '忘记密码？' : 'Forgot password?'),
-            ),
-          ),
-        ],
-        if (needsCode) ...[
-          const SizedBox(height: 20),
-          _LabeledTextField(
-            label: _emailCodeLabel,
-            controller: codeController,
-            hintText: _emailCodeHint,
-            keyboardType: TextInputType.number,
-            obscureText: false,
-            onChanged: onChanged,
-          ),
-          const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.centerRight,
-            child: SizedBox(
-              height: 48,
-              child: OutlinedButton(
-                onPressed: (isBusy || sendingCode || cooldownSeconds > 0)
-                    ? null
-                    : () async {
-                        await onSendCode();
-                      },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF26231F),
-                  side: const BorderSide(color: Color(0xFFB9B0A3)),
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  shape: const RoundedRectangleBorder(),
-                ),
-                child: Text(codeButtonLabel),
-              ),
-            ),
-          ),
-        ],
-        const SizedBox(height: 28),
-        SizedBox(
-          height: 60,
-          child: ElevatedButton(
-            onPressed: isBusy
-                ? null
-                : () async {
-                    await onSubmit();
-                  },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF111111),
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: const RoundedRectangleBorder(),
-            ),
-            child: isBusy
-                ? const SizedBox.square(
-                    dimension: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : Text(submitLabel),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _AuthBanner extends StatelessWidget {
-  const _AuthBanner({
-    required this.message,
-  });
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
+    final items = <(AuthMode, String)>[
+      (AuthMode.passwordLogin, language.isChinese ? '密码' : 'Password'),
+      (AuthMode.codeLogin, language.isChinese ? '验证码' : 'Code'),
+      (AuthMode.register, language.isChinese ? '注册' : 'Register'),
+    ];
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF3F3),
-        border: Border.all(
-          color: const Color(0xFFFFD5D5),
-        ),
+        border: Border(bottom: BorderSide(color: tokens.line)),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.info_outline_rounded,
-            color: Color(0xFFB64646),
-            size: 20,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(
-                color: Color(0xFF5A2A2A),
-                fontSize: 14,
-                height: 1.45,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AuthModeButton extends StatelessWidget {
-  const _AuthModeButton({
-    required this.label,
-    required this.selected,
-    required this.enabled,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final bool enabled;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: enabled ? onTap : null,
-        child: Ink(
-          height: 56,
-          decoration: BoxDecoration(
-            color: selected
-                ? const Color(0xFF2B2925)
-                : const Color(0xFFF7F1E7),
-            border: Border.all(
-              color: selected
-                  ? const Color(0xFF2B2925)
-                  : const Color(0xFFB9B0A3),
-            ),
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                color: selected ? Colors.white : const Color(0xFF111111),
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _LabeledTextField extends StatefulWidget {
-  const _LabeledTextField({
-    required this.label,
-    required this.controller,
-    required this.hintText,
-    required this.keyboardType,
-    required this.obscureText,
-    required this.onChanged,
-    this.trailing,
-    this.autofillHints,
-  });
-
-  final String label;
-  final TextEditingController controller;
-  final String hintText;
-  final TextInputType keyboardType;
-  final bool obscureText;
-  final VoidCallback onChanged;
-  final Widget? trailing;
-  final Iterable<String>? autofillHints;
-
-  @override
-  State<_LabeledTextField> createState() => _LabeledTextFieldState();
-}
-
-class _LabeledTextFieldState extends State<_LabeledTextField> {
-  late final FocusNode _focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode = FocusNode()..addListener(_handleFocusChange);
-    widget.controller.addListener(_handleTextChange);
-  }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(_handleTextChange);
-    _focusNode
-      ..removeListener(_handleFocusChange)
-      ..dispose();
-    super.dispose();
-  }
-
-  void _handleFocusChange() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  void _handleTextChange() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isFocused = _focusNode.hasFocus;
-    final hasText = widget.controller.text.isNotEmpty;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.label,
-          style: const TextStyle(
-            color: Color(0xFF4F4942),
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 10),
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 140),
-          height: 60,
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFFCF6),
-            border: Border.all(
-              color: isFocused
-                  ? const Color(0xFF7B3F32)
-                  : const Color(0xFFB9B0A3),
-              width: isFocused ? 1.2 : 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Stack(
-                  alignment: Alignment.centerLeft,
-                  children: [
-                    if (!hasText)
-                      IgnorePointer(
-                        child: Text(
-                          widget.hintText,
-                          style: const TextStyle(
-                            color: Color(0xFF8B94A3),
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    EditableText(
-                      controller: widget.controller,
-                      focusNode: _focusNode,
-                      textDirection: Directionality.of(context),
-                      keyboardType: widget.keyboardType,
-                      obscureText: widget.obscureText,
-                      autofillHints: widget.autofillHints,
-                      autocorrect: false,
-                      enableSuggestions: !widget.obscureText,
-                      minLines: 1,
-                      maxLines: 1,
-                      style: const TextStyle(
-                        color: Color(0xFF111111),
-                        fontSize: 15,
-                      ),
-                      cursorColor: const Color(0xFF111111),
-                      backgroundCursorColor: const Color(0xFF111111),
-                      selectionColor: const Color(0x33111111),
-                      rendererIgnoresPointer: false,
-                      cursorRadius: const Radius.circular(2),
-                      cursorWidth: 1.8,
-                      onChanged: (_) => widget.onChanged(),
+        children: items.map((item) {
+          final selected = item.$1 == mode;
+          return Expanded(
+            child: InkWell(
+              onTap: () => onChanged(item.$1),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: selected ? tokens.accent : Colors.transparent,
+                      width: 2,
                     ),
-                  ],
+                  ),
+                ),
+                child: Text(
+                  item.$2,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: selected ? tokens.ink : tokens.muted,
+                    fontSize: 12,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  ),
                 ),
               ),
-              if (widget.trailing != null) ...[
-                const SizedBox(width: 8),
-                widget.trailing!,
-              ],
-            ],
-          ),
-        ),
-      ],
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 }

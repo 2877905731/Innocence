@@ -6,9 +6,9 @@ updated_at: "2026-08-10"
 latest_checkpoint: "0019"
 current_phase: P01
 current_gate: G01
-state: p01_flutter_automated_toolchain_verified_runtime_dpi_pending
+state: p01_auth_visual_rewrite_automated_verified_runtime_visual_dpi_pending
 next_sequence: "0020"
-current_goal: "P01 账户与基础进行中：服务端 HTTP 与 Flutter 自动化工具链已完成；继续 Windows 真实文件选择、头像上传和 100%/125%/150% DPI 实机验收"
+current_goal: "P01 账户与基础进行中：登录/语言入口已全量重写，四主题品牌字与艺术装置已分化并通过 Flutter 19 项测试与 Windows Release 构建；继续实机视觉、头像上传和 DPI 验收"
 recent_baseline:
   - checkpoint: "0015"
     result: "设置页完成 Large/Medium/Small 三档独立编排与黑名单新增入口；新增会话、认证、拉黑和跨租户权限负向测试，定向 Maven 7 项通过；Flutter/Dart SDK、数据库集成环境和头像上传后端路由仍不可用"
@@ -49,14 +49,20 @@ user_decisions:
     decision: "Windows 端不再以固定桌面挂件为中心，采用 Large/Medium/Small 三档自适应画布 + 用户主动 Focus Orb；首次登录默认 Medium 920×760，跨尺寸只重排 shell 与组件密度并保留业务状态；设计执行权交由 AI，可在提升舒适度与效率时突破旧挂件约束"
   - id: DEC-0014
     decision: "用户确认 Windows 页面清单、6+2 导航分组、Small 四项主导航、跨尺寸优先级与组件接口；G00.5 通过，进入 P01"
+  - id: DEC-0015
+    decision: "认证页四主题必须使用独立品牌字与艺术装置；纯白保持克制，侘寂强调残缺墨印，中世纪现代允许高饱和几何色块拼接，玻璃态强调发光层叠和轨道"
 unfinished:
   - id: TODO-005
     priority: P0
-    item: "执行 Windows Large/Medium/Small 在 100%/125%/150% DPI 的实机验收；flutter analyze、16 项测试和 Windows Release 构建已通过"
+    item: "执行 Windows Large/Medium/Small 在 100%/125%/150% DPI 的实机验收；flutter analyze、19 项测试和 Windows Release 构建已通过"
     gate: G01
   - id: TODO-006
     priority: P1
     item: "在 Windows Release 实机验证资料页文件选择器、multipart 调用、头像展示与资料刷新；源码、插件注册、客户端负向测试和服务端 HTTP 矩阵已完成"
+    gate: G01
+  - id: TODO-007
+    priority: P0
+    item: "在 Windows Release 实机视觉检查重写后的语言/登录页四套艺术字、左下装置、最小化与非强制置顶；自动化与 Release 构建已通过"
     gate: G01
 next_actions:
   - id: NEXT-001
@@ -65,6 +71,9 @@ next_actions:
   - id: NEXT-002
     action: "执行 Large/Medium/Small 在 100%/125%/150% DPI 的窗口重排、滚动、命中区域和状态连续性验收"
     inputs: ["Windows Release", "Windows DPI 环境"]
+  - id: NEXT-003
+    action: "手动切换纯白、侘寂、中世纪现代和玻璃态，验收品牌字、艺术装置、表单对比度与 Small/Medium 不溢出"
+    inputs: ["Windows Release", "四主题本地偏好"]
 required_reads:
   - AGENTS.md
   - docs/08-project-profile.md

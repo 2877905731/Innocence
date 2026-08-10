@@ -2,17 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
-import 'package:innocence_flutter/core/theme/app_colors.dart';
-import 'package:innocence_flutter/core/theme/app_theme.dart';
-import 'package:innocence_flutter/core/widgets/aurora_background.dart';
-import 'package:innocence_flutter/core/widgets/desktop_close_button.dart';
-import 'package:innocence_flutter/core/widgets/glass_panel.dart';
 import 'package:innocence_flutter/features/auth/presentation/pages/auth_page.dart';
+import 'package:innocence_flutter/features/auth/presentation/widgets/auth_experience.dart';
 import 'package:innocence_flutter/features/home/presentation/pages/home_page.dart';
 
 import 'app_language.dart';
+import 'app_visual_theme.dart';
 import 'session_controller.dart';
 
 class InnocenceApp extends StatefulWidget {
@@ -20,10 +16,12 @@ class InnocenceApp extends StatefulWidget {
     super.key,
     required this.sessionController,
     required this.languageController,
+    required this.visualThemeController,
   });
 
   final SessionController sessionController;
   final AppLanguageController languageController;
+  final AppVisualThemeController visualThemeController;
 
   @override
   State<InnocenceApp> createState() => _InnocenceAppState();
@@ -43,17 +41,17 @@ class _InnocenceAppState extends State<InnocenceApp> {
       animation: Listenable.merge([
         widget.sessionController,
         widget.languageController,
+        widget.visualThemeController,
       ]),
       builder: (context, _) {
         final language = widget.languageController.currentLanguage;
+        final visualTheme = widget.visualThemeController.currentTheme;
+        final visualTokens = AppVisualTokens.of(visualTheme);
         return MaterialApp(
           title: 'Innocence',
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.light(),
-          darkTheme: AppTheme.dark(),
-          themeMode: widget.sessionController.status == SessionStatus.authenticated
-              ? widget.sessionController.themeMode
-              : ThemeMode.light,
+          theme: visualTokens.toThemeData(),
+          themeMode: visualTokens.isDark ? ThemeMode.dark : ThemeMode.light,
           locale: language.locale,
           supportedLocales: const [
             Locale('zh', 'CN'),
@@ -64,13 +62,13 @@ class _InnocenceAppState extends State<InnocenceApp> {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          home: _buildHome(language),
+          home: _buildHome(language, visualTheme),
         );
       },
     );
   }
 
-  Widget _buildHome(AppLanguage language) {
+  Widget _buildHome(AppLanguage language, AppVisualTheme visualTheme) {
     if (!widget.languageController.initialized) {
       return const _BootSplash();
     }
@@ -78,16 +76,24 @@ class _InnocenceAppState extends State<InnocenceApp> {
     if (!widget.languageController.startupConfirmed) {
       return _LanguageSelectionPage(
         controller: widget.languageController,
+        visualTheme: visualTheme,
+        onThemeChanged: widget.visualThemeController.updateTheme,
       );
     }
 
     switch (widget.sessionController.status) {
       case SessionStatus.initializing:
-        return _LaunchScreen(language: language);
+        return _LaunchScreen(
+          language: language,
+          visualTheme: visualTheme,
+          onThemeChanged: widget.visualThemeController.updateTheme,
+        );
       case SessionStatus.unauthenticated:
         return AuthPage(
           sessionController: widget.sessionController,
           appLanguage: language,
+          visualTheme: visualTheme,
+          onThemeChanged: widget.visualThemeController.updateTheme,
         );
       case SessionStatus.authenticated:
         return _DesktopWindowModeScope(
@@ -95,6 +101,8 @@ class _InnocenceAppState extends State<InnocenceApp> {
           child: HomePage(
             appLanguage: language,
             onChangeLanguage: widget.languageController.updateLanguage,
+            visualTheme: visualTheme,
+            onChangeVisualTheme: widget.visualThemeController.updateTheme,
             profile: widget.sessionController.profile!,
             focusSession: widget.sessionController.focusSession,
             checkInStatus: widget.sessionController.checkInStatus,
@@ -154,8 +162,7 @@ class _InnocenceAppState extends State<InnocenceApp> {
                 widget.sessionController.updateMyPrivacySetting,
             onUpdateNotificationSetting:
                 widget.sessionController.updateNotificationSetting,
-            onUpdateWidgetSetting:
-                widget.sessionController.updateWidgetSetting,
+            onUpdateWidgetSetting: widget.sessionController.updateWidgetSetting,
             onUpdateAppearanceSetting:
                 widget.sessionController.updateAppearanceSetting,
             onClearSettingsCache: widget.sessionController.clearSettingsCache,
@@ -165,11 +172,9 @@ class _InnocenceAppState extends State<InnocenceApp> {
             onLoadAdminReports: widget.sessionController.loadAdminReports,
             onLoadAdminReportDetail:
                 widget.sessionController.loadAdminReportDetail,
-            onReviewAdminReport:
-                widget.sessionController.reviewAdminReport,
+            onReviewAdminReport: widget.sessionController.reviewAdminReport,
             onSearchAdminUsers: widget.sessionController.searchAdminUsers,
-            onLoadAdminUserDetail:
-                widget.sessionController.loadAdminUserDetail,
+            onLoadAdminUserDetail: widget.sessionController.loadAdminUserDetail,
             onLoadAdminUserReports:
                 widget.sessionController.loadAdminUserReports,
             onLoadAdminUserPunishments:
@@ -177,12 +182,10 @@ class _InnocenceAppState extends State<InnocenceApp> {
             onLiftAdminUserPunishment:
                 widget.sessionController.liftAdminUserPunishment,
             onLoadAdminTeams: widget.sessionController.loadAdminTeams,
-            onLoadAdminTeamDetail:
-                widget.sessionController.loadAdminTeamDetail,
+            onLoadAdminTeamDetail: widget.sessionController.loadAdminTeamDetail,
             onRemoveAdminTeamMember:
                 widget.sessionController.removeAdminTeamMember,
-            onDissolveAdminTeam:
-                widget.sessionController.dissolveAdminTeam,
+            onDissolveAdminTeam: widget.sessionController.dissolveAdminTeam,
             onLoadAdminAnnouncements:
                 widget.sessionController.loadAdminAnnouncements,
             onCreateAdminAnnouncement:
@@ -196,8 +199,7 @@ class _InnocenceAppState extends State<InnocenceApp> {
             onDissolveTeam: widget.sessionController.dissolveTeam,
             onLoadTeamChatMessages:
                 widget.sessionController.loadTeamChatMessages,
-            onSendTeamChatMessage:
-                widget.sessionController.sendTeamChatMessage,
+            onSendTeamChatMessage: widget.sessionController.sendTeamChatMessage,
             onMarkTeamChatRead: widget.sessionController.markTeamChatRead,
             onReportTeamChatMessage:
                 widget.sessionController.reportTeamChatMessage,
@@ -212,8 +214,7 @@ class _InnocenceAppState extends State<InnocenceApp> {
             onNextWeek: widget.sessionController.loadNextWeek,
             onSavePlanAsWeeklyTemplate:
                 widget.sessionController.savePlanAsWeeklyTemplate,
-            onApplyWeeklyTemplate:
-                widget.sessionController.applyWeeklyTemplate,
+            onApplyWeeklyTemplate: widget.sessionController.applyWeeklyTemplate,
             onApplyWeeklyTemplateToDate:
                 widget.sessionController.applyWeeklyTemplateToDate,
             onDeleteWeeklyTemplate:
@@ -224,8 +225,7 @@ class _InnocenceAppState extends State<InnocenceApp> {
             onApplyWeeklyTemplateToDates:
                 widget.sessionController.applyWeeklyTemplateToDates,
             onQuickArrangeWeek: widget.sessionController.quickArrangeWeek,
-            onToggleTodayPlanItem:
-                widget.sessionController.toggleTodayPlanItem,
+            onToggleTodayPlanItem: widget.sessionController.toggleTodayPlanItem,
           ),
         );
     }
@@ -237,24 +237,15 @@ class _BootSplash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _DesktopWindowModeScope(
-      mode: 'auth',
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: AuroraBackground(
-          transparentOnWindows: true,
-          child: Stack(
-            children: [
-              const Center(
-                child: CircularProgressIndicator(),
-              ),
-              if (AppConfig.deviceType == 'windows')
-                const Positioned(
-                  top: 28,
-                  right: 28,
-                  child: DesktopCloseButton(compact: true),
-                ),
-            ],
+    return const Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Color(0xFF111111),
           ),
         ),
       ),
@@ -263,71 +254,30 @@ class _BootSplash extends StatelessWidget {
 }
 
 class _LaunchScreen extends StatelessWidget {
-  const _LaunchScreen({required this.language});
+  const _LaunchScreen({
+    required this.language,
+    required this.visualTheme,
+    required this.onThemeChanged,
+  });
 
   final AppLanguage language;
+  final AppVisualTheme visualTheme;
+  final ValueChanged<AppVisualTheme> onThemeChanged;
 
   @override
   Widget build(BuildContext context) {
     return _DesktopWindowModeScope(
       mode: 'auth',
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: AuroraBackground(
-          transparentOnWindows: true,
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Stack(
-                  children: [
-                    GlassPanel(
-                      desktopTransparent: true,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 28,
-                        vertical: 30,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Innocence',
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                          const SizedBox(height: 24),
-                          Row(
-                            children: [
-                              const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(strokeWidth: 2.2),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Text(
-                                  language.launchMessage,
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (AppConfig.deviceType == 'windows')
-                      const Positioned(
-                        top: 10,
-                        right: 10,
-                        child: DesktopCloseButton(compact: true),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+      child: AuthExperience(
+        language: language,
+        visualTheme: visualTheme,
+        onThemeChanged: onThemeChanged,
+        stageNumber: '02',
+        title: language.launchMessage,
+        description: language.isChinese
+            ? '正在恢复你上次的学习状态。'
+            : 'Restoring the study state you left last time.',
+        child: const LinearProgressIndicator(minHeight: 3),
       ),
     );
   }
@@ -336,90 +286,56 @@ class _LaunchScreen extends StatelessWidget {
 class _LanguageSelectionPage extends StatelessWidget {
   const _LanguageSelectionPage({
     required this.controller,
+    required this.visualTheme,
+    required this.onThemeChanged,
   });
 
   final AppLanguageController controller;
+  final AppVisualTheme visualTheme;
+  final ValueChanged<AppVisualTheme> onThemeChanged;
 
   @override
   Widget build(BuildContext context) {
     final language = controller.currentLanguage;
-    final isDesktop = AppConfig.deviceType == 'windows';
     return _DesktopWindowModeScope(
       mode: 'auth',
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: AuroraBackground(
-          transparentOnWindows: true,
-          child: SafeArea(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: isDesktop ? 680 : 520),
-                  child: Stack(
-                    children: [
-                      GlassPanel(
-                        desktopTransparent: true,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 30,
-                          vertical: 30,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Innocence',
-                              style: Theme.of(context).textTheme.headlineMedium,
-                            ),
-                            const SizedBox(height: 18),
-                            Text(
-                              language.startupTitle,
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(language.startupDescription),
-                            const SizedBox(height: 24),
-                            Row(
-                              children: AppLanguage.values.map((item) {
-                                final selected = item == language;
-                                return Expanded(
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                      right: item == AppLanguage.values.last ? 0 : 12,
-                                    ),
-                                    child: _LanguageOptionCard(
-                                      label: item.label,
-                                      selected: selected,
-                                      onTap: () => controller.previewLanguage(item),
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                            const SizedBox(height: 24),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: controller.confirmStartupLanguage,
-                                child: Text(language.continueLabel),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (AppConfig.deviceType == 'windows')
-                        const Positioned(
-                          top: 10,
-                          right: 10,
-                          child: DesktopCloseButton(compact: true),
-                        ),
-                    ],
-                  ),
+      child: AuthExperience(
+        language: language,
+        visualTheme: visualTheme,
+        onThemeChanged: onThemeChanged,
+        stageNumber: '01',
+        title: language.startupTitle,
+        description: language.isChinese
+            ? '这个选择会保存在本机，以后也可以随时更改。'
+            : 'This choice stays on this device and can be changed anytime.',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ...AppLanguage.values.map((item) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _LanguageOptionCard(
+                  label: item.label,
+                  secondaryLabel: item == AppLanguage.simplifiedChinese
+                      ? 'Simplified Chinese'
+                      : '英语 / English',
+                  selected: item == language,
+                  onTap: () => controller.previewLanguage(item),
                 ),
+              );
+            }),
+            const SizedBox(height: 14),
+            ElevatedButton(
+              onPressed: controller.confirmStartupLanguage,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(language.continueLabel),
+                  const Icon(Icons.arrow_forward_rounded, size: 19),
+                ],
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -429,53 +345,62 @@ class _LanguageSelectionPage extends StatelessWidget {
 class _LanguageOptionCard extends StatelessWidget {
   const _LanguageOptionCard({
     required this.label,
+    required this.secondaryLabel,
     required this.selected,
     required this.onTap,
   });
 
   final String label;
+  final String secondaryLabel;
   final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(22),
-        child: Ink(
-          height: 74,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(22),
-            color: selected
-                ? Colors.white.withValues(alpha: 0.11)
-                : Colors.white.withValues(alpha: 0.045),
-            border: Border.all(
-              color: selected
-                  ? AppColors.glow.withValues(alpha: 0.85)
-                  : Colors.white.withValues(alpha: 0.14),
-              width: selected ? 1.35 : 1,
-            ),
-            boxShadow: selected
-                ? [
-                    BoxShadow(
-                      color: AppColors.glow.withValues(alpha: 0.24),
-                      blurRadius: 18,
-                      spreadRadius: -8,
-                    ),
-                  ]
-                : null,
+    final colors = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(4),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+        decoration: BoxDecoration(
+          color: selected
+              ? colors.primary.withValues(alpha: 0.09)
+              : colors.surface,
+          border: Border.all(
+            color: selected ? colors.primary : colors.outline,
+            width: selected ? 1.5 : 1,
           ),
-          child: Center(
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w700,
-                  ),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 18,
+              height: 18,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: selected ? colors.primary : colors.outline,
+                  width: selected ? 5 : 1,
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 2),
+                  Text(secondaryLabel,
+                      style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ),
+            if (selected) Icon(Icons.check_rounded, color: colors.primary),
+          ],
         ),
       ),
     );
@@ -492,7 +417,8 @@ class _DesktopWindowModeScope extends StatefulWidget {
   final Widget child;
 
   @override
-  State<_DesktopWindowModeScope> createState() => _DesktopWindowModeScopeState();
+  State<_DesktopWindowModeScope> createState() =>
+      _DesktopWindowModeScopeState();
 }
 
 class _DesktopWindowModeScopeState extends State<_DesktopWindowModeScope> {

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:innocence_flutter/app/app.dart';
 import 'package:innocence_flutter/app/app_language.dart';
+import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/app/session_controller.dart';
 import 'package:innocence_flutter/features/auth/data/auth_api.dart';
 import 'package:innocence_flutter/features/auth/data/auth_local_storage.dart';
@@ -16,6 +17,7 @@ void main() {
     });
     final preferences = await SharedPreferences.getInstance();
     final languageController = AppLanguageController(preferences);
+    final visualThemeController = AppVisualThemeController(preferences);
     final sessionController = SessionController(
       authApi: AuthApi(),
       localStorage: AuthLocalStorage(preferences),
@@ -26,6 +28,7 @@ void main() {
       InnocenceApp(
         sessionController: sessionController,
         languageController: languageController,
+        visualThemeController: visualThemeController,
       ),
     );
     await tester.pumpAndSettle();
@@ -52,5 +55,49 @@ void main() {
     await tester.pump();
 
     expect(find.text('Please enter your email.'), findsOneWidget);
+  });
+
+  testWidgets('all auth art themes fit the small canvas', (tester) async {
+    tester.view.physicalSize = const Size(480, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    SharedPreferences.setMockInitialValues({
+      'app.language': 'en_US',
+      'app.language.startup_confirmed': true,
+    });
+    final preferences = await SharedPreferences.getInstance();
+    final languageController = AppLanguageController(preferences);
+    final visualThemeController = AppVisualThemeController(preferences);
+    final sessionController = SessionController(
+      authApi: AuthApi(),
+      localStorage: AuthLocalStorage(preferences),
+      languageController: languageController,
+    );
+
+    await tester.pumpWidget(
+      InnocenceApp(
+        sessionController: sessionController,
+        languageController: languageController,
+        visualThemeController: visualThemeController,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    for (final theme in [
+      'wabi_sabi',
+      'mid_century',
+      'glass',
+      'minimalism',
+    ]) {
+      final themeButton = find.byKey(ValueKey('visual-theme-$theme'));
+      await tester.ensureVisible(themeButton);
+      await tester.tap(themeButton);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    }
+
+    expect(find.text('Password login'), findsOneWidget);
   });
 }

@@ -70,6 +70,9 @@ class Win32Window {
   // Hide the window while keeping the tray icon alive.
   void HideWindowToTray();
 
+  // Minimize a normal auth or canvas window to the Windows taskbar.
+  void MinimizeWindow();
+
   // If true, closing this window will quit the application.
   void SetQuitOnClose(bool quit_on_close);
 
@@ -134,7 +137,7 @@ class Win32Window {
   void UpdateTopMostState();
 
   bool quit_on_close_ = false;
-  bool always_on_top_ = true;
+  bool always_on_top_ = false;
   std::string window_mode_ = "auth";
   std::string desktop_effect_ = "immersive_glass";
   int widget_width_ = 560;

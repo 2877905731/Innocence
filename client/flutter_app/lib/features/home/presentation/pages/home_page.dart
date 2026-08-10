@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:innocence_flutter/app/team_workspace_snapshot.dart';
 import 'package:innocence_flutter/app/app_language.dart';
+import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
 import 'package:innocence_flutter/core/theme/app_colors.dart';
@@ -363,6 +364,8 @@ class HomePage extends StatelessWidget {
     super.key,
     required this.appLanguage,
     required this.onChangeLanguage,
+    required this.visualTheme,
+    required this.onChangeVisualTheme,
     required this.profile,
     required this.focusSession,
     required this.checkInStatus,
@@ -465,6 +468,8 @@ class HomePage extends StatelessWidget {
     AppLanguage language, {
     bool confirmStartup,
   }) onChangeLanguage;
+  final AppVisualTheme visualTheme;
+  final ValueChanged<AppVisualTheme> onChangeVisualTheme;
   final UserProfile profile;
   final FocusSession focusSession;
   final CheckInStatus checkInStatus;
@@ -868,6 +873,8 @@ class HomePage extends StatelessWidget {
         builder: (context) {
           return SettingsPage(
             onChangeLanguage: onChangeLanguage,
+            visualTheme: visualTheme,
+            onChangeVisualTheme: onChangeVisualTheme,
             initialOverview: latestOverview ?? settingOverview,
             onRefresh: onLoadSettingsOverview,
             onLoadBlacklist: onLoadBlacklist,

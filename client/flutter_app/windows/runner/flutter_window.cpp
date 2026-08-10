@@ -215,6 +215,12 @@ void FlutterWindow::RegisterDesktopWidgetChannel() {
           return;
         }
 
+        if (call.method_name() == "minimizeWindow") {
+          MinimizeWindow();
+          result->Success();
+          return;
+        }
+
         if (call.method_name() == "closeWindow") {
           CloseWindow();
           result->Success();
