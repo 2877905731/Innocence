@@ -1,6 +1,8 @@
 import 'package:innocence_flutter/core/network/api_client.dart';
 import 'package:innocence_flutter/core/network/api_exception.dart';
 import 'package:innocence_flutter/features/account/domain/models/user_profile.dart';
+import 'package:innocence_flutter/features/account/domain/models/blacklist_item.dart';
+import 'package:innocence_flutter/features/account/domain/models/current_device_session.dart';
 import 'package:innocence_flutter/features/auth/domain/models/app_session.dart';
 import 'package:innocence_flutter/features/settings/domain/models/appearance_setting.dart';
 import 'package:innocence_flutter/features/settings/domain/models/notification_setting.dart';
@@ -20,6 +22,44 @@ class SettingsApi {
     );
     return SettingOverview.fromJson(
       _requireMap(data, 'Failed to load the settings overview.'),
+    );
+  }
+
+  Future<List<BlacklistItem>> getBlacklist(AppSession session) async {
+    final data = await _apiClient.get(
+      'account/blacklist',
+      headers: session.authHeaders,
+    );
+    if (data is! List) {
+      throw const ApiException('Failed to load the blacklist.');
+    }
+    return data
+        .whereType<Map<String, dynamic>>()
+        .map(BlacklistItem.fromJson)
+        .where((item) => item.blockedUserId > 0)
+        .toList(growable: false);
+  }
+
+  Future<bool> removeBlacklist(
+    AppSession session,
+    int blockedUserId,
+  ) async {
+    final data = await _apiClient.delete(
+      'account/blacklist/$blockedUserId',
+      headers: session.authHeaders,
+    );
+    return _readSuccess(data);
+  }
+
+  Future<CurrentDeviceSession> getCurrentDeviceSession(
+    AppSession session,
+  ) async {
+    final data = await _apiClient.get(
+      'account/sessions/current',
+      headers: session.authHeaders,
+    );
+    return CurrentDeviceSession.fromJson(
+      _requireMap(data, 'Failed to load the current device session.'),
     );
   }
 

@@ -14,6 +14,8 @@ import 'package:innocence_flutter/core/widgets/glass_panel.dart';
 import 'package:innocence_flutter/core/widgets/secondary_page_scaffold.dart';
 import 'package:innocence_flutter/core/widgets/status_banner.dart';
 import 'package:innocence_flutter/features/account/domain/models/user_profile.dart';
+import 'package:innocence_flutter/features/account/domain/models/blacklist_item.dart';
+import 'package:innocence_flutter/features/account/domain/models/current_device_session.dart';
 import 'package:innocence_flutter/features/admin/domain/models/admin_report_models.dart';
 import 'package:innocence_flutter/features/checkin/domain/models/check_in_status.dart';
 import 'package:innocence_flutter/features/focus/domain/models/focus_session.dart';
@@ -398,6 +400,9 @@ class HomePage extends StatelessWidget {
     required this.onUpdateMemo,
     required this.onDeleteMemo,
     required this.onLoadSettingsOverview,
+    required this.onLoadBlacklist,
+    required this.onRemoveBlacklist,
+    required this.onLoadCurrentDeviceSession,
     required this.onUpdateMySettingProfile,
     required this.onUpdateMyPrivacySetting,
     required this.onUpdateNotificationSetting,
@@ -519,6 +524,9 @@ class HomePage extends StatelessWidget {
       onUpdateMemo;
   final Future<MemoOverview?> Function(int memoId) onDeleteMemo;
   final Future<SettingOverview?> Function() onLoadSettingsOverview;
+  final Future<List<BlacklistItem>> Function() onLoadBlacklist;
+  final Future<bool> Function(int blockedUserId) onRemoveBlacklist;
+  final Future<CurrentDeviceSession?> Function() onLoadCurrentDeviceSession;
   final Future<UserProfile?> Function({
     required String nickname,
     required String avatarUrl,
@@ -855,6 +863,9 @@ class HomePage extends StatelessWidget {
             onChangeLanguage: onChangeLanguage,
             initialOverview: latestOverview ?? settingOverview,
             onRefresh: onLoadSettingsOverview,
+            onLoadBlacklist: onLoadBlacklist,
+            onRemoveBlacklist: onRemoveBlacklist,
+            onLoadCurrentDeviceSession: onLoadCurrentDeviceSession,
             onUpdateProfile: onUpdateMySettingProfile,
             onUpdatePrivacy: onUpdateMyPrivacySetting,
             onUpdateNotifications: onUpdateNotificationSetting,

@@ -3,15 +3,17 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-08-10"
-latest_checkpoint: "0013"
+latest_checkpoint: "0014"
 current_phase: P01
 current_gate: G01
-state: p01_adaptive_shell_and_auth_entry_source_implemented
-next_sequence: "0014"
+state: p01_settings_privacy_and_session_context_source_implemented
+next_sequence: "0015"
 current_goal: "P01 账户与基础进行中：继续资料、隐私、设置页面重建，并完成会话、权限负向路径和 Flutter 工具链验收"
 recent_baseline:
   - checkpoint: "0013"
     result: "DesktopPresentationTier、自适应 6+2 主 Shell、88×88 Focus Orb 和认证重置入口已完成源码实现与结构一致性检查；Flutter/Dart SDK 不可用，尚未执行 analyze/test"
+  - checkpoint: "0014"
+    result: "设置页补齐黑名单读取/解除确认与当前设备会话状态；新增 U09-U11 契约登记、模型解析测试源码和非玻璃平面设置表面；Dart 分隔符、后端路由对齐与 diff check 通过，Flutter/Dart SDK 仍不可用"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
@@ -48,7 +50,7 @@ unfinished:
     gate: G01
   - id: TODO-006
     priority: P1
-    item: "按新 UI 重建资料、隐私与设置页面"
+    item: "继续完成设置页 Large/Medium/Small 三档独立编排，并补资料头像上传与黑名单新增入口"
     gate: G01
   - id: TODO-007
     priority: P0
@@ -56,7 +58,7 @@ unfinished:
     gate: G01
 next_actions:
   - id: NEXT-001
-    action: "继续重建资料、隐私与设置页面；保留现有 API、模型和 SessionController 回调"
+    action: "继续完成设置页三档自适应编排，并补资料头像上传、黑名单新增入口和负向权限回放"
     inputs: []
   - id: NEXT-002
     action: "Flutter SDK 可用后执行 analyze/test，并在 Windows 三档尺寸与三档 DPI 下验证 Canvas/Orb 切换"

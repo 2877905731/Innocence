@@ -104,3 +104,10 @@ checkpoints:
     status: complete
     path: progress/0013__20260810__P01__DONE__adaptive-canvas-shell-and-auth-entry-foundation.md
     title: "Windows 自适应画布、Focus Orb 与认证入口首批实现"
+  - sequence: "0014"
+    created_at: "2026-08-10T10:30:00+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0014__20260810__P01__DONE__settings-privacy-and-session-context.md
+    title: "设置隐私黑名单与当前设备会话上下文"

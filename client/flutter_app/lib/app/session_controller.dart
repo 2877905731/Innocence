@@ -7,6 +7,8 @@ import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/network/api_exception.dart';
 import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
 import 'package:innocence_flutter/features/account/domain/models/user_profile.dart';
+import 'package:innocence_flutter/features/account/domain/models/blacklist_item.dart';
+import 'package:innocence_flutter/features/account/domain/models/current_device_session.dart';
 import 'package:innocence_flutter/features/admin/data/admin_report_api.dart';
 import 'package:innocence_flutter/features/admin/domain/models/admin_report_models.dart';
 import 'package:innocence_flutter/features/auth/data/auth_api.dart';
@@ -102,6 +104,8 @@ class SessionController extends ChangeNotifier {
   TodayPlan _todayPlan = TodayPlan.empty();
   WeekPlanOverview _weekPlanOverview = WeekPlanOverview.empty();
   SettingOverview _settingOverview = SettingOverview.empty();
+  List<BlacklistItem> _blacklist = const [];
+  CurrentDeviceSession? _currentDeviceSession;
   String? _weekAnchorDate;
   int _statsRangeDays = 7;
   List<WeeklyPlanTemplate> _weeklyTemplates = const [];
@@ -127,6 +131,8 @@ class SessionController extends ChangeNotifier {
   TodayPlan get todayPlan => _todayPlan;
   WeekPlanOverview get weekPlanOverview => _weekPlanOverview;
   SettingOverview get settingOverview => _settingOverview;
+  List<BlacklistItem> get blacklist => _blacklist;
+  CurrentDeviceSession? get currentDeviceSession => _currentDeviceSession;
   List<WeeklyPlanTemplate> get weeklyTemplates => _weeklyTemplates;
   bool get isBusy => _isBusy;
   String? get bannerMessage => _bannerMessage;
@@ -219,6 +225,8 @@ class SessionController extends ChangeNotifier {
       _todayPlan = TodayPlan.empty();
       _weekPlanOverview = WeekPlanOverview.empty();
       _settingOverview = SettingOverview.empty();
+      _blacklist = const [];
+      _currentDeviceSession = null;
       _weeklyTemplates = const [];
       _bannerMessage = _message(
         '会话已失效，请重新登录。',
@@ -241,6 +249,8 @@ class SessionController extends ChangeNotifier {
       _todayPlan = TodayPlan.empty();
       _weekPlanOverview = WeekPlanOverview.empty();
       _settingOverview = SettingOverview.empty();
+      _blacklist = const [];
+      _currentDeviceSession = null;
       _weeklyTemplates = const [];
       _bannerMessage = _message(
         '恢复上一次会话失败。',
@@ -411,6 +421,8 @@ class SessionController extends ChangeNotifier {
       _todayPlan = TodayPlan.empty();
       _weekPlanOverview = WeekPlanOverview.empty();
       _settingOverview = SettingOverview.empty();
+      _blacklist = const [];
+      _currentDeviceSession = null;
       _weeklyTemplates = const [];
       _bannerMessage = null;
       _status = SessionStatus.unauthenticated;
@@ -917,6 +929,8 @@ class SessionController extends ChangeNotifier {
       _todayPlan = TodayPlan.empty();
       _weekPlanOverview = WeekPlanOverview.empty();
       _settingOverview = SettingOverview.empty();
+      _blacklist = const [];
+      _currentDeviceSession = null;
       _weeklyTemplates = const [];
       _status = SessionStatus.unauthenticated;
       _stopFocusTicker();
@@ -1080,6 +1094,65 @@ class SessionController extends ChangeNotifier {
         fallbackMessage:
             _message('加载设置概览失败。', 'Failed to load the settings overview.'));
     return latestOverview;
+  }
+
+  Future<List<BlacklistItem>> loadBlacklist() async {
+    final currentSession = _session;
+    if (currentSession == null) {
+      return const [];
+    }
+
+    var latest = _blacklist;
+    await _runBusyAction(() async {
+      latest = await _settingsApi.getBlacklist(currentSession);
+      _blacklist = latest;
+    }, fallbackMessage: _message(
+      '加载黑名单失败。',
+      'Failed to load the blacklist.',
+    ));
+    return latest;
+  }
+
+  Future<bool> removeBlacklist(int blockedUserId) async {
+    final currentSession = _session;
+    if (currentSession == null || blockedUserId <= 0) {
+      return false;
+    }
+
+    var removed = false;
+    await _runBusyAction(() async {
+      removed = await _settingsApi.removeBlacklist(
+        currentSession,
+        blockedUserId,
+      );
+      if (removed) {
+        _blacklist = _blacklist
+            .where((item) => item.blockedUserId != blockedUserId)
+            .toList(growable: false);
+        _bannerMessage = _message('已解除拉黑。', 'Removed from the blacklist.');
+      }
+    }, fallbackMessage: _message(
+      '解除拉黑失败。',
+      'Failed to remove the blacklist entry.',
+    ));
+    return removed;
+  }
+
+  Future<CurrentDeviceSession?> loadCurrentDeviceSession() async {
+    final currentSession = _session;
+    if (currentSession == null) {
+      return null;
+    }
+
+    CurrentDeviceSession? latest = _currentDeviceSession;
+    await _runBusyAction(() async {
+      latest = await _settingsApi.getCurrentDeviceSession(currentSession);
+      _currentDeviceSession = latest;
+    }, fallbackMessage: _message(
+      '加载当前设备会话失败。',
+      'Failed to load the current device session.',
+    ));
+    return latest;
   }
 
   Future<UserProfile?> updateMySettingProfile({
@@ -1292,6 +1365,8 @@ class SessionController extends ChangeNotifier {
       _todayPlan = TodayPlan.empty();
       _weekPlanOverview = WeekPlanOverview.empty();
       _settingOverview = SettingOverview.empty();
+      _blacklist = const [];
+      _currentDeviceSession = null;
       _weeklyTemplates = const [];
       _bannerMessage = _message('账号已注销。', 'Account cancelled.');
       _status = SessionStatus.unauthenticated;

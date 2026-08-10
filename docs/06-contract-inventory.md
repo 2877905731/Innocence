@@ -71,6 +71,24 @@ endpoints:
     source_behavior: "发送找回密码验证码（接口草案 4.1）"
     evidence_status: implementation_matched_sample_pending
     trigger: "P01 认证收尾时以脱敏请求回放核对"
+  - id: U09
+    method: GET
+    path: "/api/app/v1/account/blacklist"
+    source_behavior: "获取当前用户黑名单（接口草案 4.1）"
+    evidence_status: implementation_matched_sample_pending
+    trigger: "P01 隐私设置收尾时以脱敏空/非空回放核对"
+  - id: U10
+    method: DELETE
+    path: "/api/app/v1/account/blacklist/{targetUserId}"
+    source_behavior: "解除当前用户的黑名单关系（接口草案 4.1）"
+    evidence_status: implementation_matched_sample_pending
+    trigger: "P01 隐私设置收尾时以权限拒绝回放核对"
+  - id: U11
+    method: GET
+    path: "/api/app/v1/account/sessions/current"
+    source_behavior: "读取当前设备会话状态（接口草案 4.1）"
+    evidence_status: implementation_matched_sample_pending
+    trigger: "P01 会话策略收尾时以替换/当前设备回放核对"
 preview_queue:
   - priority: P1
     sample: "待收样本：认证/学习/签到/统计/首页聚合 5 组正常+空+边界请求"

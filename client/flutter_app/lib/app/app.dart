@@ -143,6 +143,10 @@ class _InnocenceAppState extends State<InnocenceApp> {
             onDeleteMemo: widget.sessionController.deleteMemo,
             onLoadSettingsOverview:
                 widget.sessionController.loadSettingsOverview,
+            onLoadBlacklist: widget.sessionController.loadBlacklist,
+            onRemoveBlacklist: widget.sessionController.removeBlacklist,
+            onLoadCurrentDeviceSession:
+                widget.sessionController.loadCurrentDeviceSession,
             onUpdateMySettingProfile:
                 widget.sessionController.updateMySettingProfile,
             onUpdateMyPrivacySetting:

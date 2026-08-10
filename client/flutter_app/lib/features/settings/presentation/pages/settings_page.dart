@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/core/theme/surface_palette.dart';
 import 'package:innocence_flutter/core/utils/localized_text.dart';
-import 'package:innocence_flutter/core/widgets/glass_panel.dart';
 import 'package:innocence_flutter/core/widgets/secondary_page_scaffold.dart';
 import 'package:innocence_flutter/features/admin/domain/models/admin_report_models.dart';
 import 'package:innocence_flutter/features/admin/presentation/pages/admin_announcement_page.dart';
@@ -11,6 +10,8 @@ import 'package:innocence_flutter/features/admin/presentation/pages/admin_report
 import 'package:innocence_flutter/features/admin/presentation/pages/admin_team_management_page.dart';
 import 'package:innocence_flutter/features/admin/presentation/pages/admin_user_management_page.dart';
 import 'package:innocence_flutter/features/account/domain/models/user_profile.dart';
+import 'package:innocence_flutter/features/account/domain/models/blacklist_item.dart';
+import 'package:innocence_flutter/features/account/domain/models/current_device_session.dart';
 import 'package:innocence_flutter/features/settings/domain/models/appearance_setting.dart';
 import 'package:innocence_flutter/features/settings/domain/models/notification_setting.dart';
 import 'package:innocence_flutter/features/settings/domain/models/privacy_setting.dart';
@@ -23,6 +24,9 @@ class SettingsPage extends StatefulWidget {
     required this.onChangeLanguage,
     required this.initialOverview,
     required this.onRefresh,
+    required this.onLoadBlacklist,
+    required this.onRemoveBlacklist,
+    required this.onLoadCurrentDeviceSession,
     required this.onUpdateProfile,
     required this.onUpdatePrivacy,
     required this.onUpdateNotifications,
@@ -55,6 +59,9 @@ class SettingsPage extends StatefulWidget {
   }) onChangeLanguage;
   final SettingOverview initialOverview;
   final Future<SettingOverview?> Function() onRefresh;
+  final Future<List<BlacklistItem>> Function() onLoadBlacklist;
+  final Future<bool> Function(int blockedUserId) onRemoveBlacklist;
+  final Future<CurrentDeviceSession?> Function() onLoadCurrentDeviceSession;
   final Future<UserProfile?> Function({
     required String nickname,
     required String avatarUrl,
@@ -148,7 +155,10 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   late SettingOverview _overview;
+  List<BlacklistItem> _blacklist = const [];
+  CurrentDeviceSession? _currentDeviceSession;
   bool _isLoading = false;
+  bool _isPrivacyContextLoading = true;
 
   String _text(String zh, String en) {
     return localizedText(context, zh, en);
@@ -183,6 +193,54 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     _overview = widget.initialOverview;
+    _loadPrivacyContext();
+  }
+
+  Future<void> _loadPrivacyContext() async {
+    try {
+      final blacklist = await widget.onLoadBlacklist();
+      if (mounted) {
+        setState(() => _blacklist = blacklist);
+      }
+    } catch (_) {
+      // The settings overview remains usable when a secondary privacy read fails.
+    }
+    try {
+      final currentSession = await widget.onLoadCurrentDeviceSession();
+      if (mounted) {
+        setState(() => _currentDeviceSession = currentSession);
+      }
+    } catch (_) {
+      // The session status is supplementary and must not block profile editing.
+    }
+    if (mounted) {
+      setState(() {
+        _isPrivacyContextLoading = false;
+      });
+    }
+  }
+
+  String _deviceLabel(CurrentDeviceSession session) {
+    switch (session.deviceType.trim().toLowerCase()) {
+      case 'windows':
+        return _text('Windows 桌面端', 'Windows desktop');
+      case 'android':
+        return _text('Android 手机端', 'Android phone');
+      default:
+        return session.deviceType.isEmpty
+            ? _text('未知设备', 'Unknown device')
+            : session.deviceType;
+    }
+  }
+
+  String _sessionStateLabel(CurrentDeviceSession session) {
+    if (session.replaced) {
+      return _text('已被同类型新设备替换', 'Replaced by a newer device');
+    }
+    if (session.online) {
+      return _text('当前在线', 'Currently online');
+    }
+    return _text('已离线', 'Offline');
   }
 
   Future<void> _refresh() async {
@@ -191,6 +249,49 @@ class _SettingsPageState extends State<SettingsPage> {
       fallbackMessage:
           _text('当前无法刷新设置，请稍后再试。', 'Unable to refresh settings right now.'),
     );
+    await _loadPrivacyContext();
+  }
+
+  Future<void> _removeBlacklist(BlacklistItem item) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(_text('解除拉黑？', 'Remove from blacklist?')),
+        content: Text(
+          _text(
+            '解除后，对方仍需满足好友和隐私规则才能查看资料或发起互动。',
+            'Removing the entry does not bypass friend or privacy rules.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(_text('取消', 'Cancel')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(_text('解除拉黑', 'Remove')),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
+    final removed = await widget.onRemoveBlacklist(item.blockedUserId);
+    if (!mounted) {
+      return;
+    }
+    if (removed) {
+      setState(() {
+        _blacklist = _blacklist
+            .where((entry) => entry.blockedUserId != item.blockedUserId)
+            .toList(growable: false);
+      });
+      _showMessage(_text('已解除拉黑。', 'Removed from the blacklist.'));
+    } else {
+      _showMessage(_text('解除拉黑失败。', 'Unable to remove the entry.'));
+    }
   }
 
   Future<void> _editProfile() async {
@@ -674,7 +775,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ],
       children: [
-        GlassPanel(
+        _SettingsSurface(
           lightStyle: true,
           child: _SettingSection(
             title: _text('语言', 'Language'),
@@ -705,7 +806,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         const SizedBox(height: 16),
-        GlassPanel(
+        _SettingsSurface(
           lightStyle: true,
           child: _SettingSection(
             title: _text('账号', 'Account'),
@@ -753,7 +854,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         const SizedBox(height: 16),
-        GlassPanel(
+        _SettingsSurface(
           lightStyle: true,
           child: _SettingSection(
             title: _text('隐私', 'Privacy'),
@@ -801,12 +902,98 @@ class _SettingsPageState extends State<SettingsPage> {
                     'Strangers cannot send private messages in this product direction.',
                   ),
                 ),
+                const SizedBox(height: 14),
+                Text(
+                  _text('黑名单', 'Blacklist'),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  _text(
+                    '被拉黑的账号不会出现在好友互动入口中。',
+                    'Blocked accounts stay out of friend interaction entry points.',
+                  ),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 8),
+                if (_isPrivacyContextLoading)
+                  const LinearProgressIndicator()
+                else if (_blacklist.isEmpty)
+                  Text(
+                    _text('黑名单为空。', 'Your blacklist is empty.'),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  )
+                else
+                  Column(
+                    children: _blacklist
+                        .map(
+                          (item) => ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(Icons.block_rounded),
+                            title: Text(
+                              '${_text('用户', 'User')} #${item.blockedUserId}',
+                            ),
+                            subtitle: item.createTime.isEmpty
+                                ? null
+                                : Text(item.createTime),
+                            trailing: TextButton(
+                              onPressed: _isLoading
+                                  ? null
+                                  : () => _removeBlacklist(item),
+                              child: Text(_text('解除', 'Remove')),
+                            ),
+                          ),
+                        )
+                        .toList(growable: false),
+                  ),
               ],
             ),
           ),
         ),
         const SizedBox(height: 16),
-        GlassPanel(
+        _SettingsSurface(
+          lightStyle: true,
+          child: _SettingSection(
+            title: _text('当前设备会话', 'Current device session'),
+            subtitle: _text(
+              '账号同时保留 1 台手机和 1 台 Windows 电脑会话。',
+              'One phone session and one Windows session are kept per account.',
+            ),
+            child: _currentDeviceSession == null
+                ? Text(
+                    _isPrivacyContextLoading
+                        ? _text('正在核对会话状态…', 'Checking session status…')
+                        : _text('当前会话状态暂不可用。', 'Session status is unavailable.'),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _InfoLine(
+                        label: _text('设备', 'Device'),
+                        value: _deviceLabel(_currentDeviceSession!),
+                      ),
+                      _InfoLine(
+                        label: _text('状态', 'Status'),
+                        value: _sessionStateLabel(_currentDeviceSession!),
+                      ),
+                      _InfoLine(
+                        label: _text('设备标识', 'Device ID'),
+                        value: _currentDeviceSession!.deviceId.isEmpty
+                            ? _text('未提供', 'Unavailable')
+                            : _currentDeviceSession!.deviceId,
+                      ),
+                      if (_currentDeviceSession!.loginTime.isNotEmpty)
+                        _InfoLine(
+                          label: _text('登录时间', 'Login time'),
+                          value: _currentDeviceSession!.loginTime,
+                        ),
+                    ],
+                  ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        _SettingsSurface(
           lightStyle: true,
           child: _SettingSection(
             title: _text('通知', 'Notifications'),
@@ -887,13 +1074,13 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         const SizedBox(height: 16),
-        GlassPanel(
+        _SettingsSurface(
           lightStyle: true,
           child: _SettingSection(
-            title: _text('桌面挂件', 'Desktop widget'),
+            title: _text('桌面体验', 'Desktop experience'),
             subtitle: _text(
-              '这里可以控制桌面挂件的基础行为。',
-              'Simple behavior controls for the desktop companion window.',
+              '这里控制 Canvas 与 Focus Orb 的窗口行为。',
+              'Control Canvas and Focus Orb window behavior here.',
             ),
             child: Column(
               children: [
@@ -905,11 +1092,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       : (value) => _updateWidgetSetting(
                             widgetSetting.copyWith(autoStart: value),
                           ),
-                  title: Text(_text('开机启动', 'Auto start')),
+                   title: Text(_text('开机启动 Canvas', 'Auto start Canvas')),
                   subtitle: Text(
                     _text(
-                      '随 Windows 一起启动桌面挂件。',
-                      'Launch the desktop widget with Windows.',
+                       '随 Windows 一起启动桌面画布。',
+                       'Launch the desktop Canvas with Windows.',
                     ),
                   ),
                 ),
@@ -921,11 +1108,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       : (value) => _updateWidgetSetting(
                             widgetSetting.copyWith(alwaysOnTop: value),
                           ),
-                  title: Text(_text('始终置顶', 'Always on top')),
+                   title: Text(_text('Focus Orb 始终置顶', 'Keep Focus Orb on top')),
                   subtitle: Text(
                     _text(
-                      '让挂件始终浮在其他窗口上方。',
-                      'Keep the desktop widget floating above other windows.',
+                       '让主动收纳后的 Focus Orb 保持在其他窗口上方。',
+                       'Keep the Focus Orb above other windows when stowed.',
                     ),
                   ),
                 ),
@@ -937,11 +1124,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       : (value) => _updateWidgetSetting(
                             widgetSetting.copyWith(showPlan: value),
                           ),
-                  title: Text(_text('显示计划', 'Show plan')),
+                   title: Text(_text('Orb 显示下一计划', 'Show next plan in Orb')),
                   subtitle: Text(
                     _text(
-                      '在挂件中显示今日计划摘要。',
-                      'Display today plan summary inside the widget.',
+                       '在 Focus Orb 中显示下一项计划摘要。',
+                       'Display the next plan summary in Focus Orb.',
                     ),
                   ),
                 ),
@@ -953,11 +1140,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       : (value) => _updateWidgetSetting(
                             widgetSetting.copyWith(showTimer: value),
                           ),
-                  title: Text(_text('显示计时器', 'Show timer')),
+                   title: Text(_text('Orb 显示计时器', 'Show timer in Orb')),
                   subtitle: Text(
                     _text(
-                      '显示当前学习计时器和番茄状态。',
-                      'Display active study timer and pomodoro state.',
+                       '显示 Focus Orb 的当前学习计时器和番茄状态。',
+                       'Display the active timer and pomodoro state in Focus Orb.',
                     ),
                   ),
                 ),
@@ -969,11 +1156,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       : (value) => _updateWidgetSetting(
                             widgetSetting.copyWith(showMemo: value),
                           ),
-                  title: Text(_text('显示备忘录', 'Show memo')),
+                   title: Text(_text('Orb 显示备忘录', 'Show memo in Orb')),
                   subtitle: Text(
                     _text(
-                      '在挂件中显示备忘录摘要卡片。',
-                      'Display memo summary cards in the widget.',
+                       '在 Canvas 摘要中显示备忘录卡片；Orb 不显示正文。',
+                       'Show memo cards in Canvas summaries; Orb never shows body text.',
                     ),
                   ),
                 ),
@@ -982,7 +1169,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         const SizedBox(height: 16),
-        GlassPanel(
+        _SettingsSurface(
           lightStyle: true,
           child: _SettingSection(
             title: _text('外观', 'Appearance'),
@@ -1098,7 +1285,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         const SizedBox(height: 16),
-        GlassPanel(
+        _SettingsSurface(
           lightStyle: true,
           child: _SettingSection(
             title: _text('后台管理', 'Admin tools'),
@@ -1135,7 +1322,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         const SizedBox(height: 16),
-        GlassPanel(
+        _SettingsSurface(
           lightStyle: true,
           child: _SettingSection(
             title: _text('快捷操作', 'Quick actions'),
@@ -1167,7 +1354,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         const SizedBox(height: 16),
-        GlassPanel(
+        _SettingsSurface(
           lightStyle: true,
           child: _SettingSection(
             title: _text('危险操作', 'Danger zone'),
@@ -1189,6 +1376,30 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SettingsSurface extends StatelessWidget {
+  const _SettingsSurface({
+    required this.child,
+    this.padding = const EdgeInsets.all(18),
+    this.lightStyle = false,
+  });
+
+  final Widget child;
+  final EdgeInsets padding;
+  final bool lightStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: lightStyle ? SurfacePalette.surface : SurfacePalette.softSurface,
+        border: Border.all(color: SurfacePalette.border),
+      ),
+      child: child,
     );
   }
 }
