@@ -77,7 +77,7 @@ pitfalls:
     contract_test_required: true
 code_locations:
   backend: "server/innocence-server/src/main/java/com/innocence/server/modules/（account/checkin/focus/friend/home/memo/notification/plan/report/setting/stats/system/team）"
-  frontend: "client/flutter_app/lib/features/（account/admin/auth/checkin/focus/friends/home/memos/notifications/plans/settings/stats/team）+ core/（network/config/theme/platform）"
+  frontend: "client/flutter_app/lib/features/（account/admin/auth/checkin/focus/friends/home/memos/notifications/plans/settings/stats/team）+ core/（network/config/theme/platform/layout/widgets）"
   database: "server/innocence-server/src/main/resources/schema.sql + infra/docker/docker-compose.dev.yml"
 project_boundary:
   read:
@@ -92,5 +92,5 @@ project_boundary:
     - Dart feature 模型
 fixtures:
   - path: "暂无（契约样本未收，P01 起回放收样）"
-    contract: "U01-U06"
+    contract: "U01-U08"
 ---

@@ -86,4 +86,6 @@ change_policy:
 - MVP 范围：`docs/planning/Innocence-MVP第一版功能范围.md`
 - 接口契约：`docs/planning/Innocence-接口清单草案.md`
 - 数据库契约：`docs/planning/Innocence-数据库表结构草案.md`
-- UI 规划与主题存档：`docs/planning/Innocence-UI设计规划.md`（P00.5 待创建）
+- UI 规划与主题存档：`docs/planning/Innocence-UI设计规划.md`
+- Windows 自适应体验：`docs/planning/Innocence-Windows自适应桌面体验.md`
+- Windows 信息架构与组件接口：`docs/planning/Innocence-Windows信息架构与组件体系.md`（已确认）

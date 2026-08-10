@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/session_controller.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
+import 'package:innocence_flutter/core/layout/desktop_presentation.dart';
 import 'package:innocence_flutter/core/network/api_exception.dart';
 import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
 import 'package:innocence_flutter/core/widgets/desktop_drag_region.dart';
@@ -12,6 +13,7 @@ enum AuthMode {
   passwordLogin,
   codeLogin,
   register,
+  passwordReset,
 }
 
 class AuthPage extends StatefulWidget {
@@ -40,8 +42,14 @@ class _AuthPageState extends State<AuthPage> {
   int _cooldownSeconds = 0;
 
   AppLanguage get _language => widget.appLanguage;
-  bool get _needsPassword => _mode != AuthMode.codeLogin;
-  bool get _needsCode => _mode != AuthMode.passwordLogin;
+  bool get _needsPassword =>
+      _mode == AuthMode.passwordLogin ||
+      _mode == AuthMode.register ||
+      _mode == AuthMode.passwordReset;
+  bool get _needsCode =>
+      _mode == AuthMode.codeLogin ||
+      _mode == AuthMode.register ||
+      _mode == AuthMode.passwordReset;
 
   @override
   void initState() {
@@ -84,6 +92,21 @@ class _AuthPageState extends State<AuthPage> {
       return;
     }
 
+    if (_mode == AuthMode.passwordReset) {
+      final succeeded = await widget.sessionController.resetPassword(
+        email: _emailController.text.trim(),
+        emailCode: _codeController.text.trim(),
+        newPassword: _passwordController.text,
+      );
+      if (succeeded && mounted) {
+        _codeController.clear();
+        setState(() {
+          _mode = AuthMode.passwordLogin;
+        });
+      }
+      return;
+    }
+
     await widget.sessionController.register(
       email: _emailController.text.trim(),
       password: _passwordController.text,
@@ -105,7 +128,8 @@ class _AuthPageState extends State<AuthPage> {
       if (password.isEmpty) {
         return _language.isChinese ? '请输入密码。' : 'Please enter your password.';
       }
-      if (_mode == AuthMode.register && password.length < 6) {
+      if ((_mode == AuthMode.register || _mode == AuthMode.passwordReset) &&
+          password.length < 6) {
         return _language.isChinese
             ? '密码至少 6 位。'
             : 'Password must be at least 6 characters.';
@@ -135,6 +159,8 @@ class _AuthPageState extends State<AuthPage> {
     try {
       if (_mode == AuthMode.register) {
         await widget.sessionController.sendRegisterCode(email);
+      } else if (_mode == AuthMode.passwordReset) {
+        await widget.sessionController.sendResetPasswordCode(email);
       } else {
         await widget.sessionController.sendLoginCode(email);
       }
@@ -214,6 +240,8 @@ class _AuthPageState extends State<AuthPage> {
         return _language.authCodeLoginTitle;
       case AuthMode.register:
         return _language.authRegisterTitle;
+      case AuthMode.passwordReset:
+        return _language.isChinese ? '重置密码' : 'Reset password';
     }
   }
 
@@ -225,6 +253,8 @@ class _AuthPageState extends State<AuthPage> {
         return _language.authCodeSubmitLabel;
       case AuthMode.register:
         return _language.authRegisterSubmitLabel;
+      case AuthMode.passwordReset:
+        return _language.isChinese ? '确认重置密码' : 'Reset password';
     }
   }
 
@@ -235,6 +265,9 @@ class _AuthPageState extends State<AuthPage> {
     if (_mode == AuthMode.register) {
       return _language.sendRegisterCodeLabel;
     }
+    if (_mode == AuthMode.passwordReset) {
+      return _language.isChinese ? '发送重置验证码' : 'Send reset code';
+    }
     return _language.sendLoginCodeLabel;
   }
 
@@ -244,60 +277,105 @@ class _AuthPageState extends State<AuthPage> {
     final sessionController = widget.sessionController;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFE4DED3),
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final contentWidth = isDesktop ? 740.0 : constraints.maxWidth - 40;
+        child: DesktopPresentationLayout(
+          surface: DesktopWindowSurface.auth,
+          builder: (context, spec) {
+            final splitLayout = isDesktop &&
+                spec.tier != DesktopPresentationTier.small;
+            final form = Container(
+              padding: EdgeInsets.all(splitLayout ? 34 : 24),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF7F1E7),
+                border: Border.all(color: const Color(0xFFB9B0A3)),
+              ),
+              child: _AuthFormSection(
+                mode: _mode,
+                modeTitle: _modeTitle,
+                submitLabel: _submitLabel,
+                codeButtonLabel: _codeButtonLabel,
+                isBusy: sessionController.isBusy,
+                sendingCode: _sendingCode,
+                cooldownSeconds: _cooldownSeconds,
+                bannerMessage: sessionController.bannerMessage,
+                emailController: _emailController,
+                passwordController: _passwordController,
+                codeController: _codeController,
+                needsPassword: _needsPassword,
+                needsCode: _needsCode,
+                obscurePassword: _obscurePassword,
+                isChinese: _language.isChinese,
+                onModeChanged: _switchMode,
+                onForgotPassword: () =>
+                    _switchMode(AuthMode.passwordReset),
+                onTogglePasswordVisibility: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
+                onChanged: sessionController.clearBanner,
+                onSendCode: _sendCode,
+                onSubmit: _submit,
+              ),
+            );
 
-            return Center(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  isDesktop ? 48 : 20,
-                  isDesktop ? 28 : 18,
-                  isDesktop ? 48 : 20,
-                  26,
-                ),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: contentWidth),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _AuthHeader(
-                        isDesktop: isDesktop,
-                        isChinese: _language.isChinese,
+            return Stack(
+              children: [
+                if (isDesktop)
+                  const Positioned.fill(child: DesktopDragRegion()),
+                Positioned.fill(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                      splitLayout ? 32 : 18,
+                      splitLayout ? 46 : 70,
+                      splitLayout ? 32 : 18,
+                      28,
+                    ),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1060),
+                        child: splitLayout
+                            ? IntrinsicHeight(
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Expanded(
+                                      flex: 4,
+                                      child: _AuthHeader(
+                                        isDesktop: isDesktop,
+                                        isChinese: _language.isChinese,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 18),
+                                    Expanded(flex: 6, child: form),
+                                  ],
+                                ),
+                              )
+                            : Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.stretch,
+                                children: [
+                                  _AuthHeader(
+                                    isDesktop: false,
+                                    isChinese: _language.isChinese,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  form,
+                                ],
+                              ),
                       ),
-                      const SizedBox(height: 40),
-                      _AuthFormSection(
-                        mode: _mode,
-                        modeTitle: _modeTitle,
-                        submitLabel: _submitLabel,
-                        codeButtonLabel: _codeButtonLabel,
-                        isBusy: sessionController.isBusy,
-                        sendingCode: _sendingCode,
-                        cooldownSeconds: _cooldownSeconds,
-                        bannerMessage: sessionController.bannerMessage,
-                        emailController: _emailController,
-                        passwordController: _passwordController,
-                        codeController: _codeController,
-                        needsPassword: _needsPassword,
-                        needsCode: _needsCode,
-                        obscurePassword: _obscurePassword,
-                        isChinese: _language.isChinese,
-                        onModeChanged: _switchMode,
-                        onTogglePasswordVisibility: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                        onChanged: sessionController.clearBanner,
-                        onSendCode: _sendCode,
-                        onSubmit: _submit,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+                if (isDesktop)
+                  const Positioned(
+                    top: 12,
+                    right: 12,
+                    child: _UnifiedCloseButton(),
+                  ),
+              ],
             );
           },
         ),
@@ -317,63 +395,51 @@ class _AuthHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final titleContent = Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          'INNOCENCE',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: const Color(0xFF111111),
-            fontSize: isDesktop ? 50 : 36,
-            fontWeight: FontWeight.w800,
-            letterSpacing: isDesktop ? 3.2 : 2.0,
-            height: 1,
-          ),
-        ),
-        const SizedBox(height: 14),
-        Center(
-          child: Container(
-            width: isDesktop ? 300 : 200,
-            height: 2,
-            decoration: BoxDecoration(
-              color: const Color(0xFF111111),
-              borderRadius: BorderRadius.circular(999),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          isChinese ? '专注陪伴与同步学习' : 'Focused study and synced progress',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: const Color(0xFF7A8090),
-            fontSize: isDesktop ? 14 : 13,
-          ),
-        ),
-      ],
-    );
-
-    if (!isDesktop) {
-      return titleContent;
-    }
-
-    return SizedBox(
-      height: 168,
-      child: Stack(
+    return Container(
+      padding: EdgeInsets.all(isDesktop ? 34 : 24),
+      color: const Color(0xFF2B2925),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Positioned.fill(
-            child: DesktopDragRegion(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'INNOCENCE',
+                style: TextStyle(
+                  color: Color(0xFFF6EEE1),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 2.4,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Container(width: 54, height: 4, color: const Color(0xFFBD6048)),
+            ],
           ),
-          Positioned.fill(
-            child: IgnorePointer(
-              child: Center(child: titleContent),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: isDesktop ? 36 : 24),
+            child: Text(
+              isChinese ? '把注意力，\n留给真正重要的事。' : 'Keep your attention\nfor what matters.',
+              style: TextStyle(
+                color: const Color(0xFFF6EEE1),
+                fontSize: isDesktop ? 34 : 28,
+                fontWeight: FontWeight.w800,
+                height: 1.15,
+                letterSpacing: -0.8,
+              ),
             ),
           ),
-          const Positioned(
-            top: 2,
-            right: 0,
-            child: _UnifiedCloseButton(),
+          Text(
+            isChinese
+                ? '计划、专注与陪伴，在手机和 Windows 之间保持同一条节奏。'
+                : 'Plans, focus and companionship stay in rhythm across phone and Windows.',
+            style: const TextStyle(
+              color: Color(0xFFCFC4B5),
+              fontSize: 13,
+              height: 1.55,
+            ),
           ),
         ],
       ),
@@ -397,10 +463,9 @@ class _UnifiedCloseButton extends StatelessWidget {
           width: 46,
           height: 46,
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            color: const Color(0xFFF7F1E7),
             border: Border.all(
-              color: const Color(0xFFD4DAE3),
+              color: const Color(0xFFB9B0A3),
             ),
           ),
           alignment: Alignment.center,
@@ -433,6 +498,7 @@ class _AuthFormSection extends StatelessWidget {
     required this.obscurePassword,
     required this.isChinese,
     required this.onModeChanged,
+    required this.onForgotPassword,
     required this.onTogglePasswordVisibility,
     required this.onChanged,
     required this.onSendCode,
@@ -455,6 +521,7 @@ class _AuthFormSection extends StatelessWidget {
   final bool obscurePassword;
   final bool isChinese;
   final ValueChanged<AuthMode> onModeChanged;
+  final VoidCallback onForgotPassword;
   final VoidCallback onTogglePasswordVisibility;
   final VoidCallback onChanged;
   final Future<void> Function() onSendCode;
@@ -471,6 +538,27 @@ class _AuthFormSection extends StatelessWidget {
   String get _emailCodeLabel => isChinese ? '邮箱验证码' : 'Email code';
   String get _emailCodeHint => isChinese ? '请输入收到的验证码' : 'Enter the code';
 
+  String get _modeDescription {
+    switch (mode) {
+      case AuthMode.passwordLogin:
+        return isChinese
+            ? '使用邮箱和密码进入你的学习空间。'
+            : 'Use email and password to enter your study space.';
+      case AuthMode.codeLogin:
+        return isChinese
+            ? '通过邮箱验证码快速登录当前设备。'
+            : 'Use an email code for quick access on this device.';
+      case AuthMode.register:
+        return isChinese
+            ? '创建账号后，将直接进入你的今日画布。'
+            : 'Create an account and enter your daily canvas.';
+      case AuthMode.passwordReset:
+        return isChinese
+            ? '验证邮箱后设置一组新密码。'
+            : 'Verify your email and choose a new password.';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final disableDesktopAutofill = AppConfig.deviceType == 'windows';
@@ -480,45 +568,69 @@ class _AuthFormSection extends StatelessWidget {
       children: [
         Text(
           modeTitle,
-          textAlign: TextAlign.center,
           style: const TextStyle(
-            color: Color(0xFF111111),
+            color: Color(0xFF26231F),
             fontSize: 32,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.6,
           ),
         ),
-        const SizedBox(height: 28),
-        Row(
-          children: [
-            Expanded(
-              child: _AuthModeButton(
-                label: _passwordSegmentLabel,
-                selected: mode == AuthMode.passwordLogin,
-                enabled: !isBusy,
-                onTap: () => onModeChanged(AuthMode.passwordLogin),
-              ),
-            ),
-            const SizedBox(width: 18),
-            Expanded(
-              child: _AuthModeButton(
-                label: _codeSegmentLabel,
-                selected: mode == AuthMode.codeLogin,
-                enabled: !isBusy,
-                onTap: () => onModeChanged(AuthMode.codeLogin),
-              ),
-            ),
-            const SizedBox(width: 18),
-            Expanded(
-              child: _AuthModeButton(
-                label: _registerSegmentLabel,
-                selected: mode == AuthMode.register,
-                enabled: !isBusy,
-                onTap: () => onModeChanged(AuthMode.register),
-              ),
-            ),
-          ],
+        const SizedBox(height: 8),
+        Text(
+          _modeDescription,
+          style: const TextStyle(
+            color: Color(0xFF6F685F),
+            fontSize: 14,
+            height: 1.45,
+          ),
         ),
+        const SizedBox(height: 24),
+        if (mode == AuthMode.passwordReset)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: isBusy
+                  ? null
+                  : () => onModeChanged(AuthMode.passwordLogin),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF7B3F32),
+                padding: EdgeInsets.zero,
+              ),
+              icon: const Icon(Icons.arrow_back_rounded, size: 17),
+              label: Text(isChinese ? '返回登录' : 'Back to sign in'),
+            ),
+          )
+        else
+          Row(
+            children: [
+              Expanded(
+                child: _AuthModeButton(
+                  label: _passwordSegmentLabel,
+                  selected: mode == AuthMode.passwordLogin,
+                  enabled: !isBusy,
+                  onTap: () => onModeChanged(AuthMode.passwordLogin),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _AuthModeButton(
+                  label: _codeSegmentLabel,
+                  selected: mode == AuthMode.codeLogin,
+                  enabled: !isBusy,
+                  onTap: () => onModeChanged(AuthMode.codeLogin),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _AuthModeButton(
+                  label: _registerSegmentLabel,
+                  selected: mode == AuthMode.register,
+                  enabled: !isBusy,
+                  onTap: () => onModeChanged(AuthMode.register),
+                ),
+              ),
+            ],
+          ),
         if (bannerMessage != null) ...[
           const SizedBox(height: 18),
           _AuthBanner(message: bannerMessage!),
@@ -539,12 +651,15 @@ class _AuthFormSection extends StatelessWidget {
           _LabeledTextField(
             label: _passwordLabel,
             controller: passwordController,
-            hintText: mode == AuthMode.register ? _newPasswordHint : _passwordHint,
+            hintText:
+                mode == AuthMode.register || mode == AuthMode.passwordReset
+                    ? _newPasswordHint
+                    : _passwordHint,
             keyboardType: TextInputType.text,
             obscureText: obscurePassword,
             autofillHints: disableDesktopAutofill
                 ? null
-                : mode == AuthMode.register
+                : mode == AuthMode.register || mode == AuthMode.passwordReset
                     ? const [AutofillHints.newPassword]
                     : const [AutofillHints.password],
             trailing: IconButton(
@@ -558,6 +673,20 @@ class _AuthFormSection extends StatelessWidget {
               ),
             ),
             onChanged: onChanged,
+          ),
+        ],
+        if (mode == AuthMode.passwordLogin) ...[
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: isBusy ? null : onForgotPassword,
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF7B3F32),
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+              ),
+              child: Text(isChinese ? '忘记密码？' : 'Forgot password?'),
+            ),
           ),
         ],
         if (needsCode) ...[
@@ -582,12 +711,10 @@ class _AuthFormSection extends StatelessWidget {
                         await onSendCode();
                       },
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF111111),
-                  side: const BorderSide(color: Color(0xFFD2D8E1)),
+                  foregroundColor: const Color(0xFF26231F),
+                  side: const BorderSide(color: Color(0xFFB9B0A3)),
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                  shape: const RoundedRectangleBorder(),
                 ),
                 child: Text(codeButtonLabel),
               ),
@@ -607,9 +734,7 @@ class _AuthFormSection extends StatelessWidget {
               backgroundColor: const Color(0xFF111111),
               foregroundColor: Colors.white,
               elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
+              shape: const RoundedRectangleBorder(),
             ),
             child: isBusy
                 ? const SizedBox.square(
@@ -641,7 +766,6 @@ class _AuthBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF3F3),
-        borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: const Color(0xFFFFD5D5),
         ),
@@ -690,14 +814,16 @@ class _AuthModeButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(18),
         child: Ink(
-          height: 64,
+          height: 56,
           decoration: BoxDecoration(
-            color: selected ? const Color(0xFF111111) : Colors.white,
-            borderRadius: BorderRadius.circular(18),
+            color: selected
+                ? const Color(0xFF2B2925)
+                : const Color(0xFFF7F1E7),
             border: Border.all(
-              color: selected ? const Color(0xFF111111) : const Color(0xFFD2D8E1),
+              color: selected
+                  ? const Color(0xFF2B2925)
+                  : const Color(0xFFB9B0A3),
             ),
           ),
           child: Center(
@@ -783,7 +909,7 @@ class _LabeledTextFieldState extends State<_LabeledTextField> {
         Text(
           widget.label,
           style: const TextStyle(
-            color: Color(0xFF333333),
+            color: Color(0xFF4F4942),
             fontSize: 15,
             fontWeight: FontWeight.w700,
           ),
@@ -794,12 +920,11 @@ class _LabeledTextFieldState extends State<_LabeledTextField> {
           height: 60,
           padding: const EdgeInsets.symmetric(horizontal: 18),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
+            color: const Color(0xFFFFFCF6),
             border: Border.all(
               color: isFocused
-                  ? const Color(0xFF111111)
-                  : const Color(0xFFD8DEE8),
+                  ? const Color(0xFF7B3F32)
+                  : const Color(0xFFB9B0A3),
               width: isFocused ? 1.2 : 1,
             ),
           ),

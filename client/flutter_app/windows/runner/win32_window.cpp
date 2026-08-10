@@ -55,14 +55,14 @@ constexpr int kWidgetMaxWidth = 980;
 constexpr int kWidgetHeight = 920;
 constexpr int kWidgetMinHeight = 380;
 constexpr int kWidgetMaxHeight = 940;
-constexpr int kPageDefaultWidth = 1260;
-constexpr int kPageDefaultHeight = 860;
-constexpr int kPageMinWidth = 1080;
-constexpr int kPageMinHeight = 760;
-constexpr int kMiniWidgetWidth = 132;
-constexpr int kMiniWidgetHeight = 156;
-constexpr int kAuthWidth = 860;
-constexpr int kAuthHeight = 980;
+constexpr int kPageDefaultWidth = 920;
+constexpr int kPageDefaultHeight = 760;
+constexpr int kPageMinWidth = 380;
+constexpr int kPageMinHeight = 520;
+constexpr int kMiniWidgetWidth = 88;
+constexpr int kMiniWidgetHeight = 88;
+constexpr int kAuthWidth = 920;
+constexpr int kAuthHeight = 760;
 constexpr int kWidgetMarginRight = 32;
 constexpr int kWidgetMarginTop = 24;
 constexpr int kWidgetSnapThreshold = 28;
@@ -101,6 +101,12 @@ int ClampInt(int value, int min_value, int max_value) {
 // scale factor
 int Scale(int source, double scale_factor) {
   return static_cast<int>(source * scale_factor);
+}
+
+double WindowScaleFactor(HWND window) {
+  const HMONITOR monitor =
+      MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
+  return FlutterDesktopGetDpiForMonitor(monitor) / 96.0;
 }
 
 // Dynamically loads the |EnableNonClientDpiScaling| from the User32 module.
@@ -255,6 +261,32 @@ Win32Window::MessageHandler(HWND hwnd,
       }
       return 0;
 
+    case WM_GETMINMAXINFO: {
+      auto min_max_info = reinterpret_cast<MINMAXINFO*>(lparam);
+      const double scale_factor = WindowScaleFactor(hwnd);
+      if (window_mode_ == "mini") {
+        const int width = Scale(kMiniWidgetWidth, scale_factor);
+        const int height = Scale(kMiniWidgetHeight, scale_factor);
+        min_max_info->ptMinTrackSize.x = width;
+        min_max_info->ptMinTrackSize.y = height;
+        min_max_info->ptMaxTrackSize.x = width;
+        min_max_info->ptMaxTrackSize.y = height;
+      } else if (window_mode_ == "widget") {
+        min_max_info->ptMinTrackSize.x =
+            Scale(kWidgetMinWidth, scale_factor);
+        min_max_info->ptMinTrackSize.y =
+            Scale(kWidgetMinHeight, scale_factor);
+        min_max_info->ptMaxTrackSize.x =
+            Scale(kWidgetMaxWidth, scale_factor);
+        min_max_info->ptMaxTrackSize.y =
+            Scale(kWidgetMaxHeight, scale_factor);
+      } else {
+        min_max_info->ptMinTrackSize.x = Scale(kPageMinWidth, scale_factor);
+        min_max_info->ptMinTrackSize.y = Scale(kPageMinHeight, scale_factor);
+      }
+      return 0;
+    }
+
     case WM_DPICHANGED: {
       auto newRectSize = reinterpret_cast<RECT*>(lparam);
       LONG newWidth = newRectSize->right - newRectSize->left;
@@ -359,7 +391,7 @@ Win32Window::MessageHandler(HWND hwnd,
     case kTrayIconMessage:
       if (lparam == WM_LBUTTONDBLCLK || lparam == WM_LBUTTONUP) {
         if (window_mode_ == "mini") {
-          SetWindowMode("widget");
+          SetWindowMode("page");
         }
         ShowWindow(hwnd, SW_SHOWNORMAL);
         SetForegroundWindow(hwnd);
@@ -536,8 +568,18 @@ void Win32Window::ApplyDesktopWidgetChrome(HWND const window) {
 
 void Win32Window::UpdateWindowFrame(HWND const window) {
   LONG_PTR style = GetWindowLongPtr(window, GWL_STYLE);
-  style &= ~(WS_MAXIMIZEBOX | WS_CAPTION);
-  style |= WS_MINIMIZEBOX | WS_SYSMENU | WS_THICKFRAME;
+  style &= ~WS_CAPTION;
+  style |= WS_SYSMENU;
+  if (window_mode_ == "mini") {
+    style &= ~(WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME);
+  } else {
+    style |= WS_MINIMIZEBOX | WS_THICKFRAME;
+  }
+  if (window_mode_ == "page") {
+    style |= WS_MAXIMIZEBOX;
+  } else {
+    style &= ~WS_MAXIMIZEBOX;
+  }
   SetWindowLongPtr(window, GWL_STYLE, style);
 
   LONG_PTR ex_style = GetWindowLongPtr(window, GWL_EXSTYLE);
@@ -660,9 +702,13 @@ void Win32Window::SnapWidgetToWorkArea(HWND const window) {
   int target_x = window_rect.left;
   int target_y = window_rect.top;
   const int current_width =
-      window_mode_ == "mini" ? kMiniWidgetWidth : widget_width_;
+      window_mode_ == "mini"
+          ? Scale(kMiniWidgetWidth, WindowScaleFactor(window))
+          : widget_width_;
   const int current_height =
-      window_mode_ == "mini" ? kMiniWidgetHeight : widget_height_;
+      window_mode_ == "mini"
+          ? Scale(kMiniWidgetHeight, WindowScaleFactor(window))
+          : widget_height_;
   const int max_x = std::max(work_area.left, work_area.right - current_width);
   const int max_y = std::max(work_area.top, work_area.bottom - current_height);
 
@@ -713,13 +759,16 @@ void Win32Window::PositionAuthWindow(HWND const window) {
   RECT work_area = GetMonitorWorkArea(window);
   const int work_width = static_cast<int>(work_area.right - work_area.left);
   const int work_height = static_cast<int>(work_area.bottom - work_area.top);
+  const double scale_factor = WindowScaleFactor(window);
+  const int auth_width = Scale(kAuthWidth, scale_factor);
+  const int auth_height = Scale(kAuthHeight, scale_factor);
   const int auth_x = static_cast<int>(work_area.left) +
-                     std::max(0, (work_width - kAuthWidth) / 2);
+                     std::max(0, (work_width - auth_width) / 2);
   const int auth_y = static_cast<int>(work_area.top) +
-                     std::max(0, (work_height - kAuthHeight) / 2);
+                     std::max(0, (work_height - auth_height) / 2);
 
   updating_window_position_ = true;
-  SetWindowPos(window, insert_after, auth_x, auth_y, kAuthWidth, kAuthHeight,
+  SetWindowPos(window, insert_after, auth_x, auth_y, auth_width, auth_height,
                SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_FRAMECHANGED);
   updating_window_position_ = false;
 }
@@ -738,8 +787,9 @@ void Win32Window::PositionPageWindow(HWND const window) {
   RECT work_area = GetMonitorWorkArea(window);
   const int work_width = static_cast<int>(work_area.right - work_area.left);
   const int work_height = static_cast<int>(work_area.bottom - work_area.top);
-  const int target_width = page_width_;
-  const int target_height = page_height_;
+  const double scale_factor = WindowScaleFactor(window);
+  const int target_width = Scale(page_width_, scale_factor);
+  const int target_height = Scale(page_height_, scale_factor);
   const int auth_x = static_cast<int>(work_area.left) +
                      std::max(0, (work_width - target_width) / 2);
   const int auth_y = static_cast<int>(work_area.top) +
@@ -791,23 +841,26 @@ void Win32Window::PositionDesktopWidget(HWND const window, int logical_height) {
 void Win32Window::PositionMiniWidget(HWND const window) {
   const HWND insert_after = always_on_top_ ? HWND_TOPMOST : HWND_NOTOPMOST;
   RECT work_area = GetMonitorWorkArea(window);
-  int widget_x = work_area.right - kMiniWidgetWidth - kWidgetMarginRight;
+  const double scale_factor = WindowScaleFactor(window);
+  const int mini_width = Scale(kMiniWidgetWidth, scale_factor);
+  const int mini_height = Scale(kMiniWidgetHeight, scale_factor);
+  int widget_x = work_area.right - mini_width - kWidgetMarginRight;
   int widget_y = work_area.top + kWidgetMarginTop;
 
   if (has_custom_position_) {
     const int max_x = std::max(
         static_cast<int>(work_area.left),
-        static_cast<int>(work_area.right) - kMiniWidgetWidth);
+        static_cast<int>(work_area.right) - mini_width);
     const int max_y = std::max(
         static_cast<int>(work_area.top),
-        static_cast<int>(work_area.bottom) - kMiniWidgetHeight);
+        static_cast<int>(work_area.bottom) - mini_height);
     widget_x = ClampInt(widget_x_, static_cast<int>(work_area.left), max_x);
     widget_y = ClampInt(widget_y_, static_cast<int>(work_area.top), max_y);
   }
 
   updating_window_position_ = true;
-  SetWindowPos(window, insert_after, widget_x, widget_y, kMiniWidgetWidth,
-               kMiniWidgetHeight,
+  SetWindowPos(window, insert_after, widget_x, widget_y, mini_width,
+               mini_height,
                SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_FRAMECHANGED);
   updating_window_position_ = false;
 

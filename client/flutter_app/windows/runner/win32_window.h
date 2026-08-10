@@ -58,7 +58,7 @@ class Win32Window {
   // Resize the desktop widget while keeping it anchored to the top-right.
   void SetWidgetHeight(int logical_height);
 
-  // Switch between the wider auth window and the compact desktop widget.
+  // Switch between auth, the adaptive canvas, and the compatibility orb mode.
   void SetWindowMode(const std::string& mode);
 
   // Start dragging the widget from a Flutter-defined drag region.
@@ -149,8 +149,8 @@ class Win32Window {
   bool tray_icon_added_ = false;
   int widget_x_ = 0;
   int widget_y_ = 0;
-  int page_width_ = 1260;
-  int page_height_ = 860;
+  int page_width_ = 920;
+  int page_height_ = 760;
   int page_x_ = 0;
   int page_y_ = 0;
 

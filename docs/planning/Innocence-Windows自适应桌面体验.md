@@ -3,8 +3,10 @@ schema_version: 1
 document_type: windows_adaptive_desktop_experience
 project_name: "Innocence"
 status: approved_design_direction
+implementation_status: p01_shell_foundation_implemented
 updated_at: "2026-08-10"
 owner: "Innocence UI"
+information_architecture_path: docs/planning/Innocence-Windows信息架构与组件体系.md
 ---
 
 # Innocence Windows 自适应桌面体验
@@ -134,9 +136,9 @@ Windows 端不再定义为“一个可以被拉大的桌面挂件”，而定义
 
 ## 10. 分阶段落地
 
-1. **P00.5**：固化四层级信息架构、断点、组件密度接口和主题映射。
-2. **P01-P04**：页面重建时同步实现 Large/Medium/Small 三种布局，不在阶段末尾补做响应式。
-3. **P05**：完成原生 `canvas / orb` shell、边缘吸附、托盘、置顶、DPI 与窗口状态持久化。
+1. **P00.5**：四层级信息架构、断点、组件密度接口和主题映射已固化并获用户确认。
+2. **P01-P04**：P01 首批已落地三档 Shell 与 88×88 Orb；后续页面重建继续同步实现 Large/Medium/Small，不在阶段末尾补做响应式。
+3. **P05**：在现有原生 `canvas / orb` 窗口切换基础上，完善边缘吸附、托盘、置顶、DPI 与窗口状态持久化。
 4. **P06**：在 100% / 125% / 150% DPI、单屏/多屏和四套主题下完成尺寸矩阵验收。
 
 ## 11. 验收标准
@@ -148,3 +150,7 @@ Windows 端不再定义为“一个可以被拉大的桌面挂件”，而定义
 - Orb 可在 300ms 内恢复最近窗口，且不会遮挡任务栏或丢失当前专注状态。
 - 四套主题在四种形态中保持辨识度、可读性和一致的信息结构。
 - 键盘导航、屏幕阅读器标签、减少动画、高对比度与 DPI 缩放均可用。
+
+## 12. 关联规范
+
+页面清单、导航地图、跨尺寸内容优先级、Flutter 呈现接口与四主题映射以 `docs/planning/Innocence-Windows信息架构与组件体系.md` 为准。本文继续作为窗口形态、断点、原生 Shell 和状态连续性的上位体验规范。

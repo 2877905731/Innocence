@@ -33,7 +33,7 @@ class DesktopWidgetBridge {
       if (arguments is Map) {
         final mode = arguments['mode'];
         if (mode is String && mode.isNotEmpty) {
-          _windowModeListener?.call(mode);
+          _windowModeListener?.call(_canonicalWindowMode(mode));
         }
       }
     });
@@ -101,7 +101,7 @@ class DesktopWidgetBridge {
       await _channel.invokeMethod<void>(
         'setWindowMode',
         <String, String>{
-          'mode': mode,
+          'mode': _nativeWindowMode(mode),
         },
       );
     } on MissingPluginException {
@@ -168,14 +168,50 @@ class DesktopWidgetBridge {
   }
 
   static Future<void> showMiniWindow() async {
-    await setWindowMode('mini');
+    await showOrbWindow();
   }
 
   static Future<void> showPageWindow() async {
-    await setWindowMode('page');
+    await showCanvasWindow();
   }
 
   static Future<void> showWidgetWindow() async {
-    await setWindowMode('widget');
+    await showCanvasWindow();
+  }
+
+  static Future<void> showCanvasWindow() async {
+    await setWindowMode('canvas');
+  }
+
+  static Future<void> showOrbWindow() async {
+    await setWindowMode('orb');
+  }
+
+  static String _nativeWindowMode(String mode) {
+    switch (mode) {
+      case 'canvas':
+      case 'page':
+      case 'widget':
+        return 'page';
+      case 'orb':
+      case 'mini':
+        return 'mini';
+      default:
+        return 'auth';
+    }
+  }
+
+  static String _canonicalWindowMode(String mode) {
+    switch (mode) {
+      case 'page':
+      case 'widget':
+      case 'canvas':
+        return 'canvas';
+      case 'mini':
+      case 'orb':
+        return 'orb';
+      default:
+        return 'auth';
+    }
   }
 }

@@ -59,6 +59,18 @@ endpoints:
     source_behavior: "首页聚合（接口草案 4.14）"
     evidence_status: pending
     trigger: "P02 首页重建时以真实请求回放核对"
+  - id: U07
+    method: POST
+    path: "/api/app/v1/auth/password/reset"
+    source_behavior: "邮箱验证码重置密码（接口草案 4.1）"
+    evidence_status: implementation_matched_sample_pending
+    trigger: "P01 认证收尾时以脱敏请求回放核对"
+  - id: U08
+    method: POST
+    path: "/api/app/v1/auth/password/send-reset-code"
+    source_behavior: "发送找回密码验证码（接口草案 4.1）"
+    evidence_status: implementation_matched_sample_pending
+    trigger: "P01 认证收尾时以脱敏请求回放核对"
 preview_queue:
   - priority: P1
     sample: "待收样本：认证/学习/签到/统计/首页聚合 5 组正常+空+边界请求"

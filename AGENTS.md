@@ -22,6 +22,7 @@ read_order:
       - docs/08-project-profile.md
       - docs/02-contract-and-compatibility-rules.md
       - docs/planning/Innocence-Windows自适应桌面体验.md
+      - docs/planning/Innocence-Windows信息架构与组件体系.md
     purpose: task_specific_context
 ---
 
@@ -39,7 +40,7 @@ read_order:
 ```yaml
 project_summary: "Innocence 是面向学习、自律、陪伴和团队互助的双端产品（Flutter 手机端 + 桌面端），15 个产品模块已全部封板，第一版按 MVP 范围开发。前端 UI 全面重写，四个主题并存可切换；Windows 端采用大/中/小自适应画布 + 主动悬浮球，不再以固定挂件为中心。"
 data_owner: "Innocence 自有数据；用户数据归用户，由 Innocence 服务托管"
-current_milestone: "P00.5 UI 设计体系：四主题参考实现齐备；Windows 自适应桌面画布方向已批准，进入信息架构与组件密度设计"
+current_milestone: "P01 账户与基础：Windows 自适应 Shell、Focus Orb 与认证入口首批实现完成；继续资料、隐私、设置和 G01 负向验收"
 ```
 
 ## invariants

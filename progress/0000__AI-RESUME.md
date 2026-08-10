@@ -3,15 +3,15 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-08-10"
-latest_checkpoint: "0010"
-current_phase: P00.5
-current_gate: G00.5
-state: windows_adaptive_desktop_canvas_direction_approved
-next_sequence: "0011"
-current_goal: "P00.5 UI 设计体系进行中：四主题方向与 Windows 自适应桌面画布已确认；下一步推进页面信息架构、Large/Medium/Small 组件密度接口和主题映射"
+latest_checkpoint: "0013"
+current_phase: P01
+current_gate: G01
+state: p01_adaptive_shell_and_auth_entry_source_implemented
+next_sequence: "0014"
+current_goal: "P01 账户与基础进行中：继续资料、隐私、设置页面重建，并完成会话、权限负向路径和 Flutter 工具链验收"
 recent_baseline:
-  - checkpoint: null
-    result: "P00 治理基线初始化完成；暂无历史检查点"
+  - checkpoint: "0013"
+    result: "DesktopPresentationTier、自适应 6+2 主 Shell、88×88 Focus Orb 和认证重置入口已完成源码实现与结构一致性检查；Flutter/Dart SDK 不可用，尚未执行 analyze/test"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
@@ -39,18 +39,27 @@ user_decisions:
     decision: "玻璃态恢复为第四个可选主题；中世纪现代主义与玻璃态分别使用独立临时 HTML。生成 Flutter 前端时优先参考 HTML 的构图与视觉令牌；若 AI 参考不便或转换效率较低，可忽略 HTML 代码并依据提示词、令牌和页面结构实现"
   - id: DEC-0013
     decision: "Windows 端不再以固定桌面挂件为中心，采用 Large/Medium/Small 三档自适应画布 + 用户主动 Focus Orb；首次登录默认 Medium 920×760，跨尺寸只重排 shell 与组件密度并保留业务状态；设计执行权交由 AI，可在提升舒适度与效率时突破旧挂件约束"
+  - id: DEC-0014
+    decision: "用户确认 Windows 页面清单、6+2 导航分组、Small 四项主导航、跨尺寸优先级与组件接口；G00.5 通过，进入 P01"
 unfinished:
-  - id: TODO-002
+  - id: TODO-005
     priority: P0
-    item: "完成页面清单、导航地图与 Large/Medium/Small 跨尺寸内容优先级"
-    gate: G00.5
-  - id: TODO-003
+    item: "执行 flutter analyze、flutter test 和 Windows 100%/125%/150% DPI 实机验收；当前环境未安装 Flutter/Dart SDK"
+    gate: G01
+  - id: TODO-006
     priority: P1
-    item: "定义 Flutter DesktopPresentationTier、组件 full/comfortable/compact/glance 密度接口与主题映射"
-    gate: G00.5
+    item: "按新 UI 重建资料、隐私与设置页面"
+    gate: G01
+  - id: TODO-007
+    priority: P0
+    item: "核对 1 手机 + 1 电脑会话冲突、认证失败、租户不匹配、权限拒绝和拉黑越权负向路径"
+    gate: G01
 next_actions:
   - id: NEXT-001
-    action: "依据 Windows 自适应桌面体验规范推进 P00.5 信息架构和组件体系；移动端布局仍单独设计"
+    action: "继续重建资料、隐私与设置页面；保留现有 API、模型和 SessionController 回调"
+    inputs: []
+  - id: NEXT-002
+    action: "Flutter SDK 可用后执行 analyze/test，并在 Windows 三档尺寸与三档 DPI 下验证 Canvas/Orb 切换"
     inputs: []
 required_reads:
   - AGENTS.md
@@ -59,4 +68,5 @@ required_reads:
   - docs/07-dataflow-and-module-map.md
   - docs/06-contract-inventory.md
   - docs/planning/Innocence-Windows自适应桌面体验.md
+  - docs/planning/Innocence-Windows信息架构与组件体系.md
   - progress/INDEX.md

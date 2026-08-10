@@ -3,6 +3,9 @@ schema_version: 1
 document_type: ui_design_plan
 project_name: "Innocence"
 created_at: "2026-08-07"
+updated_at: "2026-08-10"
+information_architecture_status: approved
+windows_shell_implementation_status: p01_foundation_implemented
 themes:
   - id: theme-01
     name: "侘寂禅意"
@@ -1043,8 +1046,9 @@ module.exports = {
 
 ## 3. 后续规划
 
-- 四个主题提示词与 Windows 参考实现均已齐备，主题方向视为已确认；进入信息架构（页面清单 + 导航地图）和组件体系设计
+- 四个主题提示词与 Windows 参考实现均已齐备，主题方向视为已确认
 - Windows 不再按“主窗口 + 固定挂件”规划，改为 Large / Medium / Small 自适应画布 + 用户主动 Focus Orb；完整规范见 `docs/planning/Innocence-Windows自适应桌面体验.md`
+- Windows 页面清单、导航地图、跨尺寸内容优先级、`DesktopPresentationTier`、组件密度和主题映射已获用户确认，见 `docs/planning/Innocence-Windows信息架构与组件体系.md`
 - Windows 首次登录默认 `920 × 760` Medium Canvas；跨尺寸通过布局重排保持舒适度，不等比缩放完整页面；移动端仍另行设计
 - 页面重建实施顺序：登录 → 主框架 → 首页 → 二级页
 - 前端生成参考策略：优先参考 `docs/design/templates/` 中对应 HTML 的构图、信息层级和视觉令牌；若 AI 直接参考 HTML 不方便，或从 HTML 转换为 Flutter 前端代码效率较低，可忽略 HTML 代码实现，仅依据提示词、设计令牌和页面结构完成等价实现

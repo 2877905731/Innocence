@@ -6,9 +6,9 @@ project_profile_path: docs/08-project-profile.md
 baseline:
   project_root: "D:\\project\\Innocence"
   runtime: "Flutter + Java 21 + Spring Boot 3.3.2 + MyBatis + MySQL 8 + Redis"
-  current_phase: P00
-  current_gate: G00
-  evidence: "docs 0~8 + AGENTS + progress 已生成（2026-08-07）"
+  current_phase: P00.5
+  current_gate: G00.5
+  evidence: "四主题参考、Windows 自适应桌面体验及信息架构/组件接口草案已生成（2026-08-10）"
 invariants:
   - id: INV-001-TRUTHFUL-SCOPE
     enabled: true
@@ -55,15 +55,18 @@ phases:
     deliverables:
       - docs/planning/Innocence-UI设计规划.md（信息架构 + 双端布局 + 视觉令牌 + 组件）
       - docs/planning/Innocence-Windows自适应桌面体验.md（Large / Medium / Small / Focus Orb）
+      - docs/planning/Innocence-Windows信息架构与组件体系.md（页面清单 + 导航地图 + 跨尺寸优先级 + Flutter 呈现接口）
       - 四个主题设计（并存可切换，提示词由用户提供并先存档）
       - 页面清单与导航地图（登录 → 主框架 → 首页 → 二级页）
     actions:
-      - 四个主题提示词已存档，继续完成信息架构与组件体系
+      - 四个主题提示词已存档；Windows 信息架构与组件接口已获用户确认
       - 按「信息架构 → 双端布局 → 视觉令牌 → 主题 → 组件」顺序产出
       - 生成 Flutter 前端时优先将 `docs/design/templates/` 中对应 HTML 作为构图、信息层级和视觉令牌参考；若 AI 参考 HTML 不便或 HTML 到 Flutter 的转换效率较低，可忽略 HTML 代码，仅依据提示词、设计令牌和页面结构实现
       - Windows 页面按 Large / Medium / Small 三档自适应重排，Focus Orb 作为用户主动进入的最小状态；不得等比缩放完整页面
     gate:
       id: G00.5
+      status: passed
+      passed_at: "2026-08-10T09:22:16+08:00"
       criteria:
         - theme_prompts_archived（提示词原文存档）
         - four_themes_designed（色彩/质感/动效可落地）
@@ -74,8 +77,10 @@ phases:
     actions:
       - 认证/会话/权限/设置模块收尾（已实现部分验收）
       - 按新 UI 重建：登录、注册、找回密码、资料、隐私、设置页面
+      - 首批已实现 DesktopPresentationTier、自适应 6+2 主 Shell、88×88 Focus Orb，以及登录/注册/验证码/重置密码入口；Flutter 工具链验证待补
     gate:
       id: G01
+      status: in_progress
       criteria:
         - auth_flow_ui_redesigned
         - session_policy_verified（1 手机 + 1 电脑）
@@ -145,6 +150,6 @@ phases:
         - release_candidate_confirmed
 next_actions:
   - id: NEXT-001
-    action: "四主题与 Windows 自适应桌面画布方向已确认；推进 P00.5 页面清单、导航地图、Large/Medium/Small 内容优先级与组件密度接口"
+    action: "继续 P01：按新 UI 重建资料、隐私与设置页面，并补会话冲突、权限拒绝和 Flutter 工具链验收"
     inputs: []
 ---

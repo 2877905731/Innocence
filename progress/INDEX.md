@@ -83,3 +83,24 @@ checkpoints:
     status: complete
     path: progress/0010__20260810__P00.5__DECISION__windows-adaptive-desktop-canvas.md
     title: "Windows 自适应桌面画布与四形态体验决策"
+  - sequence: "0011"
+    created_at: "2026-08-10T09:16:20+08:00"
+    phase: P00.5
+    type: DONE
+    status: complete
+    path: progress/0011__20260810__P00.5__DONE__windows-information-architecture-and-component-contract.md
+    title: "Windows 页面信息架构与组件呈现契约草案"
+  - sequence: "0012"
+    created_at: "2026-08-10T09:22:16+08:00"
+    phase: P00.5
+    type: DECISION
+    status: complete
+    path: progress/0012__20260810__P00.5__DECISION__windows-information-architecture-approved.md
+    title: "用户确认 Windows 信息架构并通过 G00.5"
+  - sequence: "0013"
+    created_at: "2026-08-10T09:59:05+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0013__20260810__P01__DONE__adaptive-canvas-shell-and-auth-entry-foundation.md
+    title: "Windows 自适应画布、Focus Orb 与认证入口首批实现"

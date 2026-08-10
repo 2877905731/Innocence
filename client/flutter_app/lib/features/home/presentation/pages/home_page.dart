@@ -19,6 +19,7 @@ import 'package:innocence_flutter/features/checkin/domain/models/check_in_status
 import 'package:innocence_flutter/features/focus/domain/models/focus_session.dart';
 import 'package:innocence_flutter/features/friends/domain/models/friend_overview.dart';
 import 'package:innocence_flutter/features/friends/presentation/pages/friend_page.dart';
+import 'package:innocence_flutter/features/home/presentation/pages/adaptive_desktop_home.dart';
 import 'package:innocence_flutter/features/memos/domain/models/memo_overview.dart';
 import 'package:innocence_flutter/features/memos/presentation/pages/memo_page.dart';
 import 'package:innocence_flutter/features/notifications/domain/models/notification_overview.dart';
@@ -924,7 +925,7 @@ class HomePage extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     if (AppConfig.deviceType == 'windows') {
-      return _DesktopWidgetHomeV2(
+      return AdaptiveDesktopHome(
         appLanguage: appLanguage,
         profile: profile,
         focusSession: focusSession,
@@ -935,7 +936,6 @@ class HomePage extends StatelessWidget {
         friendOverview: friendOverview,
         memoOverview: memoOverview,
         notificationOverview: notificationOverview,
-        settingOverview: settingOverview,
         todayPlan: todayPlan,
         isBusy: isBusy,
         bannerMessage: bannerMessage,
@@ -952,7 +952,6 @@ class HomePage extends StatelessWidget {
         onSubmitCheckIn: onSubmitCheckIn,
         onEditTodayPlan: () => _openEditor(context),
         onToggleTodayPlanItem: onToggleTodayPlanItem,
-        onRemindTeammate: onRemindTeammate,
       );
     }
 

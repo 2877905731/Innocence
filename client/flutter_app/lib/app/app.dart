@@ -91,134 +91,137 @@ class _InnocenceAppState extends State<InnocenceApp> {
           appLanguage: language,
         );
       case SessionStatus.authenticated:
-        return HomePage(
-          appLanguage: language,
-          onChangeLanguage: widget.languageController.updateLanguage,
-          profile: widget.sessionController.profile!,
-          focusSession: widget.sessionController.focusSession,
-          checkInStatus: widget.sessionController.checkInStatus,
-          statsOverview: widget.sessionController.statsOverview,
-          teamOverview: widget.sessionController.teamOverview,
-          teamChatOverview: widget.sessionController.teamChatOverview,
-          friendOverview: widget.sessionController.friendOverview,
-          memoOverview: widget.sessionController.memoOverview,
-          notificationOverview: widget.sessionController.notificationOverview,
-          settingOverview: widget.sessionController.settingOverview,
-          todayPlan: widget.sessionController.todayPlan,
-          isBusy: widget.sessionController.isBusy,
-          bannerMessage: widget.sessionController.bannerMessage,
-          onClearBanner: widget.sessionController.clearBanner,
-          onRefresh: widget.sessionController.refreshProfile,
-          onLogout: widget.sessionController.logout,
-          onStartFocusSession: widget.sessionController.startFocusSession,
-          onFinishFocusSession: widget.sessionController.finishFocusSession,
-          onSubmitCheckIn: widget.sessionController.submitTodayCheckIn,
-          onLoadStatsOverview: widget.sessionController.loadStatsOverview,
-          onDeleteCheckInFailureRecord:
-              widget.sessionController.deleteCheckInFailureRecord,
-          onLoadNotifications: widget.sessionController.loadNotifications,
-          onMarkNotificationRead:
-              widget.sessionController.markNotificationRead,
-          onMarkAllNotificationsRead:
-              widget.sessionController.markAllNotificationsRead,
-          onRespondNotificationFriendRequest:
-              widget.sessionController.respondNotificationFriendRequest,
-          onRespondNotificationTeamInvitation:
-              widget.sessionController.respondNotificationTeamInvitation,
-          onRemindTeammate: widget.sessionController.remindTeammate,
-          onLoadFriendOverview: widget.sessionController.loadFriendOverview,
-          onSearchFriends: widget.sessionController.searchFriends,
-          onSendFriendRequest: widget.sessionController.sendFriendRequest,
-          onRespondFriendRequest:
-              widget.sessionController.respondToFriendRequest,
-          onCreateFriendGroup: widget.sessionController.createFriendGroup,
-          onMoveFriendToGroup: widget.sessionController.moveFriendToGroup,
-          onDeleteFriend: widget.sessionController.deleteFriend,
-          onLoadMemoOverview: widget.sessionController.loadMemoOverview,
-          onLoadMemoDetail: widget.sessionController.loadMemoDetail,
-          onCreateMemo: widget.sessionController.createMemo,
-          onUpdateMemo: widget.sessionController.updateMemo,
-          onDeleteMemo: widget.sessionController.deleteMemo,
-          onLoadSettingsOverview:
-              widget.sessionController.loadSettingsOverview,
-          onUpdateMySettingProfile:
-              widget.sessionController.updateMySettingProfile,
-          onUpdateMyPrivacySetting:
-              widget.sessionController.updateMyPrivacySetting,
-          onUpdateNotificationSetting:
-              widget.sessionController.updateNotificationSetting,
-          onUpdateWidgetSetting:
-              widget.sessionController.updateWidgetSetting,
-          onUpdateAppearanceSetting:
-              widget.sessionController.updateAppearanceSetting,
-          onClearSettingsCache: widget.sessionController.clearSettingsCache,
-          onSendCancelAccountCode:
-              widget.sessionController.sendCancelAccountCode,
-          onCancelAccount: widget.sessionController.cancelAccount,
-          onLoadAdminReports: widget.sessionController.loadAdminReports,
-          onLoadAdminReportDetail:
-              widget.sessionController.loadAdminReportDetail,
-          onReviewAdminReport:
-              widget.sessionController.reviewAdminReport,
-          onSearchAdminUsers: widget.sessionController.searchAdminUsers,
-          onLoadAdminUserDetail:
-              widget.sessionController.loadAdminUserDetail,
-          onLoadAdminUserReports:
-              widget.sessionController.loadAdminUserReports,
-          onLoadAdminUserPunishments:
-              widget.sessionController.loadAdminUserPunishments,
-          onLiftAdminUserPunishment:
-              widget.sessionController.liftAdminUserPunishment,
-          onLoadAdminTeams: widget.sessionController.loadAdminTeams,
-          onLoadAdminTeamDetail:
-              widget.sessionController.loadAdminTeamDetail,
-          onRemoveAdminTeamMember:
-              widget.sessionController.removeAdminTeamMember,
-          onDissolveAdminTeam:
-              widget.sessionController.dissolveAdminTeam,
-          onLoadAdminAnnouncements:
-              widget.sessionController.loadAdminAnnouncements,
-          onCreateAdminAnnouncement:
-              widget.sessionController.createAdminAnnouncement,
-          onDeleteAdminAnnouncement:
-              widget.sessionController.deleteAdminAnnouncement,
-          onCreateTeam: widget.sessionController.createTeam,
-          onJoinTeam: widget.sessionController.joinTeam,
-          onInviteTeamMember: widget.sessionController.inviteTeamMember,
-          onRemoveTeamMember: widget.sessionController.removeTeamMember,
-          onDissolveTeam: widget.sessionController.dissolveTeam,
-          onLoadTeamChatMessages:
-              widget.sessionController.loadTeamChatMessages,
-          onSendTeamChatMessage:
-              widget.sessionController.sendTeamChatMessage,
-          onMarkTeamChatRead: widget.sessionController.markTeamChatRead,
-          onReportTeamChatMessage:
-              widget.sessionController.reportTeamChatMessage,
-          onLoadTeamWorkspaceSnapshot:
-              widget.sessionController.loadTeamWorkspaceSnapshot,
-          onSaveTodayPlan: widget.sessionController.saveTodayPlan,
-          onLoadPlanByDate: widget.sessionController.loadPlanByDate,
-          weekPlanOverview: widget.sessionController.weekPlanOverview,
-          weeklyTemplates: widget.sessionController.weeklyTemplates,
-          onPreviousWeek: widget.sessionController.loadPreviousWeek,
-          onCurrentWeek: widget.sessionController.loadCurrentWeek,
-          onNextWeek: widget.sessionController.loadNextWeek,
-          onSavePlanAsWeeklyTemplate:
-              widget.sessionController.savePlanAsWeeklyTemplate,
-          onApplyWeeklyTemplate:
-              widget.sessionController.applyWeeklyTemplate,
-          onApplyWeeklyTemplateToDate:
-              widget.sessionController.applyWeeklyTemplateToDate,
-          onDeleteWeeklyTemplate:
-              widget.sessionController.deleteWeeklyTemplate,
-          onCopyPlanToDate: widget.sessionController.copyPlanToDate,
-          onCopyPlanToDates: widget.sessionController.copyPlanToDates,
-          onClearPlanDate: widget.sessionController.clearPlanDate,
-          onApplyWeeklyTemplateToDates:
-              widget.sessionController.applyWeeklyTemplateToDates,
-          onQuickArrangeWeek: widget.sessionController.quickArrangeWeek,
-          onToggleTodayPlanItem:
-              widget.sessionController.toggleTodayPlanItem,
+        return _DesktopWindowModeScope(
+          mode: 'canvas',
+          child: HomePage(
+            appLanguage: language,
+            onChangeLanguage: widget.languageController.updateLanguage,
+            profile: widget.sessionController.profile!,
+            focusSession: widget.sessionController.focusSession,
+            checkInStatus: widget.sessionController.checkInStatus,
+            statsOverview: widget.sessionController.statsOverview,
+            teamOverview: widget.sessionController.teamOverview,
+            teamChatOverview: widget.sessionController.teamChatOverview,
+            friendOverview: widget.sessionController.friendOverview,
+            memoOverview: widget.sessionController.memoOverview,
+            notificationOverview: widget.sessionController.notificationOverview,
+            settingOverview: widget.sessionController.settingOverview,
+            todayPlan: widget.sessionController.todayPlan,
+            isBusy: widget.sessionController.isBusy,
+            bannerMessage: widget.sessionController.bannerMessage,
+            onClearBanner: widget.sessionController.clearBanner,
+            onRefresh: widget.sessionController.refreshProfile,
+            onLogout: widget.sessionController.logout,
+            onStartFocusSession: widget.sessionController.startFocusSession,
+            onFinishFocusSession: widget.sessionController.finishFocusSession,
+            onSubmitCheckIn: widget.sessionController.submitTodayCheckIn,
+            onLoadStatsOverview: widget.sessionController.loadStatsOverview,
+            onDeleteCheckInFailureRecord:
+                widget.sessionController.deleteCheckInFailureRecord,
+            onLoadNotifications: widget.sessionController.loadNotifications,
+            onMarkNotificationRead:
+                widget.sessionController.markNotificationRead,
+            onMarkAllNotificationsRead:
+                widget.sessionController.markAllNotificationsRead,
+            onRespondNotificationFriendRequest:
+                widget.sessionController.respondNotificationFriendRequest,
+            onRespondNotificationTeamInvitation:
+                widget.sessionController.respondNotificationTeamInvitation,
+            onRemindTeammate: widget.sessionController.remindTeammate,
+            onLoadFriendOverview: widget.sessionController.loadFriendOverview,
+            onSearchFriends: widget.sessionController.searchFriends,
+            onSendFriendRequest: widget.sessionController.sendFriendRequest,
+            onRespondFriendRequest:
+                widget.sessionController.respondToFriendRequest,
+            onCreateFriendGroup: widget.sessionController.createFriendGroup,
+            onMoveFriendToGroup: widget.sessionController.moveFriendToGroup,
+            onDeleteFriend: widget.sessionController.deleteFriend,
+            onLoadMemoOverview: widget.sessionController.loadMemoOverview,
+            onLoadMemoDetail: widget.sessionController.loadMemoDetail,
+            onCreateMemo: widget.sessionController.createMemo,
+            onUpdateMemo: widget.sessionController.updateMemo,
+            onDeleteMemo: widget.sessionController.deleteMemo,
+            onLoadSettingsOverview:
+                widget.sessionController.loadSettingsOverview,
+            onUpdateMySettingProfile:
+                widget.sessionController.updateMySettingProfile,
+            onUpdateMyPrivacySetting:
+                widget.sessionController.updateMyPrivacySetting,
+            onUpdateNotificationSetting:
+                widget.sessionController.updateNotificationSetting,
+            onUpdateWidgetSetting:
+                widget.sessionController.updateWidgetSetting,
+            onUpdateAppearanceSetting:
+                widget.sessionController.updateAppearanceSetting,
+            onClearSettingsCache: widget.sessionController.clearSettingsCache,
+            onSendCancelAccountCode:
+                widget.sessionController.sendCancelAccountCode,
+            onCancelAccount: widget.sessionController.cancelAccount,
+            onLoadAdminReports: widget.sessionController.loadAdminReports,
+            onLoadAdminReportDetail:
+                widget.sessionController.loadAdminReportDetail,
+            onReviewAdminReport:
+                widget.sessionController.reviewAdminReport,
+            onSearchAdminUsers: widget.sessionController.searchAdminUsers,
+            onLoadAdminUserDetail:
+                widget.sessionController.loadAdminUserDetail,
+            onLoadAdminUserReports:
+                widget.sessionController.loadAdminUserReports,
+            onLoadAdminUserPunishments:
+                widget.sessionController.loadAdminUserPunishments,
+            onLiftAdminUserPunishment:
+                widget.sessionController.liftAdminUserPunishment,
+            onLoadAdminTeams: widget.sessionController.loadAdminTeams,
+            onLoadAdminTeamDetail:
+                widget.sessionController.loadAdminTeamDetail,
+            onRemoveAdminTeamMember:
+                widget.sessionController.removeAdminTeamMember,
+            onDissolveAdminTeam:
+                widget.sessionController.dissolveAdminTeam,
+            onLoadAdminAnnouncements:
+                widget.sessionController.loadAdminAnnouncements,
+            onCreateAdminAnnouncement:
+                widget.sessionController.createAdminAnnouncement,
+            onDeleteAdminAnnouncement:
+                widget.sessionController.deleteAdminAnnouncement,
+            onCreateTeam: widget.sessionController.createTeam,
+            onJoinTeam: widget.sessionController.joinTeam,
+            onInviteTeamMember: widget.sessionController.inviteTeamMember,
+            onRemoveTeamMember: widget.sessionController.removeTeamMember,
+            onDissolveTeam: widget.sessionController.dissolveTeam,
+            onLoadTeamChatMessages:
+                widget.sessionController.loadTeamChatMessages,
+            onSendTeamChatMessage:
+                widget.sessionController.sendTeamChatMessage,
+            onMarkTeamChatRead: widget.sessionController.markTeamChatRead,
+            onReportTeamChatMessage:
+                widget.sessionController.reportTeamChatMessage,
+            onLoadTeamWorkspaceSnapshot:
+                widget.sessionController.loadTeamWorkspaceSnapshot,
+            onSaveTodayPlan: widget.sessionController.saveTodayPlan,
+            onLoadPlanByDate: widget.sessionController.loadPlanByDate,
+            weekPlanOverview: widget.sessionController.weekPlanOverview,
+            weeklyTemplates: widget.sessionController.weeklyTemplates,
+            onPreviousWeek: widget.sessionController.loadPreviousWeek,
+            onCurrentWeek: widget.sessionController.loadCurrentWeek,
+            onNextWeek: widget.sessionController.loadNextWeek,
+            onSavePlanAsWeeklyTemplate:
+                widget.sessionController.savePlanAsWeeklyTemplate,
+            onApplyWeeklyTemplate:
+                widget.sessionController.applyWeeklyTemplate,
+            onApplyWeeklyTemplateToDate:
+                widget.sessionController.applyWeeklyTemplateToDate,
+            onDeleteWeeklyTemplate:
+                widget.sessionController.deleteWeeklyTemplate,
+            onCopyPlanToDate: widget.sessionController.copyPlanToDate,
+            onCopyPlanToDates: widget.sessionController.copyPlanToDates,
+            onClearPlanDate: widget.sessionController.clearPlanDate,
+            onApplyWeeklyTemplateToDates:
+                widget.sessionController.applyWeeklyTemplateToDates,
+            onQuickArrangeWeek: widget.sessionController.quickArrangeWeek,
+            onToggleTodayPlanItem:
+                widget.sessionController.toggleTodayPlanItem,
+          ),
         );
     }
   }

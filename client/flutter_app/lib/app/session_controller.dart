@@ -314,6 +314,37 @@ class SessionController extends ChangeNotifier {
     return _authApi.sendRegisterCode(email);
   }
 
+  Future<void> sendResetPasswordCode(String email) {
+    return _authApi.sendResetPasswordCode(email);
+  }
+
+  Future<bool> resetPassword({
+    required String email,
+    required String emailCode,
+    required String newPassword,
+  }) async {
+    var succeeded = false;
+    await _runBusyAction(
+      () async {
+        await _authApi.resetPassword(
+          email: email,
+          emailCode: emailCode,
+          newPassword: newPassword,
+        );
+        succeeded = true;
+        _bannerMessage = _message(
+          '密码已重置，请使用新密码登录。',
+          'Password reset. Sign in with your new password.',
+        );
+      },
+      fallbackMessage: _message(
+        '重置密码失败，请稍后重试。',
+        'Failed to reset the password. Please try again.',
+      ),
+    );
+    return succeeded;
+  }
+
   Future<void> refreshProfile() async {
     final currentSession = _session;
     if (currentSession == null) {
