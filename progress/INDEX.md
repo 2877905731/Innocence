@@ -328,3 +328,10 @@ checkpoints:
     status: complete
     path: progress/0045__20260910__P01__DONE__windows-tray-pause-and-logo-candidate.md
     title: "Windows 托盘驻留、暂停计时与首版 Logo 候选稿"
+  - sequence: "0046"
+    created_at: "2026-09-10T03:04:15+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0046__20260910__P01__DECISION__user-logo-selected-and-extracted.md
+    title: "用户指定 Logo 已保留白色底板无损归档"
