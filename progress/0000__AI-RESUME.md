@@ -3,12 +3,12 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-09-10"
-latest_checkpoint: "0042"
+latest_checkpoint: "0043"
 current_phase: P01
 current_gate: G01
-state: windows_release_candidate_verified_publish_pending
-next_sequence: "0043"
-current_goal: "离线设置分级开放与认证页拖窗纠正已完成；Windows Release 候选通过 Flutter 51 项、Maven 36 项和构建启动验证，继续提交推送并创建 GitHub Windows 预览 Release"
+state: windows_preview_released_followup_validation_pending
+next_sequence: "0044"
+current_goal: "Windows v0.0.1-preview.1 已推送并发布；继续完成登录页拖窗的多 DPI 实机矩阵和离线同步真实 HTTP 回放"
 recent_baseline:
   - checkpoint: "0015"
     result: "设置页完成 Large/Medium/Small 三档独立编排与黑名单新增入口；新增会话、认证、拉黑和跨租户权限负向测试，定向 Maven 7 项通过；Flutter/Dart SDK、数据库集成环境和头像上传后端路由仍不可用"
@@ -54,6 +54,8 @@ recent_baseline:
     result: "离线 SQLite/outbox/本地统计与登录确认导入、四主题 4×7 标语、短/月/年计划、日模板、年度区间和 Windows sizing loop 已落地；Flutter 49 项、Maven 36 项、analyze、diff 检查和 Windows Release 构建通过，已启动 PID 25640；真实拖边/DPI 与同步 HTTP 回放待验收"
   - checkpoint: "0042"
     result: "用户确认普通边框拖动和离线模式可用；离线设置只开放本机安全分区并持久化桌面偏好，认证页顶部/品牌区拖窗命中已纠正；Flutter 51 项、Maven 36 项、analyze、diff 检查和 Windows Release 构建通过，已启动 PID 8228"
+  - checkpoint: "0043"
+    result: "实现提交 99a6d75 已推送 origin/main；v0.0.1-preview.1 GitHub 预发布已创建，Windows x64 ZIP（14,717,177 bytes，SHA256 7833EC35...8115）上传完成"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
@@ -134,16 +136,13 @@ unfinished:
     gate: G01/G02
   - id: TODO-013
     priority: P0
-    item: "在 PID 8228 的 Windows Release 登录页顶部安全条和左侧品牌区各执行一次真实鼠标拖动，复验 0042 命中层纠正"
+    item: "使用 v0.0.1-preview.1 Windows Release，在登录页顶部安全条和左侧品牌区各执行一次真实鼠标拖动，复验 0042 命中层纠正"
     gate: G01
 next_actions:
   - id: NEXT-001
-    action: "提交并推送当前实现，创建 v0.0.1 Windows 预览 Release 并上传完整 x64 运行目录压缩包"
-    inputs: ["origin/main", "client/flutter_app/build/windows/x64/runner/Release"]
+    action: "下载或使用 v0.0.1-preview.1 Windows Release 人工复验认证页顶部/品牌区拖窗，并完成 100%/125%/150% DPI 八方向矩阵"
+    inputs: ["https://github.com/2877905731/Innocence/releases/tag/v0.0.1-preview.1", "docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md"]
   - id: NEXT-002
-    action: "在当前已启动 Windows Release 中人工复验认证页顶部/品牌区拖窗，并完成 100%/125%/150% DPI 八方向矩阵"
-    inputs: ["PID 8228", "docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md"]
-  - id: NEXT-003
     action: "启动本地后端并用合成账号完成同步真实 HTTP 回放与幂等/租户负向验证"
     inputs: ["docs/06-contract-inventory.md", "server/innocence-server"]
 required_reads:

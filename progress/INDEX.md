@@ -307,3 +307,10 @@ checkpoints:
     status: complete
     path: progress/0042__20260910__P01__DONE__offline-settings-auth-drag-release-candidate.md
     title: "离线设置分级开放与认证页拖窗发布候选"
+  - sequence: "0043"
+    created_at: "2026-09-10T00:30:00+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0043__20260910__P01__DONE__windows-preview-release-published.md
+    title: "Windows 预览版已发布到 GitHub"
