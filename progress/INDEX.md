@@ -335,3 +335,10 @@ checkpoints:
     status: complete
     path: progress/0046__20260910__P01__DECISION__user-logo-selected-and-extracted.md
     title: "用户指定 Logo 已保留白色底板无损归档"
+  - sequence: "0047"
+    created_at: "2026-09-10T03:21:25+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0047__20260910__P01__CORRECTION__logo-rounded-plate-cutout.md
+    title: "Logo 边界纠正为白色圆角底板并完成真透明抠图"

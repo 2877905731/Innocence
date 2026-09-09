@@ -3,12 +3,12 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-09-10"
-latest_checkpoint: "0046"
+latest_checkpoint: "0047"
 current_phase: P01
 current_gate: G01
-state: windows_tray_v1_implemented_user_logo_extracted
-next_sequence: "0047"
-current_goal: "用户指定 Logo 已按原图无损归档并保留白色圆角底板；等待确认提取结果后制作多尺寸 ICO、替换正式资源并构建下一版 Windows 包"
+state: windows_tray_v1_implemented_user_logo_cutout_ready
+next_sequence: "0048"
+current_goal: "用户指定 Logo 已完成真透明抠图：保留白色圆角底板及内部品牌内容，只移除外围画布；下一步制作多尺寸 ICO、替换正式资源并构建 Windows 包"
 recent_baseline:
   - checkpoint: "0015"
     result: "设置页完成 Large/Medium/Small 三档独立编排与黑名单新增入口；新增会话、认证、拉黑和跨租户权限负向测试，定向 Maven 7 项通过；Flutter/Dart SDK、数据库集成环境和头像上传后端路由仍不可用"
@@ -62,6 +62,8 @@ recent_baseline:
     result: "关闭后驻留托盘、显示/设置/暂停继续/退出菜单与在线离线真实暂停已实现；Flutter 54 项、Maven 39 项、analyze、Windows Release 和关闭/恢复/右键菜单运行态探针通过；白色折页前进箭头 Logo 候选稿待用户确认后转 ICO"
   - checkpoint: "0046"
     result: "用户指定新的银灰字母 I、圆点、环线与 INNOCENCE 字标 Logo，并明确保留白色圆角底板；原图已无损归档为 innocence-logo-v1-selected.png，SHA-256 与来源一致，尚未替换 ICO。"
+  - checkpoint: "0047"
+    result: "按用户纠正，仅保留白色圆角底板及内部品牌内容，移除外围画布并输出 1254×1254 ARGB 抠图母版；四角 alpha=0、中心 alpha=255、圆角含多级抗锯齿，内部抽样 RGB 与源图一致。"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
@@ -125,6 +127,8 @@ user_decisions:
     decision: "Windows 关闭按钮默认隐藏到系统托盘；托盘第一版提供显示主界面、设置、暂停/继续当前计时和退出，离线模式可进入分级设置。Logo 采用白色占多数的简约现代先锋方向，以折页/前进箭头平衡学习的文静感和向前冲动感；候选稿确认前不覆盖正式 ICO。"
   - id: DEC-0031
     decision: "Windows 第一版品牌 Logo 改用用户提供的银灰字母 I、右上圆点、环线、INNOCENCE 字标和下方短横方案，并保留原始白色圆角底板、外围留白与阴影；本决策覆盖 DEC-0030 的折页/前进箭头候选方向。"
+  - id: DEC-0032
+    decision: "Logo 的完整边界是白色圆角底板：保留底板及内部银灰字母 I、圆点、环线、INNOCENCE 字标和短横，只删除底板以外的外围画布并设为真实透明；本决策覆盖 DEC-0031 中保留外围留白与外部阴影的部分。"
 unfinished:
   - id: TODO-005
     priority: P0
@@ -152,7 +156,7 @@ unfinished:
     gate: G06
   - id: TODO-015
     priority: P0
-    item: "确认 docs/design/logo/innocence-logo-v1-selected.png 的无损提取结果；确认后制作多尺寸 ICO，并针对 16×16/32×32 托盘尺寸设计同源简化构图，再替换 Windows 桌面与托盘正式资源"
+    item: "以 docs/design/logo/innocence-logo-v1-cutout.png 制作多尺寸 ICO，并针对 16×16/32×32 托盘尺寸设计同源简化构图，再替换 Windows 桌面与托盘正式资源"
     gate: G01/G06
   - id: TODO-016
     priority: P1
@@ -160,8 +164,8 @@ unfinished:
     gate: G01/G02
 next_actions:
   - id: NEXT-001
-    action: "收集用户对无损提取稿的确认；确认后从用户选定稿制作多尺寸 ICO 和同源托盘小图标，替换正式资源并构建下一版 Windows 包"
-    inputs: ["docs/design/logo/innocence-logo-v1-selected.png", "docs/design/logo/README.md", "client/flutter_app/windows/runner/resources/app_icon.ico"]
+    action: "从真透明抠图母版制作多尺寸 ICO 和同源托盘小图标，替换正式资源并构建下一版 Windows 包"
+    inputs: ["docs/design/logo/innocence-logo-v1-cutout.png", "docs/design/logo/README.md", "client/flutter_app/windows/runner/resources/app_icon.ico"]
   - id: NEXT-002
     action: "使用真实登录会话回放 U24/U25 与离线同步，并人工完成托盘菜单所有命令的端到端验收"
     inputs: ["docs/06-contract-inventory.md", "server/innocence-server", "client/flutter_app/build/windows/x64/runner/Release/innocence_flutter.exe"]
