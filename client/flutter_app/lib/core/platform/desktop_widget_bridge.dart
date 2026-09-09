@@ -10,6 +10,7 @@ class DesktopWidgetBridge {
       MethodChannel('innocence/desktop_widget');
   static bool _nativeHandlerReady = false;
   static void Function(String mode)? _windowModeListener;
+  static Future<void> Function(String command)? _trayCommandListener;
 
   static void setWindowModeListener(void Function(String mode)? listener) {
     if (AppConfig.deviceType != 'windows') {
@@ -19,23 +20,72 @@ class DesktopWidgetBridge {
     _windowModeListener = listener;
   }
 
+  static void setTrayCommandListener(
+    Future<void> Function(String command)? listener,
+  ) {
+    if (AppConfig.deviceType != 'windows') {
+      return;
+    }
+    _ensureNativeHandler();
+    _trayCommandListener = listener;
+  }
+
   static void _ensureNativeHandler() {
     if (_nativeHandlerReady) {
       return;
     }
     _nativeHandlerReady = true;
     _channel.setMethodCallHandler((call) async {
-      if (call.method != 'windowModeChanged') {
-        return;
-      }
       final arguments = call.arguments;
-      if (arguments is Map) {
-        final mode = arguments['mode'];
-        if (mode is String && mode.isNotEmpty) {
-          _windowModeListener?.call(_canonicalWindowMode(mode));
-        }
+      switch (call.method) {
+        case 'windowModeChanged':
+          if (arguments is Map) {
+            final mode = arguments['mode'];
+            if (mode is String && mode.isNotEmpty) {
+              _windowModeListener?.call(_canonicalWindowMode(mode));
+            }
+          }
+          return;
+        case 'trayCommand':
+          if (arguments is Map) {
+            final command = arguments['command'];
+            final listener = _trayCommandListener;
+            if (command is String && command.isNotEmpty && listener != null) {
+              await listener(command);
+            }
+          }
+          return;
+        default:
+          return;
       }
     });
+  }
+
+  static Future<void> setTrayState({
+    required bool settingsAvailable,
+    required bool focusActive,
+    required bool focusPaused,
+    required bool isChinese,
+  }) async {
+    if (AppConfig.deviceType != 'windows') {
+      return;
+    }
+
+    try {
+      await _channel.invokeMethod<void>(
+        'setTrayState',
+        <String, bool>{
+          'settingsAvailable': settingsAvailable,
+          'focusActive': focusActive,
+          'focusPaused': focusPaused,
+          'isChinese': isChinese,
+        },
+      );
+    } on MissingPluginException {
+      // Ignore when the current platform does not expose the desktop bridge.
+    } on PlatformException {
+      // The main window remains usable if tray state cannot be synchronized.
+    }
   }
 
   static Future<void> applySettings({

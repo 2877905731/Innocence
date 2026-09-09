@@ -448,6 +448,8 @@ CREATE TABLE IF NOT EXISTS study_timer_record
     planned_minutes          INT          NOT NULL DEFAULT 0,
     duration_seconds         INT          NOT NULL DEFAULT 0,
     status                   VARCHAR(32)  NOT NULL DEFAULT 'active',
+    paused_at                DATETIME     NULL,
+    paused_duration_seconds  INT          NOT NULL DEFAULT 0,
     bind_pomodoro_flag       TINYINT      NOT NULL DEFAULT 0,
     pomodoro_study_minutes   INT          NOT NULL DEFAULT 0,
     pomodoro_break_minutes   INT          NOT NULL DEFAULT 0,
@@ -475,6 +477,40 @@ SET @study_timer_completion_notified_sql = (
 PREPARE study_timer_completion_notified_stmt FROM @study_timer_completion_notified_sql;
 EXECUTE study_timer_completion_notified_stmt;
 DEALLOCATE PREPARE study_timer_completion_notified_stmt;
+
+SET @study_timer_paused_at_sql = (
+    SELECT IF(
+        EXISTS(
+            SELECT 1
+            FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'study_timer_record'
+              AND COLUMN_NAME = 'paused_at'
+        ),
+        'SELECT 1',
+        'ALTER TABLE study_timer_record ADD COLUMN paused_at DATETIME NULL AFTER status'
+    )
+);
+PREPARE study_timer_paused_at_stmt FROM @study_timer_paused_at_sql;
+EXECUTE study_timer_paused_at_stmt;
+DEALLOCATE PREPARE study_timer_paused_at_stmt;
+
+SET @study_timer_paused_duration_sql = (
+    SELECT IF(
+        EXISTS(
+            SELECT 1
+            FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'study_timer_record'
+              AND COLUMN_NAME = 'paused_duration_seconds'
+        ),
+        'SELECT 1',
+        'ALTER TABLE study_timer_record ADD COLUMN paused_duration_seconds INT NOT NULL DEFAULT 0 AFTER paused_at'
+    )
+);
+PREPARE study_timer_paused_duration_stmt FROM @study_timer_paused_duration_sql;
+EXECUTE study_timer_paused_duration_stmt;
+DEALLOCATE PREPARE study_timer_paused_duration_stmt;
 
 CREATE TABLE IF NOT EXISTS memo_record
 (

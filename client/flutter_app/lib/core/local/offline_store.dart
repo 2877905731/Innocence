@@ -41,7 +41,7 @@ class OfflineStore {
     _database = await factory.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 2,
+        version: 3,
         onConfigure: (database) async {
           await database.execute('PRAGMA foreign_keys = ON');
         },
@@ -49,6 +49,45 @@ class OfflineStore {
         onUpgrade: (database, oldVersion, newVersion) async {
           if (oldVersion < 2) {
             await _createLocalWidgetSettingTable(database);
+          }
+          if (oldVersion < 3) {
+            await database.execute(
+              'ALTER TABLE local_focus_session '
+              'ADD COLUMN paused INTEGER NOT NULL DEFAULT 0',
+            );
+            await database.execute(
+              'ALTER TABLE local_focus_session '
+              'ADD COLUMN elapsed_seconds INTEGER NOT NULL DEFAULT 0',
+            );
+            await database.execute(
+              'ALTER TABLE local_focus_session '
+              'ADD COLUMN remaining_seconds INTEGER NOT NULL DEFAULT 0',
+            );
+            await database.execute(
+              '''UPDATE local_focus_session
+              SET elapsed_seconds = MIN(
+                    planned_minutes * 60,
+                    MAX(
+                      0,
+                      CAST(strftime('%s', CASE
+                        WHEN actual_end_time <> '' THEN actual_end_time
+                        ELSE updated_at
+                      END) AS INTEGER) -
+                      CAST(strftime('%s', start_time) AS INTEGER)
+                    )
+                  ),
+                  remaining_seconds = CASE
+                    WHEN active = 1 THEN MIN(
+                      planned_minutes * 60,
+                      MAX(
+                        0,
+                        CAST(strftime('%s', planned_end_time) AS INTEGER) -
+                        CAST(strftime('%s', 'now') AS INTEGER)
+                      )
+                    )
+                    ELSE 0
+                  END''',
+            );
           }
         },
       ),
@@ -895,35 +934,30 @@ class OfflineStore {
       return FocusSession.empty();
     }
     final row = rows.first;
-    final plannedEnd = DateTime.tryParse('${row['planned_end_time']}');
-    final start = DateTime.tryParse('${row['start_time']}');
     final now = DateTime.now();
-    final plannedSeconds = (row['planned_minutes'] as int) * 60;
-    final elapsed = start == null ? 0 : now.difference(start).inSeconds;
-    final remaining = plannedEnd == null
-        ? plannedSeconds
-        : plannedEnd.difference(now).inSeconds.clamp(0, plannedSeconds);
-    if (remaining <= 0) {
+    final progress = _resolveLocalFocusProgress(row, now);
+    if (!progress.paused && progress.remainingSeconds <= 0) {
       await finishFocusSession(ownerScope, row['session_id'] as int);
       return FocusSession.empty();
     }
     return FocusSession.fromJson({
       'sessionId': row['session_id'],
       'active': true,
+      'paused': progress.paused,
       'taskName': row['task_name'],
       'stageName': row['stage_name'],
       'startTime': row['start_time'],
       'plannedEndTime': row['planned_end_time'],
       'actualEndTime': row['actual_end_time'],
       'plannedMinutes': row['planned_minutes'],
-      'elapsedSeconds': elapsed.clamp(0, plannedSeconds),
-      'remainingSeconds': remaining,
+      'elapsedSeconds': progress.elapsedSeconds,
+      'remainingSeconds': progress.remainingSeconds,
       'bindPomodoro': row['bind_pomodoro'] == 1,
       'pomodoroStudyMinutes': row['pomodoro_study_minutes'],
       'pomodoroBreakMinutes': row['pomodoro_break_minutes'],
       'currentCycleNo': row['current_cycle_no'],
       'completedPomodoroCount': row['completed_pomodoro_count'],
-      'stageRemainingSeconds': remaining,
+      'stageRemainingSeconds': progress.remainingSeconds,
     });
   }
 
@@ -937,8 +971,8 @@ class OfflineStore {
   }) async {
     final database = await _readyDatabase();
     final now = DateTime.now();
-    final plannedMinutes = max(1, endTime.difference(now).inMinutes);
     final remainingSeconds = max(1, endTime.difference(now).inSeconds);
+    final plannedMinutes = max(1, (remainingSeconds + 59) ~/ 60);
     final sessionId = await _nextFocusSessionId(database, ownerScope);
     final nowText = now.toIso8601String();
     await database.transaction((transaction) async {
@@ -952,6 +986,7 @@ class OfflineStore {
         'owner_scope': ownerScope,
         'session_id': sessionId,
         'active': 1,
+        'paused': 0,
         'task_name': taskName?.trim() ?? '',
         'stage_name': 'study',
         'start_time': nowText,
@@ -963,6 +998,8 @@ class OfflineStore {
         'pomodoro_break_minutes': pomodoroBreakMinutes,
         'current_cycle_no': 1,
         'completed_pomodoro_count': 0,
+        'elapsed_seconds': 0,
+        'remaining_seconds': remainingSeconds,
         'updated_at': nowText,
         'dirty': 1,
       });
@@ -985,6 +1022,7 @@ class OfflineStore {
     return FocusSession.fromJson({
       'sessionId': sessionId,
       'active': true,
+      'paused': false,
       'taskName': taskName?.trim() ?? '',
       'stageName': 'study',
       'startTime': nowText,
@@ -1004,6 +1042,86 @@ class OfflineStore {
     });
   }
 
+  Future<FocusSession> pauseFocusSession(
+    String ownerScope,
+    int sessionId,
+  ) async {
+    final database = await _readyDatabase();
+    final rows = await database.query(
+      'local_focus_session',
+      where: 'owner_scope = ? AND session_id = ? AND active = 1',
+      whereArgs: [ownerScope, sessionId],
+      limit: 1,
+    );
+    if (rows.isEmpty) {
+      return FocusSession.empty();
+    }
+    final row = rows.first;
+    final now = DateTime.now();
+    final progress = _resolveLocalFocusProgress(row, now);
+    if (progress.remainingSeconds <= 0) {
+      return finishFocusSession(ownerScope, sessionId);
+    }
+    final nowText = now.toIso8601String();
+    await database.update(
+      'local_focus_session',
+      {
+        'paused': 1,
+        'elapsed_seconds': progress.elapsedSeconds,
+        'remaining_seconds': progress.remainingSeconds,
+        'updated_at': nowText,
+        'dirty': 1,
+      },
+      where: 'owner_scope = ? AND session_id = ? AND active = 1',
+      whereArgs: [ownerScope, sessionId],
+    );
+    return _localFocusSessionFromRow(
+      row,
+      progress.copyWith(paused: true),
+      plannedEndTime: '${row['planned_end_time']}',
+    );
+  }
+
+  Future<FocusSession> resumeFocusSession(
+    String ownerScope,
+    int sessionId,
+  ) async {
+    final database = await _readyDatabase();
+    final rows = await database.query(
+      'local_focus_session',
+      where: 'owner_scope = ? AND session_id = ? AND active = 1 AND paused = 1',
+      whereArgs: [ownerScope, sessionId],
+      limit: 1,
+    );
+    if (rows.isEmpty) {
+      return FocusSession.empty();
+    }
+    final row = rows.first;
+    final now = DateTime.now();
+    final progress = _resolveLocalFocusProgress(row, now);
+    final plannedEnd = now.add(Duration(seconds: progress.remainingSeconds));
+    final nowText = now.toIso8601String();
+    final plannedEndText = plannedEnd.toIso8601String();
+    await database.update(
+      'local_focus_session',
+      {
+        'paused': 0,
+        'planned_end_time': plannedEndText,
+        'elapsed_seconds': progress.elapsedSeconds,
+        'remaining_seconds': progress.remainingSeconds,
+        'updated_at': nowText,
+        'dirty': 1,
+      },
+      where: 'owner_scope = ? AND session_id = ? AND active = 1 AND paused = 1',
+      whereArgs: [ownerScope, sessionId],
+    );
+    return _localFocusSessionFromRow(
+      row,
+      progress.copyWith(paused: false),
+      plannedEndTime: plannedEndText,
+    );
+  }
+
   Future<FocusSession> finishFocusSession(
     String ownerScope,
     int sessionId,
@@ -1021,20 +1139,18 @@ class OfflineStore {
       return FocusSession.empty();
     }
     final row = rows.first;
-    final start = DateTime.tryParse('${row['start_time']}');
-    final elapsedSeconds = start == null
-        ? 0
-        : now.difference(start).inSeconds.clamp(
-              0,
-              (row['planned_minutes'] as int) * 60,
-            );
+    final progress = _resolveLocalFocusProgress(row, now);
+    final elapsedSeconds = progress.elapsedSeconds;
     await database.transaction((transaction) async {
       await transaction.update(
         'local_focus_session',
         {
           'active': 0,
+          'paused': 0,
           'stage_name': 'finished',
           'actual_end_time': nowText,
+          'elapsed_seconds': elapsedSeconds,
+          'remaining_seconds': 0,
           'updated_at': nowText,
           'dirty': 1,
         },
@@ -1047,13 +1163,17 @@ class OfflineStore {
         aggregateType: 'focus_session',
         aggregateId: '$sessionId',
         operationType: 'finish',
-        payload: {'actualEndTime': nowText},
+        payload: {
+          'actualEndTime': nowText,
+          'durationSeconds': elapsedSeconds,
+        },
         createdAt: now.toUtc().toIso8601String(),
       );
     });
     return FocusSession.fromJson({
       'sessionId': sessionId,
       'active': false,
+      'paused': false,
       'taskName': row['task_name'],
       'stageName': 'finished',
       'startTime': row['start_time'],
@@ -1068,6 +1188,69 @@ class OfflineStore {
       'currentCycleNo': row['current_cycle_no'],
       'completedPomodoroCount': row['completed_pomodoro_count'],
       'stageRemainingSeconds': 0,
+    });
+  }
+
+  _LocalFocusProgress _resolveLocalFocusProgress(
+    Map<String, Object?> row,
+    DateTime now,
+  ) {
+    final plannedSeconds = max(0, (row['planned_minutes'] as int? ?? 0) * 60);
+    final paused = row['paused'] == 1;
+    var elapsedSeconds = row['elapsed_seconds'] as int? ?? 0;
+    var remainingSeconds = row['remaining_seconds'] as int? ?? 0;
+    final updatedAt = DateTime.tryParse('${row['updated_at']}');
+
+    // Version 2 rows do not contain a persisted progress snapshot. Rebuild it
+    // once from the original timestamps before applying the version 3 rules.
+    if (elapsedSeconds <= 0 && remainingSeconds <= 0) {
+      final start = DateTime.tryParse('${row['start_time']}');
+      final plannedEnd = DateTime.tryParse('${row['planned_end_time']}');
+      elapsedSeconds = start == null
+          ? 0
+          : now.difference(start).inSeconds.clamp(0, plannedSeconds);
+      remainingSeconds = plannedEnd == null
+          ? max(0, plannedSeconds - elapsedSeconds)
+          : plannedEnd.difference(now).inSeconds.clamp(0, plannedSeconds);
+    } else if (!paused && updatedAt != null && now.isAfter(updatedAt)) {
+      final delta = now.difference(updatedAt).inSeconds.clamp(
+            0,
+            remainingSeconds,
+          );
+      elapsedSeconds += delta;
+      remainingSeconds -= delta;
+    }
+
+    return _LocalFocusProgress(
+      paused: paused,
+      elapsedSeconds: elapsedSeconds.clamp(0, plannedSeconds),
+      remainingSeconds: remainingSeconds.clamp(0, plannedSeconds),
+    );
+  }
+
+  FocusSession _localFocusSessionFromRow(
+    Map<String, Object?> row,
+    _LocalFocusProgress progress, {
+    required String plannedEndTime,
+  }) {
+    return FocusSession.fromJson({
+      'sessionId': row['session_id'],
+      'active': true,
+      'paused': progress.paused,
+      'taskName': row['task_name'],
+      'stageName': row['stage_name'],
+      'startTime': row['start_time'],
+      'plannedEndTime': plannedEndTime,
+      'actualEndTime': row['actual_end_time'],
+      'plannedMinutes': row['planned_minutes'],
+      'elapsedSeconds': progress.elapsedSeconds,
+      'remainingSeconds': progress.remainingSeconds,
+      'bindPomodoro': row['bind_pomodoro'] == 1,
+      'pomodoroStudyMinutes': row['pomodoro_study_minutes'],
+      'pomodoroBreakMinutes': row['pomodoro_break_minutes'],
+      'currentCycleNo': row['current_cycle_no'],
+      'completedPomodoroCount': row['completed_pomodoro_count'],
+      'stageRemainingSeconds': progress.remainingSeconds,
     });
   }
 
@@ -1227,6 +1410,7 @@ class OfflineStore {
         owner_scope TEXT NOT NULL,
         session_id INTEGER NOT NULL,
         active INTEGER NOT NULL DEFAULT 0,
+        paused INTEGER NOT NULL DEFAULT 0,
         task_name TEXT NOT NULL DEFAULT '',
         stage_name TEXT NOT NULL DEFAULT 'idle',
         start_time TEXT NOT NULL,
@@ -1238,6 +1422,8 @@ class OfflineStore {
         pomodoro_break_minutes INTEGER NOT NULL DEFAULT 0,
         current_cycle_no INTEGER NOT NULL DEFAULT 0,
         completed_pomodoro_count INTEGER NOT NULL DEFAULT 0,
+        elapsed_seconds INTEGER NOT NULL DEFAULT 0,
+        remaining_seconds INTEGER NOT NULL DEFAULT 0,
         updated_at TEXT NOT NULL,
         dirty INTEGER NOT NULL DEFAULT 1,
         PRIMARY KEY (owner_scope, session_id)
@@ -1488,6 +1674,16 @@ class OfflineStore {
     Map<String, Object?> row,
     DateTime now,
   ) {
+    final storedElapsed = row['elapsed_seconds'] as int? ?? 0;
+    if (row['paused'] == 1 || row['active'] == 0) {
+      return storedElapsed ~/ 60;
+    }
+    final updatedAt = DateTime.tryParse('${row['updated_at']}');
+    if (storedElapsed > 0 && updatedAt != null) {
+      final remaining = row['remaining_seconds'] as int? ?? 0;
+      final delta = now.difference(updatedAt).inSeconds.clamp(0, remaining);
+      return (storedElapsed + delta) ~/ 60;
+    }
     final start = DateTime.tryParse('${row['start_time']}');
     final plannedEnd = DateTime.tryParse('${row['planned_end_time']}');
     final actualText = '${row['actual_end_time'] ?? ''}';
@@ -1536,5 +1732,25 @@ class OfflineStore {
     final month = value.month.toString().padLeft(2, '0');
     final day = value.day.toString().padLeft(2, '0');
     return '$year-$month-$day';
+  }
+}
+
+class _LocalFocusProgress {
+  const _LocalFocusProgress({
+    required this.paused,
+    required this.elapsedSeconds,
+    required this.remainingSeconds,
+  });
+
+  final bool paused;
+  final int elapsedSeconds;
+  final int remainingSeconds;
+
+  _LocalFocusProgress copyWith({bool? paused}) {
+    return _LocalFocusProgress(
+      paused: paused ?? this.paused,
+      elapsedSeconds: elapsedSeconds,
+      remainingSeconds: remainingSeconds,
+    );
   }
 }

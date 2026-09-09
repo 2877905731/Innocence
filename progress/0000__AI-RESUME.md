@@ -3,12 +3,12 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-09-10"
-latest_checkpoint: "0044"
+latest_checkpoint: "0045"
 current_phase: P01
 current_gate: G01
-state: windows_v1_released_followup_validation_pending
-next_sequence: "0045"
-current_goal: "Windows v1.0.0 首个正式版本已发布；继续配置代码签名、完成多 DPI 矩阵和离线同步真实 HTTP 回放"
+state: windows_tray_v1_implemented_logo_candidate_pending
+next_sequence: "0046"
+current_goal: "Windows 托盘驻留与真实暂停/继续已实现；等待确认首版 Logo 后替换 ICO 并制作下一版 Windows 包"
 recent_baseline:
   - checkpoint: "0015"
     result: "设置页完成 Large/Medium/Small 三档独立编排与黑名单新增入口；新增会话、认证、拉黑和跨租户权限负向测试，定向 Maven 7 项通过；Flutter/Dart SDK、数据库集成环境和头像上传后端路由仍不可用"
@@ -58,6 +58,8 @@ recent_baseline:
     result: "实现提交 99a6d75 已推送 origin/main；v0.0.1-preview.1 GitHub 预发布已创建，Windows x64 ZIP（14,717,177 bytes，SHA256 7833EC35...8115）上传完成"
   - checkpoint: "0044"
     result: "用户确认认证页拖窗可用；Windows 1.0.0+1 安装器与便携包通过构建、哈希和安装/启动/卸载验证；v1.0.0 正式 GitHub Release 已发布并上传 3 个资产"
+  - checkpoint: "0045"
+    result: "关闭后驻留托盘、显示/设置/暂停继续/退出菜单与在线离线真实暂停已实现；Flutter 54 项、Maven 39 项、analyze、Windows Release 和关闭/恢复/右键菜单运行态探针通过；白色折页前进箭头 Logo 候选稿待用户确认后转 ICO"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
@@ -117,6 +119,8 @@ user_decisions:
     decision: "离线模式允许进入系统设置，但只展示语言、本机资料、桌面体验、外观和本机操作；需要联网的隐私、通知、设备会话、后台和账号注销不向离线用户开放。Windows 认证页顶部安全条和无按钮品牌区必须可拖动窗口。"
   - id: DEC-0029
     decision: "Windows 第一版正式版本号采用 1.0.0；同时提供每用户安装器、便携 ZIP 和 SHA256 清单。没有 Authenticode 证书时允许发布，但必须明确披露 SmartScreen 未知发布者风险。"
+  - id: DEC-0030
+    decision: "Windows 关闭按钮默认隐藏到系统托盘；托盘第一版提供显示主界面、设置、暂停/继续当前计时和退出，离线模式可进入分级设置。Logo 采用白色占多数的简约现代先锋方向，以折页/前进箭头平衡学习的文静感和向前冲动感；候选稿确认前不覆盖正式 ICO。"
 unfinished:
   - id: TODO-005
     priority: P0
@@ -142,16 +146,24 @@ unfinished:
     priority: P1
     item: "为后续 Windows Release 配置可信 Authenticode 代码签名证书；v1.0.0 当前为 NotSigned，发布说明已披露 SmartScreen 风险"
     gate: G06
+  - id: TODO-015
+    priority: P0
+    item: "确认 docs/design/logo/innocence-logo-v1-candidate.png；确认后制作多尺寸 ICO 并替换 Windows 桌面与托盘正式资源"
+    gate: G01/G06
+  - id: TODO-016
+    priority: P1
+    item: "使用真实登录会话回放 U24/U25 pause/resume，并人工点击托盘设置、暂停/继续和退出；当前单元测试、Release 编译、关闭/恢复和右键菜单出现已验证"
+    gate: G01/G02
 next_actions:
   - id: NEXT-001
-    action: "使用 v1.0.0 完成 100%/125%/150% DPI 八方向缩放、最大化和 Focus Orb 矩阵；认证页拖窗已获用户确认"
-    inputs: ["https://github.com/2877905731/Innocence/releases/tag/v1.0.0", "docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md"]
+    action: "收集用户对首版 Logo 候选稿的确认或修改意见；确认后制作多尺寸 ICO、替换正式资源并构建下一版 Windows 包"
+    inputs: ["docs/design/logo/innocence-logo-v1-candidate.png", "docs/design/logo/README.md", "client/flutter_app/windows/runner/resources/app_icon.ico"]
   - id: NEXT-002
-    action: "启动本地后端并用合成账号完成同步真实 HTTP 回放与幂等/租户负向验证"
-    inputs: ["docs/06-contract-inventory.md", "server/innocence-server"]
+    action: "使用真实登录会话回放 U24/U25 与离线同步，并人工完成托盘菜单所有命令的端到端验收"
+    inputs: ["docs/06-contract-inventory.md", "server/innocence-server", "client/flutter_app/build/windows/x64/runner/Release/innocence_flutter.exe"]
   - id: NEXT-003
-    action: "在下一次 Windows 发布前配置并验证 Authenticode 代码签名"
-    inputs: ["client/flutter_app/windows/package_release.ps1"]
+    action: "继续 v1.0.0 的 100%/125%/150% DPI 矩阵，并在下一次 Windows 发布前配置 Authenticode 代码签名"
+    inputs: ["https://github.com/2877905731/Innocence/releases/tag/v1.0.0", "client/flutter_app/windows/package_release.ps1"]
 required_reads:
   - AGENTS.md
   - docs/08-project-profile.md
@@ -164,9 +176,9 @@ required_reads:
   - progress/INDEX.md
 
 backend_checkpoint:
-  sequence: "0041"
+  sequence: "0045"
   status: complete
-  result: "新增月/年/日模板/年度区间与离线同步预检/导入服务；36 项 Maven 测试和 Spring local 上下文通过。"
+  result: "新增在线专注 pause/resume、暂停秒数持久化与离线有效时长导入；39 项 Maven 测试和 Spring local 上下文通过。"
   next_actions:
-    - "使用合成登录会话完成 U14/U15 真实 HTTP 回放，覆盖幂等、冲突策略和目标账号不匹配。"
+    - "使用合成登录会话完成 U14/U15/U24/U25 真实 HTTP 回放，覆盖幂等、冲突策略、暂停恢复和目标账号不匹配。"
     - "完成 Windows 八方向真实拖边和 DPI 矩阵。"

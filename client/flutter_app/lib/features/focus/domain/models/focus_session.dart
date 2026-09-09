@@ -2,6 +2,7 @@ class FocusSession {
   const FocusSession({
     required this.sessionId,
     required this.active,
+    this.paused = false,
     required this.taskName,
     required this.stageName,
     required this.startTime,
@@ -21,6 +22,7 @@ class FocusSession {
 
   final int sessionId;
   final bool active;
+  final bool paused;
   final String taskName;
   final String stageName;
   final String startTime;
@@ -41,6 +43,7 @@ class FocusSession {
     return FocusSession(
       sessionId: 0,
       active: false,
+      paused: false,
       taskName: '',
       stageName: 'idle',
       startTime: '',
@@ -63,6 +66,7 @@ class FocusSession {
     return FocusSession(
       sessionId: _toInt(json['sessionId']),
       active: json['active'] == true,
+      paused: json['paused'] == true,
       taskName: '${json['taskName'] ?? ''}',
       stageName: '${json['stageName'] ?? 'idle'}',
       startTime: '${json['startTime'] ?? ''}',
@@ -82,11 +86,12 @@ class FocusSession {
   }
 
   FocusSession tick() {
-    if (!active) {
+    if (!active || paused) {
       return this;
     }
 
-    final nextRemainingSeconds = remainingSeconds > 0 ? remainingSeconds - 1 : 0;
+    final nextRemainingSeconds =
+        remainingSeconds > 0 ? remainingSeconds - 1 : 0;
     final nextElapsedSeconds = elapsedSeconds + (remainingSeconds > 0 ? 1 : 0);
     final nextStageState = _resolveStageState(
       bindPomodoro: bindPomodoro,
@@ -98,8 +103,10 @@ class FocusSession {
     return FocusSession(
       sessionId: sessionId,
       active: nextRemainingSeconds > 0,
+      paused: false,
       taskName: taskName,
-      stageName: nextRemainingSeconds > 0 ? nextStageState.stageName : 'finished',
+      stageName:
+          nextRemainingSeconds > 0 ? nextStageState.stageName : 'finished',
       startTime: startTime,
       plannedEndTime: plannedEndTime,
       actualEndTime: actualEndTime,
@@ -109,7 +116,9 @@ class FocusSession {
       bindPomodoro: bindPomodoro,
       pomodoroStudyMinutes: pomodoroStudyMinutes,
       pomodoroBreakMinutes: pomodoroBreakMinutes,
-      currentCycleNo: nextRemainingSeconds > 0 ? nextStageState.currentCycleNo : currentCycleNo,
+      currentCycleNo: nextRemainingSeconds > 0
+          ? nextStageState.currentCycleNo
+          : currentCycleNo,
       completedPomodoroCount: nextRemainingSeconds > 0
           ? nextStageState.completedPomodoroCount
           : completedPomodoroCount,
@@ -120,6 +129,9 @@ class FocusSession {
   }
 
   String get stageLabel {
+    if (paused) {
+      return 'Paused';
+    }
     switch (stageName) {
       case 'study':
         return 'Studying';

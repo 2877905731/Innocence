@@ -129,6 +129,7 @@ class _InnocenceAppState extends State<InnocenceApp> {
                 onStartFocusSession: widget.sessionController.startFocusSession,
                 onFinishFocusSession:
                     widget.sessionController.finishFocusSession,
+                onToggleFocusPause: widget.sessionController.toggleFocusPause,
                 onSubmitCheckIn: widget.sessionController.submitTodayCheckIn,
                 onLoadStatsOverview: widget.sessionController.loadStatsOverview,
                 onDeleteCheckInFailureRecord:

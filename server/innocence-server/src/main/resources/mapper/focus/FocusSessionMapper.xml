@@ -13,6 +13,8 @@
         <result property="plannedMinutes" column="planned_minutes"/>
         <result property="durationSeconds" column="duration_seconds"/>
         <result property="status" column="status"/>
+        <result property="pausedAt" column="paused_at"/>
+        <result property="pausedDurationSeconds" column="paused_duration_seconds"/>
         <result property="bindPomodoroFlag" column="bind_pomodoro_flag"/>
         <result property="pomodoroStudyMinutes" column="pomodoro_study_minutes"/>
         <result property="pomodoroBreakMinutes" column="pomodoro_break_minutes"/>
@@ -22,11 +24,11 @@
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
-    <select id="findActiveSessionByUserId" resultMap="StudyTimerRecordResultMap">
+    <select id="findCurrentSessionByUserId" resultMap="StudyTimerRecordResultMap">
         select *
         from study_timer_record
         where user_id = #{userId}
-          and status = 'active'
+          and status in ('active', 'paused')
         order by id desc
         limit 1
     </select>
@@ -48,6 +50,8 @@
             planned_minutes,
             duration_seconds,
             status,
+            paused_at,
+            paused_duration_seconds,
             bind_pomodoro_flag,
             pomodoro_study_minutes,
             pomodoro_break_minutes,
@@ -62,6 +66,8 @@
             #{plannedMinutes},
             #{durationSeconds},
             #{status},
+            #{pausedAt},
+            #{pausedDurationSeconds},
             #{bindPomodoroFlag},
             #{pomodoroStudyMinutes},
             #{pomodoroBreakMinutes},
@@ -79,6 +85,8 @@
             planned_minutes,
             duration_seconds,
             status,
+            paused_at,
+            paused_duration_seconds,
             bind_pomodoro_flag,
             pomodoro_study_minutes,
             pomodoro_break_minutes,
@@ -95,6 +103,8 @@
             #{plannedMinutes},
             #{durationSeconds},
             #{status},
+            #{pausedAt},
+            #{pausedDurationSeconds},
             #{bindPomodoroFlag},
             #{pomodoroStudyMinutes},
             #{pomodoroBreakMinutes},
@@ -112,7 +122,27 @@
             completed_pomodoro_count = #{completedPomodoroCount},
             status = #{status}
         where id = #{sessionId}
+          and status in ('active', 'paused')
+    </update>
+
+    <update id="pauseStudyTimerRecord">
+        update study_timer_record
+        set status = 'paused',
+            paused_at = #{pausedAt}
+        where id = #{sessionId}
+          and user_id = #{userId}
           and status = 'active'
+    </update>
+
+    <update id="resumeStudyTimerRecord">
+        update study_timer_record
+        set status = 'active',
+            planned_end_time = #{plannedEndTime},
+            paused_at = null,
+            paused_duration_seconds = #{pausedDurationSeconds}
+        where id = #{sessionId}
+          and user_id = #{userId}
+          and status = 'paused'
     </update>
 
     <update id="finishImportedStudyTimerRecord">

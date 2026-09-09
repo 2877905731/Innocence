@@ -321,3 +321,10 @@ checkpoints:
     status: complete
     path: progress/0044__20260910__P01__DONE__windows-v1-release-published.md
     title: "Windows 1.0.0 首个正式版本发布"
+  - sequence: "0045"
+    created_at: "2026-09-10T02:47:17+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0045__20260910__P01__DONE__windows-tray-pause-and-logo-candidate.md
+    title: "Windows 托盘驻留、暂停计时与首版 Logo 候选稿"

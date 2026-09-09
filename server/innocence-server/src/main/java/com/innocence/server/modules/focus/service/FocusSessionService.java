@@ -32,26 +32,26 @@ public class FocusSessionService {
 
     @Transactional
     public FocusSessionResponse getCurrentSession(Long userId) {
-        StudyTimerRecord activeRecord = focusSessionMapper.findActiveSessionByUserId(userId);
-        if (activeRecord == null) {
+        StudyTimerRecord currentRecord = focusSessionMapper.findCurrentSessionByUserId(userId);
+        if (currentRecord == null) {
             return emptyResponse();
         }
 
         LocalDateTime now = LocalDateTime.now();
-        if (!activeRecord.getPlannedEndTime().isAfter(now)) {
-            finalizeRecordAndNotify(activeRecord, activeRecord.getPlannedEndTime());
-            return buildFinishedResponse(activeRecord);
+        if (!isPaused(currentRecord) && !currentRecord.getPlannedEndTime().isAfter(now)) {
+            finalizeRecordAndNotify(currentRecord, currentRecord.getPlannedEndTime());
+            return buildFinishedResponse(currentRecord);
         }
 
-        return buildActiveResponse(activeRecord, now);
+        return buildCurrentResponse(currentRecord, now);
     }
 
     @Transactional
     public FocusSessionResponse startSession(Long userId, StartFocusSessionRequest request) {
-        StudyTimerRecord currentRecord = focusSessionMapper.findActiveSessionByUserId(userId);
+        StudyTimerRecord currentRecord = focusSessionMapper.findCurrentSessionByUserId(userId);
         if (currentRecord != null) {
             LocalDateTime now = LocalDateTime.now();
-            if (currentRecord.getPlannedEndTime().isAfter(now)) {
+            if (isPaused(currentRecord) || currentRecord.getPlannedEndTime().isAfter(now)) {
                 throw new BusinessException(
                         ErrorCode.BAD_REQUEST,
                         "An active study session is already running."
@@ -96,6 +96,8 @@ public class FocusSessionService {
         record.setPlannedMinutes((int) ((plannedSeconds + 59) / 60));
         record.setDurationSeconds(0);
         record.setStatus("active");
+        record.setPausedAt(null);
+        record.setPausedDurationSeconds(0);
         record.setBindPomodoroFlag(bindPomodoro ? 1 : 0);
         record.setPomodoroStudyMinutes(pomodoroStudyMinutes);
         record.setPomodoroBreakMinutes(pomodoroBreakMinutes);
@@ -104,7 +106,56 @@ public class FocusSessionService {
         record.setCreateTime(now);
         focusSessionMapper.insertStudyTimerRecord(record);
 
-        return buildActiveResponse(record, now);
+        return buildCurrentResponse(record, now);
+    }
+
+    @Transactional
+    public FocusSessionResponse pauseSession(Long userId) {
+        StudyTimerRecord record = focusSessionMapper.findCurrentSessionByUserId(userId);
+        if (record == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "No active study session was found.");
+        }
+        if (isPaused(record)) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "The study session is already paused.");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (!record.getPlannedEndTime().isAfter(now)) {
+            finalizeRecordAndNotify(record, record.getPlannedEndTime());
+            return buildFinishedResponse(record);
+        }
+        if (focusSessionMapper.pauseStudyTimerRecord(record.getId(), userId, now) != 1) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "The study session state changed.");
+        }
+        record.setStatus("paused");
+        record.setPausedAt(now);
+        return buildCurrentResponse(record, now);
+    }
+
+    @Transactional
+    public FocusSessionResponse resumeSession(Long userId) {
+        StudyTimerRecord record = focusSessionMapper.findCurrentSessionByUserId(userId);
+        if (record == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "No paused study session was found.");
+        }
+        if (!isPaused(record) || record.getPausedAt() == null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "The study session is not paused.");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        int currentPauseSeconds = calculateElapsedSeconds(record.getPausedAt(), now);
+        int totalPauseSeconds = defaultNumber(record.getPausedDurationSeconds()) + currentPauseSeconds;
+        LocalDateTime extendedEndTime = record.getPlannedEndTime().plusSeconds(currentPauseSeconds);
+        if (focusSessionMapper.resumeStudyTimerRecord(
+                record.getId(), userId, extendedEndTime, totalPauseSeconds
+        ) != 1) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "The study session state changed.");
+        }
+        record.setStatus("active");
+        record.setPausedAt(null);
+        record.setPausedDurationSeconds(totalPauseSeconds);
+        record.setPlannedEndTime(extendedEndTime);
+        return buildCurrentResponse(record, now);
     }
 
     @Transactional
@@ -113,10 +164,10 @@ public class FocusSessionService {
         if (request != null && request.getSessionId() != null) {
             record = focusSessionMapper.findSessionByIdAndUserId(request.getSessionId(), userId);
         } else {
-            record = focusSessionMapper.findActiveSessionByUserId(userId);
+            record = focusSessionMapper.findCurrentSessionByUserId(userId);
         }
 
-        if (record == null || !"active".equalsIgnoreCase(record.getStatus())) {
+        if (record == null || (!"active".equalsIgnoreCase(record.getStatus()) && !isPaused(record))) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "No active study session was found.");
         }
 
@@ -152,6 +203,8 @@ public class FocusSessionService {
         record.setPlannedMinutes((int) Math.max(1, Duration.between(startTime, plannedEndTime).toMinutes()));
         record.setDurationSeconds(durationSeconds);
         record.setStatus("finished");
+        record.setPausedAt(null);
+        record.setPausedDurationSeconds(0);
         record.setBindPomodoroFlag(bindPomodoro ? 1 : 0);
         record.setPomodoroStudyMinutes(bindPomodoro ? Math.max(pomodoroStudyMinutes, 0) : 0);
         record.setPomodoroBreakMinutes(bindPomodoro ? Math.max(pomodoroBreakMinutes, 0) : 0);
@@ -165,6 +218,16 @@ public class FocusSessionService {
 
     @Transactional
     public void finishImportedSession(Long userId, Long sessionId, LocalDateTime actualEndTime) {
+        finishImportedSession(userId, sessionId, actualEndTime, null);
+    }
+
+    @Transactional
+    public void finishImportedSession(
+            Long userId,
+            Long sessionId,
+            LocalDateTime actualEndTime,
+            Integer importedDurationSeconds
+    ) {
         StudyTimerRecord record = focusSessionMapper.findSessionByIdAndUserId(sessionId, userId);
         if (record == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "Imported focus session was not found.");
@@ -176,7 +239,12 @@ public class FocusSessionService {
         if (record.getPlannedEndTime() != null && resolvedEnd.isAfter(record.getPlannedEndTime())) {
             resolvedEnd = record.getPlannedEndTime();
         }
-        int durationSeconds = calculateElapsedSeconds(record.getCreateTime(), resolvedEnd);
+        int maximumDurationSeconds = calculateElapsedSeconds(
+                record.getCreateTime(), record.getPlannedEndTime()
+        );
+        int durationSeconds = importedDurationSeconds == null
+                ? calculateElapsedSeconds(record.getCreateTime(), resolvedEnd)
+                : Math.min(Math.max(importedDurationSeconds, 0), maximumDurationSeconds);
         focusSessionMapper.finishImportedStudyTimerRecord(
                 sessionId,
                 userId,
@@ -202,11 +270,19 @@ public class FocusSessionService {
 
     private void finalizeRecord(StudyTimerRecord record, LocalDateTime finishTime) {
         LocalDateTime effectiveEndTime = finishTime;
-        if (record.getPlannedEndTime() != null && record.getPlannedEndTime().isBefore(effectiveEndTime)) {
+        if (!isPaused(record) && record.getPlannedEndTime() != null
+                && record.getPlannedEndTime().isBefore(effectiveEndTime)) {
             effectiveEndTime = record.getPlannedEndTime();
         }
 
-        int durationSeconds = calculateElapsedSeconds(record.getCreateTime(), effectiveEndTime);
+        LocalDateTime activeClockEnd = isPaused(record) && record.getPausedAt() != null
+                ? record.getPausedAt()
+                : effectiveEndTime;
+        int durationSeconds = Math.max(
+                0,
+                calculateElapsedSeconds(record.getCreateTime(), activeClockEnd)
+                        - defaultNumber(record.getPausedDurationSeconds())
+        );
         int completedPomodoroCount = calculateCompletedPomodoroCount(record, durationSeconds);
 
         focusSessionMapper.finishStudyTimerRecord(
@@ -223,16 +299,25 @@ public class FocusSessionService {
         record.setStatus("finished");
     }
 
-    private FocusSessionResponse buildActiveResponse(StudyTimerRecord record, LocalDateTime now) {
-        int elapsedSeconds = calculateElapsedSeconds(record.getCreateTime(), now);
-        int remainingSeconds = calculateRemainingSeconds(now, record.getPlannedEndTime());
+    private FocusSessionResponse buildCurrentResponse(StudyTimerRecord record, LocalDateTime now) {
+        boolean paused = isPaused(record);
+        LocalDateTime referenceTime = paused && record.getPausedAt() != null
+                ? record.getPausedAt()
+                : now;
+        int elapsedSeconds = Math.max(
+                0,
+                calculateElapsedSeconds(record.getCreateTime(), referenceTime)
+                        - defaultNumber(record.getPausedDurationSeconds())
+        );
+        int remainingSeconds = calculateRemainingSeconds(referenceTime, record.getPlannedEndTime());
         PomodoroState pomodoroState = resolvePomodoroState(record, elapsedSeconds, remainingSeconds);
 
         FocusSessionResponse response = new FocusSessionResponse();
         response.setSessionId(record.getId());
         response.setActive(true);
+        response.setPaused(paused);
         response.setTaskName(normalizeTaskName(record.getTaskName()));
-        response.setStageName(pomodoroState.stageName());
+        response.setStageName(paused ? "paused" : pomodoroState.stageName());
         response.setStartTime(formatDateTime(record.getCreateTime()));
         response.setPlannedEndTime(formatDateTime(record.getPlannedEndTime()));
         response.setActualEndTime("");
@@ -252,6 +337,7 @@ public class FocusSessionService {
         FocusSessionResponse response = new FocusSessionResponse();
         response.setSessionId(record.getId());
         response.setActive(false);
+        response.setPaused(false);
         response.setTaskName(normalizeTaskName(record.getTaskName()));
         response.setStageName("finished");
         response.setStartTime(formatDateTime(record.getCreateTime()));
@@ -273,6 +359,7 @@ public class FocusSessionService {
         FocusSessionResponse response = new FocusSessionResponse();
         response.setSessionId(0L);
         response.setActive(false);
+        response.setPaused(false);
         response.setTaskName("");
         response.setStageName("idle");
         response.setStartTime("");
@@ -402,6 +489,10 @@ public class FocusSessionService {
 
     private boolean isPomodoroBound(StudyTimerRecord record) {
         return record != null && defaultNumber(record.getBindPomodoroFlag()) == 1;
+    }
+
+    private boolean isPaused(StudyTimerRecord record) {
+        return record != null && "paused".equalsIgnoreCase(record.getStatus());
     }
 
     private int defaultNumber(Integer value) {

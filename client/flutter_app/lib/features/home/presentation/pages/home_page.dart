@@ -116,6 +116,8 @@ String _formatMinutesCompactLocalized(BuildContext context, int minutes) {
 
 String _focusStageLabel(BuildContext context, String stageName, bool active) {
   switch (stageName.trim().toLowerCase()) {
+    case 'paused':
+      return _contextText(context, '已暂停', 'Paused');
     case 'study':
       return _contextText(context, '学习', 'Study');
     case 'break':
@@ -372,6 +374,7 @@ class HomePage extends StatelessWidget {
     required this.onLogout,
     required this.onStartFocusSession,
     required this.onFinishFocusSession,
+    required this.onToggleFocusPause,
     required this.onSubmitCheckIn,
     required this.onLoadStatsOverview,
     required this.onDeleteCheckInFailureRecord,
@@ -497,6 +500,7 @@ class HomePage extends StatelessWidget {
     int pomodoroBreakMinutes,
   }) onStartFocusSession;
   final Future<void> Function() onFinishFocusSession;
+  final Future<void> Function() onToggleFocusPause;
   final Future<void> Function() onSubmitCheckIn;
   final Future<StatsOverview?> Function({int days}) onLoadStatsOverview;
   final Future<bool> Function(String date) onDeleteCheckInFailureRecord;
@@ -1048,6 +1052,7 @@ class HomePage extends StatelessWidget {
         onOpenTeamWorkspace: () => _openTeamWorkspace(context),
         onStartFocus: () => _openFocusSessionDialog(context),
         onFinishFocus: onFinishFocusSession,
+        onToggleFocus: onToggleFocusPause,
         onSubmitCheckIn: onSubmitCheckIn,
         onEditTodayPlan: () => _openEditor(context),
         onToggleTodayPlanItem: onToggleTodayPlanItem,

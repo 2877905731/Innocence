@@ -4,7 +4,8 @@ import 'package:innocence_flutter/features/auth/domain/models/app_session.dart';
 import 'package:innocence_flutter/features/focus/domain/models/focus_session.dart';
 
 class FocusSessionApi {
-  FocusSessionApi({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
+  FocusSessionApi({ApiClient? apiClient})
+      : _apiClient = apiClient ?? ApiClient();
 
   final ApiClient _apiClient;
 
@@ -57,6 +58,28 @@ class FocusSessionApi {
     );
     if (data is! Map<String, dynamic>) {
       throw const ApiException('Failed to finish the focus session.');
+    }
+    return FocusSession.fromJson(data);
+  }
+
+  Future<FocusSession> pauseSession(AppSession session) async {
+    final data = await _apiClient.post(
+      'focus/session/pause',
+      headers: session.authHeaders,
+    );
+    if (data is! Map<String, dynamic>) {
+      throw const ApiException('Failed to pause the focus session.');
+    }
+    return FocusSession.fromJson(data);
+  }
+
+  Future<FocusSession> resumeSession(AppSession session) async {
+    final data = await _apiClient.post(
+      'focus/session/resume',
+      headers: session.authHeaders,
+    );
+    if (data is! Map<String, dynamic>) {
+      throw const ApiException('Failed to resume the focus session.');
     }
     return FocusSession.fromJson(data);
   }

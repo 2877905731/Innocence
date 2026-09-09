@@ -76,6 +76,12 @@ class Win32Window {
   // Minimize a normal auth or canvas window to the Windows taskbar.
   void MinimizeWindow();
 
+  // Synchronize the commands exposed by the Windows notification-area menu.
+  void SetTrayState(bool settings_available,
+                    bool focus_active,
+                    bool focus_paused,
+                    bool is_chinese);
+
   // If true, closing this window will quit the application.
   void SetQuitOnClose(bool quit_on_close);
 
@@ -100,6 +106,9 @@ class Win32Window {
 
   // Called whenever the native window mode changes.
   virtual void OnWindowModeChanged(const std::string& mode) {}
+
+  // Called when a tray command must be handled by Flutter.
+  virtual void OnTrayCommand(const std::string& command) {}
 
  private:
   friend class WindowClassRegistrar;
@@ -126,6 +135,9 @@ class Win32Window {
   void ApplyDesktopBackdrop(HWND const window);
   void AddTrayIcon(HWND const window);
   void RemoveTrayIcon(HWND const window);
+  void ShowMainWindow();
+  void ShowTrayMenu(HWND const window);
+  void ExitApplication();
   void PositionAuthWindow(HWND const window);
   void PositionPageWindow(HWND const window);
   void PositionDesktopWidget(HWND const window, int logical_height);
@@ -154,6 +166,11 @@ class Win32Window {
   bool resizing_window_ = false;
   bool updating_window_position_ = false;
   bool tray_icon_added_ = false;
+  bool force_quit_ = false;
+  bool tray_settings_available_ = false;
+  bool tray_focus_active_ = false;
+  bool tray_focus_paused_ = false;
+  bool tray_is_chinese_ = true;
   int widget_x_ = 0;
   int widget_y_ = 0;
   int page_width_ = 1360;

@@ -41,6 +41,22 @@ endpoints:
     source_behavior: "开始学习时段（接口草案 4.8）"
     evidence_status: pending
     trigger: "P02 定时收尾时以真实请求回放核对"
+  - id: U24
+    method: POST
+    path: "/api/app/v1/focus/session/pause"
+    source_behavior: "暂停当前用户的活动专注；冻结有效学习时长、剩余时间和番茄阶段，不把暂停时段计入学习统计"
+    success: "返回 active=true、paused=true 的当前专注快照；服务端保存 pausedAt 与累计暂停秒数"
+    failures: "未认证返回 401；没有活动专注或当前已暂停返回 404/400；只允许操作 token 所属用户的数据"
+    evidence_status: client_server_implemented_unit_verified_http_pending
+    trigger: "2026-09-10 已完成服务端当前用户状态校验、Flutter 在线/离线持久化和 3 项服务单测；真实 HTTP 回放待补"
+  - id: U25
+    method: POST
+    path: "/api/app/v1/focus/session/resume"
+    source_behavior: "继续当前用户已暂停的专注；按本次暂停时长顺延计划结束时间，保持剩余专注时长不变"
+    success: "返回 active=true、paused=false 的当前专注快照；累计暂停秒数只增不减"
+    failures: "未认证返回 401；没有已暂停专注或状态不匹配返回 404/400；只允许操作 token 所属用户的数据"
+    evidence_status: client_server_implemented_unit_verified_http_pending
+    trigger: "2026-09-10 已完成顺延结束时间、累计暂停秒数、Flutter 在线/离线恢复和服务单测；真实 HTTP 回放待补"
   - id: U04
     method: POST
     path: "/api/app/v1/check-in/submit"

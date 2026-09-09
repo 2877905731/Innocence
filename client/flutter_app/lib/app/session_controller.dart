@@ -1446,6 +1446,47 @@ class SessionController extends ChangeNotifier {
             _message('结束专注失败。', 'Failed to finish the focus session.'));
   }
 
+  Future<void> toggleFocusPause() async {
+    if (!_focusSession.active) {
+      return;
+    }
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        _focusSession = _focusSession.paused
+            ? await _offlineStore.resumeFocusSession(
+                ownerScope,
+                _focusSession.sessionId,
+              )
+            : await _offlineStore.pauseFocusSession(
+                ownerScope,
+                _focusSession.sessionId,
+              );
+        _bannerMessage = _focusSession.paused
+            ? _message('离线计时已暂停。', 'Offline timer paused.')
+            : _message('离线计时已继续。', 'Offline timer resumed.');
+        _syncFocusTicker();
+      },
+          fallbackMessage:
+              _message('切换离线计时状态失败。', 'Failed to update the offline timer.'));
+      return;
+    }
+
+    final currentSession = _session;
+    if (currentSession == null) {
+      return;
+    }
+    await _runBusyAction(() async {
+      _focusSession = _focusSession.paused
+          ? await _focusSessionApi.resumeSession(currentSession)
+          : await _focusSessionApi.pauseSession(currentSession);
+      _bannerMessage = _focusSession.paused
+          ? _message('计时已暂停。', 'Timer paused.')
+          : _message('计时已继续。', 'Timer resumed.');
+      _syncFocusTicker();
+    }, fallbackMessage: _message('切换计时状态失败。', 'Failed to update the timer.'));
+  }
+
   Future<void> submitTodayCheckIn() async {
     final ownerScope = localOwnerScope;
     if (isOffline && ownerScope != null) {
@@ -3095,9 +3136,9 @@ class SessionController extends ChangeNotifier {
   }
 
   void _syncFocusTicker() {
-    if (_focusSession.active) {
+    if (_focusSession.active && !_focusSession.paused) {
       _focusTicker ??= Timer.periodic(const Duration(seconds: 1), (_) {
-        if (!_focusSession.active) {
+        if (!_focusSession.active || _focusSession.paused) {
           _stopFocusTicker();
           return;
         }

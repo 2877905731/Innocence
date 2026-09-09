@@ -4,6 +4,7 @@ public class FocusSessionResponse {
 
     private Long sessionId;
     private boolean active;
+    private boolean paused;
     private String taskName;
     private String stageName;
     private String startTime;
@@ -33,6 +34,14 @@ public class FocusSessionResponse {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
     }
 
     public String getTaskName() {

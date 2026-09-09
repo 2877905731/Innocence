@@ -134,17 +134,81 @@ void main() {
       endTime: DateTime.now().add(const Duration(minutes: 20)),
       taskName: 'Deep work',
     );
-    final restored = await store.loadActiveFocusSession(profile.ownerScope);
+    final paused = await store.pauseFocusSession(
+      profile.ownerScope,
+      started.sessionId,
+    );
+    final restoredPaused =
+        await store.loadActiveFocusSession(profile.ownerScope);
+    final resumed = await store.resumeFocusSession(
+      profile.ownerScope,
+      started.sessionId,
+    );
     final finished = await store.finishFocusSession(
       profile.ownerScope,
       started.sessionId,
     );
 
     expect(started.active, isTrue);
-    expect(restored.active, isTrue);
-    expect(restored.taskName, 'Deep work');
+    expect(paused.paused, isTrue);
+    expect(restoredPaused.paused, isTrue);
+    expect(restoredPaused.taskName, 'Deep work');
+    expect(resumed.active, isTrue);
+    expect(resumed.paused, isFalse);
     expect(finished.active, isFalse);
     expect(await store.pendingOutboxCount(profile.ownerScope), 2);
+  });
+
+  test('migrates version 2 focus history without losing elapsed time',
+      () async {
+    final databasePath =
+        '${tempDirectory.path}${Platform.pathSeparator}offline.db';
+    final legacyDatabase = await databaseFactoryFfi.openDatabase(
+      databasePath,
+      options: OpenDatabaseOptions(
+        version: 2,
+        onCreate: (database, version) async {
+          await database.execute('''CREATE TABLE local_focus_session (
+            owner_scope TEXT NOT NULL,
+            session_id INTEGER NOT NULL,
+            active INTEGER NOT NULL DEFAULT 0,
+            start_time TEXT NOT NULL,
+            planned_end_time TEXT NOT NULL,
+            actual_end_time TEXT NOT NULL DEFAULT '',
+            planned_minutes INTEGER NOT NULL DEFAULT 0,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (owner_scope, session_id)
+          )''');
+        },
+      ),
+    );
+    await legacyDatabase.insert('local_focus_session', {
+      'owner_scope': 'local:test',
+      'session_id': 1,
+      'active': 0,
+      'start_time': '2026-09-10T00:00:00.000',
+      'planned_end_time': '2026-09-10T00:30:00.000',
+      'actual_end_time': '2026-09-10T00:10:00.000',
+      'planned_minutes': 30,
+      'updated_at': '2026-09-10T00:10:00.000',
+    });
+    await legacyDatabase.close();
+
+    await store.initialize();
+    await store.close();
+    final migratedDatabase =
+        await databaseFactoryFfi.openDatabase(databasePath);
+    final columns = await migratedDatabase.rawQuery(
+      'PRAGMA table_info(local_focus_session)',
+    );
+    final rows = await migratedDatabase.query('local_focus_session');
+    await migratedDatabase.close();
+
+    expect(columns.map((column) => column['name']), contains('paused'));
+    expect(
+        columns.map((column) => column['name']), contains('elapsed_seconds'));
+    expect(rows.single['elapsed_seconds'], 600);
+    expect(rows.single['remaining_seconds'], 0);
   });
 
   test('builds month summaries and applies saved day templates explicitly',

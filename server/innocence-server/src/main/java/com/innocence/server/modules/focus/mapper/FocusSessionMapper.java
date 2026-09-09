@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Mapper
 public interface FocusSessionMapper {
 
-    StudyTimerRecord findActiveSessionByUserId(@Param("userId") Long userId);
+    StudyTimerRecord findCurrentSessionByUserId(@Param("userId") Long userId);
 
     StudyTimerRecord findSessionByIdAndUserId(@Param("sessionId") Long sessionId, @Param("userId") Long userId);
 
@@ -31,6 +31,19 @@ public interface FocusSessionMapper {
             @Param("actualEndTime") LocalDateTime actualEndTime,
             @Param("durationSeconds") int durationSeconds,
             @Param("completedPomodoroCount") int completedPomodoroCount
+    );
+
+    int pauseStudyTimerRecord(
+            @Param("sessionId") Long sessionId,
+            @Param("userId") Long userId,
+            @Param("pausedAt") LocalDateTime pausedAt
+    );
+
+    int resumeStudyTimerRecord(
+            @Param("sessionId") Long sessionId,
+            @Param("userId") Long userId,
+            @Param("plannedEndTime") LocalDateTime plannedEndTime,
+            @Param("pausedDurationSeconds") int pausedDurationSeconds
     );
 
     int markCompletionNotificationSent(@Param("sessionId") Long sessionId);

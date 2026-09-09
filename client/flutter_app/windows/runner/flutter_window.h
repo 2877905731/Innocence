@@ -24,12 +24,14 @@ class FlutterWindow : public Win32Window {
   LRESULT MessageHandler(HWND window, UINT const message, WPARAM const wparam,
                          LPARAM const lparam) noexcept override;
   void OnWindowModeChanged(const std::string& mode) override;
+  void OnTrayCommand(const std::string& command) override;
 
  private:
   void RegisterDesktopWidgetChannel();
   bool SetAutoStart(bool enabled);
   void CloseWindow();
   void NotifyWindowModeChanged(const std::string& mode);
+  void NotifyTrayCommand(const std::string& command);
 
   // The project to run.
   flutter::DartProject project_;

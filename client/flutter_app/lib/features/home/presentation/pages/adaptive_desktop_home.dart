@@ -57,6 +57,7 @@ class AdaptiveDesktopHome extends StatefulWidget {
     required this.onOpenTeamWorkspace,
     required this.onStartFocus,
     required this.onFinishFocus,
+    required this.onToggleFocus,
     required this.onSubmitCheckIn,
     required this.onEditTodayPlan,
     required this.onToggleTodayPlanItem,
@@ -103,6 +104,7 @@ class AdaptiveDesktopHome extends StatefulWidget {
   final Future<void> Function() onOpenTeamWorkspace;
   final Future<void> Function() onStartFocus;
   final Future<void> Function() onFinishFocus;
+  final Future<void> Function() onToggleFocus;
   final Future<void> Function() onSubmitCheckIn;
   final Future<void> Function() onEditTodayPlan;
   final Future<void> Function(int index, bool completed) onToggleTodayPlanItem;
@@ -150,14 +152,62 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
   void initState() {
     super.initState();
     DesktopWidgetBridge.setWindowModeListener(_handleWindowModeChanged);
+    DesktopWidgetBridge.setTrayCommandListener(_handleTrayCommand);
+    unawaited(_syncTrayState());
     _scheduleSloganRefresh();
+  }
+
+  @override
+  void didUpdateWidget(covariant AdaptiveDesktopHome oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.focusSession.active != widget.focusSession.active ||
+        oldWidget.focusSession.paused != widget.focusSession.paused ||
+        oldWidget.appLanguage != widget.appLanguage) {
+      unawaited(_syncTrayState());
+    }
   }
 
   @override
   void dispose() {
     _sloganRefreshTimer?.cancel();
     DesktopWidgetBridge.setWindowModeListener(null);
+    DesktopWidgetBridge.setTrayCommandListener(null);
+    unawaited(
+      DesktopWidgetBridge.setTrayState(
+        settingsAvailable: false,
+        focusActive: false,
+        focusPaused: false,
+        isChinese: _isChinese,
+      ),
+    );
     super.dispose();
+  }
+
+  Future<void> _syncTrayState() {
+    return DesktopWidgetBridge.setTrayState(
+      settingsAvailable: true,
+      focusActive: widget.focusSession.active,
+      focusPaused: widget.focusSession.paused,
+      isChinese: _isChinese,
+    );
+  }
+
+  Future<void> _handleTrayCommand(String command) async {
+    switch (command) {
+      case 'openSettings':
+        await _restoreCanvas();
+        if (mounted) {
+          await widget.onOpenSettings();
+        }
+        return;
+      case 'toggleFocusPause':
+        if (widget.focusSession.active && !widget.isBusy) {
+          await widget.onToggleFocus();
+        }
+        return;
+      default:
+        return;
+    }
   }
 
   void _scheduleSloganRefresh() {
@@ -228,7 +278,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
 
   Future<void> _handleOrbAction() async {
     if (widget.focusSession.active) {
-      await widget.onFinishFocus();
+      await widget.onToggleFocus();
       return;
     }
     await _restoreCanvas();
@@ -458,6 +508,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
             onAction: widget.focusSession.active
                 ? widget.onFinishFocus
                 : widget.onStartFocus,
+            onToggle: widget.onToggleFocus,
           ),
           secondary: _PlanPanel(
             palette: palette,
@@ -646,6 +697,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
           onAction: widget.focusSession.active
               ? widget.onFinishFocus
               : widget.onStartFocus,
+          onToggle: widget.onToggleFocus,
         ),
         const SizedBox(height: 20),
         _MetricGrid(
@@ -2471,6 +2523,7 @@ class _FocusPanel extends StatelessWidget {
     required this.isChinese,
     required this.isBusy,
     required this.onAction,
+    required this.onToggle,
     this.expanded = false,
   });
 
@@ -2479,6 +2532,7 @@ class _FocusPanel extends StatelessWidget {
   final bool isChinese;
   final bool isBusy;
   final Future<void> Function() onAction;
+  final Future<void> Function() onToggle;
   final bool expanded;
 
   String _text(String zh, String en) => isChinese ? zh : en;
@@ -2495,8 +2549,10 @@ class _FocusPanel extends StatelessWidget {
             palette: palette,
             title: _text('当前专注', 'Focus now'),
             subtitle: session.active
-                ? _text('结束于 ${session.endTimeLabel}',
-                    'Ends at ${session.endTimeLabel}')
+                ? session.paused
+                    ? _text('计时已暂停', 'Timer paused')
+                    : _text('结束于 ${session.endTimeLabel}',
+                        'Ends at ${session.endTimeLabel}')
                 : _text('设置结束时间后开始', 'Set an end time to begin'),
           ),
           SizedBox(height: expanded ? 34 : 24),
@@ -2528,42 +2584,68 @@ class _FocusPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 22),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: isBusy ? null : () => unawaited(onAction()),
-              icon: Icon(
-                session.active ? Icons.stop_rounded : Icons.play_arrow_rounded,
-              ),
-              label: Text(
-                session.active
-                    ? _text('结束本次专注', 'Finish focus')
-                    : _text('开始专注', 'Start focus'),
-              ),
-              style: FilledButton.styleFrom(
-                backgroundColor: palette.visualTheme == AppVisualTheme.glass
-                    ? const Color(0x24FFFFFF)
-                    : palette.ink,
-                foregroundColor: palette.visualTheme == AppVisualTheme.glass
-                    ? palette.ink
-                    : palette.onInk,
-                minimumSize: const Size.fromHeight(48),
-                side: palette.visualTheme == AppVisualTheme.glass
-                    ? const BorderSide(color: Color(0x42FFFFFF))
-                    : BorderSide.none,
-                elevation: 0,
-                shadowColor: palette.visualTheme == AppVisualTheme.glass
-                    ? palette.accent.withValues(alpha: .5)
-                    : null,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    palette.visualTheme == AppVisualTheme.glass ? 12 : 0,
+          if (session.active)
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: isBusy ? null : () => unawaited(onToggle()),
+                    icon: Icon(
+                      session.paused
+                          ? Icons.play_arrow_rounded
+                          : Icons.pause_rounded,
+                    ),
+                    label: Text(
+                      session.paused
+                          ? _text('继续计时', 'Resume timer')
+                          : _text('暂停计时', 'Pause timer'),
+                    ),
+                    style: _primaryButtonStyle(),
                   ),
                 ),
+                const SizedBox(width: 10),
+                OutlinedButton.icon(
+                  onPressed: isBusy ? null : () => unawaited(onAction()),
+                  icon: const Icon(Icons.stop_rounded),
+                  label: Text(_text('结束', 'Finish')),
+                ),
+              ],
+            )
+          else
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: isBusy ? null : () => unawaited(onAction()),
+                icon: const Icon(Icons.play_arrow_rounded),
+                label: Text(_text('开始专注', 'Start focus')),
+                style: _primaryButtonStyle(),
               ),
             ),
-          ),
         ],
+      ),
+    );
+  }
+
+  ButtonStyle _primaryButtonStyle() {
+    return FilledButton.styleFrom(
+      backgroundColor: palette.visualTheme == AppVisualTheme.glass
+          ? const Color(0x24FFFFFF)
+          : palette.ink,
+      foregroundColor: palette.visualTheme == AppVisualTheme.glass
+          ? palette.ink
+          : palette.onInk,
+      minimumSize: const Size.fromHeight(48),
+      side: palette.visualTheme == AppVisualTheme.glass
+          ? const BorderSide(color: Color(0x42FFFFFF))
+          : BorderSide.none,
+      elevation: 0,
+      shadowColor: palette.visualTheme == AppVisualTheme.glass
+          ? palette.accent.withValues(alpha: .5)
+          : null,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(
+          palette.visualTheme == AppVisualTheme.glass ? 12 : 0,
+        ),
       ),
     );
   }

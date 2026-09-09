@@ -314,7 +314,10 @@ public class SyncImportService {
             focusSessionService.finishImportedSession(
                     userId,
                     serverId,
-                    parseDateTime(asText(operation.payload().get("actualEndTime")))
+                    parseDateTime(asText(operation.payload().get("actualEndTime"))),
+                    operation.payload().containsKey("durationSeconds")
+                            ? asInt(operation.payload().get("durationSeconds"))
+                            : null
             );
             return String.valueOf(serverId);
         }

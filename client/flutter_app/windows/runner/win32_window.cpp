@@ -65,6 +65,10 @@ constexpr int kWidgetSnapThreshold = 28;
 constexpr int kWindowCornerRound = 2;
 constexpr UINT kTrayIconMessage = WM_APP + 1;
 constexpr UINT_PTR kTrayIconId = 1;
+constexpr UINT kTrayShowMainCommand = 41001;
+constexpr UINT kTrayOpenSettingsCommand = 41002;
+constexpr UINT kTrayToggleFocusCommand = 41003;
+constexpr UINT kTrayExitCommand = 41004;
 constexpr const wchar_t kWindowStateRegKey[] =
     L"Software\\Innocence\\WindowState";
 
@@ -436,6 +440,14 @@ Win32Window::MessageHandler(HWND hwnd,
       resizing_window_ = true;
       return 0;
 
+    case WM_CLOSE:
+      if (force_quit_) {
+        DestroyWindow(hwnd);
+      } else {
+        HideWindowToTray();
+      }
+      return 0;
+
     case WM_EXITSIZEMOVE:
       resizing_window_ = false;
       if (window_mode_ == "auth" || window_mode_ == "page") {
@@ -470,12 +482,15 @@ Win32Window::MessageHandler(HWND hwnd,
       return 0;
 
     case kTrayIconMessage:
-      if (lparam == WM_LBUTTONDBLCLK || lparam == WM_LBUTTONUP) {
-        if (window_mode_ == "mini") {
-          SetWindowMode("page");
-        }
-        ShowWindow(hwnd, SW_SHOWNORMAL);
-        SetForegroundWindow(hwnd);
+      switch (LOWORD(lparam)) {
+        case WM_LBUTTONDBLCLK:
+        case WM_LBUTTONUP:
+          ShowMainWindow();
+          break;
+        case WM_CONTEXTMENU:
+        case WM_RBUTTONUP:
+          ShowTrayMenu(hwnd);
+          break;
       }
       return 0;
   }
@@ -700,6 +715,16 @@ void Win32Window::MinimizeWindow() {
   ShowWindow(window_handle_, SW_MINIMIZE);
 }
 
+void Win32Window::SetTrayState(bool settings_available,
+                               bool focus_active,
+                               bool focus_paused,
+                               bool is_chinese) {
+  tray_settings_available_ = settings_available;
+  tray_focus_active_ = focus_active;
+  tray_focus_paused_ = focus_active && focus_paused;
+  tray_is_chinese_ = is_chinese;
+}
+
 void Win32Window::SetQuitOnClose(bool quit_on_close) {
   quit_on_close_ = quit_on_close;
 }
@@ -811,6 +836,82 @@ void Win32Window::RemoveTrayIcon(HWND const window) {
   data.uID = kTrayIconId;
   Shell_NotifyIconW(NIM_DELETE, &data);
   tray_icon_added_ = false;
+}
+
+void Win32Window::ShowMainWindow() {
+  if (window_handle_ == nullptr) {
+    return;
+  }
+  if (window_mode_ == "mini") {
+    SetWindowMode("page");
+  }
+  ShowWindow(window_handle_, SW_RESTORE);
+  SetForegroundWindow(window_handle_);
+}
+
+void Win32Window::ShowTrayMenu(HWND const window) {
+  HMENU menu = CreatePopupMenu();
+  if (menu == nullptr) {
+    return;
+  }
+
+  AppendMenuW(menu, MF_STRING, kTrayShowMainCommand,
+              tray_is_chinese_ ? L"\u663E\u793A\u4E3B\u754C\u9762"
+                               : L"Show main window");
+  AppendMenuW(menu,
+              MF_STRING | (tray_settings_available_ ? MF_ENABLED : MF_GRAYED),
+              kTrayOpenSettingsCommand,
+              tray_is_chinese_ ? L"\u8BBE\u7F6E" : L"Settings");
+  AppendMenuW(
+      menu, MF_STRING | (tray_focus_active_ ? MF_ENABLED : MF_GRAYED),
+      kTrayToggleFocusCommand,
+      tray_is_chinese_
+          ? (tray_focus_paused_ ? L"\u7EE7\u7EED\u8BA1\u65F6"
+                                : L"\u6682\u505C\u8BA1\u65F6")
+          : (tray_focus_paused_ ? L"Resume timer" : L"Pause timer"));
+  AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+  AppendMenuW(menu, MF_STRING, kTrayExitCommand,
+              tray_is_chinese_ ? L"\u9000\u51FA\u8F6F\u4EF6"
+                               : L"Exit Innocence");
+
+  POINT cursor = {};
+  GetCursorPos(&cursor);
+  SetForegroundWindow(window);
+  const UINT command = TrackPopupMenuEx(
+      menu, TPM_RETURNCMD | TPM_RIGHTBUTTON | TPM_NONOTIFY, cursor.x, cursor.y,
+      window, nullptr);
+  DestroyMenu(menu);
+  PostMessage(window, WM_NULL, 0, 0);
+
+  switch (command) {
+    case kTrayShowMainCommand:
+      ShowMainWindow();
+      return;
+    case kTrayOpenSettingsCommand:
+      if (tray_settings_available_) {
+        ShowMainWindow();
+        OnTrayCommand("openSettings");
+      }
+      return;
+    case kTrayToggleFocusCommand:
+      if (tray_focus_active_) {
+        OnTrayCommand("toggleFocusPause");
+      }
+      return;
+    case kTrayExitCommand:
+      ExitApplication();
+      return;
+    default:
+      return;
+  }
+}
+
+void Win32Window::ExitApplication() {
+  if (window_handle_ == nullptr) {
+    return;
+  }
+  force_quit_ = true;
+  DestroyWindow(window_handle_);
 }
 
 RECT Win32Window::GetMonitorWorkArea(HWND const window) const {

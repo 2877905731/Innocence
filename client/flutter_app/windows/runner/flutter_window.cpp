@@ -70,6 +70,7 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     case WM_NCHITTEST:
     case WM_SETCURSOR:
     case WM_GETMINMAXINFO:
+    case WM_CLOSE:
       return Win32Window::MessageHandler(hwnd, message, wparam, lparam);
   }
 
@@ -94,6 +95,10 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
 
 void FlutterWindow::OnWindowModeChanged(const std::string& mode) {
   NotifyWindowModeChanged(mode);
+}
+
+void FlutterWindow::OnTrayCommand(const std::string& command) {
+  NotifyTrayCommand(command);
 }
 
 void FlutterWindow::RegisterDesktopWidgetChannel() {
@@ -188,6 +193,35 @@ void FlutterWindow::RegisterDesktopWidgetChannel() {
           return;
         }
 
+        if (call.method_name() == "setTrayState") {
+          const auto* arguments =
+              std::get_if<flutter::EncodableMap>(call.arguments());
+          bool settings_available = false;
+          bool focus_active = false;
+          bool focus_paused = false;
+          bool is_chinese = true;
+          if (arguments != nullptr) {
+            const auto read_bool = [arguments](const char* key,
+                                                bool fallback) {
+              const auto found =
+                  arguments->find(flutter::EncodableValue(key));
+              if (found == arguments->end()) {
+                return fallback;
+              }
+              const auto* value = std::get_if<bool>(&found->second);
+              return value == nullptr ? fallback : *value;
+            };
+            settings_available = read_bool("settingsAvailable", false);
+            focus_active = read_bool("focusActive", false);
+            focus_paused = read_bool("focusPaused", false);
+            is_chinese = read_bool("isChinese", true);
+          }
+          SetTrayState(settings_available, focus_active, focus_paused,
+                       is_chinese);
+          result->Success();
+          return;
+        }
+
         if (call.method_name() == "setCanvasSizePreset") {
           const auto* arguments =
               std::get_if<flutter::EncodableMap>(call.arguments());
@@ -275,6 +309,19 @@ void FlutterWindow::NotifyWindowModeChanged(const std::string& mode) {
       });
   desktop_widget_channel_->InvokeMethod("windowModeChanged",
                                         std::move(arguments));
+}
+
+void FlutterWindow::NotifyTrayCommand(const std::string& command) {
+  if (!desktop_widget_channel_) {
+    return;
+  }
+
+  auto arguments = std::make_unique<flutter::EncodableValue>(
+      flutter::EncodableMap{
+          {flutter::EncodableValue("command"),
+           flutter::EncodableValue(command)},
+      });
+  desktop_widget_channel_->InvokeMethod("trayCommand", std::move(arguments));
 }
 
 bool FlutterWindow::SetAutoStart(bool enabled) {

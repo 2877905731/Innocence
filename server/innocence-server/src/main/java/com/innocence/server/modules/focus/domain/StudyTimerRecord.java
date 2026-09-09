@@ -12,6 +12,8 @@ public class StudyTimerRecord {
     private Integer plannedMinutes;
     private Integer durationSeconds;
     private String status;
+    private LocalDateTime pausedAt;
+    private Integer pausedDurationSeconds;
     private Integer bindPomodoroFlag;
     private Integer pomodoroStudyMinutes;
     private Integer pomodoroBreakMinutes;
@@ -82,6 +84,22 @@ public class StudyTimerRecord {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public LocalDateTime getPausedAt() {
+        return pausedAt;
+    }
+
+    public void setPausedAt(LocalDateTime pausedAt) {
+        this.pausedAt = pausedAt;
+    }
+
+    public Integer getPausedDurationSeconds() {
+        return pausedDurationSeconds;
+    }
+
+    public void setPausedDurationSeconds(Integer pausedDurationSeconds) {
+        this.pausedDurationSeconds = pausedDurationSeconds;
     }
 
     public Integer getBindPomodoroFlag() {

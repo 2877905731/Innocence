@@ -40,6 +40,16 @@ public class FocusSessionController {
         return ApiResponse.success(focusSessionService.finishSession(currentUserId(), request));
     }
 
+    @PostMapping("/pause")
+    public ApiResponse<FocusSessionResponse> pauseSession() {
+        return ApiResponse.success(focusSessionService.pauseSession(currentUserId()));
+    }
+
+    @PostMapping("/resume")
+    public ApiResponse<FocusSessionResponse> resumeSession() {
+        return ApiResponse.success(focusSessionService.resumeSession(currentUserId()));
+    }
+
     private Long currentUserId() {
         Long userId = RequestUserContext.getUserId();
         if (userId == null) {
