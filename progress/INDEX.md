@@ -314,3 +314,10 @@ checkpoints:
     status: complete
     path: progress/0043__20260910__P01__DONE__windows-preview-release-published.md
     title: "Windows 预览版已发布到 GitHub"
+  - sequence: "0044"
+    created_at: "2026-09-10T01:51:46+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0044__20260910__P01__DONE__windows-v1-release-published.md
+    title: "Windows 1.0.0 首个正式版本发布"

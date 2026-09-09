@@ -3,12 +3,12 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-09-10"
-latest_checkpoint: "0043"
+latest_checkpoint: "0044"
 current_phase: P01
 current_gate: G01
-state: windows_preview_released_followup_validation_pending
-next_sequence: "0044"
-current_goal: "Windows v0.0.1-preview.1 已推送并发布；继续完成登录页拖窗的多 DPI 实机矩阵和离线同步真实 HTTP 回放"
+state: windows_v1_released_followup_validation_pending
+next_sequence: "0045"
+current_goal: "Windows v1.0.0 首个正式版本已发布；继续配置代码签名、完成多 DPI 矩阵和离线同步真实 HTTP 回放"
 recent_baseline:
   - checkpoint: "0015"
     result: "设置页完成 Large/Medium/Small 三档独立编排与黑名单新增入口；新增会话、认证、拉黑和跨租户权限负向测试，定向 Maven 7 项通过；Flutter/Dart SDK、数据库集成环境和头像上传后端路由仍不可用"
@@ -56,6 +56,8 @@ recent_baseline:
     result: "用户确认普通边框拖动和离线模式可用；离线设置只开放本机安全分区并持久化桌面偏好，认证页顶部/品牌区拖窗命中已纠正；Flutter 51 项、Maven 36 项、analyze、diff 检查和 Windows Release 构建通过，已启动 PID 8228"
   - checkpoint: "0043"
     result: "实现提交 99a6d75 已推送 origin/main；v0.0.1-preview.1 GitHub 预发布已创建，Windows x64 ZIP（14,717,177 bytes，SHA256 7833EC35...8115）上传完成"
+  - checkpoint: "0044"
+    result: "用户确认认证页拖窗可用；Windows 1.0.0+1 安装器与便携包通过构建、哈希和安装/启动/卸载验证；v1.0.0 正式 GitHub Release 已发布并上传 3 个资产"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
@@ -113,6 +115,8 @@ user_decisions:
     decision: "Windows 新增无需登录的本机离线资料，登录后先预览目标账号并确认导入；首页四主题各 7 条艺术标语按日稳定轮换；计划层级改为短=日、长=月、超长=年，旧周能力仅兼容；边框缩放改用 Flutter 八方向命中层触发原生 sizing loop 并以 Release 真实拖动验收。本决策覆盖 DEC-0025 中周/逐周计划语义及旧缩放完成假设。"
   - id: DEC-0028
     decision: "离线模式允许进入系统设置，但只展示语言、本机资料、桌面体验、外观和本机操作；需要联网的隐私、通知、设备会话、后台和账号注销不向离线用户开放。Windows 认证页顶部安全条和无按钮品牌区必须可拖动窗口。"
+  - id: DEC-0029
+    decision: "Windows 第一版正式版本号采用 1.0.0；同时提供每用户安装器、便携 ZIP 和 SHA256 清单。没有 Authenticode 证书时允许发布，但必须明确披露 SmartScreen 未知发布者风险。"
 unfinished:
   - id: TODO-005
     priority: P0
@@ -134,17 +138,20 @@ unfinished:
     priority: P0
     item: "使用真实登录会话回放离线 import-preview/import，覆盖 keep_server、overwrite、重复 operationId、断线重试和 targetUserNo 不匹配"
     gate: G01/G02
-  - id: TODO-013
-    priority: P0
-    item: "使用 v0.0.1-preview.1 Windows Release，在登录页顶部安全条和左侧品牌区各执行一次真实鼠标拖动，复验 0042 命中层纠正"
-    gate: G01
+  - id: TODO-014
+    priority: P1
+    item: "为后续 Windows Release 配置可信 Authenticode 代码签名证书；v1.0.0 当前为 NotSigned，发布说明已披露 SmartScreen 风险"
+    gate: G06
 next_actions:
   - id: NEXT-001
-    action: "下载或使用 v0.0.1-preview.1 Windows Release 人工复验认证页顶部/品牌区拖窗，并完成 100%/125%/150% DPI 八方向矩阵"
-    inputs: ["https://github.com/2877905731/Innocence/releases/tag/v0.0.1-preview.1", "docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md"]
+    action: "使用 v1.0.0 完成 100%/125%/150% DPI 八方向缩放、最大化和 Focus Orb 矩阵；认证页拖窗已获用户确认"
+    inputs: ["https://github.com/2877905731/Innocence/releases/tag/v1.0.0", "docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md"]
   - id: NEXT-002
     action: "启动本地后端并用合成账号完成同步真实 HTTP 回放与幂等/租户负向验证"
     inputs: ["docs/06-contract-inventory.md", "server/innocence-server"]
+  - id: NEXT-003
+    action: "在下一次 Windows 发布前配置并验证 Authenticode 代码签名"
+    inputs: ["client/flutter_app/windows/package_release.ps1"]
 required_reads:
   - AGENTS.md
   - docs/08-project-profile.md
