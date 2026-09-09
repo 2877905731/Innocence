@@ -6,6 +6,9 @@ import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/widgets/desktop_close_button.dart';
 import 'package:innocence_flutter/core/widgets/desktop_drag_region.dart';
+import 'package:innocence_flutter/core/widgets/desktop_resize_frame.dart';
+import 'package:innocence_flutter/core/widgets/glass_motion_backdrop.dart';
+import 'package:innocence_flutter/core/widgets/glass_panel.dart';
 import 'package:innocence_flutter/core/widgets/wabi_sabi_paper.dart';
 
 class AuthExperience extends StatelessWidget {
@@ -33,51 +36,44 @@ class AuthExperience extends StatelessWidget {
     final tokens = AppVisualTokens.of(visualTheme);
     final isWindows = AppConfig.deviceType == 'windows';
 
-    return Scaffold(
-      backgroundColor: tokens.canvas,
-      body: Stack(
-        children: [
-          if (visualTheme == AppVisualTheme.wabiSabi)
-            Positioned.fill(
-              child: WabiSabiPaper(
-                color: tokens.canvas,
-                child: const SizedBox.expand(),
-              ),
-            ),
+    final authSurface = Stack(
+      children: [
+        if (visualTheme == AppVisualTheme.wabiSabi)
           Positioned.fill(
-            child: CustomPaint(
-              painter: _AuthArtworkPainter(
-                theme: visualTheme,
-                tokens: tokens,
-              ),
+            child: WabiSabiPaper(
+              color: tokens.canvas,
+              child: const SizedBox.expand(),
             ),
           ),
-          if (isWindows)
-            const Positioned(
-              top: 0,
-              left: 0,
-              right: 104,
-              height: 44,
-              child: DesktopDragRegion(),
+        Positioned.fill(
+          child: CustomPaint(
+            painter: _AuthArtworkPainter(
+              theme: visualTheme,
+              tokens: tokens,
             ),
-          SafeArea(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final split = constraints.maxWidth >= 760;
-                final horizontal = split ? 46.0 : 22.0;
-                final top = isWindows ? 62.0 : 28.0;
-                return SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(horizontal, top, horizontal, 28),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: math.max(0, constraints.maxHeight - top - 28),
-                    ),
-                    child: split
-                        ? Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                flex: 9,
+          ),
+        ),
+        SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final split = constraints.maxWidth >= 760;
+              final horizontal = split ? 46.0 : 22.0;
+              final top = isWindows ? 62.0 : 28.0;
+              return SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(horizontal, top, horizontal, 28),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: math.max(0, constraints.maxHeight - top - 28),
+                  ),
+                  child: split
+                      ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 9,
+                              child: DesktopDragRegion(
+                                key: const ValueKey(
+                                    'auth-editorial-drag-region'),
                                 child: _EditorialSide(
                                   language: language,
                                   visualTheme: visualTheme,
@@ -85,33 +81,11 @@ class AuthExperience extends StatelessWidget {
                                   stageNumber: stageNumber,
                                 ),
                               ),
-                              const SizedBox(width: 52),
-                              Expanded(
-                                flex: 11,
-                                child: _FunctionalSide(
-                                  language: language,
-                                  visualTheme: visualTheme,
-                                  onThemeChanged: onThemeChanged,
-                                  tokens: tokens,
-                                  title: title,
-                                  description: description,
-                                  child: child,
-                                ),
-                              ),
-                            ],
-                          )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _EditorialSide(
-                                language: language,
-                                visualTheme: visualTheme,
-                                tokens: tokens,
-                                stageNumber: stageNumber,
-                                compact: true,
-                              ),
-                              const SizedBox(height: 32),
-                              _FunctionalSide(
+                            ),
+                            const SizedBox(width: 52),
+                            Expanded(
+                              flex: 11,
+                              child: _FunctionalSide(
                                 language: language,
                                 visualTheme: visualTheme,
                                 onThemeChanged: onThemeChanged,
@@ -120,20 +94,64 @@ class AuthExperience extends StatelessWidget {
                                 description: description,
                                 child: child,
                               ),
-                            ],
-                          ),
-                  ),
-                );
-              },
+                            ),
+                          ],
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            DesktopDragRegion(
+                              key: const ValueKey('auth-editorial-drag-region'),
+                              child: _EditorialSide(
+                                language: language,
+                                visualTheme: visualTheme,
+                                tokens: tokens,
+                                stageNumber: stageNumber,
+                                compact: true,
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                            _FunctionalSide(
+                              language: language,
+                              visualTheme: visualTheme,
+                              onThemeChanged: onThemeChanged,
+                              tokens: tokens,
+                              title: title,
+                              description: description,
+                              child: child,
+                            ),
+                          ],
+                        ),
+                ),
+              );
+            },
+          ),
+        ),
+        if (isWindows)
+          const Positioned(
+            top: 10,
+            left: 10,
+            right: 104,
+            height: 52,
+            child: DesktopDragRegion(
+              key: ValueKey('auth-titlebar-drag-region'),
             ),
           ),
-          if (isWindows)
-            const Positioned(
-              top: 12,
-              right: 12,
-              child: DesktopWindowControls(compact: true),
-            ),
-        ],
+        if (isWindows)
+          const Positioned(
+            top: 12,
+            right: 12,
+            child: DesktopWindowControls(compact: true),
+          ),
+      ],
+    );
+
+    return Scaffold(
+      backgroundColor: tokens.canvas,
+      body: DesktopResizeFrame(
+        child: visualTheme == AppVisualTheme.glass
+            ? GlassMotionBackdrop(child: authSurface)
+            : authSurface,
       ),
     );
   }
@@ -542,39 +560,39 @@ class _FunctionalSide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AuthThemeSwitcher(
+          language: language,
+          visualTheme: visualTheme,
+          onThemeChanged: onThemeChanged,
+        ),
+        const SizedBox(height: 34),
+        Text(title, style: Theme.of(context).textTheme.headlineLarge),
+        const SizedBox(height: 9),
+        Text(description, style: Theme.of(context).textTheme.bodyMedium),
+        const SizedBox(height: 28),
+        child,
+      ],
+    );
+
+    if (tokens.isGlass) {
+      return GlassPanel(
+        padding: const EdgeInsets.fromLTRB(30, 28, 30, 30),
+        child: content,
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.fromLTRB(30, 28, 30, 30),
       decoration: BoxDecoration(
         color: tokens.panel,
         border: Border.all(color: tokens.line),
-        borderRadius: BorderRadius.circular(tokens.isGlass ? 24 : 6),
-        boxShadow: tokens.isGlass
-            ? const [
-                BoxShadow(
-                  color: Color(0x59000000),
-                  blurRadius: 50,
-                  offset: Offset(0, 22),
-                ),
-              ]
-            : null,
+        borderRadius: BorderRadius.circular(6),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AuthThemeSwitcher(
-            language: language,
-            visualTheme: visualTheme,
-            onThemeChanged: onThemeChanged,
-          ),
-          const SizedBox(height: 34),
-          Text(title, style: Theme.of(context).textTheme.headlineLarge),
-          const SizedBox(height: 9),
-          Text(description, style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: 28),
-          child,
-        ],
-      ),
+      child: content,
     );
   }
 }
@@ -665,7 +683,7 @@ class _AuthArtworkPainter extends CustomPainter {
       ..color = tokens.line
           .withValues(alpha: theme == AppVisualTheme.glass ? 0.28 : 0.48)
       ..strokeWidth = 1;
-    if (theme != AppVisualTheme.wabiSabi) {
+    if (theme != AppVisualTheme.wabiSabi && theme != AppVisualTheme.glass) {
       const spacing = 72.0;
       for (double x = 24; x < size.width; x += spacing) {
         canvas.drawLine(Offset(x, 0), Offset(x, size.height), linePaint);

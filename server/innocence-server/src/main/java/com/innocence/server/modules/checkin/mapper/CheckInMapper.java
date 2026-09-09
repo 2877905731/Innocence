@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Mapper
 public interface CheckInMapper {
@@ -18,6 +19,14 @@ public interface CheckInMapper {
     CheckInFailRecord findCheckInFailRecordByUserIdAndDate(@Param("userId") Long userId, @Param("checkInDate") LocalDate checkInDate);
 
     Integer countCheckInRecordsByUserId(@Param("userId") Long userId);
+
+    List<LocalDate> findCheckInDatesByUserId(@Param("userId") Long userId);
+
+    List<CheckInFailRecord> findCheckInFailRecordsByUserId(
+            @Param("userId") Long userId,
+            @Param("offset") int offset,
+            @Param("limit") int limit
+    );
 
     void insertCheckInRecord(CheckInRecord record);
 

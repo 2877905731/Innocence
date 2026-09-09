@@ -69,6 +69,9 @@
   - `clientTime`
   - `clientVersion`
   - `deviceId`
+  - `clientEntityId`：客户端实体 UUID，跨离线重试保持不变
+  - `operationId`：一次业务操作的幂等 UUID
+  - `baseRevision`：客户端修改前看到的服务端修订号
 
 ### 2.6 文件上传建议
 
@@ -160,12 +163,16 @@
 | `/sync/upload` | POST | 上传离线或本地变更 | `changeList` | `acceptedList` `latestVersion` |
 | `/sync/status` | GET | 获取当前同步状态 | 无 | `lastSyncTime` `pendingCount` `failedCount` |
 | `/sync/retry` | POST | 重试失败同步任务 | `taskIds` | `successCount` |
+| `/sync/import-preview` | POST | 登录后对比当前本机离线资料 manifest 与目标账号 | `localProfileId` `deviceId` `manifest`，manifest 只含类型、数量、日期范围和修订摘要 | `targetAccount` `entityCountByType` `dateRange` `conflictCount` |
+| `/sync/import` | POST | 用户确认目标账号后幂等导入离线数据 | `localProfileId` `operationList` `confirmTargetUserNo` | `acceptedList` `rejectedList` `conflictList` `latestVersion` |
 
 接口说明：
 
-- 第一版冲突策略按你前面确认的规则，采用“最后修改覆盖”。
-- 桌面端离线期间可先本地记账，联网后统一补传。
-- `changeList` 建议至少包含：`bizType`、`bizId`、`operationType`、`payload`、`clientVersion`。
+- 未登录离线模式只写本机数据库，不调用本节任何需要 Bearer token 的接口；local profile 不是服务端账号，不得用固定或伪造 userId。
+- 已登录断网变更先进入账户 ownerScope 的本地 outbox，恢复联网后可自动补传；未登录 local profile 登录后必须先预览、展示目标账号并经用户确认才可导入。
+- 第一版不做任意字段级三方合并，但不得全局套用“最后修改覆盖”：日计划由用户选择，备忘录同实体按 revision，专注事件按 UUID 幂等追加，年度区间按 revision，签到意图由服务端重验。
+- `changeList` 建议至少包含：`bizType`、`clientEntityId`、`operationId`、`operationType`、`baseRevision`、`payload`、`clientVersion`；服务端身份必须来自 token，不接受请求中的 userId 决定数据归属。
+- `/sync/import-preview` 不接收业务正文；`/sync/import` 逐项返回 accepted/rejected/conflict，客户端只清理已确认成功的 outbox 项。
 
 ### 4.4 好友模块
 
@@ -250,19 +257,27 @@
 | `/study/plans/{planId}` | DELETE | 删除计划 | 路径参数 | `success` |
 | `/study/plans/calendar` | GET | 获取计划日历视图数据 | `planType` `startDate` `endDate` | `datePlanList` |
 | `/study/plans/today` | GET | 获取今日计划 | 无 | `planInfo` |
-| `/study/plans/templates` | GET | 获取短计划模板列表 | 无 | `list` |
-| `/study/plans/{planId}/save-template` | POST | 把某个短计划保存为模板 | `templateName` | `templateInfo` |
-| `/study/plans/templates/{templateId}/apply` | POST | 套用模板到某一天 | `targetDate` | `planInfo` |
+| `/study/plans/month` | GET | 获取完整月份的日期摘要 | `month=YYYY-MM` | `month` `dateList` `templateUsageSummary` |
+| `/study/plans/year` | GET | 获取全年 12 个月摘要与年度区间 | `year=YYYY` | `monthList` `annualSegmentList` |
+| `/study/plans/day-templates` | GET | 获取日计划模板列表 | 无 | `list` |
+| `/study/plans/day-templates` | POST | 把当前已保存短计划另存为日模板 | `sourcePlanId` `templateName` | `templateInfo` |
+| `/study/plans/day-templates/{templateId}` | PUT | 修改日模板名称或模板内容 | `templateName` `blockList` `taskList` `baseRevision` | `templateInfo` |
+| `/study/plans/day-templates/{templateId}` | DELETE | 删除日模板 | 路径参数 `baseRevision` | `success` |
+| `/study/plans/day-templates/{templateId}/apply-batch` | POST | 套用日模板到一个或多个日期 | `targetDates` `conflictPolicy=overwrite/skip` `operationId` | `appliedDates` `skippedDates` `conflictDates` |
+| `/study/plans/annual-segments` | POST | 按月创建年度计划区间 | `year` `startMonth` `endMonth` `title` `colorKey` `operationId` | `segmentInfo` |
+| `/study/plans/annual-segments/{segmentId}` | PUT | 调整年度区间 | `startMonth` `endMonth` `title` `colorKey` `sortNo` `baseRevision` | `segmentInfo` |
+| `/study/plans/annual-segments/{segmentId}` | DELETE | 删除年度区间 | 路径参数 `baseRevision` | `success` |
 | `/study/plans/progress/{progressId}/toggle` | POST | 切换某项完成状态 | `finished` | `progressInfo` |
 | `/study/plans/fail-records` | GET | 获取失败记录 | `pageNo` `pageSize` | `list` |
 | `/study/plans/fail-records/{recordId}` | DELETE | 删除失败记录 | 路径参数 | `success` |
 
 接口说明：
 
-- `planType` 建议取值：`short`、`long`、`ultra`。
-- 短计划按天，以半小时为单位排布时间块。
-- 长计划按周，支持直接套用短计划模板到某一天。
-- 超长计划按天做长期目标安排。
+- 权威计划语义为短计划=单日、长计划=完整月份、超长计划=完整年份；月历由日期计划聚合，年历使用独立年度区间，不再通过一个模糊的 `planType=long/ultra` 同时承载三种模型。
+- 短计划按天，以半小时为单位排布时间块；保存后保持可编辑，另存模板是独立操作。
+- 长计划按月返回该月全部日期，客户端横向滑动月份；日模板可套用到一天或多天，目标日期已有数据时必须显式覆盖、跳过或取消。
+- 超长计划按年返回 12 个月，以 `1..12` 月为最小单位拖动年度区间；单个区间不得跨自然年，重叠目标使用独立轨道。
+- 现有 `/study/plans/week`、`/study/plans/weekly-templates`、`/study/plans/templates/**` 只作为迁移兼容路由；前端新页面和新契约不得继续使用“周模板”命名日模板。
 - 过期未完成任务写入失败记录，用户可以手动删除。
 
 ### 4.8 定时系统与番茄模式

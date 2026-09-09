@@ -58,8 +58,14 @@ class Win32Window {
   // Switch between auth, the adaptive canvas, and the compatibility orb mode.
   void SetWindowMode(const std::string& mode);
 
+  // Apply one of the Large, Medium, or Small adaptive Canvas presets.
+  void SetCanvasSizePreset(const std::string& preset);
+
   // Start dragging the widget from a Flutter-defined drag region.
   void BeginWindowDrag();
+
+  // Start the native Windows sizing loop from a Flutter-defined edge.
+  bool BeginWindowResize(const std::string& edge);
 
   // Return the widget to its default anchored position.
   void ResetWidgetPosition();
@@ -145,6 +151,7 @@ class Win32Window {
   bool lock_widget_size_to_content_ = true;
   bool window_state_loaded_ = false;
   bool dragging_widget_ = false;
+  bool resizing_window_ = false;
   bool updating_window_position_ = false;
   bool tray_icon_added_ = false;
   int widget_x_ = 0;

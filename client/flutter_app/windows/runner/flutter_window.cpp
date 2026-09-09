@@ -63,6 +63,16 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
+  // Frame and hit-test messages belong to the native shell. Handle them before
+  // Flutter so plugins cannot consume the frameless resize path.
+  switch (message) {
+    case WM_NCCALCSIZE:
+    case WM_NCHITTEST:
+    case WM_SETCURSOR:
+    case WM_GETMINMAXINFO:
+      return Win32Window::MessageHandler(hwnd, message, wparam, lparam);
+  }
+
   // Give Flutter, including plugins, an opportunity to handle window messages.
   if (flutter_controller_) {
     std::optional<LRESULT> result =
@@ -178,9 +188,51 @@ void FlutterWindow::RegisterDesktopWidgetChannel() {
           return;
         }
 
+        if (call.method_name() == "setCanvasSizePreset") {
+          const auto* arguments =
+              std::get_if<flutter::EncodableMap>(call.arguments());
+          std::string preset = "large";
+          if (arguments != nullptr) {
+            const auto found =
+                arguments->find(flutter::EncodableValue("preset"));
+            if (found != arguments->end()) {
+              if (const auto value =
+                      std::get_if<std::string>(&found->second)) {
+                preset = *value;
+              }
+            }
+          }
+          SetCanvasSizePreset(preset);
+          result->Success();
+          return;
+        }
+
         if (call.method_name() == "startWindowDrag") {
           BeginWindowDrag();
           result->Success();
+          return;
+        }
+
+        if (call.method_name() == "startWindowResize") {
+          const auto* arguments =
+              std::get_if<flutter::EncodableMap>(call.arguments());
+          std::string edge;
+          if (arguments != nullptr) {
+            const auto found =
+                arguments->find(flutter::EncodableValue("edge"));
+            if (found != arguments->end()) {
+              if (const auto value =
+                      std::get_if<std::string>(&found->second)) {
+                edge = *value;
+              }
+            }
+          }
+          if (BeginWindowResize(edge)) {
+            result->Success();
+          } else {
+            result->Error("resize_unavailable",
+                          "Window resize is unavailable for this edge or mode.");
+          }
           return;
         }
 

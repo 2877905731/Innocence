@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/team_workspace_snapshot.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
+import 'package:innocence_flutter/core/local/local_profile.dart';
+import 'package:innocence_flutter/core/local/offline_store.dart';
+import 'package:innocence_flutter/core/local/offline_sync_models.dart';
 import 'package:innocence_flutter/core/network/api_exception.dart';
 import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
 import 'package:innocence_flutter/features/account/domain/models/user_profile.dart';
@@ -27,6 +30,8 @@ import 'package:innocence_flutter/features/notifications/data/notification_api.d
 import 'package:innocence_flutter/features/notifications/domain/models/notification_overview.dart';
 import 'package:innocence_flutter/features/plans/data/study_plan_api.dart';
 import 'package:innocence_flutter/features/plans/domain/models/today_plan.dart';
+import 'package:innocence_flutter/features/plans/domain/models/month_plan_overview.dart';
+import 'package:innocence_flutter/features/plans/domain/models/annual_plan_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/week_plan_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/weekly_plan_template.dart';
 import 'package:innocence_flutter/features/settings/data/settings_api.dart';
@@ -37,6 +42,7 @@ import 'package:innocence_flutter/features/settings/domain/models/setting_overvi
 import 'package:innocence_flutter/features/settings/domain/models/widget_setting.dart';
 import 'package:innocence_flutter/features/stats/data/stats_api.dart';
 import 'package:innocence_flutter/features/stats/domain/models/stats_overview.dart';
+import 'package:innocence_flutter/features/sync/data/offline_sync_api.dart';
 import 'package:innocence_flutter/features/team/data/team_api.dart';
 import 'package:innocence_flutter/features/team/domain/models/team_chat_overview.dart';
 import 'package:innocence_flutter/features/team/domain/models/team_overview.dart';
@@ -45,6 +51,7 @@ enum SessionStatus {
   initializing,
   unauthenticated,
   authenticated,
+  offline,
 }
 
 class SessionController extends ChangeNotifier {
@@ -52,6 +59,7 @@ class SessionController extends ChangeNotifier {
     required AuthApi authApi,
     required AuthLocalStorage localStorage,
     required AppLanguageController languageController,
+    OfflineStore? offlineStore,
     StudyPlanApi? studyPlanApi,
     FocusSessionApi? focusSessionApi,
     CheckInApi? checkInApi,
@@ -62,9 +70,11 @@ class SessionController extends ChangeNotifier {
     NotificationApi? notificationApi,
     SettingsApi? settingsApi,
     AdminReportApi? adminReportApi,
+    OfflineSyncApi? offlineSyncApi,
   })  : _authApi = authApi,
         _localStorage = localStorage,
         _languageController = languageController,
+        _offlineStore = offlineStore ?? OfflineStore(),
         _studyPlanApi = studyPlanApi ?? StudyPlanApi(),
         _focusSessionApi = focusSessionApi ?? FocusSessionApi(),
         _checkInApi = checkInApi ?? CheckInApi(),
@@ -74,11 +84,13 @@ class SessionController extends ChangeNotifier {
         _memoApi = memoApi ?? MemoApi(),
         _notificationApi = notificationApi ?? NotificationApi(),
         _settingsApi = settingsApi ?? SettingsApi(),
-        _adminReportApi = adminReportApi ?? AdminReportApi();
+        _adminReportApi = adminReportApi ?? AdminReportApi(),
+        _offlineSyncApi = offlineSyncApi ?? OfflineSyncApi();
 
   final AuthApi _authApi;
   final AuthLocalStorage _localStorage;
   final AppLanguageController _languageController;
+  final OfflineStore _offlineStore;
   final StudyPlanApi _studyPlanApi;
   final FocusSessionApi _focusSessionApi;
   final CheckInApi _checkInApi;
@@ -89,9 +101,11 @@ class SessionController extends ChangeNotifier {
   final NotificationApi _notificationApi;
   final SettingsApi _settingsApi;
   final AdminReportApi _adminReportApi;
+  final OfflineSyncApi _offlineSyncApi;
 
   SessionStatus _status = SessionStatus.initializing;
   AppSession? _session;
+  LocalProfile? _localProfile;
   UserProfile? _profile;
   FocusSession _focusSession = FocusSession.empty();
   CheckInStatus _checkInStatus = CheckInStatus.empty();
@@ -103,6 +117,8 @@ class SessionController extends ChangeNotifier {
   NotificationOverview _notificationOverview = NotificationOverview.empty();
   TodayPlan _todayPlan = TodayPlan.empty();
   WeekPlanOverview _weekPlanOverview = WeekPlanOverview.empty();
+  MonthPlanOverview _monthPlanOverview = MonthPlanOverview.empty();
+  AnnualPlanOverview _annualPlanOverview = AnnualPlanOverview.empty();
   SettingOverview _settingOverview = SettingOverview.empty();
   List<BlacklistItem> _blacklist = const [];
   CurrentDeviceSession? _currentDeviceSession;
@@ -114,6 +130,7 @@ class SessionController extends ChangeNotifier {
   bool _isReconcilingFocusCompletion = false;
   String? _bannerMessage;
   Timer? _focusTicker;
+  OfflineImportPreview? _offlineImportPreview;
 
   bool get _isChineseLanguage => _languageController.currentLanguage.isChinese;
 
@@ -130,13 +147,18 @@ class SessionController extends ChangeNotifier {
   NotificationOverview get notificationOverview => _notificationOverview;
   TodayPlan get todayPlan => _todayPlan;
   WeekPlanOverview get weekPlanOverview => _weekPlanOverview;
+  MonthPlanOverview get monthPlanOverview => _monthPlanOverview;
+  AnnualPlanOverview get annualPlanOverview => _annualPlanOverview;
   SettingOverview get settingOverview => _settingOverview;
   List<BlacklistItem> get blacklist => _blacklist;
   CurrentDeviceSession? get currentDeviceSession => _currentDeviceSession;
   List<WeeklyPlanTemplate> get weeklyTemplates => _weeklyTemplates;
   bool get isBusy => _isBusy;
+  bool get isOffline => _status == SessionStatus.offline;
+  String? get localOwnerScope => _localProfile?.ownerScope;
   String? get bannerMessage => _bannerMessage;
   int get unreadNotificationCount => _notificationOverview.unreadCount;
+  OfflineImportPreview? get offlineImportPreview => _offlineImportPreview;
   ThemeMode get themeMode => _settingOverview.appearanceSetting.isLightMode
       ? ThemeMode.light
       : ThemeMode.dark;
@@ -147,10 +169,6 @@ class SessionController extends ChangeNotifier {
 
   String _weeklyTemplateSavedMessage() {
     return _message('周模板已保存。', 'Weekly template saved.');
-  }
-
-  String _weeklyTemplateAppliedMessage() {
-    return _message('周模板已应用。', 'Weekly template applied.');
   }
 
   Future<void> initialize() async {
@@ -191,8 +209,7 @@ class SessionController extends ChangeNotifier {
         savedSession,
         anchorDate: _weekAnchorDate,
       );
-      final weeklyTemplates =
-          await _studyPlanApi.getWeeklyTemplates(savedSession);
+      final weeklyTemplates = await _studyPlanApi.getDayTemplates(savedSession);
       _session = savedSession;
       _applySettingOverview(settingsOverview);
       _focusSession = focusSession;
@@ -210,8 +227,11 @@ class SessionController extends ChangeNotifier {
       _bannerMessage = null;
       _status = SessionStatus.authenticated;
       _syncFocusTicker();
-    } on ApiException {
-      await _localStorage.clearSession();
+    } on ApiException catch (error) {
+      final authenticationFailure = _isAuthenticationFailure(error);
+      if (authenticationFailure) {
+        await _localStorage.clearSession();
+      }
       _session = null;
       _profile = null;
       _focusSession = FocusSession.empty();
@@ -224,18 +244,24 @@ class SessionController extends ChangeNotifier {
       _notificationOverview = NotificationOverview.empty();
       _todayPlan = TodayPlan.empty();
       _weekPlanOverview = WeekPlanOverview.empty();
+      _monthPlanOverview = MonthPlanOverview.empty();
+      _annualPlanOverview = AnnualPlanOverview.empty();
       _settingOverview = SettingOverview.empty();
       _blacklist = const [];
       _currentDeviceSession = null;
       _weeklyTemplates = const [];
-      _bannerMessage = _message(
-        '会话已失效，请重新登录。',
-        'Session expired. Please sign in again.',
-      );
+      _bannerMessage = authenticationFailure
+          ? _message(
+              '会话已失效，请重新登录。',
+              'Session expired. Please sign in again.',
+            )
+          : _message(
+              '暂时无法恢复联网数据；登录凭据已保留，可重试或使用离线模式。',
+              'Online data could not be restored. Your sign-in is preserved; retry or use offline mode.',
+            );
       _status = SessionStatus.unauthenticated;
       _stopFocusTicker();
     } catch (_) {
-      await _localStorage.clearSession();
       _session = null;
       _profile = null;
       _focusSession = FocusSession.empty();
@@ -248,18 +274,117 @@ class SessionController extends ChangeNotifier {
       _notificationOverview = NotificationOverview.empty();
       _todayPlan = TodayPlan.empty();
       _weekPlanOverview = WeekPlanOverview.empty();
+      _monthPlanOverview = MonthPlanOverview.empty();
+      _annualPlanOverview = AnnualPlanOverview.empty();
       _settingOverview = SettingOverview.empty();
       _blacklist = const [];
       _currentDeviceSession = null;
       _weeklyTemplates = const [];
       _bannerMessage = _message(
-        '恢复上一次会话失败。',
-        'Failed to restore the previous session.',
+        '恢复上一次会话失败；登录凭据未被清除。',
+        'Failed to restore the previous session. Your sign-in was not cleared.',
       );
       _status = SessionStatus.unauthenticated;
       _stopFocusTicker();
     }
 
+    if (_status == SessionStatus.authenticated && _session != null) {
+      try {
+        await _prepareOfflineImportPreview(_session!);
+      } on ApiException {
+        _bannerMessage = _message(
+          '离线数据仍保存在本机，联网恢复后可再次导入。',
+          'Offline data remains on this device and can be imported after reconnecting.',
+        );
+      }
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> enterOfflineMode() async {
+    if (_isBusy) {
+      return;
+    }
+    _isBusy = true;
+    _bannerMessage = null;
+    notifyListeners();
+    try {
+      final localProfile = await _offlineStore.getOrCreateLocalProfile();
+      final todayDate = _formatDate(DateTime.now());
+      final profile = localProfile.toUserProfile();
+      _localProfile = localProfile;
+      _session = null;
+      _profile = profile;
+      _focusSession =
+          await _offlineStore.loadActiveFocusSession(localProfile.ownerScope);
+      _todayPlan = await _offlineStore.loadDailyPlan(
+        localProfile.ownerScope,
+        todayDate,
+      );
+      _memoOverview =
+          await _offlineStore.loadMemoOverview(localProfile.ownerScope);
+      _checkInStatus = await _buildOfflineCheckInStatus(
+        localProfile.ownerScope,
+        _todayPlan,
+      );
+      _statsOverview = await _offlineStore.loadStatsOverview(
+        localProfile.ownerScope,
+        days: _statsRangeDays,
+      );
+      _teamOverview = TeamOverview.empty();
+      _teamChatOverview = TeamChatOverview.empty();
+      _friendOverview = FriendOverview.empty();
+      _notificationOverview = NotificationOverview.empty();
+      _weekPlanOverview = WeekPlanOverview.empty();
+      _monthPlanOverview = await _offlineStore.loadMonthOverview(
+        localProfile.ownerScope,
+        MonthPlanOverview.formatMonth(DateTime.now()),
+      );
+      _annualPlanOverview = await _offlineStore.loadAnnualOverview(
+        localProfile.ownerScope,
+        DateTime.now().year,
+      );
+      final localWidgetSetting =
+          await _offlineStore.loadLocalWidgetSetting(localProfile.ownerScope);
+      _settingOverview = SettingOverview.empty(
+        accountSetting: profile,
+      ).copyWith(widgetSetting: localWidgetSetting);
+      await _applyDesktopShellSettings(widgetSetting: localWidgetSetting);
+      _blacklist = const [];
+      _currentDeviceSession = null;
+      _weeklyTemplates =
+          await _offlineStore.loadDayTemplates(localProfile.ownerScope);
+      final pendingCount = await _offlineStore.pendingOutboxCount(
+        localProfile.ownerScope,
+      );
+      _bannerMessage = _message(
+        pendingCount == 0
+            ? '已进入离线模式，数据仅保存在此设备。'
+            : '已进入离线模式，有 $pendingCount 项本地变更将在登录并确认后同步。',
+        pendingCount == 0
+            ? 'Offline mode: data stays on this device.'
+            : 'Offline mode: $pendingCount local changes will sync after sign-in and confirmation.',
+      );
+      _status = SessionStatus.offline;
+      _syncFocusTicker();
+    } catch (_) {
+      _status = SessionStatus.unauthenticated;
+      _bannerMessage = _message(
+        '无法初始化本地数据，请检查磁盘权限后重试。',
+        'Could not initialize local data. Check disk permissions and retry.',
+      );
+    } finally {
+      _isBusy = false;
+      notifyListeners();
+    }
+  }
+
+  void requireOnlineFeature(String featureName) {
+    _bannerMessage = _message(
+      '“$featureName”需要登录并联网后使用；离线数据不会因此丢失。',
+      '$featureName requires sign-in and a network connection. Your offline data is safe.',
+    );
     notifyListeners();
   }
 
@@ -356,6 +481,33 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<void> refreshProfile() async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        _focusSession = await _offlineStore.loadActiveFocusSession(ownerScope);
+        _todayPlan = await _offlineStore.loadDailyPlan(
+          ownerScope,
+          _formatDate(DateTime.now()),
+        );
+        _memoOverview = await _offlineStore.loadMemoOverview(ownerScope);
+        _statsOverview = await _offlineStore.loadStatsOverview(
+          ownerScope,
+          days: _statsRangeDays,
+        );
+        _checkInStatus = await _buildOfflineCheckInStatus(
+          ownerScope,
+          _todayPlan,
+        );
+        _bannerMessage = _message(
+          '本地数据已刷新。',
+          'Local data refreshed.',
+        );
+        _syncFocusTicker();
+      },
+          fallbackMessage:
+              _message('刷新本地数据失败。', 'Failed to refresh local data.'));
+      return;
+    }
     final currentSession = _session;
     if (currentSession == null) {
       return;
@@ -384,7 +536,7 @@ class SessionController extends ChangeNotifier {
         anchorDate: _weekAnchorDate,
       );
       final weeklyTemplates =
-          await _studyPlanApi.getWeeklyTemplates(currentSession);
+          await _studyPlanApi.getDayTemplates(currentSession);
       _applySettingOverview(settingsOverview);
       _focusSession = focusSession;
       _checkInStatus = checkInStatus;
@@ -397,6 +549,14 @@ class SessionController extends ChangeNotifier {
       _notificationOverview = notificationOverview;
       _todayPlan = todayPlan;
       _weekPlanOverview = weekPlanOverview;
+      _monthPlanOverview = await _studyPlanApi.getMonthPlanOverview(
+        currentSession,
+        month: _monthPlanOverview.month,
+      );
+      _annualPlanOverview = await _studyPlanApi.getAnnualPlanOverview(
+        currentSession,
+        year: _annualPlanOverview.year,
+      );
       _weeklyTemplates = weeklyTemplates;
       _bannerMessage = null;
       _syncFocusTicker();
@@ -409,6 +569,7 @@ class SessionController extends ChangeNotifier {
     try {
       await _localStorage.clearSession();
       _session = null;
+      _localProfile = null;
       _profile = null;
       _focusSession = FocusSession.empty();
       _checkInStatus = CheckInStatus.empty();
@@ -424,6 +585,7 @@ class SessionController extends ChangeNotifier {
       _blacklist = const [];
       _currentDeviceSession = null;
       _weeklyTemplates = const [];
+      _offlineImportPreview = null;
       _bannerMessage = null;
       _status = SessionStatus.unauthenticated;
       _stopFocusTicker();
@@ -442,6 +604,34 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<void> saveTodayPlan(TodayPlan plan) async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        final savedPlan = await _offlineStore.saveDailyPlan(ownerScope, plan);
+        if (savedPlan.planDate == _todayPlan.planDate) {
+          _todayPlan = savedPlan;
+          _checkInStatus = await _buildOfflineCheckInStatus(
+            ownerScope,
+            savedPlan,
+          );
+        }
+        _monthPlanOverview = await _offlineStore.loadMonthOverview(
+          ownerScope,
+          savedPlan.planDate.substring(0, 7),
+        );
+        _annualPlanOverview = await _offlineStore.loadAnnualOverview(
+          ownerScope,
+          DateTime.parse(savedPlan.planDate).year,
+        );
+        _bannerMessage = _message(
+          '计划已保存在本机，登录并确认后可同步。',
+          'Plan saved on this device. Sign in and confirm to sync it.',
+        );
+      },
+          fallbackMessage:
+              _message('本地计划保存失败。', 'Failed to save the local plan.'));
+      return;
+    }
     final currentSession = _session;
     if (currentSession == null) {
       return;
@@ -471,6 +661,18 @@ class SessionController extends ChangeNotifier {
       _teamOverview = teamOverview;
       _teamChatOverview = teamChatOverview;
       _weekPlanOverview = weekPlanOverview;
+      if (_monthPlanOverview.month == savedPlan.planDate.substring(0, 7)) {
+        _monthPlanOverview = await _studyPlanApi.getMonthPlanOverview(
+          currentSession,
+          month: _monthPlanOverview.month,
+        );
+      }
+      if (_annualPlanOverview.year == DateTime.parse(savedPlan.planDate).year) {
+        _annualPlanOverview = await _studyPlanApi.getAnnualPlanOverview(
+          currentSession,
+          year: _annualPlanOverview.year,
+        );
+      }
       _bannerMessage = null;
     },
         fallbackMessage:
@@ -500,19 +702,40 @@ class SessionController extends ChangeNotifier {
   }) async {
     final resolvedSuccessMessage =
         successMessage.isEmpty ? _weeklyTemplateSavedMessage() : successMessage;
-    final currentSession = _session;
-    if (currentSession == null) {
-      return;
-    }
     if (!sourcePlan.hasItems) {
-      _bannerMessage =
-          'Create tasks for that day first, then save them as a weekly template.';
+      _bannerMessage = _message(
+        '请先为这一天创建任务，再保存为日计划模板。',
+        'Create tasks for that day before saving a day template.',
+      );
       notifyListeners();
       return;
     }
 
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        _weeklyTemplates = await _offlineStore.saveDayTemplate(
+          ownerScope,
+          templateName: templateName,
+          sourcePlan: sourcePlan,
+        );
+        _bannerMessage = _message(
+          '日计划模板已保存在本机。',
+          'Day template saved on this device.',
+        );
+      },
+          fallbackMessage:
+              _message('保存本地日模板失败。', 'Failed to save the local day template.'));
+      return;
+    }
+
+    final currentSession = _session;
+    if (currentSession == null) {
+      return;
+    }
+
     await _runBusyAction(() async {
-      final templates = await _studyPlanApi.saveWeeklyTemplate(
+      final templates = await _studyPlanApi.saveDayTemplate(
         currentSession,
         templateName: templateName,
         sourcePlan: sourcePlan,
@@ -521,7 +744,7 @@ class SessionController extends ChangeNotifier {
       _bannerMessage = resolvedSuccessMessage;
     },
         fallbackMessage:
-            _message('保存周模板失败。', 'Failed to save the weekly template.'));
+            _message('保存日模板失败。', 'Failed to save the day template.'));
   }
 
   Future<void> deleteWeeklyTemplate(int templateId) async {
@@ -661,20 +884,67 @@ class SessionController extends ChangeNotifier {
     String planDate, {
     String successMessage = '',
   }) async {
+    await applyDayTemplateToDate(
+      templateId,
+      planDate,
+      strategy: PlanApplyStrategy.overwrite,
+      successMessage: successMessage,
+    );
+  }
+
+  Future<void> applyDayTemplateToDate(
+    int templateId,
+    String planDate, {
+    required PlanApplyStrategy strategy,
+    String successMessage = '',
+  }) async {
     final resolvedSuccessMessage = successMessage.isEmpty
-        ? _weeklyTemplateAppliedMessage()
+        ? _message('日模板已应用。', 'Day template applied.')
         : successMessage;
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        final appliedPlan = await _offlineStore.applyDayTemplate(
+          ownerScope,
+          templateId: templateId,
+          planDate: planDate,
+          strategy: strategy,
+        );
+        if (appliedPlan.planDate == _todayPlan.planDate) {
+          _todayPlan = appliedPlan;
+        }
+        _monthPlanOverview = await _offlineStore.loadMonthOverview(
+          ownerScope,
+          planDate.substring(0, 7),
+        );
+        _annualPlanOverview = await _offlineStore.loadAnnualOverview(
+          ownerScope,
+          DateTime.parse(planDate).year,
+        );
+        _bannerMessage = resolvedSuccessMessage;
+      },
+          fallbackMessage: _message(
+              '应用本地日模板失败。', 'Failed to apply the local day template.'));
+      return;
+    }
     final currentSession = _session;
     if (currentSession == null) {
       return;
     }
 
     await _runBusyAction(() async {
-      final appliedPlan = await _studyPlanApi.applyWeeklyTemplate(
+      final plans = await _studyPlanApi.applyDayTemplateBatch(
         currentSession,
         templateId: templateId,
-        planDate: planDate,
+        planDates: [planDate],
+        strategy: strategy,
       );
+      final appliedPlan = plans.isEmpty
+          ? await _studyPlanApi.getTodayPlan(
+              currentSession,
+              planDate: planDate,
+            )
+          : plans.first;
       if (appliedPlan.planDate == _todayPlan.planDate) {
         _todayPlan = appliedPlan;
       }
@@ -685,7 +955,7 @@ class SessionController extends ChangeNotifier {
       _bannerMessage = resolvedSuccessMessage;
     },
         fallbackMessage:
-            _message('应用周模板失败。', 'Failed to apply the weekly template.'));
+            _message('应用日模板失败。', 'Failed to apply the day template.'));
   }
 
   Future<void> applyWeeklyTemplateToDates(
@@ -872,6 +1142,9 @@ class SessionController extends ChangeNotifier {
 
   Future<void> _completeAuthentication(AuthResult result) async {
     await _localStorage.saveSession(result.session);
+    _session = result.session;
+    _profile = result.userInfo;
+    _settingOverview = SettingOverview.empty(accountSetting: result.userInfo);
     try {
       final settingsOverview = await _settingsApi.getOverview(result.session);
       final focusSession =
@@ -896,7 +1169,7 @@ class SessionController extends ChangeNotifier {
         anchorDate: _weekAnchorDate,
       );
       final weeklyTemplates =
-          await _studyPlanApi.getWeeklyTemplates(result.session);
+          await _studyPlanApi.getDayTemplates(result.session);
       _session = result.session;
       _applySettingOverview(settingsOverview);
       _focusSession = focusSession;
@@ -914,28 +1187,153 @@ class SessionController extends ChangeNotifier {
       _bannerMessage = null;
       _status = SessionStatus.authenticated;
       _syncFocusTicker();
+    } on ApiException catch (error) {
+      if (!_isAuthenticationFailure(error)) {
+        _status = SessionStatus.authenticated;
+        _bannerMessage = _message(
+          '登录成功，但部分联网数据暂时无法加载。',
+          'Signed in, but some online data is temporarily unavailable.',
+        );
+        _stopFocusTicker();
+      } else {
+        await _localStorage.clearSession();
+        _session = null;
+        _profile = null;
+        _focusSession = FocusSession.empty();
+        _checkInStatus = CheckInStatus.empty();
+        _statsOverview = StatsOverview.empty();
+        _teamOverview = TeamOverview.empty();
+        _teamChatOverview = TeamChatOverview.empty();
+        _friendOverview = FriendOverview.empty();
+        _memoOverview = MemoOverview.empty();
+        _notificationOverview = NotificationOverview.empty();
+        _todayPlan = TodayPlan.empty();
+        _weekPlanOverview = WeekPlanOverview.empty();
+        _settingOverview = SettingOverview.empty();
+        _blacklist = const [];
+        _currentDeviceSession = null;
+        _weeklyTemplates = const [];
+        _status = SessionStatus.unauthenticated;
+        _stopFocusTicker();
+        rethrow;
+      }
     } catch (_) {
-      await _localStorage.clearSession();
-      _session = null;
-      _profile = null;
-      _focusSession = FocusSession.empty();
-      _checkInStatus = CheckInStatus.empty();
-      _statsOverview = StatsOverview.empty();
-      _teamOverview = TeamOverview.empty();
-      _teamChatOverview = TeamChatOverview.empty();
-      _friendOverview = FriendOverview.empty();
-      _memoOverview = MemoOverview.empty();
-      _notificationOverview = NotificationOverview.empty();
-      _todayPlan = TodayPlan.empty();
-      _weekPlanOverview = WeekPlanOverview.empty();
-      _settingOverview = SettingOverview.empty();
-      _blacklist = const [];
-      _currentDeviceSession = null;
-      _weeklyTemplates = const [];
-      _status = SessionStatus.unauthenticated;
+      _status = SessionStatus.authenticated;
+      _bannerMessage = _message(
+        '登录成功，但本地界面初始化未完全完成。',
+        'Signed in, but the local interface did not fully initialize.',
+      );
       _stopFocusTicker();
-      rethrow;
     }
+
+    if (_status == SessionStatus.authenticated) {
+      try {
+        await _prepareOfflineImportPreview(result.session);
+      } on ApiException {
+        _bannerMessage = _message(
+          '离线数据仍保存在本机，联网恢复后可再次导入。',
+          'Offline data remains on this device and can be imported after reconnecting.',
+        );
+      }
+    }
+  }
+
+  Future<void> _prepareOfflineImportPreview(AppSession currentSession) async {
+    final localProfile = await _offlineStore.readLocalProfile();
+    if (localProfile == null) {
+      _offlineImportPreview = null;
+      return;
+    }
+    final manifest = await _offlineStore.buildImportManifest(
+      localProfile.ownerScope,
+      localProfile.localProfileId,
+    );
+    if (manifest.pendingOperationCount <= 0) {
+      _offlineImportPreview = null;
+      return;
+    }
+    _offlineImportPreview = await _offlineSyncApi.preview(
+      currentSession,
+      manifest,
+    );
+  }
+
+  Future<void> importOfflineData(OfflineConflictStrategy strategy) async {
+    final preview = _offlineImportPreview;
+    final currentSession = _session;
+    if (preview == null || currentSession == null || _isBusy) {
+      return;
+    }
+    await _runBusyAction(() async {
+      final localProfile = await _offlineStore.readLocalProfile();
+      if (localProfile == null ||
+          localProfile.localProfileId != preview.localProfileId) {
+        throw StateError('The local profile changed before import.');
+      }
+      final operations = await _offlineStore.loadPendingSyncOperations(
+        localProfile.ownerScope,
+      );
+      final result = await _offlineSyncApi.import(
+        currentSession,
+        localProfileId: localProfile.localProfileId,
+        targetUserNo: preview.targetUserNo,
+        conflictStrategy: strategy,
+        operations: operations,
+      );
+      await _offlineStore.applyImportResult(
+        localProfile.ownerScope,
+        localProfileId: localProfile.localProfileId,
+        serverUserId: currentSession.userId,
+        result: result,
+      );
+      _offlineImportPreview = null;
+      _bannerMessage = _message(
+        '离线导入完成：成功 ${result.acceptedCount} 项，冲突 ${result.conflictCount} 项，失败 ${result.rejectedCount} 项。本地原始数据已保留。',
+        'Offline import finished: ${result.acceptedCount} accepted, ${result.conflictCount} conflicts, ${result.rejectedCount} rejected. Original local data was retained.',
+      );
+      await _reloadOnlineDataAfterImport(currentSession);
+    },
+        fallbackMessage: _message('离线数据导入失败，本地数据未删除。',
+            'Offline import failed. Local data was not deleted.'));
+  }
+
+  void dismissOfflineImport() {
+    if (_offlineImportPreview == null) {
+      return;
+    }
+    _offlineImportPreview = null;
+    _bannerMessage = _message(
+      '已取消导入，离线数据继续保存在本机。',
+      'Import cancelled. Offline data remains on this device.',
+    );
+    notifyListeners();
+  }
+
+  Future<void> _reloadOnlineDataAfterImport(AppSession currentSession) async {
+    _todayPlan = await _studyPlanApi.getTodayPlan(currentSession);
+    _weekPlanOverview = await _studyPlanApi.getWeekPlanOverview(
+      currentSession,
+      anchorDate: _weekAnchorDate,
+    );
+    _monthPlanOverview = await _studyPlanApi.getMonthPlanOverview(
+      currentSession,
+      month: _monthPlanOverview.month,
+    );
+    _annualPlanOverview = await _studyPlanApi.getAnnualPlanOverview(
+      currentSession,
+      year: _annualPlanOverview.year,
+    );
+    _weeklyTemplates = await _studyPlanApi.getDayTemplates(currentSession);
+    _memoOverview = await _memoApi.getWidgetSummary(currentSession);
+    _checkInStatus = await _checkInApi.getTodayStatus(currentSession);
+    _statsOverview = await _statsApi.getOverview(
+      currentSession,
+      days: _statsRangeDays,
+    );
+  }
+
+  bool _isAuthenticationFailure(ApiException error) {
+    return error.statusCode == 401 || error.code == 2000;
   }
 
   Future<void> startFocusSession({
@@ -945,6 +1343,27 @@ class SessionController extends ChangeNotifier {
     int pomodoroStudyMinutes = 0,
     int pomodoroBreakMinutes = 0,
   }) async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        _focusSession = await _offlineStore.startFocusSession(
+          ownerScope,
+          endTime: endTime,
+          taskName: taskName,
+          bindPomodoro: bindPomodoro,
+          pomodoroStudyMinutes: pomodoroStudyMinutes,
+          pomodoroBreakMinutes: pomodoroBreakMinutes,
+        );
+        _bannerMessage = _message(
+          '离线专注已开始，记录保存在本机。',
+          'Offline focus started and saved on this device.',
+        );
+        _syncFocusTicker();
+      },
+          fallbackMessage:
+              _message('开始离线专注失败。', 'Failed to start offline focus.'));
+      return;
+    }
     final currentSession = _session;
     if (currentSession == null) {
       return;
@@ -976,6 +1395,23 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<void> finishFocusSession() async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        _focusSession = await _offlineStore.finishFocusSession(
+          ownerScope,
+          _focusSession.sessionId,
+        );
+        _bannerMessage = _message(
+          '离线专注已结束，记录保存在本机。',
+          'Offline focus finished and saved on this device.',
+        );
+        _stopFocusTicker();
+      },
+          fallbackMessage:
+              _message('结束离线专注失败。', 'Failed to finish offline focus.'));
+      return;
+    }
     final currentSession = _session;
     if (currentSession == null) {
       return;
@@ -1011,6 +1447,35 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<void> submitTodayCheckIn() async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      if (!_todayPlan.hasItems ||
+          _todayPlan.completedCount != _todayPlan.totalCount) {
+        _bannerMessage = _message(
+          '完成当天全部计划后才能记录离线签到。',
+          'Complete every task before recording an offline check-in.',
+        );
+        notifyListeners();
+        return;
+      }
+      await _runBusyAction(() async {
+        await _offlineStore.recordCheckInIntent(
+          ownerScope,
+          _todayPlan.planDate,
+        );
+        _checkInStatus = await _buildOfflineCheckInStatus(
+          ownerScope,
+          _todayPlan,
+        );
+        _bannerMessage = _message(
+          '离线签到已记录；登录后需由服务器校验。',
+          'Offline check-in recorded; the server will validate it after sign-in.',
+        );
+      },
+          fallbackMessage:
+              _message('记录离线签到失败。', 'Failed to record the offline check-in.'));
+      return;
+    }
     final currentSession = _session;
     if (currentSession == null) {
       return;
@@ -1106,10 +1571,11 @@ class SessionController extends ChangeNotifier {
     await _runBusyAction(() async {
       latest = await _settingsApi.getBlacklist(currentSession);
       _blacklist = latest;
-    }, fallbackMessage: _message(
-      '加载黑名单失败。',
-      'Failed to load the blacklist.',
-    ));
+    },
+        fallbackMessage: _message(
+          '加载黑名单失败。',
+          'Failed to load the blacklist.',
+        ));
     return latest;
   }
 
@@ -1126,10 +1592,11 @@ class SessionController extends ChangeNotifier {
         _blacklist = await _settingsApi.getBlacklist(currentSession);
         _bannerMessage = _message('已加入黑名单。', 'Added to the blacklist.');
       }
-    }, fallbackMessage: _message(
-      '加入黑名单失败。',
-      'Failed to add the blacklist entry.',
-    ));
+    },
+        fallbackMessage: _message(
+          '加入黑名单失败。',
+          'Failed to add the blacklist entry.',
+        ));
     return added;
   }
 
@@ -1151,10 +1618,11 @@ class SessionController extends ChangeNotifier {
             .toList(growable: false);
         _bannerMessage = _message('已解除拉黑。', 'Removed from the blacklist.');
       }
-    }, fallbackMessage: _message(
-      '解除拉黑失败。',
-      'Failed to remove the blacklist entry.',
-    ));
+    },
+        fallbackMessage: _message(
+          '解除拉黑失败。',
+          'Failed to remove the blacklist entry.',
+        ));
     return removed;
   }
 
@@ -1168,10 +1636,11 @@ class SessionController extends ChangeNotifier {
     await _runBusyAction(() async {
       latest = await _settingsApi.getCurrentDeviceSession(currentSession);
       _currentDeviceSession = latest;
-    }, fallbackMessage: _message(
-      '加载当前设备会话失败。',
-      'Failed to load the current device session.',
-    ));
+    },
+        fallbackMessage: _message(
+          '加载当前设备会话失败。',
+          'Failed to load the current device session.',
+        ));
     return latest;
   }
 
@@ -1220,9 +1689,7 @@ class SessionController extends ChangeNotifier {
       updatedProfile = await _authApi.getProfile(currentSession);
       _syncProfile(updatedProfile!);
       _bannerMessage = _message('头像已更新。', 'Avatar updated.');
-    },
-        fallbackMessage:
-            _message('头像上传失败。', 'Failed to upload the avatar.'));
+    }, fallbackMessage: _message('头像上传失败。', 'Failed to upload the avatar.'));
     return updatedProfile;
   }
 
@@ -1296,6 +1763,35 @@ class SessionController extends ChangeNotifier {
     required bool showMemo,
   }) async {
     final currentSession = _session;
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      WidgetSetting? updatedSetting;
+      await _runBusyAction(() async {
+        updatedSetting = await _offlineStore.saveLocalWidgetSetting(
+          ownerScope,
+          WidgetSetting(
+            autoStart: autoStart,
+            alwaysOnTop: alwaysOnTop,
+            showPlan: showPlan,
+            showTimer: showTimer,
+            showMemo: showMemo,
+          ),
+        );
+        _settingOverview = _settingOverview.copyWith(
+          widgetSetting: updatedSetting,
+        );
+        await _applyDesktopShellSettings(widgetSetting: updatedSetting!);
+        _bannerMessage = _message(
+          '桌面偏好已保存到本机。',
+          'Desktop preferences were saved on this device.',
+        );
+      },
+          fallbackMessage: _message(
+            '保存本机桌面偏好失败。',
+            'Failed to save desktop preferences on this device.',
+          ));
+      return updatedSetting;
+    }
     if (currentSession == null) {
       return null;
     }
@@ -1414,6 +1910,25 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<StatsOverview?> loadStatsOverview({int days = 7}) async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      StatsOverview? latestOverview;
+      await _runBusyAction(() async {
+        latestOverview = await _offlineStore.loadStatsOverview(
+          ownerScope,
+          days: days,
+        );
+        _statsRangeDays = days == 30 ? 30 : 7;
+        _statsOverview = latestOverview!;
+        _bannerMessage = _message(
+          '显示的是本机离线记录；签到结果仍需登录后由服务端验证。',
+          'Showing local offline records. Check-ins still require server validation after sign-in.',
+        );
+      },
+          fallbackMessage:
+              _message('加载本地统计失败。', 'Failed to load local statistics.'));
+      return latestOverview;
+    }
     final currentSession = _session;
     if (currentSession == null) {
       return null;
@@ -1677,6 +2192,12 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<MemoOverview?> loadMemoOverview() async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      _memoOverview = await _offlineStore.loadMemoOverview(ownerScope);
+      notifyListeners();
+      return _memoOverview;
+    }
     final currentSession = _session;
     if (currentSession == null) {
       return null;
@@ -1693,6 +2214,10 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<MemoCardModel?> loadMemoDetail(int memoId) async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      return _offlineStore.loadMemo(ownerScope, memoId);
+    }
     final currentSession = _session;
     if (currentSession == null) {
       return null;
@@ -1712,6 +2237,19 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<MemoOverview?> createMemo(MemoCardModel draft) async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        _memoOverview = await _offlineStore.saveMemo(ownerScope, draft);
+        _bannerMessage = _message(
+          '备忘录已保存在本机。',
+          'Memo saved on this device.',
+        );
+      },
+          fallbackMessage:
+              _message('本地备忘录保存失败。', 'Failed to save the local memo.'));
+      return _memoOverview;
+    }
     final currentSession = _session;
     if (currentSession == null) {
       return null;
@@ -1735,6 +2273,23 @@ class SessionController extends ChangeNotifier {
     int memoId,
     MemoCardModel draft,
   ) async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        _memoOverview = await _offlineStore.saveMemo(
+          ownerScope,
+          draft,
+          memoId: memoId,
+        );
+        _bannerMessage = _message(
+          '备忘录已在本机更新。',
+          'Memo updated on this device.',
+        );
+      },
+          fallbackMessage:
+              _message('本地备忘录更新失败。', 'Failed to update the local memo.'));
+      return _memoOverview;
+    }
     final currentSession = _session;
     if (currentSession == null) {
       return null;
@@ -1756,6 +2311,19 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<MemoOverview?> deleteMemo(int memoId) async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        _memoOverview = await _offlineStore.deleteMemo(ownerScope, memoId);
+        _bannerMessage = _message(
+          '本地备忘录已删除。',
+          'Local memo deleted.',
+        );
+      },
+          fallbackMessage:
+              _message('删除本地备忘录失败。', 'Failed to delete the local memo.'));
+      return _memoOverview;
+    }
     final currentSession = _session;
     if (currentSession == null) {
       return null;
@@ -2559,6 +3127,15 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<void> _reconcileFocusCompletion() async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      _focusSession = await _offlineStore.finishFocusSession(
+        ownerScope,
+        _focusSession.sessionId,
+      );
+      notifyListeners();
+      return;
+    }
     final currentSession = _session;
     if (currentSession == null || _isReconcilingFocusCompletion) {
       return;
@@ -2594,6 +3171,21 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<TodayPlan?> loadPlanByDate(String planDate) async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      try {
+        final plan = await _offlineStore.loadDailyPlan(ownerScope, planDate);
+        _bannerMessage = null;
+        return plan;
+      } catch (_) {
+        _bannerMessage = _message(
+          '加载本地计划失败。',
+          'Failed to load the local plan.',
+        );
+        notifyListeners();
+        return null;
+      }
+    }
     final currentSession = _session;
     if (currentSession == null) {
       return null;
@@ -2619,6 +3211,153 @@ class SessionController extends ChangeNotifier {
       _isBusy = false;
       notifyListeners();
     }
+  }
+
+  Future<void> loadMonthOverview(String month) async {
+    if (DateTime.tryParse('$month-01') == null) {
+      _bannerMessage = _message(
+        '月份格式无效。',
+        'Invalid month value.',
+      );
+      notifyListeners();
+      return;
+    }
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        _monthPlanOverview =
+            await _offlineStore.loadMonthOverview(ownerScope, month);
+        _bannerMessage = null;
+      },
+          fallbackMessage:
+              _message('加载本地月计划失败。', 'Failed to load the local month plan.'));
+      return;
+    }
+    final currentSession = _session;
+    if (currentSession == null) {
+      return;
+    }
+    await _runBusyAction(() async {
+      _monthPlanOverview = await _studyPlanApi.getMonthPlanOverview(
+        currentSession,
+        month: month,
+      );
+      _bannerMessage = null;
+    }, fallbackMessage: _message('加载月计划失败。', 'Failed to load the month plan.'));
+  }
+
+  Future<void> loadCurrentMonth() => loadMonthOverview(
+        MonthPlanOverview.formatMonth(DateTime.now()),
+      );
+
+  Future<void> loadPreviousMonth() => _shiftMonth(-1);
+
+  Future<void> loadNextMonth() => _shiftMonth(1);
+
+  Future<void> _shiftMonth(int offset) {
+    final current =
+        DateTime.tryParse('${_monthPlanOverview.month}-01') ?? DateTime.now();
+    return loadMonthOverview(
+      MonthPlanOverview.formatMonth(
+        DateTime(current.year, current.month + offset),
+      ),
+    );
+  }
+
+  Future<void> loadAnnualOverview(int year) async {
+    if (year < 1 || year > 9999) {
+      _bannerMessage = _message('年份无效。', 'Invalid year value.');
+      notifyListeners();
+      return;
+    }
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        _annualPlanOverview =
+            await _offlineStore.loadAnnualOverview(ownerScope, year);
+        _bannerMessage = null;
+      },
+          fallbackMessage:
+              _message('加载本地年计划失败。', 'Failed to load the local annual plan.'));
+      return;
+    }
+    final currentSession = _session;
+    if (currentSession == null) {
+      return;
+    }
+    await _runBusyAction(() async {
+      _annualPlanOverview = await _studyPlanApi.getAnnualPlanOverview(
+        currentSession,
+        year: year,
+      );
+      _bannerMessage = null;
+    },
+        fallbackMessage:
+            _message('加载年计划失败。', 'Failed to load the annual plan.'));
+  }
+
+  Future<void> loadCurrentYear() => loadAnnualOverview(DateTime.now().year);
+
+  Future<void> loadPreviousYear() =>
+      loadAnnualOverview(_annualPlanOverview.year - 1);
+
+  Future<void> loadNextYear() =>
+      loadAnnualOverview(_annualPlanOverview.year + 1);
+
+  Future<void> saveAnnualSegment(AnnualPlanSegment segment) async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        _annualPlanOverview =
+            await _offlineStore.saveAnnualSegment(ownerScope, segment);
+        _bannerMessage = _message(
+          '年度区间已保存在本机。',
+          'Annual segment saved on this device.',
+        );
+      },
+          fallbackMessage: _message(
+              '保存本地年度区间失败。', 'Failed to save the local annual segment.'));
+      return;
+    }
+    final currentSession = _session;
+    if (currentSession == null) {
+      return;
+    }
+    await _runBusyAction(() async {
+      _annualPlanOverview =
+          await _studyPlanApi.saveAnnualSegment(currentSession, segment);
+      _bannerMessage = _message('年度区间已保存。', 'Annual segment saved.');
+    },
+        fallbackMessage:
+            _message('保存年度区间失败。', 'Failed to save the annual segment.'));
+  }
+
+  Future<void> deleteAnnualSegment(AnnualPlanSegment segment) async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        _annualPlanOverview =
+            await _offlineStore.deleteAnnualSegment(ownerScope, segment);
+        _bannerMessage = _message(
+          '年度区间已从本机删除。',
+          'Annual segment deleted from this device.',
+        );
+      },
+          fallbackMessage: _message(
+              '删除本地年度区间失败。', 'Failed to delete the local annual segment.'));
+      return;
+    }
+    final currentSession = _session;
+    if (currentSession == null) {
+      return;
+    }
+    await _runBusyAction(() async {
+      _annualPlanOverview =
+          await _studyPlanApi.deleteAnnualSegment(currentSession, segment);
+      _bannerMessage = _message('年度区间已删除。', 'Annual segment deleted.');
+    },
+        fallbackMessage:
+            _message('删除年度区间失败。', 'Failed to delete the annual segment.'));
   }
 
   Future<void> loadCurrentWeek() async {
@@ -2671,6 +3410,32 @@ class SessionController extends ChangeNotifier {
     return '$year-$month-$day';
   }
 
+  Future<CheckInStatus> _buildOfflineCheckInStatus(
+    String ownerScope,
+    TodayPlan plan,
+  ) async {
+    final checkedIn = await _offlineStore.hasCheckInIntent(
+      ownerScope,
+      plan.planDate,
+    );
+    final completed = plan.hasItems && plan.completedCount == plan.totalCount;
+    return CheckInStatus(
+      checkInDate: plan.planDate,
+      checkedInToday: checkedIn,
+      canCheckInToday: !checkedIn && completed,
+      todayPlanCompleted: completed,
+      todayPlanCompletedCount: plan.completedCount,
+      todayPlanTotalCount: plan.totalCount,
+      consecutiveDays: checkedIn ? 1 : 0,
+      totalDays: checkedIn ? 1 : 0,
+      totalStudyDurationMinutes: 0,
+      todayFailedAttempts: 0,
+      latestFailureReason: '',
+      lastCheckInTime: checkedIn ? DateTime.now().toIso8601String() : '',
+      lastFailureTime: '',
+    );
+  }
+
   Future<void> _runBusyAction(
     Future<void> Function() action, {
     String fallbackMessage = '',
@@ -2696,6 +3461,7 @@ class SessionController extends ChangeNotifier {
   @override
   void dispose() {
     _stopFocusTicker();
+    unawaited(_offlineStore.close());
     super.dispose();
   }
 }

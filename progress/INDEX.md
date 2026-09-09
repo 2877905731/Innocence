@@ -237,3 +237,73 @@ checkpoints:
     status: complete
     path: progress/0032__20260811__P01__CORRECTION__memo-desktop-editor-surface.md
     title: "备忘录桌面大面板与响应式编辑器纠偏"
+  - sequence: "0033"
+    created_at: "2026-08-18T20:52:00+08:00"
+    phase: P02
+    type: DONE
+    status: complete
+    path: progress/0033__20260818__P02__DONE__checkin-summary-and-failure-records.md
+    title: "补齐签到汇总与失败记录后端接口"
+  - sequence: "0034"
+    created_at: "2026-08-19T00:00:00+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0034__20260819__P01__CORRECTION__auth-glass-surface-consistency.md
+    title: "认证页玻璃态背景与主页表面一致性纠偏"
+  - sequence: "0035"
+    created_at: "2026-08-19T00:30:00+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0035__20260819__P01__CORRECTION__glass-dialog-visibility.md
+    title: "玻璃态二级弹层可见度纠偏"
+  - sequence: "0036"
+    created_at: "2026-08-20T00:00:03+08:00"
+    phase: P02
+    type: DECISION
+    status: complete
+    path: progress/0036__20260820__P02__DECISION__daylight-timeline-and-glass-action-palette.md
+    title: "今日计划昼夜时间轴与玻璃态操作色纠偏"
+  - sequence: "0037"
+    created_at: "2026-08-20T01:12:13+08:00"
+    phase: P02
+    type: DECISION
+    status: complete
+    path: progress/0037__20260820__P02__DECISION__multicolor-plan-range-editing.md
+    title: "今日计划多色联动时间条与防重叠边界拖动"
+  - sequence: "0038"
+    created_at: "2026-08-20T01:49:13+08:00"
+    phase: P02
+    type: DECISION
+    status: complete
+    path: progress/0038__20260820__P02__DECISION__theme-window-stats-and-plan-horizons.md
+    title: "主题化窗口控件、统计固定工具栏与可操作计划层级"
+  - sequence: "0039"
+    created_at: "2026-08-20T01:57:53+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0039__20260820__P01__CORRECTION__inline-three-ring-canvas-presets.md
+    title: "顶部常驻三圆环 Canvas 尺寸预设"
+  - sequence: "0040"
+    created_at: "2026-09-08T21:35:39+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0040__20260908__P01__DECISION__offline-theme-copy-month-year-plans-window-resize.md
+    title: "离线模式、主题每日标语、年月计划与八方向缩放规划"
+  - sequence: "0041"
+    created_at: "2026-09-09T00:12:32+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0041__20260909__P01__DONE__offline-sync-theme-month-year-resize-implementation.md
+    title: "离线同步、每日主题标语、年月计划与原生缩放代码落地"
+  - sequence: "0042"
+    created_at: "2026-09-10T00:16:39+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0042__20260910__P01__DONE__offline-settings-auth-drag-release-candidate.md
+    title: "离线设置分级开放与认证页拖窗发布候选"

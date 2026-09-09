@@ -40,6 +40,7 @@ enum _SettingsSectionId {
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
     super.key,
+    required this.isOfflineMode,
     required this.onChangeLanguage,
     required this.visualTheme,
     required this.onChangeVisualTheme,
@@ -76,6 +77,7 @@ class SettingsPage extends StatefulWidget {
     required this.onDeleteAdminAnnouncement,
   });
 
+  final bool isOfflineMode;
   final Future<void> Function(
     AppLanguage language, {
     bool confirmStartup,
@@ -192,6 +194,16 @@ class _SettingsPageState extends State<SettingsPage> {
   _SettingsSectionId _selectedSection = _SettingsSectionId.account;
   bool _smallDetailOpen = false;
 
+  List<_SettingsSectionId> get _availableSections => widget.isOfflineMode
+      ? const [
+          _SettingsSectionId.language,
+          _SettingsSectionId.account,
+          _SettingsSectionId.desktop,
+          _SettingsSectionId.appearance,
+          _SettingsSectionId.quickActions,
+        ]
+      : _SettingsSectionId.values;
+
   String _text(String zh, String en) {
     return localizedText(context, zh, en);
   }
@@ -211,7 +223,11 @@ class _SettingsPageState extends State<SettingsPage> {
     super.initState();
     _overview = widget.initialOverview;
     _visualTheme = widget.visualTheme;
-    _loadPrivacyContext();
+    if (widget.isOfflineMode) {
+      _isPrivacyContextLoading = false;
+    } else {
+      _loadPrivacyContext();
+    }
   }
 
   @override
@@ -232,6 +248,9 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _loadPrivacyContext() async {
+    if (widget.isOfflineMode) {
+      return;
+    }
     try {
       final blacklist = await widget.onLoadBlacklist();
       if (mounted) {
@@ -851,7 +870,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildSectionNavigation(DesktopPresentationTier tier) {
-    const items = _SettingsSectionId.values;
+    final items = _availableSections;
     final visualTheme =
         Theme.of(context).extension<AppVisualThemeMarker>()?.visualTheme ??
             _visualTheme;
@@ -923,17 +942,20 @@ class _SettingsPageState extends State<SettingsPage> {
         mainAxisSize: MainAxisSize.min,
         children: items
             .map(
-              (section) => ListTile(
-                selected: tier == DesktopPresentationTier.large &&
-                    section == _selectedSection,
-                leading: Icon(_sectionIcon(section)),
-                title: Text(_sectionLabel(section)),
-                trailing: tier == DesktopPresentationTier.small
-                    ? const Icon(Icons.chevron_right_rounded)
-                    : null,
-                onTap: () => _selectSection(
-                  section,
-                  openSmallDetail: tier == DesktopPresentationTier.small,
+              (section) => Material(
+                type: MaterialType.transparency,
+                child: ListTile(
+                  selected: tier == DesktopPresentationTier.large &&
+                      section == _selectedSection,
+                  leading: Icon(_sectionIcon(section)),
+                  title: Text(_sectionLabel(section)),
+                  trailing: tier == DesktopPresentationTier.small
+                      ? const Icon(Icons.chevron_right_rounded)
+                      : null,
+                  onTap: () => _selectSection(
+                    section,
+                    openSmallDetail: tier == DesktopPresentationTier.small,
+                  ),
                 ),
               ),
             )
@@ -1103,26 +1125,33 @@ class _SettingsPageState extends State<SettingsPage> {
             section: _SettingsSectionId.account,
             child: _SettingSection(
               title: _text('账号', 'Account'),
-              subtitle: _text(
-                '这里是手机和电脑共用的熟人圈账号资料。',
-                'This is the trusted-circle account profile shared on phone and desktop.',
-              ),
-              trailing: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: _isLoading ? null : _uploadAvatar,
-                    icon: const Icon(Icons.add_a_photo_outlined),
-                    label: Text(_text('更换头像', 'Change avatar')),
-                  ),
-                  OutlinedButton.icon(
-                    onPressed: _isLoading ? null : _editProfile,
-                    icon: const Icon(Icons.edit_rounded),
-                    label: Text(_text('编辑资料', 'Edit profile')),
-                  ),
-                ],
-              ),
+              subtitle: widget.isOfflineMode
+                  ? _text(
+                      '这是当前设备的离线资料；登录后才能编辑云端账号和上传头像。',
+                      'This is the local offline profile. Sign in to edit the cloud account or upload an avatar.',
+                    )
+                  : _text(
+                      '这里是手机和电脑共用的熟人圈账号资料。',
+                      'This is the trusted-circle account profile shared on phone and desktop.',
+                    ),
+              trailing: widget.isOfflineMode
+                  ? null
+                  : Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: _isLoading ? null : _uploadAvatar,
+                          icon: const Icon(Icons.add_a_photo_outlined),
+                          label: Text(_text('更换头像', 'Change avatar')),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: _isLoading ? null : _editProfile,
+                          icon: const Icon(Icons.edit_rounded),
+                          label: Text(_text('编辑资料', 'Edit profile')),
+                        ),
+                      ],
+                    ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1597,15 +1626,20 @@ class _SettingsPageState extends State<SettingsPage> {
                 spacing: 12,
                 runSpacing: 12,
                 children: [
-                  OutlinedButton.icon(
-                    onPressed: _isLoading ? null : _clearCache,
-                    icon: const Icon(Icons.cleaning_services_rounded),
-                    label: Text(_text('清理缓存', 'Clear cache')),
-                  ),
+                  if (!widget.isOfflineMode)
+                    OutlinedButton.icon(
+                      onPressed: _isLoading ? null : _clearCache,
+                      icon: const Icon(Icons.cleaning_services_rounded),
+                      label: Text(_text('清理缓存', 'Clear cache')),
+                    ),
                   OutlinedButton.icon(
                     onPressed: _isLoading ? null : _logout,
                     icon: const Icon(Icons.logout_rounded),
-                    label: Text(_text('退出登录', 'Sign out')),
+                    label: Text(
+                      widget.isOfflineMode
+                          ? _text('退出离线模式', 'Leave offline mode')
+                          : _text('退出登录', 'Sign out'),
+                    ),
                   ),
                   OutlinedButton.icon(
                     onPressed: _isLoading ? null : _closeApp,
@@ -1639,32 +1673,81 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
         ];
-        final panes = sectionChildren.whereType<_SettingsSurface>().toList(
-              growable: false,
-            );
+        final panes = sectionChildren
+            .whereType<_SettingsSurface>()
+            .where((pane) => _availableSections.contains(pane.section))
+            .toList(growable: false);
+        final pageChildren = <Widget>[
+          if (widget.isOfflineMode) ...[
+            _OfflineSettingsNotice(
+              message: _text(
+                '离线模式仅开放语言、当前设备资料、桌面体验、外观和本机操作；隐私、通知、设备会话、后台管理及账号注销需要登录联网。',
+                'Offline mode keeps language, local profile, desktop experience, appearance, and device actions available. Privacy, notifications, sessions, admin tools, and account cancellation require sign-in and a network connection.',
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          ..._composeAdaptiveSections(spec.tier!, panes),
+        ];
         return SecondaryPageScaffold(
           visualTheme: _visualTheme,
           backLabel: _text('返回', 'Back'),
           title: _text('系统设置', 'System settings'),
-          description: _text(
-            '统一管理账户、隐私、通知、Canvas、Focus Orb 与外观。',
-            'Manage account, privacy, notifications, Canvas, Focus Orb, and appearance.',
-          ),
-          headerActions: [
-            OutlinedButton.icon(
-              onPressed: _isLoading ? null : _refresh,
-              icon: _isLoading
-                  ? const SizedBox.square(
-                      dimension: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.refresh_rounded),
-              label: Text(_text('刷新', 'Refresh')),
-            ),
-          ],
-          children: _composeAdaptiveSections(spec.tier!, panes),
+          description: widget.isOfflineMode
+              ? _text(
+                  '管理当前设备可独立生效的设置。',
+                  'Manage settings that can take effect on this device.',
+                )
+              : _text(
+                  '统一管理账户、隐私、通知、Canvas、Focus Orb 与外观。',
+                  'Manage account, privacy, notifications, Canvas, Focus Orb, and appearance.',
+                ),
+          headerActions: widget.isOfflineMode
+              ? const []
+              : [
+                  OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _refresh,
+                    icon: _isLoading
+                        ? const SizedBox.square(
+                            dimension: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.refresh_rounded),
+                    label: Text(_text('刷新', 'Refresh')),
+                  ),
+                ],
+          children: pageChildren,
         );
       },
+    );
+  }
+}
+
+class _OfflineSettingsNotice extends StatelessWidget {
+  const _OfflineSettingsNotice({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      key: const ValueKey('offline-settings-notice'),
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer.withValues(alpha: 0.62),
+        border: Border.all(color: scheme.primary.withValues(alpha: 0.4)),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.offline_bolt_rounded, color: scheme.primary),
+          const SizedBox(width: 12),
+          Expanded(child: Text(message)),
+        ],
+      ),
     );
   }
 }
@@ -1698,6 +1781,10 @@ class _SettingsSurfaceState extends State<_SettingsSurface> {
       AppVisualTheme.glass => 22.0,
     };
     final glass = visualTheme == AppVisualTheme.glass;
+    final materializedChild = Material(
+      type: MaterialType.transparency,
+      child: widget.child,
+    );
     return KeyedSubtree(
       key: ValueKey('settings.${widget.section.name}'),
       child: MouseRegion(
@@ -1743,11 +1830,11 @@ class _SettingsSurfaceState extends State<_SettingsSurface> {
                     ),
                     child: Padding(
                       padding: widget.padding,
-                      child: widget.child,
+                      child: materializedChild,
                     ),
                   ),
                 )
-              : widget.child,
+              : materializedChild,
         ),
       ),
     );

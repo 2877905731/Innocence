@@ -4,6 +4,7 @@ import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/core/layout/desktop_presentation.dart';
 import 'package:innocence_flutter/core/widgets/desktop_close_button.dart';
 import 'package:innocence_flutter/core/widgets/desktop_drag_region.dart';
+import 'package:innocence_flutter/core/widgets/desktop_resize_frame.dart';
 import 'package:innocence_flutter/core/widgets/wabi_sabi_paper.dart';
 
 @immutable
@@ -123,7 +124,7 @@ class AdaptiveCanvasShell extends StatelessWidget {
         };
         return Scaffold(
           backgroundColor: palette.background,
-          body: themedContent,
+          body: DesktopResizeFrame(child: themedContent),
         );
       },
     );
@@ -335,7 +336,10 @@ class _SmallCanvas extends StatelessWidget {
                             .toList(),
                         icon: const Icon(Icons.more_horiz_rounded),
                       ),
-                      const DesktopCloseButton(compact: true),
+                      const DesktopWindowControls(
+                        compact: true,
+                        showMinimize: false,
+                      ),
                     ],
                   ),
                 ),
@@ -465,7 +469,7 @@ class _CommandBar extends StatelessWidget {
                     compact: false,
                   ),
                   const SizedBox(width: 10),
-                  const DesktopCloseButton(compact: true),
+                  const DesktopWindowControls(compact: true),
                 ],
               ),
             ),

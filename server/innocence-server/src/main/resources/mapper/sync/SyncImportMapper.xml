@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innocence.server.modules.sync.mapper.SyncImportMapper">
+
+    <resultMap id="SyncImportOperationResultMap"
+               type="com.innocence.server.modules.sync.domain.SyncImportOperationRecord">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="localProfileId" column="local_profile_id"/>
+        <result property="operationId" column="operation_id"/>
+        <result property="aggregateType" column="aggregate_type"/>
+        <result property="aggregateId" column="aggregate_id"/>
+        <result property="operationType" column="operation_type"/>
+        <result property="status" column="status"/>
+        <result property="message" column="message"/>
+        <result property="serverAggregateId" column="server_aggregate_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="findByUserIdAndOperationId" resultMap="SyncImportOperationResultMap">
+        select *
+        from sync_import_operation
+        where user_id = #{userId}
+          and operation_id = #{operationId}
+        limit 1
+    </select>
+
+    <select id="findServerAggregateId" resultType="java.lang.String">
+        select server_aggregate_id
+        from sync_import_operation
+        where user_id = #{userId}
+          and local_profile_id = #{localProfileId}
+          and aggregate_type = #{aggregateType}
+          and aggregate_id = #{aggregateId}
+          and status = 'accepted'
+          and server_aggregate_id is not null
+          and server_aggregate_id != ''
+        order by id desc
+        limit 1
+    </select>
+
+    <insert id="upsertOperation" useGeneratedKeys="true" keyProperty="id">
+        insert into sync_import_operation (
+            user_id, local_profile_id, operation_id, aggregate_type,
+            aggregate_id, operation_type, status, message, server_aggregate_id
+        ) values (
+            #{userId}, #{localProfileId}, #{operationId}, #{aggregateType},
+            #{aggregateId}, #{operationType}, #{status}, #{message}, #{serverAggregateId}
+        )
+        on duplicate key update
+            local_profile_id = values(local_profile_id),
+            aggregate_type = values(aggregate_type),
+            aggregate_id = values(aggregate_id),
+            operation_type = values(operation_type),
+            status = values(status),
+            message = values(message),
+            server_aggregate_id = values(server_aggregate_id)
+    </insert>
+
+</mapper>

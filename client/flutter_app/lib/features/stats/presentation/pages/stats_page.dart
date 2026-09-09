@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:innocence_flutter/core/theme/app_colors.dart';
-import 'package:innocence_flutter/core/theme/surface_palette.dart';
 import 'package:innocence_flutter/core/utils/localized_text.dart';
 import 'package:innocence_flutter/core/widgets/glass_panel.dart';
 import 'package:innocence_flutter/core/widgets/secondary_page_scaffold.dart';
@@ -222,6 +221,7 @@ class _StatsPageState extends State<StatsPage> {
   @override
   Widget build(BuildContext context) {
     return SecondaryPageScaffold(
+      pinHeader: true,
       backLabel: _text(context, '返回', 'Back'),
       title: _text(context, '统计中心', 'Statistics center'),
       description: _text(
@@ -892,9 +892,9 @@ class _SummaryTile extends StatelessWidget {
       width: 220,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: SurfacePalette.softSurface,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: SurfacePalette.borderSoft),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -904,7 +904,7 @@ class _SummaryTile extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: SurfacePalette.ink,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
           ),
           const SizedBox(height: 8),
@@ -929,9 +929,9 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: SurfacePalette.softSurface,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: SurfacePalette.borderSoft),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -941,7 +941,7 @@ class _InfoChip extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: SurfacePalette.ink,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
           ),
         ],
@@ -967,9 +967,9 @@ class _DayBreakdownTile extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: SurfacePalette.softSurface,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: SurfacePalette.borderSoft),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -994,7 +994,7 @@ class _DayBreakdownTile extends StatelessWidget {
               Text(
                 _headlineMetric(context, point, metric),
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: SurfacePalette.ink,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
               ),
             ],
@@ -1053,12 +1053,12 @@ class _FailureRecordTile extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0x26FFAA82),
-            SurfacePalette.surface,
+            const Color(0x26FFAA82),
+            Theme.of(context).colorScheme.surface,
           ],
         ),
         borderRadius: BorderRadius.circular(20),
@@ -1151,7 +1151,7 @@ class _TeammateStatTile extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: SurfacePalette.softSurface,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color:
@@ -1288,9 +1288,9 @@ class _EmptyStateCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: SurfacePalette.softSurface,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: SurfacePalette.borderSoft),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1318,14 +1318,14 @@ class _MiniPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: SurfacePalette.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: SurfacePalette.border),
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
       child: Text(
         '$label: $value',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: SurfacePalette.ink,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
       ),
     );
@@ -1423,15 +1423,15 @@ class _TrendGraph extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            SurfacePalette.softSurface,
-            SurfacePalette.surface,
+            Theme.of(context).colorScheme.surfaceContainerLow,
+            Theme.of(context).colorScheme.surface,
           ],
         ),
-        border: Border.all(color: SurfacePalette.borderSoft),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         children: [
@@ -1462,7 +1462,7 @@ class _TrendGraph extends StatelessWidget {
               Text(
                 _trendMetricHint(context, metric),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: SurfacePalette.subtle,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
               ),
             ],
@@ -1482,7 +1482,9 @@ class _TrendGraph extends StatelessWidget {
                       Text(
                         _trendAxisLabelLocalized(context, safeMaxValue, metric),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: SurfacePalette.subtle,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                       ),
                       Text(
@@ -1492,13 +1494,17 @@ class _TrendGraph extends StatelessWidget {
                           metric,
                         ),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: SurfacePalette.subtle,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                       ),
                       Text(
                         _trendAxisLabelLocalized(context, 0, metric),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: SurfacePalette.subtle,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                       ),
                     ],
@@ -1514,7 +1520,8 @@ class _TrendGraph extends StatelessWidget {
                           children: List.generate(4, (_) {
                             return Container(
                               height: 1,
-                              color: SurfacePalette.borderSoft,
+                              color:
+                                  Theme.of(context).colorScheme.outlineVariant,
                             );
                           }),
                         ),
@@ -1547,8 +1554,12 @@ class _TrendGraph extends StatelessWidget {
                                             .bodySmall
                                             ?.copyWith(
                                               color: isLatest
-                                                  ? SurfacePalette.ink
-                                                  : SurfacePalette.subtle,
+                                                  ? Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface
+                                                  : Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
                                             ),
                                       ),
                                       const SizedBox(height: 8),
@@ -1634,8 +1645,12 @@ class _TrendGraph extends StatelessWidget {
                                             .bodySmall
                                             ?.copyWith(
                                               color: isLatest
-                                                  ? SurfacePalette.ink
-                                                  : SurfacePalette.subtle,
+                                                  ? Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface
+                                                  : Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
                                             ),
                                       ),
                                     ],

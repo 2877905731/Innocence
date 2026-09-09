@@ -419,6 +419,25 @@ CREATE TABLE IF NOT EXISTS weekly_plan_template_item
     KEY idx_week_template_item_user_id (user_id)
 );
 
+CREATE TABLE IF NOT EXISTS annual_plan_segment
+(
+    id               BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id          BIGINT       NOT NULL,
+    client_entity_id VARCHAR(64)  NOT NULL,
+    plan_year        INT          NOT NULL,
+    title            VARCHAR(96)  NOT NULL,
+    start_month      TINYINT      NOT NULL,
+    end_month        TINYINT      NOT NULL,
+    color_key        VARCHAR(24)  NOT NULL DEFAULT 'accent',
+    sort_order       INT          NOT NULL DEFAULT 0,
+    note             VARCHAR(500) NOT NULL DEFAULT '',
+    revision         INT          NOT NULL DEFAULT 1,
+    create_time      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_annual_segment_client (user_id, client_entity_id),
+    KEY idx_annual_segment_user_year (user_id, plan_year, sort_order)
+);
+
 CREATE TABLE IF NOT EXISTS study_timer_record
 (
     id                       BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -521,6 +540,24 @@ CREATE TABLE IF NOT EXISTS check_in_summary
     last_success_date DATE     NULL,
     create_time       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sync_import_operation
+(
+    id                  BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id             BIGINT       NOT NULL,
+    local_profile_id    VARCHAR(64)  NOT NULL,
+    operation_id        VARCHAR(64)  NOT NULL,
+    aggregate_type      VARCHAR(32)  NOT NULL,
+    aggregate_id        VARCHAR(128) NOT NULL,
+    operation_type      VARCHAR(24)  NOT NULL,
+    status              VARCHAR(16)  NOT NULL,
+    message             VARCHAR(255) NOT NULL DEFAULT '',
+    server_aggregate_id VARCHAR(128) NULL,
+    create_time         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_sync_import_user_operation (user_id, operation_id),
+    KEY idx_sync_import_binding (user_id, local_profile_id, aggregate_type, aggregate_id)
 );
 
 CREATE TABLE IF NOT EXISTS check_in_fail_record

@@ -83,4 +83,25 @@ void main() {
     );
     expect(theme.scaffoldBackgroundColor, const Color(0xFFECE3D3));
   });
+
+  test('glass dialogs use a visible modal surface and edge', () {
+    final theme = AppVisualTokens.of(
+      AppVisualTheme.glass,
+    ).toThemeData(AppVisualTheme.glass);
+    final shape = theme.dialogTheme.shape! as RoundedRectangleBorder;
+
+    expect(theme.dialogTheme.backgroundColor, const Color(0xE6132146));
+    expect(theme.dialogTheme.surfaceTintColor, Colors.transparent);
+    expect(theme.dialogTheme.elevation, 28);
+    expect(shape.borderRadius, BorderRadius.circular(22));
+    expect(shape.side.color, const Color(0x78FFFFFF));
+    expect(shape.side.width, 1.2);
+  });
+
+  test('glass primary actions stay in the blue-violet palette', () {
+    final tokens = AppVisualTokens.of(AppVisualTheme.glass);
+
+    expect(tokens.accent, const Color(0xFFA7B5FF));
+    expect(tokens.onAccent, const Color(0xFF11183A));
+  });
 }

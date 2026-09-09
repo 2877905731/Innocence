@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
+import 'package:innocence_flutter/core/local/offline_sync_models.dart';
 import 'package:innocence_flutter/features/auth/presentation/pages/auth_page.dart';
 import 'package:innocence_flutter/features/auth/presentation/widgets/auth_experience.dart';
 import 'package:innocence_flutter/features/home/presentation/pages/home_page.dart';
@@ -96,139 +97,317 @@ class _InnocenceAppState extends State<InnocenceApp> {
           onThemeChanged: widget.visualThemeController.updateTheme,
         );
       case SessionStatus.authenticated:
+      case SessionStatus.offline:
         return _DesktopWindowModeScope(
           mode: 'canvas',
-          child: HomePage(
-            appLanguage: language,
-            onChangeLanguage: widget.languageController.updateLanguage,
-            visualTheme: visualTheme,
-            onChangeVisualTheme: widget.visualThemeController.updateTheme,
-            profile: widget.sessionController.profile!,
-            focusSession: widget.sessionController.focusSession,
-            checkInStatus: widget.sessionController.checkInStatus,
-            statsOverview: widget.sessionController.statsOverview,
-            teamOverview: widget.sessionController.teamOverview,
-            teamChatOverview: widget.sessionController.teamChatOverview,
-            friendOverview: widget.sessionController.friendOverview,
-            memoOverview: widget.sessionController.memoOverview,
-            notificationOverview: widget.sessionController.notificationOverview,
-            settingOverview: widget.sessionController.settingOverview,
-            todayPlan: widget.sessionController.todayPlan,
-            isBusy: widget.sessionController.isBusy,
-            bannerMessage: widget.sessionController.bannerMessage,
-            onClearBanner: widget.sessionController.clearBanner,
-            onRefresh: widget.sessionController.refreshProfile,
-            onLogout: widget.sessionController.logout,
-            onStartFocusSession: widget.sessionController.startFocusSession,
-            onFinishFocusSession: widget.sessionController.finishFocusSession,
-            onSubmitCheckIn: widget.sessionController.submitTodayCheckIn,
-            onLoadStatsOverview: widget.sessionController.loadStatsOverview,
-            onDeleteCheckInFailureRecord:
-                widget.sessionController.deleteCheckInFailureRecord,
-            onLoadNotifications: widget.sessionController.loadNotifications,
-            onMarkNotificationRead:
-                widget.sessionController.markNotificationRead,
-            onMarkAllNotificationsRead:
-                widget.sessionController.markAllNotificationsRead,
-            onRespondNotificationFriendRequest:
-                widget.sessionController.respondNotificationFriendRequest,
-            onRespondNotificationTeamInvitation:
-                widget.sessionController.respondNotificationTeamInvitation,
-            onRemindTeammate: widget.sessionController.remindTeammate,
-            onLoadFriendOverview: widget.sessionController.loadFriendOverview,
-            onSearchFriends: widget.sessionController.searchFriends,
-            onSendFriendRequest: widget.sessionController.sendFriendRequest,
-            onRespondFriendRequest:
-                widget.sessionController.respondToFriendRequest,
-            onCreateFriendGroup: widget.sessionController.createFriendGroup,
-            onMoveFriendToGroup: widget.sessionController.moveFriendToGroup,
-            onDeleteFriend: widget.sessionController.deleteFriend,
-            onLoadMemoOverview: widget.sessionController.loadMemoOverview,
-            onLoadMemoDetail: widget.sessionController.loadMemoDetail,
-            onCreateMemo: widget.sessionController.createMemo,
-            onUpdateMemo: widget.sessionController.updateMemo,
-            onDeleteMemo: widget.sessionController.deleteMemo,
-            onLoadSettingsOverview:
-                widget.sessionController.loadSettingsOverview,
-            onLoadBlacklist: widget.sessionController.loadBlacklist,
-            onAddBlacklist: widget.sessionController.addBlacklist,
-            onRemoveBlacklist: widget.sessionController.removeBlacklist,
-            onLoadCurrentDeviceSession:
-                widget.sessionController.loadCurrentDeviceSession,
-            onUpdateMySettingProfile:
-                widget.sessionController.updateMySettingProfile,
-            onUploadMyAvatar: widget.sessionController.uploadMyAvatar,
-            onUpdateMyPrivacySetting:
-                widget.sessionController.updateMyPrivacySetting,
-            onUpdateNotificationSetting:
-                widget.sessionController.updateNotificationSetting,
-            onUpdateWidgetSetting: widget.sessionController.updateWidgetSetting,
-            onUpdateAppearanceSetting:
-                widget.sessionController.updateAppearanceSetting,
-            onClearSettingsCache: widget.sessionController.clearSettingsCache,
-            onSendCancelAccountCode:
-                widget.sessionController.sendCancelAccountCode,
-            onCancelAccount: widget.sessionController.cancelAccount,
-            onLoadAdminReports: widget.sessionController.loadAdminReports,
-            onLoadAdminReportDetail:
-                widget.sessionController.loadAdminReportDetail,
-            onReviewAdminReport: widget.sessionController.reviewAdminReport,
-            onSearchAdminUsers: widget.sessionController.searchAdminUsers,
-            onLoadAdminUserDetail: widget.sessionController.loadAdminUserDetail,
-            onLoadAdminUserReports:
-                widget.sessionController.loadAdminUserReports,
-            onLoadAdminUserPunishments:
-                widget.sessionController.loadAdminUserPunishments,
-            onLiftAdminUserPunishment:
-                widget.sessionController.liftAdminUserPunishment,
-            onLoadAdminTeams: widget.sessionController.loadAdminTeams,
-            onLoadAdminTeamDetail: widget.sessionController.loadAdminTeamDetail,
-            onRemoveAdminTeamMember:
-                widget.sessionController.removeAdminTeamMember,
-            onDissolveAdminTeam: widget.sessionController.dissolveAdminTeam,
-            onLoadAdminAnnouncements:
-                widget.sessionController.loadAdminAnnouncements,
-            onCreateAdminAnnouncement:
-                widget.sessionController.createAdminAnnouncement,
-            onDeleteAdminAnnouncement:
-                widget.sessionController.deleteAdminAnnouncement,
-            onCreateTeam: widget.sessionController.createTeam,
-            onJoinTeam: widget.sessionController.joinTeam,
-            onInviteTeamMember: widget.sessionController.inviteTeamMember,
-            onRemoveTeamMember: widget.sessionController.removeTeamMember,
-            onDissolveTeam: widget.sessionController.dissolveTeam,
-            onLoadTeamChatMessages:
-                widget.sessionController.loadTeamChatMessages,
-            onSendTeamChatMessage: widget.sessionController.sendTeamChatMessage,
-            onMarkTeamChatRead: widget.sessionController.markTeamChatRead,
-            onReportTeamChatMessage:
-                widget.sessionController.reportTeamChatMessage,
-            onLoadTeamWorkspaceSnapshot:
-                widget.sessionController.loadTeamWorkspaceSnapshot,
-            onSaveTodayPlan: widget.sessionController.saveTodayPlan,
-            onLoadPlanByDate: widget.sessionController.loadPlanByDate,
-            weekPlanOverview: widget.sessionController.weekPlanOverview,
-            weeklyTemplates: widget.sessionController.weeklyTemplates,
-            onPreviousWeek: widget.sessionController.loadPreviousWeek,
-            onCurrentWeek: widget.sessionController.loadCurrentWeek,
-            onNextWeek: widget.sessionController.loadNextWeek,
-            onSavePlanAsWeeklyTemplate:
-                widget.sessionController.savePlanAsWeeklyTemplate,
-            onApplyWeeklyTemplate: widget.sessionController.applyWeeklyTemplate,
-            onApplyWeeklyTemplateToDate:
-                widget.sessionController.applyWeeklyTemplateToDate,
-            onDeleteWeeklyTemplate:
-                widget.sessionController.deleteWeeklyTemplate,
-            onCopyPlanToDate: widget.sessionController.copyPlanToDate,
-            onCopyPlanToDates: widget.sessionController.copyPlanToDates,
-            onClearPlanDate: widget.sessionController.clearPlanDate,
-            onApplyWeeklyTemplateToDates:
-                widget.sessionController.applyWeeklyTemplateToDates,
-            onQuickArrangeWeek: widget.sessionController.quickArrangeWeek,
-            onToggleTodayPlanItem: widget.sessionController.toggleTodayPlanItem,
+          child: Stack(
+            children: [
+              HomePage(
+                appLanguage: language,
+                onChangeLanguage: widget.languageController.updateLanguage,
+                visualTheme: visualTheme,
+                onChangeVisualTheme: widget.visualThemeController.updateTheme,
+                profile: widget.sessionController.profile!,
+                focusSession: widget.sessionController.focusSession,
+                checkInStatus: widget.sessionController.checkInStatus,
+                statsOverview: widget.sessionController.statsOverview,
+                teamOverview: widget.sessionController.teamOverview,
+                teamChatOverview: widget.sessionController.teamChatOverview,
+                friendOverview: widget.sessionController.friendOverview,
+                memoOverview: widget.sessionController.memoOverview,
+                notificationOverview:
+                    widget.sessionController.notificationOverview,
+                settingOverview: widget.sessionController.settingOverview,
+                todayPlan: widget.sessionController.todayPlan,
+                isOfflineMode: widget.sessionController.isOffline,
+                isBusy: widget.sessionController.isBusy,
+                bannerMessage: widget.sessionController.bannerMessage,
+                onClearBanner: widget.sessionController.clearBanner,
+                onRequireOnline: widget.sessionController.requireOnlineFeature,
+                onRefresh: widget.sessionController.refreshProfile,
+                onLogout: widget.sessionController.logout,
+                onStartFocusSession: widget.sessionController.startFocusSession,
+                onFinishFocusSession:
+                    widget.sessionController.finishFocusSession,
+                onSubmitCheckIn: widget.sessionController.submitTodayCheckIn,
+                onLoadStatsOverview: widget.sessionController.loadStatsOverview,
+                onDeleteCheckInFailureRecord:
+                    widget.sessionController.deleteCheckInFailureRecord,
+                onLoadNotifications: widget.sessionController.loadNotifications,
+                onMarkNotificationRead:
+                    widget.sessionController.markNotificationRead,
+                onMarkAllNotificationsRead:
+                    widget.sessionController.markAllNotificationsRead,
+                onRespondNotificationFriendRequest:
+                    widget.sessionController.respondNotificationFriendRequest,
+                onRespondNotificationTeamInvitation:
+                    widget.sessionController.respondNotificationTeamInvitation,
+                onRemindTeammate: widget.sessionController.remindTeammate,
+                onLoadFriendOverview:
+                    widget.sessionController.loadFriendOverview,
+                onSearchFriends: widget.sessionController.searchFriends,
+                onSendFriendRequest: widget.sessionController.sendFriendRequest,
+                onRespondFriendRequest:
+                    widget.sessionController.respondToFriendRequest,
+                onCreateFriendGroup: widget.sessionController.createFriendGroup,
+                onMoveFriendToGroup: widget.sessionController.moveFriendToGroup,
+                onDeleteFriend: widget.sessionController.deleteFriend,
+                onLoadMemoOverview: widget.sessionController.loadMemoOverview,
+                onLoadMemoDetail: widget.sessionController.loadMemoDetail,
+                onCreateMemo: widget.sessionController.createMemo,
+                onUpdateMemo: widget.sessionController.updateMemo,
+                onDeleteMemo: widget.sessionController.deleteMemo,
+                onLoadSettingsOverview:
+                    widget.sessionController.loadSettingsOverview,
+                onLoadBlacklist: widget.sessionController.loadBlacklist,
+                onAddBlacklist: widget.sessionController.addBlacklist,
+                onRemoveBlacklist: widget.sessionController.removeBlacklist,
+                onLoadCurrentDeviceSession:
+                    widget.sessionController.loadCurrentDeviceSession,
+                onUpdateMySettingProfile:
+                    widget.sessionController.updateMySettingProfile,
+                onUploadMyAvatar: widget.sessionController.uploadMyAvatar,
+                onUpdateMyPrivacySetting:
+                    widget.sessionController.updateMyPrivacySetting,
+                onUpdateNotificationSetting:
+                    widget.sessionController.updateNotificationSetting,
+                onUpdateWidgetSetting:
+                    widget.sessionController.updateWidgetSetting,
+                onUpdateAppearanceSetting:
+                    widget.sessionController.updateAppearanceSetting,
+                onClearSettingsCache:
+                    widget.sessionController.clearSettingsCache,
+                onSendCancelAccountCode:
+                    widget.sessionController.sendCancelAccountCode,
+                onCancelAccount: widget.sessionController.cancelAccount,
+                onLoadAdminReports: widget.sessionController.loadAdminReports,
+                onLoadAdminReportDetail:
+                    widget.sessionController.loadAdminReportDetail,
+                onReviewAdminReport: widget.sessionController.reviewAdminReport,
+                onSearchAdminUsers: widget.sessionController.searchAdminUsers,
+                onLoadAdminUserDetail:
+                    widget.sessionController.loadAdminUserDetail,
+                onLoadAdminUserReports:
+                    widget.sessionController.loadAdminUserReports,
+                onLoadAdminUserPunishments:
+                    widget.sessionController.loadAdminUserPunishments,
+                onLiftAdminUserPunishment:
+                    widget.sessionController.liftAdminUserPunishment,
+                onLoadAdminTeams: widget.sessionController.loadAdminTeams,
+                onLoadAdminTeamDetail:
+                    widget.sessionController.loadAdminTeamDetail,
+                onRemoveAdminTeamMember:
+                    widget.sessionController.removeAdminTeamMember,
+                onDissolveAdminTeam: widget.sessionController.dissolveAdminTeam,
+                onLoadAdminAnnouncements:
+                    widget.sessionController.loadAdminAnnouncements,
+                onCreateAdminAnnouncement:
+                    widget.sessionController.createAdminAnnouncement,
+                onDeleteAdminAnnouncement:
+                    widget.sessionController.deleteAdminAnnouncement,
+                onCreateTeam: widget.sessionController.createTeam,
+                onJoinTeam: widget.sessionController.joinTeam,
+                onInviteTeamMember: widget.sessionController.inviteTeamMember,
+                onRemoveTeamMember: widget.sessionController.removeTeamMember,
+                onDissolveTeam: widget.sessionController.dissolveTeam,
+                onLoadTeamChatMessages:
+                    widget.sessionController.loadTeamChatMessages,
+                onSendTeamChatMessage:
+                    widget.sessionController.sendTeamChatMessage,
+                onMarkTeamChatRead: widget.sessionController.markTeamChatRead,
+                onReportTeamChatMessage:
+                    widget.sessionController.reportTeamChatMessage,
+                onLoadTeamWorkspaceSnapshot:
+                    widget.sessionController.loadTeamWorkspaceSnapshot,
+                onSaveTodayPlan: widget.sessionController.saveTodayPlan,
+                onLoadPlanByDate: widget.sessionController.loadPlanByDate,
+                weekPlanOverview: widget.sessionController.weekPlanOverview,
+                monthPlanOverview: widget.sessionController.monthPlanOverview,
+                annualPlanOverview: widget.sessionController.annualPlanOverview,
+                weeklyTemplates: widget.sessionController.weeklyTemplates,
+                onPreviousWeek: widget.sessionController.loadPreviousWeek,
+                onCurrentWeek: widget.sessionController.loadCurrentWeek,
+                onNextWeek: widget.sessionController.loadNextWeek,
+                onLoadMonthOverview: widget.sessionController.loadMonthOverview,
+                onPreviousMonth: widget.sessionController.loadPreviousMonth,
+                onCurrentMonth: widget.sessionController.loadCurrentMonth,
+                onNextMonth: widget.sessionController.loadNextMonth,
+                onLoadAnnualOverview:
+                    widget.sessionController.loadAnnualOverview,
+                onPreviousYear: widget.sessionController.loadPreviousYear,
+                onCurrentYear: widget.sessionController.loadCurrentYear,
+                onNextYear: widget.sessionController.loadNextYear,
+                onApplyDayTemplateToDate:
+                    widget.sessionController.applyDayTemplateToDate,
+                onSaveAnnualSegment: widget.sessionController.saveAnnualSegment,
+                onDeleteAnnualSegment:
+                    widget.sessionController.deleteAnnualSegment,
+                onSavePlanAsWeeklyTemplate:
+                    widget.sessionController.savePlanAsWeeklyTemplate,
+                onApplyWeeklyTemplate:
+                    widget.sessionController.applyWeeklyTemplate,
+                onApplyWeeklyTemplateToDate:
+                    widget.sessionController.applyWeeklyTemplateToDate,
+                onDeleteWeeklyTemplate:
+                    widget.sessionController.deleteWeeklyTemplate,
+                onCopyPlanToDate: widget.sessionController.copyPlanToDate,
+                onCopyPlanToDates: widget.sessionController.copyPlanToDates,
+                onClearPlanDate: widget.sessionController.clearPlanDate,
+                onApplyWeeklyTemplateToDates:
+                    widget.sessionController.applyWeeklyTemplateToDates,
+                onQuickArrangeWeek: widget.sessionController.quickArrangeWeek,
+                onToggleTodayPlanItem:
+                    widget.sessionController.toggleTodayPlanItem,
+              ),
+              if (widget.sessionController.offlineImportPreview != null)
+                _OfflineImportPrompt(
+                  preview: widget.sessionController.offlineImportPreview!,
+                  language: language,
+                  busy: widget.sessionController.isBusy,
+                  onCancel: widget.sessionController.dismissOfflineImport,
+                  onImport: widget.sessionController.importOfflineData,
+                ),
+            ],
           ),
         );
     }
+  }
+}
+
+class _OfflineImportPrompt extends StatelessWidget {
+  const _OfflineImportPrompt({
+    required this.preview,
+    required this.language,
+    required this.busy,
+    required this.onCancel,
+    required this.onImport,
+  });
+
+  final OfflineImportPreview preview;
+  final AppLanguage language;
+  final bool busy;
+  final VoidCallback onCancel;
+  final Future<void> Function(OfflineConflictStrategy strategy) onImport;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isChinese = language.isChinese;
+    final accountName = preview.targetNickname.trim().isEmpty
+        ? preview.targetUserNo
+        : preview.targetNickname;
+    return Positioned.fill(
+      child: Material(
+        color: Colors.black.withValues(alpha: 0.48),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Card(
+                elevation: 18,
+                child: Padding(
+                  padding: const EdgeInsets.all(28),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.cloud_upload_outlined,
+                          size: 32, color: colors.primary),
+                      const SizedBox(height: 16),
+                      Text(
+                        isChinese ? '导入本机离线数据？' : 'Import offline data?',
+                        style: theme.textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        isChinese
+                            ? '目标账号：$accountName（${preview.targetUserNo}）\n待导入：${preview.pendingOperationCount} 项'
+                            : 'Target account: $accountName (${preview.targetUserNo})\nPending: ${preview.pendingOperationCount} operations',
+                      ),
+                      if (preview.conflictCount > 0) ...[
+                        const SizedBox(height: 14),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: colors.errorContainer,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            isChinese
+                                ? '发现 ${preview.conflictCount} 个日期已有云端计划：${preview.dailyPlanConflictDates.join('、')}'
+                                : '${preview.conflictCount} dates already have online plans: ${preview.dailyPlanConflictDates.join(', ')}',
+                            style: TextStyle(color: colors.onErrorContainer),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 14),
+                      Text(
+                        isChinese
+                            ? '仅在你确认后上传。无论结果如何，本机原始数据都会保留；失败和冲突项仍可再次处理。'
+                            : 'Nothing uploads until you confirm. Original local data is retained, and failed or conflicting items can be retried.',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 24),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        alignment: WrapAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: busy ? null : onCancel,
+                            child: Text(isChinese ? '暂不导入' : 'Not now'),
+                          ),
+                          if (preview.conflictCount > 0)
+                            OutlinedButton(
+                              onPressed: busy
+                                  ? null
+                                  : () => onImport(
+                                        OfflineConflictStrategy.keepServer,
+                                      ),
+                              child: Text(isChinese
+                                  ? '保留云端并导入其余数据'
+                                  : 'Keep online plans'),
+                            ),
+                          FilledButton(
+                            onPressed: busy
+                                ? null
+                                : () => onImport(
+                                      preview.conflictCount > 0
+                                          ? OfflineConflictStrategy.overwrite
+                                          : OfflineConflictStrategy.keepServer,
+                                    ),
+                            child: busy
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    preview.conflictCount > 0
+                                        ? (isChinese
+                                            ? '用本地计划覆盖并导入'
+                                            : 'Overwrite and import')
+                                        : (isChinese
+                                            ? '确认导入到此账号'
+                                            : 'Confirm import'),
+                                  ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

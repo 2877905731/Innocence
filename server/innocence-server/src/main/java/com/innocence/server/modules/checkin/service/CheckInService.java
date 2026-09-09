@@ -6,6 +6,8 @@ import com.innocence.server.modules.checkin.domain.CheckInRecord;
 import com.innocence.server.modules.checkin.domain.CheckInSummary;
 import com.innocence.server.modules.checkin.dto.response.CheckInStatusResponse;
 import com.innocence.server.modules.checkin.dto.response.CheckInSubmitResponse;
+import com.innocence.server.modules.checkin.dto.response.CheckInSummaryResponse;
+import com.innocence.server.modules.checkin.dto.response.CheckInFailureRecordResponse;
 import com.innocence.server.modules.checkin.mapper.CheckInMapper;
 import com.innocence.server.modules.notification.service.NotificationService;
 import com.innocence.server.modules.plan.dto.response.TodayPlanResponse;
@@ -15,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class CheckInService {
@@ -92,6 +96,61 @@ public class CheckInService {
         );
     }
 
+    @Transactional
+    public void importCheckInIntent(Long userId, LocalDate checkInDate) {
+        if (checkInDate == null || checkInDate.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Offline check-in date is invalid.");
+        }
+        if (checkInMapper.findCheckInRecordByUserIdAndDate(userId, checkInDate) != null) {
+            return;
+        }
+        TodayPlanResponse plan = studyPlanService.getTodayPlan(userId, checkInDate);
+        if (!isTodayPlanCompleted(plan)) {
+            throw new IllegalArgumentException(
+                    "The imported check-in still requires a completed plan for that date."
+            );
+        }
+        CheckInRecord record = new CheckInRecord();
+        record.setUserId(userId);
+        record.setCheckInDate(checkInDate);
+        record.setPlanCompletedCount(plan.getCompletedCount());
+        record.setPlanTotalCount(plan.getTotalCount());
+        record.setStudyDurationMinutes(0);
+        checkInMapper.insertCheckInRecord(record);
+        rebuildSummaryAfterImport(userId);
+    }
+
+    private void rebuildSummaryAfterImport(Long userId) {
+        List<LocalDate> dates = checkInMapper.findCheckInDatesByUserId(userId);
+        if (dates == null || dates.isEmpty()) {
+            return;
+        }
+        int consecutiveDays = 1;
+        LocalDate expected = dates.get(0).minusDays(1);
+        for (int index = 1; index < dates.size(); index++) {
+            LocalDate date = dates.get(index);
+            if (!date.equals(expected)) {
+                break;
+            }
+            consecutiveDays++;
+            expected = expected.minusDays(1);
+        }
+        CheckInSummary summary = checkInMapper.findCheckInSummaryByUserId(userId);
+        if (summary == null) {
+            summary = new CheckInSummary();
+            summary.setUserId(userId);
+            summary.setConsecutiveDays(consecutiveDays);
+            summary.setTotalDays(dates.size());
+            summary.setLastSuccessDate(dates.get(0));
+            checkInMapper.insertCheckInSummary(summary);
+            return;
+        }
+        summary.setConsecutiveDays(consecutiveDays);
+        summary.setTotalDays(dates.size());
+        summary.setLastSuccessDate(dates.get(0));
+        checkInMapper.updateCheckInSummary(summary);
+    }
+
     @Transactional(readOnly = true)
     public int getTotalCheckInDays(Long userId) {
         CheckInSummary summary = checkInMapper.findCheckInSummaryByUserId(userId);
@@ -100,6 +159,53 @@ public class CheckInService {
         }
         Integer count = checkInMapper.countCheckInRecordsByUserId(userId);
         return count == null ? 0 : Math.max(count, 0);
+    }
+
+    @Transactional(readOnly = true)
+    public CheckInSummaryResponse getSummary(Long userId) {
+        CheckInSummary summary = checkInMapper.findCheckInSummaryByUserId(userId);
+        LocalDate today = LocalDate.now();
+        CheckInSummaryResponse response = new CheckInSummaryResponse();
+        response.setConsecutiveDays(resolveVisibleConsecutiveDays(
+                summary,
+                today,
+                summary != null && today.equals(summary.getLastSuccessDate())
+        ));
+        response.setTotalDays(resolveTotalDays(userId, summary));
+        response.setTotalStudyDurationMinutes(resolveTotalStudyDurationMinutes(userId));
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    public List<CheckInFailureRecordResponse> listFailureRecords(Long userId, Integer pageNo, Integer pageSize) {
+        int normalizedPageNo = pageNo == null || pageNo < 1 ? 1 : pageNo;
+        int normalizedPageSize = pageSize == null || pageSize < 1 ? 20 : Math.min(pageSize, 50);
+        int offset = (normalizedPageNo - 1) * normalizedPageSize;
+        List<CheckInFailRecord> records = checkInMapper.findCheckInFailRecordsByUserId(
+                userId,
+                offset,
+                normalizedPageSize
+        );
+        List<CheckInFailureRecordResponse> result = new ArrayList<>();
+        if (records == null) {
+            return result;
+        }
+        for (CheckInFailRecord record : records) {
+            if (record == null || record.getCheckInDate() == null) {
+                continue;
+            }
+            CheckInFailureRecordResponse response = new CheckInFailureRecordResponse();
+            response.setDate(record.getCheckInDate().toString());
+            response.setLabel(record.getCheckInDate().getMonthValue() + "/" + record.getCheckInDate().getDayOfMonth());
+            response.setAttemptCount(defaultNumber(record.getAttemptCount()));
+            response.setLatestReason(defaultString(record.getLatestReason()));
+            response.setPlanCompletedCount(defaultNumber(record.getPlanCompletedCount()));
+            response.setPlanTotalCount(defaultNumber(record.getPlanTotalCount()));
+            response.setStudyDurationMinutes(defaultNumber(record.getStudyDurationMinutes()));
+            response.setLastAttemptTime(formatDateTime(record.getLastAttemptTime()));
+            result.add(response);
+        }
+        return result;
     }
 
     @Transactional

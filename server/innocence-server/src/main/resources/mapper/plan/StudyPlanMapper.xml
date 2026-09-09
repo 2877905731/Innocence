@@ -51,6 +51,22 @@
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
+    <resultMap id="AnnualPlanSegmentResultMap" type="com.innocence.server.modules.plan.domain.AnnualPlanSegment">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="clientEntityId" column="client_entity_id"/>
+        <result property="planYear" column="plan_year"/>
+        <result property="title" column="title"/>
+        <result property="startMonth" column="start_month"/>
+        <result property="endMonth" column="end_month"/>
+        <result property="colorKey" column="color_key"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="note" column="note"/>
+        <result property="revision" column="revision"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
     <select id="findDailyPlanByUserIdAndDate" resultMap="DailyPlanResultMap">
         select *
         from daily_plan
@@ -173,5 +189,58 @@
         insert into weekly_plan_template_item (template_id, user_id, title, planned_minutes, start_slot, end_slot, sort_order)
         values (#{templateId}, #{userId}, #{title}, #{plannedMinutes}, #{startSlot}, #{endSlot}, #{sortOrder})
     </insert>
+
+    <select id="findAnnualSegmentsByUserIdAndYear" resultMap="AnnualPlanSegmentResultMap">
+        select *
+        from annual_plan_segment
+        where user_id = #{userId}
+          and plan_year = #{planYear}
+        order by sort_order asc, update_time asc, id asc
+    </select>
+
+    <select id="findAnnualSegmentByIdAndUserId" resultMap="AnnualPlanSegmentResultMap">
+        select *
+        from annual_plan_segment
+        where id = #{segmentId}
+          and user_id = #{userId}
+        limit 1
+    </select>
+
+    <select id="findAnnualSegmentByClientEntityIdAndUserId" resultMap="AnnualPlanSegmentResultMap">
+        select *
+        from annual_plan_segment
+        where client_entity_id = #{clientEntityId}
+          and user_id = #{userId}
+        limit 1
+    </select>
+
+    <insert id="insertAnnualPlanSegment" useGeneratedKeys="true" keyProperty="id">
+        insert into annual_plan_segment
+            (user_id, client_entity_id, plan_year, title, start_month, end_month,
+             color_key, sort_order, note, revision)
+        values
+            (#{userId}, #{clientEntityId}, #{planYear}, #{title}, #{startMonth}, #{endMonth},
+             #{colorKey}, #{sortOrder}, #{note}, #{revision})
+    </insert>
+
+    <update id="updateAnnualPlanSegment">
+        update annual_plan_segment
+        set plan_year = #{planYear},
+            title = #{title},
+            start_month = #{startMonth},
+            end_month = #{endMonth},
+            color_key = #{colorKey},
+            sort_order = #{sortOrder},
+            note = #{note},
+            revision = #{revision}
+        where id = #{id}
+          and user_id = #{userId}
+    </update>
+
+    <delete id="deleteAnnualPlanSegmentByIdAndUserId">
+        delete from annual_plan_segment
+        where id = #{segmentId}
+          and user_id = #{userId}
+    </delete>
 
 </mapper>

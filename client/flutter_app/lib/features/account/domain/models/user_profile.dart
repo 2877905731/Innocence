@@ -8,9 +8,10 @@ class UserProfile {
     required this.timezone,
     required this.studyDurationTotal,
     required this.checkInDaysTotal,
+    this.localProfileId,
   });
 
-  final int userId;
+  final int? userId;
   final String userNo;
   final String nickname;
   final String avatarUrl;
@@ -18,6 +19,27 @@ class UserProfile {
   final String timezone;
   final int studyDurationTotal;
   final int checkInDaysTotal;
+  final String? localProfileId;
+
+  factory UserProfile.local({
+    required String localProfileId,
+    required String nickname,
+    required String timezone,
+  }) {
+    return UserProfile(
+      userId: null,
+      userNo: '',
+      nickname: nickname,
+      avatarUrl: '',
+      bio: '数据仅保存在此设备',
+      timezone: timezone,
+      studyDurationTotal: 0,
+      checkInDaysTotal: 0,
+      localProfileId: localProfileId,
+    );
+  }
+
+  bool get isLocal => userId == null && localProfileId != null;
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(

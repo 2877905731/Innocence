@@ -3,11 +3,15 @@ package com.innocence.server.modules.plan.controller;
 import com.innocence.server.common.api.ApiResponse;
 import com.innocence.server.common.web.RequestUserContext;
 import com.innocence.server.modules.plan.dto.request.ApplyWeeklyTemplateRequest;
+import com.innocence.server.modules.plan.dto.request.ApplyDayTemplateBatchRequest;
+import com.innocence.server.modules.plan.dto.request.SaveAnnualPlanSegmentRequest;
 import com.innocence.server.modules.plan.dto.request.SaveTodayPlanRequest;
 import com.innocence.server.modules.plan.dto.request.SaveWeeklyTemplateRequest;
 import com.innocence.server.modules.plan.dto.response.WeekPlanOverviewResponse;
 import com.innocence.server.modules.plan.dto.response.TodayPlanResponse;
 import com.innocence.server.modules.plan.dto.response.WeeklyPlanTemplateResponse;
+import com.innocence.server.modules.plan.dto.response.MonthPlanOverviewResponse;
+import com.innocence.server.modules.plan.dto.response.AnnualPlanOverviewResponse;
 import com.innocence.server.modules.plan.service.StudyPlanService;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @RestController
@@ -55,6 +60,69 @@ public class StudyPlanController {
     @PutMapping("/today")
     public ApiResponse<TodayPlanResponse> saveTodayPlan(@Valid @RequestBody SaveTodayPlanRequest request) {
         return ApiResponse.success(studyPlanService.saveTodayPlan(currentUserId(), request));
+    }
+
+    @GetMapping("/month")
+    public ApiResponse<MonthPlanOverviewResponse> getMonthPlanOverview(
+            @RequestParam(name = "month")
+            @DateTimeFormat(pattern = "yyyy-MM")
+            YearMonth month
+    ) {
+        return ApiResponse.success(studyPlanService.getMonthPlanOverview(currentUserId(), month));
+    }
+
+    @GetMapping("/year")
+    public ApiResponse<AnnualPlanOverviewResponse> getAnnualPlanOverview(
+            @RequestParam(name = "year") int year
+    ) {
+        return ApiResponse.success(studyPlanService.getAnnualPlanOverview(currentUserId(), year));
+    }
+
+    @GetMapping("/day-templates")
+    public ApiResponse<List<WeeklyPlanTemplateResponse>> getDayTemplates() {
+        return ApiResponse.success(studyPlanService.getDayTemplates(currentUserId()));
+    }
+
+    @PostMapping("/day-templates")
+    public ApiResponse<WeeklyPlanTemplateResponse> saveDayTemplate(
+            @Valid @RequestBody SaveWeeklyTemplateRequest request
+    ) {
+        return ApiResponse.success(studyPlanService.saveDayTemplate(currentUserId(), request));
+    }
+
+    @PostMapping("/day-templates/{templateId}/apply-batch")
+    public ApiResponse<List<TodayPlanResponse>> applyDayTemplateBatch(
+            @PathVariable("templateId") Long templateId,
+            @Valid @RequestBody ApplyDayTemplateBatchRequest request
+    ) {
+        return ApiResponse.success(
+                studyPlanService.applyDayTemplateBatch(currentUserId(), templateId, request)
+        );
+    }
+
+    @PostMapping("/annual-segments")
+    public ApiResponse<AnnualPlanOverviewResponse> createAnnualSegment(
+            @Valid @RequestBody SaveAnnualPlanSegmentRequest request
+    ) {
+        return ApiResponse.success(
+                studyPlanService.saveAnnualSegment(currentUserId(), null, request)
+        );
+    }
+
+    @PutMapping("/annual-segments/{segmentId}")
+    public ApiResponse<AnnualPlanOverviewResponse> updateAnnualSegment(
+            @PathVariable("segmentId") Long segmentId,
+            @Valid @RequestBody SaveAnnualPlanSegmentRequest request
+    ) {
+        return ApiResponse.success(
+                studyPlanService.saveAnnualSegment(currentUserId(), segmentId, request)
+        );
+    }
+
+    @DeleteMapping("/annual-segments/{segmentId}")
+    public ApiResponse<Boolean> deleteAnnualSegment(@PathVariable("segmentId") Long segmentId) {
+        studyPlanService.deleteAnnualSegment(currentUserId(), segmentId);
+        return ApiResponse.success(Boolean.TRUE);
     }
 
     @GetMapping("/weekly-templates")

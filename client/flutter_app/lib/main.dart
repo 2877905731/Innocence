@@ -5,6 +5,7 @@ import 'app/app.dart';
 import 'app/app_language.dart';
 import 'app/app_visual_theme.dart';
 import 'app/session_controller.dart';
+import 'core/local/offline_store.dart';
 import 'features/auth/data/auth_api.dart';
 import 'features/auth/data/auth_local_storage.dart';
 
@@ -18,6 +19,7 @@ Future<void> main() async {
     authApi: AuthApi(),
     localStorage: AuthLocalStorage(preferences),
     languageController: languageController,
+    offlineStore: OfflineStore(),
   );
 
   runApp(

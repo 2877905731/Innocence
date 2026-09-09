@@ -42,11 +42,17 @@ api:
     - internal_url
     - stack_trace
     - cross_user_data
-  side_effecting_requests_require_idempotency_key: false
+  side_effecting_requests_require_idempotency_key: conditional
+  idempotency_required_for:
+    - offline_replayable_write
+    - batch_template_apply
+    - annual_segment_write
 authentication_and_tenancy:
   local_test_identity_allowed: true
   production_profile_in_local_tests: forbidden
   cross_user_negative_tests_before_cutover: true
+  unauthenticated_offline_profile_is_server_identity: false
+  offline_owner_scope_isolation_required: true
 sensitive_data:
   logs_allow:
     - internal_business_id
@@ -56,6 +62,12 @@ sensitive_data:
     - request_id
   samples_must_be_redacted_or_synthetic: true
   secrets_storage: env_or_untracked_local_config
+  sync_logs_forbid:
+    - token
+    - email_address
+    - verification_code
+    - full_request
+    - business_content
 compatibility:
   text_output: exact_bytes
   structured_output: structure_and_business_values
@@ -76,7 +88,7 @@ compatibility:
 - 鉴权：登录返回 `accessToken`，请求头 `Authorization: Bearer {token}`；设备信息 `X-Device-Id`、`X-Device-Type`（`mobile` / `desktop`）
 - 统一返回结构：`{ code, message, data, requestId, serverTime }`，`code=0` 成功，非 0 为可读业务错误码（不裸抛 HTTP 500）
 - 分页结构：`{ pageNo, pageSize, total, list }`
-- 时间统一 ISO 8601；需同步的写接口返回 `syncVersion` + `updateTime`；客户端提交带 `clientTime` / `clientVersion` / `deviceId`
+- 时间统一 ISO 8601；需同步的写接口返回 `syncVersion` / `revision` + `updateTime`；客户端提交带 `clientTime` / `clientVersion` / `deviceId`，离线可重放写操作还必须带稳定的 `clientEntityId`、`operationId` 和 `baseRevision`
 - 头像上传走 `multipart/form-data`，本地映射目录存储，后续切对象存储
 - 头像上传固定使用 `POST /api/app/v1/account/avatar/upload`：字段名为 `file`，仅接受 `image/jpeg` 与 `image/png`，单文件上限 5 MiB；服务端不信任原始文件名，生成 UUID 文件名并写入 `innocence.avatar.storage-dir`
 - 上传成功返回 `{ avatarUrl }`，URL 为 `innocence.avatar.public-path/{uuid}.{jpg|png}`，并同步更新当前登录用户的 `app_user.avatar_url`
@@ -98,3 +110,7 @@ compatibility:
 4. `/home/widget` 保留为 Small Canvas / Focus Orb 的轻量摘要投影接口，支持高频刷新；接口命名不约束客户端必须实现为固定挂件
 5. WebSocket 断开时前端回退「接口拉取 + 系统通知」模式，不允许数据丢失
 6. 跨用户数据访问必须有负向测试（非好友看资料、非队友看学习摘要必须被拒绝）
+7. 未登录 local profile 只读写本机数据库，不调用受保护接口，也不使用固定/伪造 userId；登录后先展示导入预览和目标账号，确认前不得上传业务正文
+8. 离线资料、账号缓存和服务端租户按 `ownerScope` 隔离；服务端数据归属只从 Bearer token 解析，`clientEntityId`/`operationId` 仅用于幂等
+9. 日计划、备忘录、专注事件、年度区间和签到意图按各自规则解决冲突，禁止全局静默套用“最后修改覆盖”
+10. 计划权威语义为短=日、长=月、超长=年；旧 `/study/plans/week` 与 `/study/plans/weekly-templates` 仅作迁移兼容

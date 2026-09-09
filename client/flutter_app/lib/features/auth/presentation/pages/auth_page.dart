@@ -109,6 +109,36 @@ class _AuthPageState extends State<AuthPage> {
     }
   }
 
+  Future<void> _enterOfflineMode() async {
+    FocusScope.of(context).unfocus();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(_language.isChinese ? '使用离线模式' : 'Use offline mode'),
+          content: Text(
+            _language.isChinese
+                ? '计划、专注与备忘录会保存在此设备。好友、团队、通知、云端资料等联网功能暂不可用；登录后会先展示待导入摘要，只有你确认后才会上传。'
+                : 'Plans, focus sessions, and memos stay on this device. Friends, teams, notifications, and cloud profile features are unavailable. After sign-in, you will review an import summary before anything uploads.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(_language.isChinese ? '取消' : 'Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(_language.isChinese ? '进入离线模式' : 'Continue offline'),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirmed == true && mounted) {
+      await widget.sessionController.enterOfflineMode();
+    }
+  }
+
   String? _validateInputs() {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
@@ -419,6 +449,15 @@ class _AuthPageState extends State<AuthPage> {
                       const Icon(Icons.arrow_forward_rounded, size: 19),
                     ],
                   ),
+          ),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            onPressed:
+                widget.sessionController.isBusy ? null : _enterOfflineMode,
+            icon: const Icon(Icons.offline_bolt_outlined, size: 18),
+            label: Text(
+              _language.isChinese ? '离线使用' : 'Continue offline',
+            ),
           ),
           const SizedBox(height: 18),
           Text(

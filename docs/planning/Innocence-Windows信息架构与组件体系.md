@@ -4,13 +4,14 @@ document_type: windows_information_architecture_and_component_system
 project_name: "Innocence"
 status: approved
 implementation_status: p01_shell_foundation_implemented
-updated_at: "2026-08-10"
+updated_at: "2026-09-08"
 approved_at: "2026-08-10T09:22:16+08:00"
 owner: "Innocence UI"
 depends_on:
   - docs/planning/Innocence-MVP第一版功能范围.md
   - docs/planning/Innocence-接口清单草案.md
   - docs/planning/Innocence-Windows自适应桌面体验.md
+  - docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md
 ---
 
 # Innocence Windows 信息架构与组件体系
@@ -22,7 +23,8 @@ depends_on:
 1. MVP 页面清单与页面职责；
 2. Windows 用户端、管理端与 Focus Orb 的导航地图；
 3. Large / Medium / Small / Focus Orb 的跨尺寸内容优先级；
-4. Flutter `DesktopPresentationTier`、组件密度与主题映射接口。
+4. Flutter `DesktopPresentationTier`、组件密度与主题映射接口；
+5. 2026-09-08 新增的离线访问、日/月/年计划和主题化年度图案信息架构。
 
 本文只定义 UI 信息架构和前端呈现契约，不新增或改名业务接口。接口与字段继续以 `Innocence-接口清单草案.md` 为准，移动端布局与导航另行设计。
 
@@ -46,7 +48,7 @@ depends_on:
 | 顺序 | 导航 ID | 名称 | 职责 | Large / Medium | Small |
 |---|---|---|---|---|
 | 1 | `home` | 首页 | 当前专注、今日计划、签到与关键摘要 | 固定主导航 | 底部主导航 |
-| 2 | `plans` | 计划 | 短计划、周计划、超长计划、模板与失败记录 | 固定主导航 | 底部主导航 |
+| 2 | `plans` | 计划 | 短计划（日）、长计划（月）、超长计划（年）、日模板与失败记录 | 固定主导航 | 底部主导航 |
 | 3 | `focus` | 专注 | 学习时段、番茄、当前会话与历史 | 固定主导航 | 底部主导航 |
 | 4 | `companions` | 陪伴 | 好友、团队、队友进度与关系申请 | 固定主导航 | 从首页或顶部菜单进入 |
 | 5 | `inbox` | 收件箱 | 私信、团队群聊、通知与未读处理 | 固定主导航 | 底部主导航 |
@@ -80,7 +82,8 @@ depends_on:
    ├─ 验证码登录
    ├─ 注册
    ├─ 找回 / 重置密码
-   └─ 同类型设备会话替换确认
+   ├─ 同类型设备会话替换确认
+   └─ 离线使用说明 → 本机离线资料 Canvas
 
 用户 Canvas
 ├─ 首页
@@ -90,9 +93,10 @@ depends_on:
 │  └─ 统计、陪伴、备忘录摘要下钻
 ├─ 计划
 │  ├─ 今日短计划
-│  ├─ 周计划
-│  ├─ 超长计划
+│  ├─ 长计划：完整月历
+│  ├─ 超长计划：12 个月年历与月区间
 │  ├─ 日计划模板
+│  ├─ 周概览兼容辅助
 │  └─ 计划失败记录
 ├─ 专注
 │  ├─ 开始配置
@@ -120,6 +124,7 @@ depends_on:
    ├─ 隐私与黑名单
    ├─ 通知
    ├─ 同步与桌面体验
+   ├─ 本机数据、登录并同步、导出与清除
    ├─ 外观与四主题
    ├─ 关于、缓存与退出
    └─ 注销账号
@@ -148,8 +153,10 @@ Focus Orb
 | 页面 ID | 页面 / 表面 | 核心职责 | 主要数据或接口族 |
 |---|---|---|---|
 | `entry.language` | 首次语言选择 | 首次选择界面语言；完成后不重复打断 | 本地设置 |
-| `entry.bootstrap` | 启动与会话恢复 | 初始化语言、会话、同步摘要和错误恢复 | `/sync/bootstrap`、当前会话 |
-| `auth.login` | 登录中心 | 密码登录、验证码登录和注册三种模式 | `/auth/**` |
+| `entry.bootstrap` | 启动与会话恢复 | 初始化语言、AccessMode、连接状态、本机资料/账户缓存和错误恢复；未认证时不得请求受保护摘要 | 本地业务库；已登录后 `/sync/bootstrap` |
+| `auth.login` | 登录中心 | 密码登录、验证码登录、注册与“离线使用”入口 | `/auth/**`；离线入口只访问本地仓储 |
+| `auth.offlineIntro` | 离线使用说明 | 首次说明本机存储、联网功能限制和登录后可确认同步 | 本地设置、`local_profile` |
+| `auth.offlineImport` | 本机数据导入确认 | 登录后展示目标账号、数量、日期范围和冲突，用户确认后才上传 | `/sync/import-preview`、`/sync/import` |
 | `auth.passwordReset` | 找回 / 重置密码 | 发送验证码并设置新密码 | `/auth/password/**` |
 | `auth.sessionConflict` | 设备会话替换确认 | 同类型设备超限时明确拒绝或替换 | `/auth/session/replace` |
 | `auth.profileSetup` | 首次资料完善 | 注册后设置头像和昵称，可暂后处理 | `/account/profile`、头像上传 |
@@ -158,13 +165,14 @@ Focus Orb
 
 | 页面 ID | 页面 / 表面 | 核心职责 | 主要数据或接口族 |
 |---|---|---|---|
-| `home.overview` | 首页 | 聚合当前专注、今日计划、签到、趋势、队友和备忘录摘要 | `/home/overview` |
-| `home.todayPlanEditor` | 今日计划快捷编辑 | 从首页快速调整当天时间块和任务 | `/study/plans/today`、`/study/plans/{id}` |
+| `home.overview` | 首页 | 聚合当前专注、今日计划、签到、趋势、队友和备忘录摘要；Hero 按主题与本地日期稳定轮换 | 在线 `/home/overview`；离线由本地仓储聚合 |
+| `home.todayPlanEditor` | 今日计划快捷编辑 | 用固定可见的48段多色昼夜时间轴调整当天时间块；空白段新建、已有段拖动首尾，计划条联动后即可保存 | `/study/plans/today`、`/study/plans/{id}` |
 | `home.checkIn` | 今日签到表面 | 展示条件、手动签到和结果，不做独立顶层导航 | `/check-in/today`、`/check-in/submit` |
-| `plans.today` | 今日短计划 | 半小时时间块、任务清单和完成状态 | `/study/plans/**` |
-| `plans.week` | 周计划 | 一周安排、复制、模板套用和跨日编辑 | `/study/plans/calendar`、模板接口 |
-| `plans.longTerm` | 超长计划 | 按天组织长期目标和多层级进度 | `/study/plans/**`，`planType=ultra` |
-| `plans.templates` | 日计划模板 | 保存、浏览、套用和删除模板 | `/study/plans/templates/**` |
+| `plans.today` | 今日短计划 | 48段多色半小时时间轴、等量计划条、无重叠边界拖动、任务清单、直接保存和完成状态 | `/study/plans/**` |
+| `plans.month` | 长计划 / 月历 | 展示当前月全部日期，横向滑动前后月；打开日期编辑并把日模板套用到一天或多天 | `/study/plans/month?month`、`/study/plans/today?date`、日模板批量套用 |
+| `plans.year` | 超长计划 / 年历 | 展示全年 12 个月，以月为单位拖动创建和调整年度区间 | `/study/plans/year?year`、`/study/plans/annual-segments/**` |
+| `plans.templates` | 日计划模板 | 从已保存短计划另存模板，浏览、编辑、删除和批量套用 | `/study/plans/day-templates/**` |
+| `plans.weekCompatibility` | 周概览兼容辅助 | 承接已有周数据与迁移，不作为长计划主入口或新模型 | 旧 `/study/plans/week?anchorDate`、`/study/plans/weekly-templates` |
 | `plans.failures` | 计划失败记录 | 低压力展示并支持手动删除 | `/study/plans/fail-records/**` |
 | `focus.session` | 当前专注 | 设置结束时间、番茄配置、开始 / 暂停 / 结束与当前阶段 | `/focus/session/**` |
 | `focus.presets` | 番茄配置 | 管理常用学习 / 休息组合 | `/focus/pomodoro/configs` |
@@ -197,7 +205,7 @@ Focus Orb
 | `settings.account` | 账户资料 | 头像、昵称、用户号和基础资料 | `/account/profile` |
 | `settings.privacy` | 隐私与黑名单 | 好友资料、队友学习权限和黑名单 | `/account/privacy`、`/account/blacklist` |
 | `settings.notifications` | 通知设置 | 按渠道和类型控制通知 | `/settings/notifications` |
-| `settings.syncDesktop` | 同步与桌面体验 | 同步状态、失败重试、开机自启、置顶和 Orb 行为 | `/sync/status`、`/settings/widget` |
+| `settings.syncDesktop` | 同步与桌面体验 | 同步状态、失败重试、本机数据查看/导出/清除、登录并同步、开机自启、置顶和 Orb 行为 | 本地仓储、`/sync/status`、`/sync/import*`、`/settings/widget` |
 | `settings.appearance` | 外观 | 浅 / 深模式和四主题切换 | `/settings/appearance` |
 | `settings.about` | 关于与缓存 | 版本、帮助、清理缓存和退出登录 | `/settings/cache/clear`、`/auth/logout` |
 | `settings.cancelAccount` | 注销账号 | 验证、风险确认和不可逆注销 | `/account/cancel` |
@@ -219,7 +227,8 @@ Focus Orb
 
 以下内容是共用状态，不建立独立主导航页面：
 
-- 首次加载、空数据、离线、同步中、同步失败；
+- 首次加载、空数据、未登录离线、已登录断网、待同步、同步中、冲突、同步失败；
+- 未登录离线状态固定显示“离线模式 · 仅本机”，不得复用“状态已连接”；联网依赖入口点击后解释限制并提供登录入口；
 - `401` 会话失效、`403` 权限拒绝、`404` 内容不存在、`409` 关系或设备冲突、`429` 操作过频；
 - 删除好友、解散团队、封号、注销账号等高风险确认；
 - 表单缺失字段、生成 / 上传失败、消息发送失败与安全拦截。
@@ -231,7 +240,7 @@ Focus Orb
 | 工作区 | `full`（Large） | `comfortable`（Medium） | `compact`（Small） | `glance`（Orb） |
 |---|---|---|---|---|
 | 首页 | 当前专注 + 今日计划 + 签到 + 趋势 + 陪伴 + 备忘录并列 | 当前专注与今日计划主导，其他为摘要 / 抽屉 | 当前专注、下一计划、今日完成度、一个主操作 | 专注进度、剩余时间、未读点 |
-| 计划 | 时间轴 / 日历 + 编辑器 + 模板 / 失败上下文并列 | 列表或周视图 + 抽屉编辑 | 单列优先队列；复杂批量编辑提示扩大窗口 | 仅允许表达下一计划，不显示清单 |
+| 计划 | 日计划时间轴、完整月历或 12 月年历 + 编辑器/模板上下文并列 | 日计划完整可编辑；月历单月主视图；年历减少装饰但保留 12 月 | 日计划保留48段和保存；月/年只读摘要并提示扩大窗口进行批量/区间拖动 | 仅允许表达下一计划，不显示清单 |
 | 专注 | 当前会话、阶段、配置、关联计划与历史上下文 | 当前会话 + 核心控制 + 可展开配置 | 计时、任务名、开始 / 暂停 / 结束 | 进度环、状态色、时间简写 |
 | 陪伴 | 好友 / 团队列表 + 内容 + 资料三段式 | 列表 + 内容，资料进抽屉 | 列表与详情互相切换 | 不展示成员内容 |
 | 收件箱 | 会话列表 + 消息 + 详情三段式 | 会话列表 + 消息，详情进抽屉 | 会话 / 通知列表与内容互相切换 | 最多一个未读点，不显示正文 |
@@ -257,6 +266,20 @@ enum DesktopPresentationTier {
   large,
   medium,
   small,
+}
+
+enum AppAccessMode {
+  unauthenticated,
+  offlineProfile,
+  authenticated,
+}
+
+enum AppSyncState {
+  idle,
+  pending,
+  syncing,
+  conflict,
+  failed,
 }
 
 enum ComponentPresentationDensity {
@@ -348,16 +371,18 @@ class AdaptiveFeatureCard<T> extends StatelessWidget {
 ### 7.5 页面状态归属
 
 ```text
-SessionController / FeatureController（业务与同步状态）
-└─ SemanticRouteState（当前页面、详情对象、筛选、草稿引用）
-   └─ AdaptiveCanvasShell（Large / Medium / Small 编排）
-      └─ AdaptiveFeatureComponent（full / comfortable / compact）
+AccessController（unauthenticated / offlineProfile / authenticated）
+└─ LocalRepository + SyncOutbox（按 ownerScope 隔离）
+   └─ SessionController / FeatureController（业务、连接与同步状态）
+      └─ SemanticRouteState（当前页面、详情对象、筛选、草稿引用）
+         └─ AdaptiveCanvasShell（Large / Medium / Small 编排）
+            └─ AdaptiveFeatureComponent（full / comfortable / compact）
 
 OrbWindow
 └─ 订阅同一 Focus / Unread 状态，只保存 Orb 位置与窗口级偏好
 ```
 
-跨层级切换不得重新创建业务 Controller。进入 Orb 时保存最近非 Orb 的语义页面、窗口尺寸、位置和滚动恢复键；恢复时回到原页面，而不是固定返回首页。
+跨层级切换不得重新创建业务 Controller。进入 Orb 时保存最近非 Orb 的语义页面、窗口尺寸、位置和滚动恢复键；恢复时回到原页面，而不是固定返回首页。切换主题、联网状态变化或登录导入也不得无条件销毁本机草稿；ownerScope 变更必须经过导入/切换流程。
 
 ## 8. 主题映射契约
 
@@ -391,9 +416,17 @@ OrbWindow
 
 同一页面切换主题时只替换 `InnocenceThemeTokens`，不得重建路由、清空输入或切换 `DesktopPresentationTier`。
 
+超长计划年历的春夏秋冬图案也属于 `ornament` 令牌：侘寂使用枯枝、水纹、叶痕与雪痕；极简使用抽象线段和几何刻度；中世纪现代使用花瓣、太阳、叶片与星芒有机几何；玻璃态使用半透明花芽、光球、晶叶与冰晶。月份始终保留文字/数字标签，季节图案不得成为唯一语义。
+
+年历的季节装饰也属于 `ornament` 令牌：侘寂使用枯枝/水纹/叶痕/雪痕，极简使用抽象线段/几何刻度，中世纪现代使用花瓣/太阳/叶片/星芒，玻璃态使用半透明花芽/光球/晶叶/冰晶。装饰不得替代月份文字、选择状态或进度语义。
+
 ## 9. 关键交互与权限边界
 
 - 非好友不可进入私信会话；非队友不可查看队友学习摘要；被拉黑关系的资料和互动入口必须在服务端拒绝后给出安全错误表面。
+- 未登录离线资料中，好友、团队、私信、云端通知处理、账号资料、安全设置和管理后台保留可发现说明但不可执行；不得构造临时账号或显示假成功。
+- 从离线资料登录后，只有导入确认表面可以改变 ownerScope；切换到其他账号、权限拒绝或同步失败不得删除本机原始数据。
+- 未登录离线资料不可执行好友、团队、私信、云端通知处理、账号安全或后台操作；入口可以保留可发现性，但必须说明需要登录且不得显示伪成功状态。
+- 登录后发现本机离线资料时先展示导入预览和目标账号；确认前不上传，账号不一致时停止自动合并。
 - 团队成员移除与解散仅对队长显示；后台入口仅对管理员显示，不能只靠前端隐藏代替服务端鉴权。
 - 通知中的好友申请和团队邀请允许直接同意 / 拒绝，处理后同步更新陪伴页状态。
 - 删除好友会删除历史私信；解散团队会删除团队交流数据；注销账号不可逆，均需明确二次确认。
@@ -405,12 +438,16 @@ OrbWindow
 | 验收项 | 通过条件 |
 |---|---|
 | 页面覆盖 | MVP 账户、同步、好友、团队、交流、计划、专注、签到、统计、通知、备忘录、设置、首页、治理均有明确入口或状态表面 |
+| 离线访问 | 未登录可进入隔离的本机 Canvas；可用功能持久化，联网功能明确受限；登录后先预览并确认目标账号再导入 |
+| 计划层级 | 短计划保存后可编辑；长计划为完整月历且可批量套用日模板；超长计划为 12 个月年历且可按月拖动区间 |
 | 导航一致 | Large / Medium / Small 指向相同语义页面；Small 仅重组入口，不删业务 |
 | 密度接口 | 三档 Canvas 和 Orb 有明确类型、默认映射与组件白名单 |
 | 状态连续 | 页面、详情、筛选、草稿、滚动和计时的归属高于 Shell |
 | 主题隔离 | 四主题不覆盖断点、导航、权限和功能可见性 |
 | 契约兼容 | 未新增接口；`/home/overview` 与 `/home/widget` 职责保持不变 |
 | 负向路径 | 会话失效、越权、权限拒绝、缺字段、同步 / 发送 / 上传失败均有安全表面 |
+| 离线边界 | 未登录可进入本机 Canvas 并重启恢复；联网依赖操作被真实阻止；目标账号未确认前没有业务正文上传 |
+| 计划层级 | 短计划保存后可编辑；长计划为可滑动完整月历；超长计划为 12 月年历并可按月拖动区间；旧周视图仅兼容 |
 | 用户确认 | 已确认；文档状态为 `approved` |
 
 ## 11. 后续实施顺序

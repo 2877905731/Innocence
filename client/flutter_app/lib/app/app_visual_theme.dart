@@ -158,8 +158,8 @@ class AppVisualTokens {
             ink: Color(0xFFF5F8FF),
             muted: Color(0xFFD2DDF0),
             line: Color(0x5CBCD3F2),
-            accent: Color(0xFF88E3D0),
-            onAccent: Color(0xFF0B1E26),
+            accent: Color(0xFFA7B5FF),
+            onAccent: Color(0xFF11183A),
             artOne: Color(0xFF789BFF),
             artTwo: Color(0xFFD798FF),
             isDark: true,
@@ -196,6 +196,21 @@ class AppVisualTokens {
       scaffoldBackgroundColor: canvas,
       dividerColor: line,
       fontFamily: 'Segoe UI',
+      dialogTheme: isGlass
+          ? const DialogThemeData(
+              backgroundColor: Color(0xE6132146),
+              surfaceTintColor: Colors.transparent,
+              elevation: 28,
+              shadowColor: Color(0xCC071027),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(22)),
+                side: BorderSide(
+                  color: Color(0x78FFFFFF),
+                  width: 1.2,
+                ),
+              ),
+            )
+          : null,
       textTheme: TextTheme(
         displayLarge: TextStyle(
           color: ink,

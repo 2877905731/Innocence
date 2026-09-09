@@ -163,6 +163,7 @@ class _ThemeAwarePanelState extends State<_ThemeAwarePanel> {
       onEnter: glass ? (_) => setState(() => _hovered = true) : null,
       onExit: glass ? (_) => setState(() => _hovered = false) : null,
       child: AnimatedContainer(
+        key: ValueKey(widget.visualTheme),
         duration:
             reduceMotion ? Duration.zero : const Duration(milliseconds: 260),
         curve: Curves.easeOutCubic,

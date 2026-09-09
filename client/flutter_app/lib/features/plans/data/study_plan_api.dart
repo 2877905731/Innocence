@@ -2,6 +2,8 @@ import 'package:innocence_flutter/core/network/api_client.dart';
 import 'package:innocence_flutter/core/network/api_exception.dart';
 import 'package:innocence_flutter/features/auth/domain/models/app_session.dart';
 import 'package:innocence_flutter/features/plans/domain/models/today_plan.dart';
+import 'package:innocence_flutter/features/plans/domain/models/month_plan_overview.dart';
+import 'package:innocence_flutter/features/plans/domain/models/annual_plan_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/week_plan_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/weekly_plan_template.dart';
 
@@ -59,7 +61,125 @@ class StudyPlanApi {
     return WeekPlanOverview.fromJson(data);
   }
 
-  Future<List<WeeklyPlanTemplate>> getWeeklyTemplates(AppSession session) async {
+  Future<MonthPlanOverview> getMonthPlanOverview(
+    AppSession session, {
+    required String month,
+  }) async {
+    final data = await _apiClient.get(
+      _withQuery('plans/month', {'month': month}),
+      headers: session.authHeaders,
+    );
+    if (data is! Map<String, dynamic>) {
+      throw const ApiException('Failed to load the month plan overview.');
+    }
+    return MonthPlanOverview.fromJson(data);
+  }
+
+  Future<AnnualPlanOverview> getAnnualPlanOverview(
+    AppSession session, {
+    required int year,
+  }) async {
+    final data = await _apiClient.get(
+      _withQuery('plans/year', {'year': '$year'}),
+      headers: session.authHeaders,
+    );
+    if (data is! Map<String, dynamic>) {
+      throw const ApiException('Failed to load the annual plan overview.');
+    }
+    return AnnualPlanOverview.fromJson(data);
+  }
+
+  Future<List<WeeklyPlanTemplate>> getDayTemplates(AppSession session) async {
+    final data = await _apiClient.get(
+      'plans/day-templates',
+      headers: session.authHeaders,
+    );
+    if (data is! List) {
+      throw const ApiException('Failed to load day plan templates.');
+    }
+    return data
+        .whereType<Map<String, dynamic>>()
+        .map(WeeklyPlanTemplate.fromJson)
+        .toList();
+  }
+
+  Future<List<WeeklyPlanTemplate>> saveDayTemplate(
+    AppSession session, {
+    required String templateName,
+    required TodayPlan sourcePlan,
+  }) async {
+    await _apiClient.post(
+      'plans/day-templates',
+      body: {
+        'templateName': templateName,
+        'sourcePlanName': sourcePlan.planName,
+        'items': sourcePlan.items.map((item) => item.toSaveJson()).toList(),
+      },
+      headers: session.authHeaders,
+    );
+    return getDayTemplates(session);
+  }
+
+  Future<List<TodayPlan>> applyDayTemplateBatch(
+    AppSession session, {
+    required int templateId,
+    required List<String> planDates,
+    required PlanApplyStrategy strategy,
+  }) async {
+    final data = await _apiClient.post(
+      'plans/day-templates/$templateId/apply-batch',
+      body: {
+        'planDates': planDates,
+        'strategy': strategy.name,
+      },
+      headers: session.authHeaders,
+    );
+    final rawPlans = data is Map<String, dynamic>
+        ? data['plans'] as List<dynamic>? ?? const []
+        : data is List<dynamic>
+            ? data
+            : const <dynamic>[];
+    return rawPlans
+        .whereType<Map<String, dynamic>>()
+        .map(TodayPlan.fromJson)
+        .toList();
+  }
+
+  Future<AnnualPlanOverview> saveAnnualSegment(
+    AppSession session,
+    AnnualPlanSegment segment,
+  ) async {
+    final creating = segment.id.trim().isEmpty;
+    final data = creating
+        ? await _apiClient.post(
+            'plans/annual-segments',
+            body: segment.toSaveJson(),
+            headers: session.authHeaders,
+          )
+        : await _apiClient.put(
+            'plans/annual-segments/${segment.id}',
+            body: segment.toSaveJson(),
+            headers: session.authHeaders,
+          );
+    if (data is Map<String, dynamic> && data.containsKey('year')) {
+      return AnnualPlanOverview.fromJson(data);
+    }
+    return getAnnualPlanOverview(session, year: segment.year);
+  }
+
+  Future<AnnualPlanOverview> deleteAnnualSegment(
+    AppSession session,
+    AnnualPlanSegment segment,
+  ) async {
+    await _apiClient.delete(
+      'plans/annual-segments/${segment.id}',
+      headers: session.authHeaders,
+    );
+    return getAnnualPlanOverview(session, year: segment.year);
+  }
+
+  Future<List<WeeklyPlanTemplate>> getWeeklyTemplates(
+      AppSession session) async {
     final data = await _apiClient.get(
       'plans/weekly-templates',
       headers: session.authHeaders,
@@ -123,8 +243,7 @@ class StudyPlanApi {
     final entries = query.entries
         .where((entry) => entry.value != null && entry.value!.isNotEmpty)
         .map(
-          (entry) =>
-              '${Uri.encodeQueryComponent(entry.key)}='
+          (entry) => '${Uri.encodeQueryComponent(entry.key)}='
               '${Uri.encodeQueryComponent(entry.value!)}',
         )
         .toList();

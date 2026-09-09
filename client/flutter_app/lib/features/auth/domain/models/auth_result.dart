@@ -22,7 +22,7 @@ class AuthResult {
       session: AppSession(
         accessToken: '${json['accessToken'] ?? ''}',
         tokenType: '${json['tokenType'] ?? 'Bearer'}',
-        userId: profile.userId,
+        userId: profile.userId!,
         deviceType: '${json['deviceType'] ?? ''}',
         deviceSlot: '${json['deviceSlot'] ?? ''}',
         deviceId: '${json['deviceId'] ?? ''}',

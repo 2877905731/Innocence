@@ -68,6 +68,21 @@
         where user_id = #{userId}
     </select>
 
+    <select id="findCheckInDatesByUserId" resultType="java.time.LocalDate">
+        select check_in_date
+        from check_in_record
+        where user_id = #{userId}
+        order by check_in_date desc
+    </select>
+
+    <select id="findCheckInFailRecordsByUserId" resultMap="CheckInFailRecordResultMap">
+        select *
+        from check_in_fail_record
+        where user_id = #{userId}
+        order by check_in_date desc, last_attempt_time desc
+        limit #{offset}, #{limit}
+    </select>
+
     <insert id="insertCheckInRecord" useGeneratedKeys="true" keyProperty="id">
         insert into check_in_record (
             user_id,

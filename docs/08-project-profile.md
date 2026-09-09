@@ -4,7 +4,7 @@ document_type: project_profile
 project_name: "Innocence"
 project_type: "other（双端自有产品：Flutter 手机端 + 桌面端 + Spring Boot 后端）"
 data_owner: "Innocence 自有数据；用户数据归用户，由 Innocence 服务托管"
-authorization_boundary: "用户数据以登录用户为边界；陌生人不可私信/看资料；仅队友可见学习数据；后台管理权限仅限内容治理与账号治理"
+authorization_boundary: "服务端用户数据以登录用户为边界；未登录离线数据以本机 ownerScope 为边界，未经用户确认不得绑定或上传；陌生人不可私信/看资料；仅队友可见学习数据；后台管理权限仅限内容治理与账号治理"
 default_invariants:
   - id: STANDALONE-FIRST
     enabled: disabled
@@ -50,8 +50,8 @@ project_specific_rules:
     verification: "会话策略验收（G01）"
   - id: RULE-006
     enabled: true
-    rule: "双端同步冲突采用最后修改覆盖；桌面端断网本地记录、联网补传"
-    verification: "同步链路验收（G02）"
+    rule: "桌面端支持未登录离线资料与已登录断网缓存两个隔离数据域；业务数据先写本地，登录后先预览目标账号并由用户确认导入；冲突按实体类型处理，禁止用统一最后修改覆盖所有数据"
+    verification: "离线入口、本地持久化、ownerScope 隔离、幂等补传、导入确认与冲突矩阵验收（G01/G02）"
   - id: RULE-007
     enabled: true
     rule: "签到成功需同时满足手动点击与当天计划完成；学习时长不足条件仍保留"
@@ -66,14 +66,30 @@ project_specific_rules:
     verification: "团队规则验收（G03）"
   - id: RULE-010
     enabled: true
-    rule: "Windows 端采用 Large/Medium/Small 自适应画布 + 用户主动 Focus Orb；默认 920×760，不以小挂件启动；跨尺寸只重排布局，不重建业务状态"
+    rule: "Windows 端采用 Large/Medium/Small 自适应画布 + 用户主动 Focus Orb；首次按工作区约 84%×82% 居中进入适中 Large，之后恢复用户边界，不以小挂件启动；跨尺寸只重排布局，不重建业务状态"
     verification: "窗口尺寸矩阵、DPI、多屏、状态连续性与四主题验收（G05/G06）"
+  - id: RULE-011
+    enabled: true
+    rule: "计划层级固定为短计划按日、长计划按月、超长计划按年；周视图仅作兼容辅助，日计划模板可批量套用到月历日期"
+    verification: "日/月/年视图、模板批量套用、年度月区间拖动与跨月/跨年边界验收（G02）"
+  - id: RULE-012
+    enabled: true
+    rule: "首页 Hero 按主题与本地日期稳定轮换；四主题分别使用符合自身气质的文案和艺术字构图，侘寂主题允许英文主标题"
+    verification: "四主题、双语、同日稳定、跨午夜切换与 Small Canvas 溢出验收（G02/G05）"
+  - id: RULE-013
+    enabled: true
+    rule: "Windows 无框窗口缩放采用 Flutter 八方向透明命中层触发原生 sizing loop，并保留顶层 WM_NCHITTEST 作为补充；必须真实拖动后尺寸发生变化才算通过"
+    verification: "Windows Release 在 100%/125%/150% DPI 下完成四边四角真实拖动、最大化与 Focus Orb 负向验收（G05/G06）"
 change_policy:
   source_of_truth: this_file
   rule_change_checkpoint: DECISION
   affected_documents_to_sync:
+    - docs/01-product-scope.md
     - docs/03-execution-plan.md
     - docs/02-contract-and-compatibility-rules.md
+    - docs/06-contract-inventory.md
+    - docs/07-dataflow-and-module-map.md
+    - docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md
     - docs/planning/Innocence-Windows自适应桌面体验.md
 ---
 
@@ -89,3 +105,4 @@ change_policy:
 - UI 规划与主题存档：`docs/planning/Innocence-UI设计规划.md`
 - Windows 自适应体验：`docs/planning/Innocence-Windows自适应桌面体验.md`
 - Windows 信息架构与组件接口：`docs/planning/Innocence-Windows信息架构与组件体系.md`（已确认）
+- 离线模式、主题标语、年月计划与窗口缩放：`docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md`（已确认，代码未开始）

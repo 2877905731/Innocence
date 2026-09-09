@@ -2,13 +2,13 @@
 schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
-updated_at: "2026-08-11"
-latest_checkpoint: "0032"
+updated_at: "2026-09-10"
+latest_checkpoint: "0042"
 current_phase: P01
 current_gate: G01
-state: p01_memo_desktop_editor_surface_corrected
-next_sequence: "0033"
-current_goal: "P01 账户与基础进行中：玻璃态主页、设置页和二级页共享动态背景与主题表面；备忘录新建/编辑已改为响应式桌面大面板；继续四主题逐页视觉、头像上传和 DPI 验收"
+state: windows_release_candidate_verified_publish_pending
+next_sequence: "0043"
+current_goal: "离线设置分级开放与认证页拖窗纠正已完成；Windows Release 候选通过 Flutter 51 项、Maven 36 项和构建启动验证，继续提交推送并创建 GitHub Windows 预览 Release"
 recent_baseline:
   - checkpoint: "0015"
     result: "设置页完成 Large/Medium/Small 三档独立编排与黑名单新增入口；新增会话、认证、拉黑和跨租户权限负向测试，定向 Maven 7 项通过；Flutter/Dart SDK、数据库集成环境和头像上传后端路由仍不可用"
@@ -36,6 +36,24 @@ recent_baseline:
     result: "共享 GlassPanel、导航、设置面板、主页卡片和空状态全部改为主题感知表面；玻璃态移除固定白卡与近黑条带，备忘录内部组件改用 ColorScheme；flutter analyze、25 项测试、git diff --check 与 Windows Release 构建通过"
   - checkpoint: "0032"
     result: "备忘录新建/编辑弹窗改为响应式桌面大面板：Large 窗口最大约 820px 宽、76% 高，正文和清单保持滚动；flutter analyze、25 项测试与 Windows Release 构建通过，待推送"
+  - checkpoint: "0034"
+    result: "认证页玻璃态接入主页共享动态光场与 GlassPanel，移除重复网格；主题切换边框插值保护已补齐；定向 Flutter 测试、flutter analyze 与 git diff --check 通过，Windows Release 实机视觉/DPI 待验收"
+  - checkpoint: "0035"
+    result: "玻璃态标准二级弹层改为高可见度深蓝紫表面、浅描边与独立阴影；11 项定向 Flutter 测试、flutter analyze、git diff --check 和 Windows Release 构建通过，已启动 PID 29328"
+  - checkpoint: "0036"
+    result: "今日计划编辑器改为固定可见48段昼夜时间轴，补齐中英文并修复选时后直接保存；玻璃态通用操作色改为蓝紫系；29项Flutter测试、flutter analyze、git diff --check和Windows Release构建通过，已启动PID 23016"
+  - checkpoint: "0037"
+    result: "今日计划新增循环浅色渐变、等量联动小时间条动画和已有时段首尾拖动；相邻计划自动钳制且占用段不触发新建；30项Flutter测试、flutter analyze、git diff --check和Windows Release构建通过，已启动PID 29920"
+  - checkpoint: "0038"
+    result: "统一主题化窗口控件并新增大中小原生尺寸预设与边缘缩放光标；统计中心内卡跟随主题且工具栏固定；计划页补齐真实周计划与长期日期路线；32项Flutter测试、analyze、diff检查和Windows Release构建通过，已启动PID 4052"
+  - checkpoint: "0039"
+    result: "尺寸入口由单按钮弹出菜单改为顶部常驻三圆环，圆环从左到右递减并直接对应Large/Medium/Small；32项Flutter测试、analyze、diff检查和Windows Release构建通过，已启动PID 5952"
+  - checkpoint: "0040"
+    result: "完成无需登录离线资料、登录后确认导入、四主题每日艺术标语、长计划月历、超长计划年历和八方向原生缩放的详细规划；同步覆盖现行冲突文档，代码未修改也未开始"
+  - checkpoint: "0041"
+    result: "离线 SQLite/outbox/本地统计与登录确认导入、四主题 4×7 标语、短/月/年计划、日模板、年度区间和 Windows sizing loop 已落地；Flutter 49 项、Maven 36 项、analyze、diff 检查和 Windows Release 构建通过，已启动 PID 25640；真实拖边/DPI 与同步 HTTP 回放待验收"
+  - checkpoint: "0042"
+    result: "用户确认普通边框拖动和离线模式可用；离线设置只开放本机安全分区并持久化桌面偏好，认证页顶部/品牌区拖窗命中已纠正；Flutter 51 项、Maven 36 项、analyze、diff 检查和 Windows Release 构建通过，已启动 PID 8228"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
@@ -81,6 +99,18 @@ user_decisions:
     decision: "共享页面表面必须跟随当前四主题；玻璃态统一使用深色半透明蓝紫表面、浅色描边和模糊发光，禁止 lightStyle 强制白卡、嵌套空状态使用不透明近黑底或页面控件复用旧浅色固定色。"
   - id: DEC-0022
     decision: "备忘录新建与编辑采用响应式桌面大面板，最大约 820px 宽并按窗口高度限制滚动；小窗口自动收缩，不改变数据契约。"
+  - id: DEC-0023
+    decision: "今日计划选时采用固定可见的48段昼夜阶梯时间轴，中央12:00最高并配置太阳、两端月亮和时间标记；选时后无需额外填写即可保存，编辑器完整覆盖中英文。玻璃态通用主操作使用蓝紫主题色，绿色仅表达成功。本决策覆盖四列滚动网格、基础选时需扩大窗口和通用薄荷绿操作色的旧要求。"
+  - id: DEC-0024
+    decision: "今日计划按计划分配稳定的循环浅色渐变，计划卡时间右侧显示颜色一致、数量等于半小时格数且等高的小时间条，并在范围变化时从零动画增长。点击已有时段只激活并允许拖动首尾，边界不得越过其他计划；新建只能从空白时段开始。本决策覆盖单一选中色、占用段可新建和已有范围不可拖动的旧要求。"
+  - id: DEC-0025
+    decision: "认证、Canvas和二级页统一主题化窗口控件；顶部提供Large/Medium/Small一键尺寸预设，边缘显式显示缩放光标；统计中心固定工具栏且内卡跟随主题；计划页的短/长/超长均为可操作视图，MVP超长计划复用日期持久化而不新增planType=ultra。本决策覆盖对应冲突旧方案。"
+  - id: DEC-0026
+    decision: "Large/Medium/Small尺寸预设必须在顶部以从左到右逐级缩小的三个圆环常驻显示并直接点击，不得收进单按钮、弹出菜单或下拉列表；本决策覆盖DEC-0025中未限定的菜单实现和检查点0038的尺寸菜单。"
+  - id: DEC-0027
+    decision: "Windows 新增无需登录的本机离线资料，登录后先预览目标账号并确认导入；首页四主题各 7 条艺术标语按日稳定轮换；计划层级改为短=日、长=月、超长=年，旧周能力仅兼容；边框缩放改用 Flutter 八方向命中层触发原生 sizing loop 并以 Release 真实拖动验收。本决策覆盖 DEC-0025 中周/逐周计划语义及旧缩放完成假设。"
+  - id: DEC-0028
+    decision: "离线模式允许进入系统设置，但只展示语言、本机资料、桌面体验、外观和本机操作；需要联网的隐私、通知、设备会话、后台和账号注销不向离线用户开放。Windows 认证页顶部安全条和无按钮品牌区必须可拖动窗口。"
 unfinished:
   - id: TODO-005
     priority: P0
@@ -94,16 +124,28 @@ unfinished:
     priority: P0
     item: "在 Windows Release 实机视觉检查重写后的语言/登录页四套艺术字、左下装置、最小化与非强制置顶；自动化与 Release 构建已通过"
     gate: G01
+  - id: TODO-011
+    priority: P0
+    item: "用户已确认普通 Canvas 边框拖动可用；仍需 100%/125%/150% DPI 八方向完整矩阵后才能关闭跨 DPI 验收"
+    gate: G05/G06
+  - id: TODO-012
+    priority: P0
+    item: "使用真实登录会话回放离线 import-preview/import，覆盖 keep_server、overwrite、重复 operationId、断线重试和 targetUserNo 不匹配"
+    gate: G01/G02
+  - id: TODO-013
+    priority: P0
+    item: "在 PID 8228 的 Windows Release 登录页顶部安全条和左侧品牌区各执行一次真实鼠标拖动，复验 0042 命中层纠正"
+    gate: G01
 next_actions:
   - id: NEXT-001
-    action: "启动隔离 MySQL/Redis 与后端，运行 Windows Release，使用合成账号完成真实头像选择、上传、静态资源展示与资料刷新"
-    inputs: ["Windows Release", "MySQL/Redis 集成环境", "合成图片"]
+    action: "提交并推送当前实现，创建 v0.0.1 Windows 预览 Release 并上传完整 x64 运行目录压缩包"
+    inputs: ["origin/main", "client/flutter_app/build/windows/x64/runner/Release"]
   - id: NEXT-002
-    action: "执行 Large/Medium/Small 在 100%/125%/150% DPI 的窗口重排、滚动、命中区域和状态连续性验收"
-    inputs: ["Windows Release", "Windows DPI 环境"]
+    action: "在当前已启动 Windows Release 中人工复验认证页顶部/品牌区拖窗，并完成 100%/125%/150% DPI 八方向矩阵"
+    inputs: ["PID 8228", "docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md"]
   - id: NEXT-003
-    action: "手动切换纯白、侘寂、中世纪现代和玻璃态，验收设置页与 72×72 圆形 Orb 同步变色、表单对比度与 Small/Medium 不溢出"
-    inputs: ["Windows Release", "四主题本地偏好"]
+    action: "启动本地后端并用合成账号完成同步真实 HTTP 回放与幂等/租户负向验证"
+    inputs: ["docs/06-contract-inventory.md", "server/innocence-server"]
 required_reads:
   - AGENTS.md
   - docs/08-project-profile.md
@@ -112,4 +154,13 @@ required_reads:
   - docs/06-contract-inventory.md
   - docs/planning/Innocence-Windows自适应桌面体验.md
   - docs/planning/Innocence-Windows信息架构与组件体系.md
+  - docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md
   - progress/INDEX.md
+
+backend_checkpoint:
+  sequence: "0041"
+  status: complete
+  result: "新增月/年/日模板/年度区间与离线同步预检/导入服务；36 项 Maven 测试和 Spring local 上下文通过。"
+  next_actions:
+    - "使用合成登录会话完成 U14/U15 真实 HTTP 回放，覆盖幂等、冲突策略和目标账号不匹配。"
+    - "完成 Windows 八方向真实拖边和 DPI 矩阵。"

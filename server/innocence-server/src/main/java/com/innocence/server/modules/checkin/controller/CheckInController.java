@@ -4,6 +4,8 @@ import com.innocence.server.common.api.ApiResponse;
 import com.innocence.server.common.web.RequestUserContext;
 import com.innocence.server.modules.checkin.dto.response.CheckInStatusResponse;
 import com.innocence.server.modules.checkin.dto.response.CheckInSubmitResponse;
+import com.innocence.server.modules.checkin.dto.response.CheckInSummaryResponse;
+import com.innocence.server.modules.checkin.dto.response.CheckInFailureRecordResponse;
 import com.innocence.server.modules.checkin.service.CheckInService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/app/v1/check-in")
@@ -33,6 +36,19 @@ public class CheckInController {
     @PostMapping("/submit")
     public ApiResponse<CheckInSubmitResponse> submitTodayCheckIn() {
         return ApiResponse.success(checkInService.submitTodayCheckIn(currentUserId()));
+    }
+
+    @GetMapping("/summary")
+    public ApiResponse<CheckInSummaryResponse> getSummary() {
+        return ApiResponse.success(checkInService.getSummary(currentUserId()));
+    }
+
+    @GetMapping("/fail-records")
+    public ApiResponse<List<CheckInFailureRecordResponse>> listFailureRecords(
+            @RequestParam(value = "pageNo", required = false, defaultValue = "1") Integer pageNo,
+            @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize
+    ) {
+        return ApiResponse.success(checkInService.listFailureRecords(currentUserId(), pageNo, pageSize));
     }
 
     @DeleteMapping("/failure")

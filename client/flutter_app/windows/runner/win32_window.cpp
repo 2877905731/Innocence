@@ -48,6 +48,12 @@ constexpr int kPageDefaultWorkWidthPercent = 84;
 constexpr int kPageDefaultWorkHeightPercent = 82;
 constexpr int kPageMinWidth = 380;
 constexpr int kPageMinHeight = 520;
+constexpr int kLargeCanvasWidth = 1320;
+constexpr int kLargeCanvasHeight = 820;
+constexpr int kMediumCanvasWidth = 920;
+constexpr int kMediumCanvasHeight = 720;
+constexpr int kSmallCanvasWidth = 460;
+constexpr int kSmallCanvasHeight = 680;
 constexpr DWORD kPageStateVersion = 2;
 constexpr int kMiniWidgetWidth = 72;
 constexpr int kMiniWidgetHeight = 72;
@@ -83,6 +89,25 @@ double WindowScaleFactor(HWND window) {
   const HMONITOR monitor =
       MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
   return FlutterDesktopGetDpiForMonitor(monitor) / 96.0;
+}
+
+int ResizeGripForWindow(HWND window) {
+  const UINT dpi = GetDpiForWindow(window);
+  const int frame = GetSystemMetricsForDpi(SM_CXSIZEFRAME, dpi);
+  const int padded_border = GetSystemMetricsForDpi(SM_CXPADDEDBORDER, dpi);
+  return std::max(Scale(8, WindowScaleFactor(window)), frame + padded_border);
+}
+
+int HitTestForResizeEdge(const std::string& edge) {
+  if (edge == "left") return HTLEFT;
+  if (edge == "right") return HTRIGHT;
+  if (edge == "top") return HTTOP;
+  if (edge == "bottom") return HTBOTTOM;
+  if (edge == "topLeft") return HTTOPLEFT;
+  if (edge == "topRight") return HTTOPRIGHT;
+  if (edge == "bottomLeft") return HTBOTTOMLEFT;
+  if (edge == "bottomRight") return HTBOTTOMRIGHT;
+  return HTNOWHERE;
 }
 
 // Dynamically loads the |EnableNonClientDpiScaling| from the User32 module.
@@ -238,7 +263,7 @@ Win32Window::MessageHandler(HWND hwnd,
       break;
 
     case WM_NCHITTEST: {
-      if (window_mode_ == "mini") {
+      if (window_mode_ == "mini" || IsZoomed(hwnd)) {
         return HTCLIENT;
       }
       RECT window_rect = {};
@@ -247,7 +272,7 @@ Win32Window::MessageHandler(HWND hwnd,
       }
       const int x = GET_X_LPARAM(lparam);
       const int y = GET_Y_LPARAM(lparam);
-      const int grip = Scale(9, WindowScaleFactor(hwnd));
+      const int grip = ResizeGripForWindow(hwnd);
       const bool left = x < window_rect.left + grip;
       const bool right = x >= window_rect.right - grip;
       const bool top = y < window_rect.top + grip;
@@ -261,6 +286,39 @@ Win32Window::MessageHandler(HWND hwnd,
       if (top) return HTTOP;
       if (bottom) return HTBOTTOM;
       return HTCLIENT;
+    }
+
+    case WM_SETCURSOR: {
+      if (window_mode_ == "mini") {
+        break;
+      }
+      const int hit_test = LOWORD(lparam);
+      LPCWSTR cursor_name = nullptr;
+      switch (hit_test) {
+        case HTLEFT:
+        case HTRIGHT:
+          cursor_name = IDC_SIZEWE;
+          break;
+        case HTTOP:
+        case HTBOTTOM:
+          cursor_name = IDC_SIZENS;
+          break;
+        case HTTOPLEFT:
+        case HTBOTTOMRIGHT:
+          cursor_name = IDC_SIZENWSE;
+          break;
+        case HTTOPRIGHT:
+        case HTBOTTOMLEFT:
+          cursor_name = IDC_SIZENESW;
+          break;
+        default:
+          break;
+      }
+      if (cursor_name != nullptr) {
+        SetCursor(LoadCursor(nullptr, cursor_name));
+        return TRUE;
+      }
+      break;
     }
 
     case WM_DESTROY:
@@ -323,7 +381,8 @@ Win32Window::MessageHandler(HWND hwnd,
       if (window_mode_ == "mini") {
         ApplyMiniWindowRegion(hwnd);
       }
-      if (!updating_window_position_ && window_mode_ == "page" &&
+      if (!updating_window_position_ &&
+          (window_mode_ == "auth" || window_mode_ == "page") &&
           wparam != SIZE_MINIMIZED) {
         RECT window_rect = {};
         if (GetWindowRect(hwnd, &window_rect)) {
@@ -334,7 +393,9 @@ Win32Window::MessageHandler(HWND hwnd,
           page_x_ = window_rect.left;
           page_y_ = window_rect.top;
           has_custom_auth_bounds_ = true;
-          SaveWindowState();
+          if (!resizing_window_) {
+            SaveWindowState();
+          }
         }
       }
       if (!updating_window_position_ && window_mode_ == "widget" &&
@@ -357,22 +418,29 @@ Win32Window::MessageHandler(HWND hwnd,
       if (!updating_window_position_) {
         if (window_mode_ == "widget" || window_mode_ == "mini") {
           UpdateStoredWidgetPosition(hwnd);
-        } else if (window_mode_ == "page") {
+        } else if (window_mode_ == "auth" || window_mode_ == "page") {
           RECT window_rect = {};
           if (GetWindowRect(hwnd, &window_rect)) {
             page_x_ = window_rect.left;
             page_y_ = window_rect.top;
             has_custom_auth_bounds_ = true;
-            SaveWindowState();
+            if (!resizing_window_) {
+              SaveWindowState();
+            }
           }
         }
       }
       return 0;
 
+    case WM_ENTERSIZEMOVE:
+      resizing_window_ = true;
+      return 0;
+
     case WM_EXITSIZEMOVE:
+      resizing_window_ = false;
       if (window_mode_ == "auth" || window_mode_ == "page") {
         has_custom_auth_bounds_ = true;
-        if (window_mode_ == "page") {
+        if (window_mode_ == "auth" || window_mode_ == "page") {
           RECT window_rect = {};
           if (GetWindowRect(hwnd, &window_rect)) {
             page_width_ = ClampInt(window_rect.right - window_rect.left,
@@ -534,6 +602,49 @@ void Win32Window::SetWindowMode(const std::string& mode) {
   OnWindowModeChanged(window_mode_);
 }
 
+void Win32Window::SetCanvasSizePreset(const std::string& preset) {
+  if (window_handle_ == nullptr || window_mode_ == "mini") {
+    return;
+  }
+
+  int logical_width = kLargeCanvasWidth;
+  int logical_height = kLargeCanvasHeight;
+  if (preset == "medium") {
+    logical_width = kMediumCanvasWidth;
+    logical_height = kMediumCanvasHeight;
+  } else if (preset == "small") {
+    logical_width = kSmallCanvasWidth;
+    logical_height = kSmallCanvasHeight;
+  }
+
+  ShowWindow(window_handle_, SW_RESTORE);
+  const RECT work_area = GetMonitorWorkArea(window_handle_);
+  const int work_width = static_cast<int>(work_area.right - work_area.left);
+  const int work_height = static_cast<int>(work_area.bottom - work_area.top);
+  const double scale_factor = WindowScaleFactor(window_handle_);
+  const int target_width = std::min(Scale(logical_width, scale_factor), work_width);
+  const int target_height =
+      std::min(Scale(logical_height, scale_factor), work_height);
+  const int target_x = static_cast<int>(work_area.left) +
+                       std::max(0, (work_width - target_width) / 2);
+  const int target_y = static_cast<int>(work_area.top) +
+                       std::max(0, (work_height - target_height) / 2);
+
+  updating_window_position_ = true;
+  const HWND insert_after = always_on_top_ ? HWND_TOPMOST : HWND_NOTOPMOST;
+  SetWindowPos(window_handle_, insert_after, target_x, target_y, target_width,
+               target_height,
+               SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+  updating_window_position_ = false;
+
+  page_x_ = target_x;
+  page_y_ = target_y;
+  page_width_ = target_width;
+  page_height_ = target_height;
+  has_custom_auth_bounds_ = true;
+  SaveWindowState();
+}
+
 void Win32Window::BeginWindowDrag() {
   if (window_handle_ == nullptr) {
     return;
@@ -542,6 +653,24 @@ void Win32Window::BeginWindowDrag() {
   dragging_widget_ = true;
   ReleaseCapture();
   SendMessage(window_handle_, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+}
+
+bool Win32Window::BeginWindowResize(const std::string& edge) {
+  if (window_handle_ == nullptr || window_mode_ == "mini" ||
+      IsZoomed(window_handle_)) {
+    return false;
+  }
+
+  const LONG_PTR style = GetWindowLongPtr(window_handle_, GWL_STYLE);
+  const int hit_test = HitTestForResizeEdge(edge);
+  if ((style & WS_THICKFRAME) == 0 || hit_test == HTNOWHERE) {
+    return false;
+  }
+
+  SetForegroundWindow(window_handle_);
+  ReleaseCapture();
+  SendMessage(window_handle_, WM_NCLBUTTONDOWN, hit_test, 0);
+  return true;
 }
 
 void Win32Window::ResetWidgetPosition() {
@@ -625,6 +754,9 @@ void Win32Window::UpdateWindowFrame(HWND const window) {
     ex_style |= WS_EX_APPWINDOW;
   }
   SetWindowLongPtr(window, GWL_EXSTYLE, ex_style);
+  SetWindowPos(window, nullptr, 0, 0, 0, 0,
+               SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE |
+                   SWP_FRAMECHANGED);
 }
 
 void Win32Window::ApplyDesktopBackdrop(HWND const window) {

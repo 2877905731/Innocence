@@ -70,6 +70,41 @@
         )
     </insert>
 
+    <insert id="insertImportedStudyTimerRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into study_timer_record (
+            user_id,
+            task_name,
+            planned_end_time,
+            actual_end_time,
+            planned_minutes,
+            duration_seconds,
+            status,
+            bind_pomodoro_flag,
+            pomodoro_study_minutes,
+            pomodoro_break_minutes,
+            completed_pomodoro_count,
+            completion_notified_flag,
+            create_time,
+            update_time
+        )
+        values (
+            #{userId},
+            #{taskName},
+            #{plannedEndTime},
+            #{actualEndTime},
+            #{plannedMinutes},
+            #{durationSeconds},
+            #{status},
+            #{bindPomodoroFlag},
+            #{pomodoroStudyMinutes},
+            #{pomodoroBreakMinutes},
+            #{completedPomodoroCount},
+            #{completionNotifiedFlag},
+            #{createTime},
+            #{updateTime}
+        )
+    </insert>
+
     <update id="finishStudyTimerRecord">
         update study_timer_record
         set actual_end_time = #{actualEndTime},
@@ -78,6 +113,17 @@
             status = #{status}
         where id = #{sessionId}
           and status = 'active'
+    </update>
+
+    <update id="finishImportedStudyTimerRecord">
+        update study_timer_record
+        set actual_end_time = #{actualEndTime},
+            duration_seconds = #{durationSeconds},
+            completed_pomodoro_count = #{completedPomodoroCount},
+            status = 'finished',
+            completion_notified_flag = 1
+        where id = #{sessionId}
+          and user_id = #{userId}
     </update>
 
     <update id="markCompletionNotificationSent">

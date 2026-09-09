@@ -103,6 +103,23 @@ class DesktopWidgetBridge {
     }
   }
 
+  static Future<void> setCanvasSizePreset(String preset) async {
+    if (AppConfig.deviceType != 'windows') {
+      return;
+    }
+
+    try {
+      await _channel.invokeMethod<void>(
+        'setCanvasSizePreset',
+        <String, String>{'preset': preset},
+      );
+    } on MissingPluginException {
+      // Ignore when the current platform does not expose the desktop bridge.
+    } on PlatformException {
+      // Manual edge resizing remains available if a preset cannot be applied.
+    }
+  }
+
   static Future<void> startWindowDrag() async {
     if (AppConfig.deviceType != 'windows') {
       return;
@@ -114,6 +131,23 @@ class DesktopWidgetBridge {
       // Ignore when the current platform does not expose the desktop bridge.
     } on PlatformException {
       // Keep the widget usable even if the native shell drag fails.
+    }
+  }
+
+  static Future<void> startWindowResize(String edge) async {
+    if (AppConfig.deviceType != 'windows') {
+      return;
+    }
+
+    try {
+      await _channel.invokeMethod<void>(
+        'startWindowResize',
+        <String, String>{'edge': edge},
+      );
+    } on MissingPluginException {
+      // Ignore when the current platform does not expose the desktop bridge.
+    } on PlatformException {
+      // The native shell rejects invalid edges, maximized windows, and Orb.
     }
   }
 

@@ -28,6 +28,8 @@ import 'package:innocence_flutter/features/memos/presentation/pages/memo_page.da
 import 'package:innocence_flutter/features/notifications/domain/models/notification_overview.dart';
 import 'package:innocence_flutter/features/notifications/presentation/pages/notification_page.dart';
 import 'package:innocence_flutter/features/plans/domain/models/today_plan.dart';
+import 'package:innocence_flutter/features/plans/domain/models/month_plan_overview.dart';
+import 'package:innocence_flutter/features/plans/domain/models/annual_plan_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/week_plan_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/weekly_plan_template.dart';
 import 'package:innocence_flutter/features/plans/presentation/widgets/today_plan_editor_dialog.dart';
@@ -433,10 +435,23 @@ class HomePage extends StatelessWidget {
     required this.onSaveTodayPlan,
     required this.onLoadPlanByDate,
     required this.weekPlanOverview,
+    required this.monthPlanOverview,
+    required this.annualPlanOverview,
     required this.weeklyTemplates,
     required this.onPreviousWeek,
     required this.onCurrentWeek,
     required this.onNextWeek,
+    required this.onLoadMonthOverview,
+    required this.onPreviousMonth,
+    required this.onCurrentMonth,
+    required this.onNextMonth,
+    required this.onLoadAnnualOverview,
+    required this.onPreviousYear,
+    required this.onCurrentYear,
+    required this.onNextYear,
+    required this.onApplyDayTemplateToDate,
+    required this.onSaveAnnualSegment,
+    required this.onDeleteAnnualSegment,
     required this.onSavePlanAsWeeklyTemplate,
     required this.onApplyWeeklyTemplate,
     required this.onApplyWeeklyTemplateToDate,
@@ -447,6 +462,8 @@ class HomePage extends StatelessWidget {
     required this.onApplyWeeklyTemplateToDates,
     required this.onQuickArrangeWeek,
     required this.onToggleTodayPlanItem,
+    required this.isOfflineMode,
+    required this.onRequireOnline,
     required this.isBusy,
     required this.onClearBanner,
     this.bannerMessage,
@@ -630,10 +647,27 @@ class HomePage extends StatelessWidget {
   final Future<void> Function(TodayPlan plan) onSaveTodayPlan;
   final Future<TodayPlan?> Function(String planDate) onLoadPlanByDate;
   final WeekPlanOverview weekPlanOverview;
+  final MonthPlanOverview monthPlanOverview;
+  final AnnualPlanOverview annualPlanOverview;
   final List<WeeklyPlanTemplate> weeklyTemplates;
   final Future<void> Function() onPreviousWeek;
   final Future<void> Function() onCurrentWeek;
   final Future<void> Function() onNextWeek;
+  final Future<void> Function(String month) onLoadMonthOverview;
+  final Future<void> Function() onPreviousMonth;
+  final Future<void> Function() onCurrentMonth;
+  final Future<void> Function() onNextMonth;
+  final Future<void> Function(int year) onLoadAnnualOverview;
+  final Future<void> Function() onPreviousYear;
+  final Future<void> Function() onCurrentYear;
+  final Future<void> Function() onNextYear;
+  final Future<void> Function(
+    int templateId,
+    String planDate, {
+    required PlanApplyStrategy strategy,
+  }) onApplyDayTemplateToDate;
+  final Future<void> Function(AnnualPlanSegment segment) onSaveAnnualSegment;
+  final Future<void> Function(AnnualPlanSegment segment) onDeleteAnnualSegment;
   final Future<void> Function(String templateName, TodayPlan sourcePlan)
       onSavePlanAsWeeklyTemplate;
   final Future<void> Function(int templateId) onApplyWeeklyTemplate;
@@ -652,21 +686,40 @@ class HomePage extends StatelessWidget {
     List<String> clearDates,
   ) onQuickArrangeWeek;
   final Future<void> Function(int index, bool completed) onToggleTodayPlanItem;
+  final bool isOfflineMode;
+  final ValueChanged<String> onRequireOnline;
   final bool isBusy;
   final String? bannerMessage;
   final VoidCallback onClearBanner;
 
   Future<void> _openEditor(BuildContext context) async {
-    final result = await showDialog<TodayPlan>(
+    await showDialog<void>(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
-        return TodayPlanEditorDialog(initialPlan: todayPlan);
+        return TodayPlanEditorDialog(
+          initialPlan: todayPlan,
+          onSave: onSaveTodayPlan,
+        );
       },
     );
-    if (result == null) {
-      return;
+  }
+
+  bool _blockOnlineOnlyFeature(BuildContext context, String featureName) {
+    if (!isOfflineMode) {
+      return false;
     }
-    await onSaveTodayPlan(result);
+    onRequireOnline(featureName);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          appLanguage.isChinese
+              ? '“$featureName”需要登录并联网后使用，本地数据仍会保留。'
+              : '$featureName requires sign-in and a network connection. Local data remains safe.',
+        ),
+      ),
+    );
+    return true;
   }
 
   Future<void> _openSaveTemplateDialog(BuildContext context) async {
@@ -748,16 +801,16 @@ class HomePage extends StatelessWidget {
       return;
     }
 
-    final result = await showDialog<TodayPlan>(
+    await showDialog<void>(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
-        return TodayPlanEditorDialog(initialPlan: plan);
+        return TodayPlanEditorDialog(
+          initialPlan: plan,
+          onSave: onSaveTodayPlan,
+        );
       },
     );
-    if (result == null) {
-      return;
-    }
-    await onSaveTodayPlan(result);
   }
 
   Future<void> _openStatsCenter(BuildContext context) async {
@@ -783,6 +836,12 @@ class HomePage extends StatelessWidget {
   }
 
   Future<void> _openNotificationCenter(BuildContext context) async {
+    if (_blockOnlineOnlyFeature(
+      context,
+      appLanguage.isChinese ? '通知中心' : 'Notifications',
+    )) {
+      return;
+    }
     final navigator = Navigator.of(context);
     final latestOverview = await onLoadNotifications(limit: 40);
     if (!context.mounted) {
@@ -805,6 +864,12 @@ class HomePage extends StatelessWidget {
   }
 
   Future<void> _openFriendCenter(BuildContext context) async {
+    if (_blockOnlineOnlyFeature(
+      context,
+      appLanguage.isChinese ? '好友' : 'Friends',
+    )) {
+      return;
+    }
     final navigator = Navigator.of(context);
     final latestOverview = await onLoadFriendOverview();
     if (!context.mounted) {
@@ -855,7 +920,8 @@ class HomePage extends StatelessWidget {
     final currentVisualTheme =
         Theme.of(context).extension<AppVisualThemeMarker>()?.visualTheme ??
             visualTheme;
-    final latestOverview = await onLoadSettingsOverview();
+    final latestOverview =
+        isOfflineMode ? settingOverview : await onLoadSettingsOverview();
     if (!context.mounted) {
       return;
     }
@@ -863,6 +929,7 @@ class HomePage extends StatelessWidget {
       MaterialPageRoute<void>(
         builder: (context) {
           return SettingsPage(
+            isOfflineMode: isOfflineMode,
             onChangeLanguage: onChangeLanguage,
             visualTheme: currentVisualTheme,
             onChangeVisualTheme: onChangeVisualTheme,
@@ -904,6 +971,12 @@ class HomePage extends StatelessWidget {
   }
 
   Future<void> _openTeamWorkspace(BuildContext context) async {
+    if (_blockOnlineOnlyFeature(
+      context,
+      appLanguage.isChinese ? '团队' : 'Teams',
+    )) {
+      return;
+    }
     final snapshot = await onLoadTeamWorkspaceSnapshot();
     if (!context.mounted) {
       return;
@@ -959,6 +1032,10 @@ class HomePage extends StatelessWidget {
         memoOverview: memoOverview,
         notificationOverview: notificationOverview,
         todayPlan: todayPlan,
+        monthPlanOverview: monthPlanOverview,
+        annualPlanOverview: annualPlanOverview,
+        weeklyTemplates: weeklyTemplates,
+        isOfflineMode: isOfflineMode,
         isBusy: isBusy,
         bannerMessage: bannerMessage,
         onClearBanner: onClearBanner,
@@ -974,6 +1051,18 @@ class HomePage extends StatelessWidget {
         onSubmitCheckIn: onSubmitCheckIn,
         onEditTodayPlan: () => _openEditor(context),
         onToggleTodayPlanItem: onToggleTodayPlanItem,
+        onOpenPlanDate: (planDate) => _openEditorForDate(context, planDate),
+        onLoadMonthOverview: onLoadMonthOverview,
+        onPreviousMonth: onPreviousMonth,
+        onCurrentMonth: onCurrentMonth,
+        onNextMonth: onNextMonth,
+        onLoadAnnualOverview: onLoadAnnualOverview,
+        onPreviousYear: onPreviousYear,
+        onCurrentYear: onCurrentYear,
+        onNextYear: onNextYear,
+        onApplyDayTemplateToDate: onApplyDayTemplateToDate,
+        onSaveAnnualSegment: onSaveAnnualSegment,
+        onDeleteAnnualSegment: onDeleteAnnualSegment,
       );
     }
 

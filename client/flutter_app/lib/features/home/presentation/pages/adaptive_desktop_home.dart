@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -15,9 +16,13 @@ import 'package:innocence_flutter/features/account/domain/models/user_profile.da
 import 'package:innocence_flutter/features/checkin/domain/models/check_in_status.dart';
 import 'package:innocence_flutter/features/focus/domain/models/focus_session.dart';
 import 'package:innocence_flutter/features/friends/domain/models/friend_overview.dart';
+import 'package:innocence_flutter/features/home/domain/theme_daily_slogan.dart';
 import 'package:innocence_flutter/features/memos/domain/models/memo_overview.dart';
 import 'package:innocence_flutter/features/notifications/domain/models/notification_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/today_plan.dart';
+import 'package:innocence_flutter/features/plans/domain/models/month_plan_overview.dart';
+import 'package:innocence_flutter/features/plans/domain/models/annual_plan_overview.dart';
+import 'package:innocence_flutter/features/plans/domain/models/weekly_plan_template.dart';
 import 'package:innocence_flutter/features/stats/domain/models/stats_overview.dart';
 import 'package:innocence_flutter/features/team/domain/models/team_chat_overview.dart';
 import 'package:innocence_flutter/features/team/domain/models/team_overview.dart';
@@ -37,6 +42,10 @@ class AdaptiveDesktopHome extends StatefulWidget {
     required this.memoOverview,
     required this.notificationOverview,
     required this.todayPlan,
+    required this.monthPlanOverview,
+    required this.annualPlanOverview,
+    required this.weeklyTemplates,
+    required this.isOfflineMode,
     required this.isBusy,
     required this.onClearBanner,
     required this.onRefresh,
@@ -51,6 +60,18 @@ class AdaptiveDesktopHome extends StatefulWidget {
     required this.onSubmitCheckIn,
     required this.onEditTodayPlan,
     required this.onToggleTodayPlanItem,
+    required this.onOpenPlanDate,
+    required this.onLoadMonthOverview,
+    required this.onPreviousMonth,
+    required this.onCurrentMonth,
+    required this.onNextMonth,
+    required this.onLoadAnnualOverview,
+    required this.onPreviousYear,
+    required this.onCurrentYear,
+    required this.onNextYear,
+    required this.onApplyDayTemplateToDate,
+    required this.onSaveAnnualSegment,
+    required this.onDeleteAnnualSegment,
     this.bannerMessage,
   });
 
@@ -66,6 +87,10 @@ class AdaptiveDesktopHome extends StatefulWidget {
   final MemoOverview memoOverview;
   final NotificationOverview notificationOverview;
   final TodayPlan todayPlan;
+  final MonthPlanOverview monthPlanOverview;
+  final AnnualPlanOverview annualPlanOverview;
+  final List<WeeklyPlanTemplate> weeklyTemplates;
+  final bool isOfflineMode;
   final bool isBusy;
   final String? bannerMessage;
   final VoidCallback onClearBanner;
@@ -81,6 +106,22 @@ class AdaptiveDesktopHome extends StatefulWidget {
   final Future<void> Function() onSubmitCheckIn;
   final Future<void> Function() onEditTodayPlan;
   final Future<void> Function(int index, bool completed) onToggleTodayPlanItem;
+  final Future<void> Function(String planDate) onOpenPlanDate;
+  final Future<void> Function(String month) onLoadMonthOverview;
+  final Future<void> Function() onPreviousMonth;
+  final Future<void> Function() onCurrentMonth;
+  final Future<void> Function() onNextMonth;
+  final Future<void> Function(int year) onLoadAnnualOverview;
+  final Future<void> Function() onPreviousYear;
+  final Future<void> Function() onCurrentYear;
+  final Future<void> Function() onNextYear;
+  final Future<void> Function(
+    int templateId,
+    String planDate, {
+    required PlanApplyStrategy strategy,
+  }) onApplyDayTemplateToDate;
+  final Future<void> Function(AnnualPlanSegment segment) onSaveAnnualSegment;
+  final Future<void> Function(AnnualPlanSegment segment) onDeleteAnnualSegment;
 
   @override
   State<AdaptiveDesktopHome> createState() => _AdaptiveDesktopHomeState();
@@ -98,6 +139,8 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
 
   String _selectedDestinationId = 'home';
   String _windowMode = 'canvas';
+  _PlanHorizon _planHorizon = _PlanHorizon.day;
+  Timer? _sloganRefreshTimer;
 
   bool get _isChinese => widget.appLanguage.isChinese;
 
@@ -107,12 +150,53 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
   void initState() {
     super.initState();
     DesktopWidgetBridge.setWindowModeListener(_handleWindowModeChanged);
+    _scheduleSloganRefresh();
   }
 
   @override
   void dispose() {
+    _sloganRefreshTimer?.cancel();
     DesktopWidgetBridge.setWindowModeListener(null);
     super.dispose();
+  }
+
+  void _scheduleSloganRefresh() {
+    _sloganRefreshTimer?.cancel();
+    final now = DateTime.now();
+    final nextDay = DateTime(now.year, now.month, now.day + 1);
+    _sloganRefreshTimer = Timer(nextDay.difference(now), () {
+      if (mounted) {
+        setState(() {});
+        _scheduleSloganRefresh();
+      }
+    });
+  }
+
+  void _selectPlanHorizon(_PlanHorizon value) {
+    if (_planHorizon == value) {
+      return;
+    }
+    setState(() => _planHorizon = value);
+    switch (value) {
+      case _PlanHorizon.day:
+        return;
+      case _PlanHorizon.month:
+        unawaited(widget.onLoadMonthOverview(widget.monthPlanOverview.month));
+        return;
+      case _PlanHorizon.year:
+        unawaited(widget.onLoadAnnualOverview(widget.annualPlanOverview.year));
+        return;
+    }
+  }
+
+  Future<void> _openMonthFromYear(int month) async {
+    final monthValue =
+        '${widget.annualPlanOverview.year.toString().padLeft(4, '0')}-'
+        '${month.toString().padLeft(2, '0')}';
+    await widget.onLoadMonthOverview(monthValue);
+    if (mounted) {
+      setState(() => _planHorizon = _PlanHorizon.month);
+    }
   }
 
   void _handleWindowModeChanged(String mode) {
@@ -257,6 +341,20 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
       unawaited(widget.onOpenSettings());
       return;
     }
+    if (widget.isOfflineMode) {
+      if (id == 'companions') {
+        unawaited(widget.onOpenFriends());
+        return;
+      }
+      if (id == 'inbox') {
+        unawaited(widget.onOpenNotifications());
+        return;
+      }
+      if (id == 'stats') {
+        unawaited(widget.onOpenStats());
+        return;
+      }
+    }
     if (!_primaryIds.contains(id) || id == _selectedDestinationId) {
       return;
     }
@@ -288,7 +386,9 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
       pageTitle: _pageTitle,
       pageSubtitle: _pageSubtitle,
       userDisplayName: widget.profile.displayName,
-      syncLabel: _text('状态已连接', 'Connected'),
+      syncLabel: widget.isOfflineMode
+          ? _text('离线 · 仅本机', 'Offline · local only')
+          : _text('状态已连接', 'Connected'),
       isRefreshing: widget.isBusy,
       onRefresh: () => unawaited(widget.onRefresh()),
       onOpenFocusOrb: () => unawaited(_openFocusOrb()),
@@ -310,6 +410,10 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
 
   Widget _buildHomePage(DesktopPresentationSpec spec) {
     final palette = _HomePalette.of(context, widget.visualTheme);
+    final dailySlogan = ThemeDailySlogans.resolve(
+      theme: widget.visualTheme,
+      localDate: DateTime.now(),
+    );
     return _PageCanvas(
       pageKey: const PageStorageKey<String>('desktop.home'),
       spec: spec,
@@ -325,18 +429,21 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
         ],
         _HeroStatement(
           palette: palette,
+          dayIndex: dailySlogan.dayIndex,
           eyebrow:
               _text('INNOCENCE · DAILY CANVAS', 'INNOCENCE · DAILY CANVAS'),
           title: widget.focusSession.active
               ? _text('此刻，保持专注。', 'Stay with this moment.')
-              : _text('今天，从一件事开始。', 'Begin today with one thing.'),
+              : dailySlogan.title(isChinese: _isChinese),
           description: widget.focusSession.active
               ? (widget.focusSession.taskName.trim().isEmpty
-                  ? _text('当前学习状态正在双端同步。',
-                      'Your current focus state is syncing across devices.')
+                  ? (widget.isOfflineMode
+                      ? _text('当前专注记录仅保存在本机。',
+                          'This focus session is stored on this device.')
+                      : _text('当前学习状态正在双端同步。',
+                          'Your current focus state is syncing across devices.'))
                   : widget.focusSession.taskName)
-              : _text('计划、专注、签到与陪伴都在同一条节奏里。',
-                  'Plans, focus, check-in and companionship share one rhythm.'),
+              : dailySlogan.subtitle(isChinese: _isChinese),
         ),
         const SizedBox(height: 20),
         _ResponsivePair(
@@ -436,6 +543,11 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
 
   Widget _buildPlansPage(DesktopPresentationSpec spec) {
     final palette = _HomePalette.of(context, widget.visualTheme);
+    final horizonTitle = switch (_planHorizon) {
+      _PlanHorizon.day => _text('短计划', 'Daily plan'),
+      _PlanHorizon.month => _text('长计划', 'Monthly plan'),
+      _PlanHorizon.year => _text('超长计划', 'Annual plan'),
+    };
     return _PageCanvas(
       pageKey: const PageStorageKey<String>('desktop.plans'),
       spec: spec,
@@ -444,55 +556,75 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
       children: [
         _SectionLead(
           palette: palette,
-          title: widget.todayPlan.planName.trim().isEmpty
-              ? _text('今日计划', 'Today plan')
-              : widget.todayPlan.planName,
+          title: horizonTitle,
           description: _text(
-            '${widget.todayPlan.planDate} · '
-                '${widget.todayPlan.completedCount}/${widget.todayPlan.totalCount} '
-                '已完成 · ${widget.todayPlan.plannedDurationLabel}',
-            '${widget.todayPlan.planDate} · '
-                '${widget.todayPlan.completedCount}/${widget.todayPlan.totalCount} '
-                'complete · ${widget.todayPlan.plannedDurationLabel}',
+            '在日计划、周计划与长期日程之间切换；所有安排都写入同一套日期计划。',
+            'Switch between daily, weekly, and long-term views backed by the same dated plans.',
           ),
-          actionLabel: _text('编辑今日计划', 'Edit today plan'),
-          onAction: widget.isBusy ? null : widget.onEditTodayPlan,
         ),
-        const SizedBox(height: 20),
-        _PlanPanel(
+        const SizedBox(height: 16),
+        _PlanHorizonSwitcher(
           palette: palette,
-          plan: widget.todayPlan,
+          selected: _planHorizon,
           isChinese: _isChinese,
-          isBusy: widget.isBusy,
-          density: spec.defaultDensity,
-          onEdit: widget.onEditTodayPlan,
-          onToggle: widget.onToggleTodayPlanItem,
-          showHeaderAction: false,
+          onSelected: _selectPlanHorizon,
         ),
         const SizedBox(height: 20),
-        _SummaryPanel(
-          palette: palette,
-          title: _text('计划层级', 'Planning horizons'),
-          lines: [
-            _SummaryLine(
-              icon: Icons.today_outlined,
-              title: _text('短计划', 'Daily plan'),
-              detail: _text('以半小时为单位安排今天', 'Arrange today in 30-minute blocks'),
+        if (_planHorizon == _PlanHorizon.day) ...[
+          _SectionLead(
+            palette: palette,
+            title: widget.todayPlan.planName.trim().isEmpty
+                ? _text('今日计划', 'Today plan')
+                : widget.todayPlan.planName,
+            description: _text(
+              '${widget.todayPlan.planDate} · '
+                  '${widget.todayPlan.completedCount}/${widget.todayPlan.totalCount} '
+                  '已完成 · ${widget.todayPlan.plannedDurationLabel}',
+              '${widget.todayPlan.planDate} · '
+                  '${widget.todayPlan.completedCount}/${widget.todayPlan.totalCount} '
+                  'complete · ${widget.todayPlan.plannedDurationLabel}',
             ),
-            _SummaryLine(
-              icon: Icons.date_range_outlined,
-              title: _text('长计划', 'Weekly plan'),
-              detail: _text(
-                  '组织一周并复用日计划模板', 'Organize a week and reuse daily templates'),
-            ),
-            _SummaryLine(
-              icon: Icons.route_outlined,
-              title: _text('超长计划', 'Long-term plan'),
-              detail:
-                  _text('按天推进更长期的目标', 'Move longer goals forward day by day'),
-            ),
-          ],
-        ),
+            actionLabel: _text('编辑今日计划', 'Edit today plan'),
+            onAction: widget.isBusy ? null : widget.onEditTodayPlan,
+          ),
+          const SizedBox(height: 20),
+          _PlanPanel(
+            palette: palette,
+            plan: widget.todayPlan,
+            isChinese: _isChinese,
+            isBusy: widget.isBusy,
+            density: spec.defaultDensity,
+            onEdit: widget.onEditTodayPlan,
+            onToggle: widget.onToggleTodayPlanItem,
+            showHeaderAction: false,
+          ),
+        ] else if (_planHorizon == _PlanHorizon.month)
+          _MonthPlanBoard(
+            palette: palette,
+            overview: widget.monthPlanOverview,
+            templates: widget.weeklyTemplates,
+            isChinese: _isChinese,
+            isBusy: widget.isBusy,
+            onPreviousMonth: widget.onPreviousMonth,
+            onCurrentMonth: widget.onCurrentMonth,
+            onNextMonth: widget.onNextMonth,
+            onOpenDate: widget.onOpenPlanDate,
+            onApplyTemplate: widget.onApplyDayTemplateToDate,
+          )
+        else
+          _AnnualPlanBoard(
+            palette: palette,
+            visualTheme: widget.visualTheme,
+            overview: widget.annualPlanOverview,
+            isChinese: _isChinese,
+            isBusy: widget.isBusy,
+            onPreviousYear: widget.onPreviousYear,
+            onCurrentYear: widget.onCurrentYear,
+            onNextYear: widget.onNextYear,
+            onOpenMonth: _openMonthFromYear,
+            onSaveSegment: widget.onSaveAnnualSegment,
+            onDeleteSegment: widget.onDeleteAnnualSegment,
+          ),
       ],
     );
   }
@@ -523,7 +655,9 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
             _MetricData(
               label: _text('本次已进行', 'Elapsed'),
               value: widget.focusSession.elapsedLabel,
-              note: _text('状态持续同步', 'State stays synchronized'),
+              note: widget.isOfflineMode
+                  ? _text('仅保存在本机', 'Stored on this device')
+                  : _text('状态持续同步', 'State stays synchronized'),
             ),
             _MetricData(
               label: _text('番茄完成', 'Pomodoros'),
@@ -842,6 +976,1183 @@ class _FocusOrb extends StatelessWidget {
   }
 }
 
+enum _PlanHorizon { day, month, year }
+
+class _PlanHorizonSwitcher extends StatelessWidget {
+  const _PlanHorizonSwitcher({
+    required this.palette,
+    required this.selected,
+    required this.isChinese,
+    required this.onSelected,
+  });
+
+  final _HomePalette palette;
+  final _PlanHorizon selected;
+  final bool isChinese;
+  final ValueChanged<_PlanHorizon> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = <(_PlanHorizon, IconData, String, String)>[
+      (_PlanHorizon.day, Icons.today_outlined, '短计划', 'Daily'),
+      (_PlanHorizon.month, Icons.calendar_month_outlined, '长计划', 'Monthly'),
+      (_PlanHorizon.year, Icons.calendar_view_month_outlined, '超长计划', 'Annual'),
+    ];
+    return _Panel(
+      palette: palette,
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: entries.map((entry) {
+          final active = selected == entry.$1;
+          return Material(
+            color: Colors.transparent,
+            child: InkWell(
+              key: ValueKey('plan-horizon-${entry.$1.name}'),
+              onTap: () => onSelected(entry.$1),
+              borderRadius: BorderRadius.circular(12),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                decoration: BoxDecoration(
+                  color: active ? palette.accentSoft : palette.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: active ? palette.accent : palette.rule,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(entry.$2,
+                        size: 19,
+                        color: active ? palette.accent : palette.muted),
+                    const SizedBox(width: 8),
+                    Text(
+                      isChinese ? entry.$3 : entry.$4,
+                      style: TextStyle(
+                        color: palette.ink,
+                        fontWeight: active ? FontWeight.w800 : FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _MonthPlanBoard extends StatelessWidget {
+  const _MonthPlanBoard({
+    required this.palette,
+    required this.overview,
+    required this.templates,
+    required this.isChinese,
+    required this.isBusy,
+    required this.onPreviousMonth,
+    required this.onCurrentMonth,
+    required this.onNextMonth,
+    required this.onOpenDate,
+    required this.onApplyTemplate,
+  });
+
+  final _HomePalette palette;
+  final MonthPlanOverview overview;
+  final List<WeeklyPlanTemplate> templates;
+  final bool isChinese;
+  final bool isBusy;
+  final Future<void> Function() onPreviousMonth;
+  final Future<void> Function() onCurrentMonth;
+  final Future<void> Function() onNextMonth;
+  final Future<void> Function(String date) onOpenDate;
+  final Future<void> Function(
+    int templateId,
+    String date, {
+    required PlanApplyStrategy strategy,
+  }) onApplyTemplate;
+
+  Future<void> _applyTemplate(
+    BuildContext context,
+    MonthPlanDay day,
+    int templateId,
+  ) async {
+    var strategy = PlanApplyStrategy.overwrite;
+    if (day.hasPlan) {
+      final selected = await showDialog<PlanApplyStrategy>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(isChinese ? '目标日期已有计划' : 'This day has a plan'),
+          content: Text(
+            isChinese
+                ? '请选择覆盖现有计划、跳过该日期，或取消本次操作。'
+                : 'Choose whether to overwrite the existing plan, skip this date, or cancel.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(isChinese ? '取消' : 'Cancel'),
+            ),
+            TextButton(
+              onPressed: () =>
+                  Navigator.of(context).pop(PlanApplyStrategy.skip),
+              child: Text(isChinese ? '跳过' : 'Skip'),
+            ),
+            FilledButton(
+              onPressed: () =>
+                  Navigator.of(context).pop(PlanApplyStrategy.overwrite),
+              child: Text(isChinese ? '覆盖' : 'Overwrite'),
+            ),
+          ],
+        ),
+      );
+      if (selected == null) {
+        return;
+      }
+      strategy = selected;
+    }
+    await onApplyTemplate(
+      templateId,
+      day.planDate,
+      strategy: strategy,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final monthStart =
+        DateTime.tryParse('${overview.month}-01') ?? DateTime.now();
+    final dayCount = DateTime(monthStart.year, monthStart.month + 1, 0).day;
+    final leading = monthStart.weekday - DateTime.monday;
+    final cellCount = ((leading + dayCount + 6) ~/ 7) * 7;
+    final today = DateTime.now();
+
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onHorizontalDragEnd: isBusy
+          ? null
+          : (details) {
+              final velocity = details.primaryVelocity ?? 0;
+              if (velocity < -260) {
+                unawaited(onNextMonth());
+              } else if (velocity > 260) {
+                unawaited(onPreviousMonth());
+              }
+            },
+      child: _Panel(
+        palette: palette,
+        emphasized: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _PlanRangeHeader(
+              palette: palette,
+              title: isChinese
+                  ? '${monthStart.year} 年 ${monthStart.month} 月'
+                  : '${_englishMonth(monthStart.month)} ${monthStart.year}',
+              subtitle: isChinese
+                  ? '${overview.plannedDayCount} 个计划日 · ${overview.completedTaskCount}/${overview.totalTaskCount} 项完成'
+                  : '${overview.plannedDayCount} planned days · ${overview.completedTaskCount}/${overview.totalTaskCount} tasks complete',
+              isBusy: isBusy,
+              currentLabel: isChinese ? '本月' : 'This month',
+              previousTooltip: isChinese ? '上个月' : 'Previous month',
+              nextTooltip: isChinese ? '下个月' : 'Next month',
+              onPrevious: onPreviousMonth,
+              onCurrent: onCurrentMonth,
+              onNext: onNextMonth,
+            ),
+            const SizedBox(height: 18),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final calendarWidth = max(720.0, constraints.maxWidth);
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: calendarWidth,
+                    child: Column(
+                      children: [
+                        Row(
+                          children: List.generate(7, (index) {
+                            const zh = ['一', '二', '三', '四', '五', '六', '日'];
+                            const en = [
+                              'Mon',
+                              'Tue',
+                              'Wed',
+                              'Thu',
+                              'Fri',
+                              'Sat',
+                              'Sun'
+                            ];
+                            return Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 9),
+                                child: Text(
+                                  isChinese ? '周${zh[index]}' : en[index],
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: palette.muted,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: cellCount,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 7,
+                            childAspectRatio: 0.86,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 8,
+                          ),
+                          itemBuilder: (context, index) {
+                            final dayNumber = index - leading + 1;
+                            if (dayNumber < 1 || dayNumber > dayCount) {
+                              return const SizedBox.shrink();
+                            }
+                            final date = DateTime(
+                              monthStart.year,
+                              monthStart.month,
+                              dayNumber,
+                            );
+                            final dateText = _formatCalendarDate(date);
+                            final day = overview.dayFor(dateText);
+                            return _MonthDayCard(
+                              palette: palette,
+                              dayNumber: dayNumber,
+                              day: day,
+                              today: date.year == today.year &&
+                                  date.month == today.month &&
+                                  date.day == today.day,
+                              templates: templates,
+                              isChinese: isChinese,
+                              isBusy: isBusy,
+                              onOpen: () => onOpenDate(dateText),
+                              onApplyTemplate: (id) =>
+                                  _applyTemplate(context, day, id),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 14),
+            Text(
+              isChinese
+                  ? '左右滑动切换月份；点击日期编辑短计划，日期菜单可套用日模板。'
+                  : 'Swipe to change month. Open a date to edit its daily plan or apply a day template.',
+              style: TextStyle(color: palette.muted, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _englishMonth(int month) => const [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ][month - 1];
+
+  static String _formatCalendarDate(DateTime value) =>
+      '${value.year.toString().padLeft(4, '0')}-'
+      '${value.month.toString().padLeft(2, '0')}-'
+      '${value.day.toString().padLeft(2, '0')}';
+}
+
+class _AnnualPlanBoard extends StatelessWidget {
+  const _AnnualPlanBoard({
+    required this.palette,
+    required this.visualTheme,
+    required this.overview,
+    required this.isChinese,
+    required this.isBusy,
+    required this.onPreviousYear,
+    required this.onCurrentYear,
+    required this.onNextYear,
+    required this.onOpenMonth,
+    required this.onSaveSegment,
+    required this.onDeleteSegment,
+  });
+
+  final _HomePalette palette;
+  final AppVisualTheme visualTheme;
+  final AnnualPlanOverview overview;
+  final bool isChinese;
+  final bool isBusy;
+  final Future<void> Function() onPreviousYear;
+  final Future<void> Function() onCurrentYear;
+  final Future<void> Function() onNextYear;
+  final Future<void> Function(int month) onOpenMonth;
+  final Future<void> Function(AnnualPlanSegment segment) onSaveSegment;
+  final Future<void> Function(AnnualPlanSegment segment) onDeleteSegment;
+
+  Future<void> _openSegmentEditor(
+    BuildContext context, {
+    AnnualPlanSegment? initial,
+    int startMonth = 1,
+    int endMonth = 1,
+  }) async {
+    final result = await showDialog<AnnualPlanSegment>(
+      context: context,
+      builder: (context) => _AnnualSegmentDialog(
+        isChinese: isChinese,
+        year: overview.year,
+        initial: initial,
+        startMonth: startMonth,
+        endMonth: endMonth,
+      ),
+    );
+    if (result != null) {
+      await onSaveSegment(result);
+    }
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    AnnualPlanSegment segment,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(isChinese ? '删除年度计划？' : 'Delete annual plan?'),
+        content: Text(segment.title),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(isChinese ? '取消' : 'Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(isChinese ? '删除' : 'Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await onDeleteSegment(segment);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _Panel(
+      palette: palette,
+      emphasized: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _PlanRangeHeader(
+            palette: palette,
+            title: isChinese
+                ? '${overview.year} 年计划'
+                : '${overview.year} annual plan',
+            subtitle: isChinese
+                ? '在 12 个月上拖动划定计划区间；区间允许相互重叠。'
+                : 'Drag across the 12-month track to create a plan range. Ranges may overlap.',
+            isBusy: isBusy,
+            currentLabel: isChinese ? '今年' : 'This year',
+            previousTooltip: isChinese ? '上一年' : 'Previous year',
+            nextTooltip: isChinese ? '下一年' : 'Next year',
+            onPrevious: onPreviousYear,
+            onCurrent: onCurrentYear,
+            onNext: onNextYear,
+          ),
+          const SizedBox(height: 18),
+          _AnnualMonthTrack(
+            palette: palette,
+            isChinese: isChinese,
+            enabled: !isBusy,
+            segments: overview.segments,
+            onRangeSelected: (start, end) => _openSegmentEditor(
+              context,
+              startMonth: start,
+              endMonth: end,
+            ),
+          ),
+          if (overview.segments.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 9,
+              runSpacing: 9,
+              children: overview.segments.map((segment) {
+                return InputChip(
+                  avatar: Icon(Icons.route_rounded,
+                      size: 17, color: palette.accent),
+                  label: Text(
+                    '${segment.title} · ${segment.startMonth}–${segment.endMonth}',
+                  ),
+                  onPressed: isBusy
+                      ? null
+                      : () => _openSegmentEditor(context, initial: segment),
+                  onDeleted:
+                      isBusy ? null : () => _confirmDelete(context, segment),
+                );
+              }).toList(),
+            ),
+          ],
+          const SizedBox(height: 20),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = constraints.maxWidth >= 1050
+                  ? 4
+                  : constraints.maxWidth >= 720
+                      ? 3
+                      : constraints.maxWidth >= 460
+                          ? 2
+                          : 1;
+              final width =
+                  (constraints.maxWidth - (columns - 1) * 12) / columns;
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: overview.months.map((month) {
+                  return SizedBox(
+                    width: width,
+                    child: _AnnualMonthCard(
+                      palette: palette,
+                      visualTheme: visualTheme,
+                      summary: month,
+                      isChinese: isChinese,
+                      onOpen: isBusy ? null : () => onOpenMonth(month.month),
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnnualMonthTrack extends StatefulWidget {
+  const _AnnualMonthTrack({
+    required this.palette,
+    required this.isChinese,
+    required this.enabled,
+    required this.segments,
+    required this.onRangeSelected,
+  });
+
+  final _HomePalette palette;
+  final bool isChinese;
+  final bool enabled;
+  final List<AnnualPlanSegment> segments;
+  final Future<void> Function(int startMonth, int endMonth) onRangeSelected;
+
+  @override
+  State<_AnnualMonthTrack> createState() => _AnnualMonthTrackState();
+}
+
+class _AnnualMonthTrackState extends State<_AnnualMonthTrack> {
+  int? _anchorMonth;
+  int? _currentMonth;
+
+  int _monthAt(double dx, double width) {
+    if (width <= 0) {
+      return 1;
+    }
+    return ((dx.clamp(0, width - 0.01) / width) * 12).floor() + 1;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final start = _anchorMonth == null || _currentMonth == null
+            ? null
+            : min(_anchorMonth!, _currentMonth!);
+        final end = _anchorMonth == null || _currentMonth == null
+            ? null
+            : max(_anchorMonth!, _currentMonth!);
+        final cellWidth = width / 12;
+        return Semantics(
+          label: widget.isChinese
+              ? '年度月份区间轨道，按住并左右拖动创建计划'
+              : 'Annual month range track. Drag across months to create a plan.',
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onHorizontalDragStart: widget.enabled
+                ? (details) {
+                    final month = _monthAt(details.localPosition.dx, width);
+                    setState(() {
+                      _anchorMonth = month;
+                      _currentMonth = month;
+                    });
+                  }
+                : null,
+            onHorizontalDragUpdate: widget.enabled
+                ? (details) {
+                    final month = _monthAt(details.localPosition.dx, width);
+                    if (month != _currentMonth) {
+                      setState(() => _currentMonth = month);
+                    }
+                  }
+                : null,
+            onHorizontalDragEnd: widget.enabled
+                ? (_) {
+                    final selectedStart = start;
+                    final selectedEnd = end;
+                    setState(() {
+                      _anchorMonth = null;
+                      _currentMonth = null;
+                    });
+                    if (selectedStart != null && selectedEnd != null) {
+                      unawaited(
+                          widget.onRangeSelected(selectedStart, selectedEnd));
+                    }
+                  }
+                : null,
+            child: SizedBox(
+              height: 76,
+              child: Stack(
+                children: [
+                  Row(
+                    children: List.generate(12, (index) {
+                      final month = index + 1;
+                      final covered = widget.segments.any(
+                        (segment) =>
+                            month >= segment.startMonth &&
+                            month <= segment.endMonth,
+                      );
+                      return Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(right: index == 11 ? 0 : 3),
+                          decoration: BoxDecoration(
+                            color: covered
+                                ? widget.palette.accentSoft
+                                : widget.palette.surface,
+                            border: Border.all(color: widget.palette.rule),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '$month',
+                            style: TextStyle(
+                              color: covered
+                                  ? widget.palette.accent
+                                  : widget.palette.muted,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                  if (start != null && end != null)
+                    Positioned(
+                      left: (start - 1) * cellWidth,
+                      width: (end - start + 1) * cellWidth,
+                      top: 3,
+                      bottom: 3,
+                      child: IgnorePointer(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color:
+                                widget.palette.accent.withValues(alpha: 0.24),
+                            border: Border.all(
+                              color: widget.palette.accent,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(9),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AnnualMonthCard extends StatelessWidget {
+  const _AnnualMonthCard({
+    required this.palette,
+    required this.visualTheme,
+    required this.summary,
+    required this.isChinese,
+    required this.onOpen,
+  });
+
+  final _HomePalette palette;
+  final AppVisualTheme visualTheme;
+  final AnnualMonthSummary summary;
+  final bool isChinese;
+  final Future<void> Function()? onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final season = (summary.month - 1) ~/ 3;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onOpen == null ? null : () => unawaited(onOpen!()),
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          height: 176,
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: palette.surface,
+            border: Border.all(color: palette.rule),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      isChinese
+                          ? '${summary.month} 月'
+                          : _shortMonth(summary.month),
+                      style: TextStyle(
+                        color: palette.ink,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  ExcludeSemantics(
+                    child: CustomPaint(
+                      size: const Size(54, 46),
+                      painter: _SeasonArtworkPainter(
+                        theme: visualTheme,
+                        season: season,
+                        accent: palette.accent,
+                        muted: palette.muted,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Text(
+                isChinese
+                    ? '${summary.plannedDayCount} 个计划日'
+                    : '${summary.plannedDayCount} planned days',
+                style: TextStyle(color: palette.muted, fontSize: 12),
+              ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: summary.completionRatio,
+                minHeight: 4,
+                borderRadius: BorderRadius.circular(99),
+                color: palette.accent,
+                backgroundColor: palette.rule,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '${summary.completedTaskCount}/${summary.totalTaskCount} · '
+                '${summary.plannedDurationLabel}',
+                style: TextStyle(color: palette.muted, fontSize: 11),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  static String _shortMonth(int month) => const [
+        'JAN',
+        'FEB',
+        'MAR',
+        'APR',
+        'MAY',
+        'JUN',
+        'JUL',
+        'AUG',
+        'SEP',
+        'OCT',
+        'NOV',
+        'DEC',
+      ][month - 1];
+}
+
+class _AnnualSegmentDialog extends StatefulWidget {
+  const _AnnualSegmentDialog({
+    required this.isChinese,
+    required this.year,
+    required this.startMonth,
+    required this.endMonth,
+    this.initial,
+  });
+
+  final bool isChinese;
+  final int year;
+  final int startMonth;
+  final int endMonth;
+  final AnnualPlanSegment? initial;
+
+  @override
+  State<_AnnualSegmentDialog> createState() => _AnnualSegmentDialogState();
+}
+
+class _AnnualSegmentDialogState extends State<_AnnualSegmentDialog> {
+  late final TextEditingController _titleController;
+  late final TextEditingController _noteController;
+  late RangeValues _months;
+  late String _colorKey;
+  String? _errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.initial?.title ?? '');
+    _noteController = TextEditingController(text: widget.initial?.note ?? '');
+    _months = RangeValues(
+      (widget.initial?.startMonth ?? widget.startMonth).toDouble(),
+      (widget.initial?.endMonth ?? widget.endMonth).toDouble(),
+    );
+    _colorKey = widget.initial?.colorKey ?? 'accent';
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final title = _titleController.text.trim();
+    if (title.isEmpty) {
+      setState(
+          () => _errorText = widget.isChinese ? '请输入计划标题。' : 'Enter a title.');
+      return;
+    }
+    final initial = widget.initial;
+    Navigator.of(context).pop(
+      AnnualPlanSegment(
+        id: initial?.id ?? '',
+        clientEntityId: initial?.clientEntityId ?? '',
+        year: widget.year,
+        title: title,
+        startMonth: _months.start.round(),
+        endMonth: _months.end.round(),
+        colorKey: _colorKey,
+        sortOrder: initial?.sortOrder ?? 0,
+        note: _noteController.text.trim(),
+        revision: initial?.revision ?? 0,
+        updateTime: initial?.updateTime ?? '',
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        widget.initial == null
+            ? (widget.isChinese ? '新建年度计划' : 'New annual plan')
+            : (widget.isChinese ? '编辑年度计划' : 'Edit annual plan'),
+      ),
+      content: SizedBox(
+        width: 460,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _titleController,
+              autofocus: true,
+              decoration: InputDecoration(
+                labelText: widget.isChinese ? '计划标题' : 'Plan title',
+                errorText: _errorText,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              widget.isChinese
+                  ? '${_months.start.round()} 月 — ${_months.end.round()} 月'
+                  : 'Month ${_months.start.round()} — ${_months.end.round()}',
+            ),
+            RangeSlider(
+              min: 1,
+              max: 12,
+              divisions: 11,
+              values: _months,
+              labels: RangeLabels(
+                '${_months.start.round()}',
+                '${_months.end.round()}',
+              ),
+              onChanged: (value) => setState(() => _months = value),
+            ),
+            const SizedBox(height: 6),
+            DropdownButtonFormField<String>(
+              initialValue: _colorKey,
+              decoration: InputDecoration(
+                labelText: widget.isChinese ? '标记颜色' : 'Color marker',
+              ),
+              items: const [
+                DropdownMenuItem(value: 'accent', child: Text('Accent')),
+                DropdownMenuItem(value: 'warm', child: Text('Warm')),
+                DropdownMenuItem(value: 'cool', child: Text('Cool')),
+                DropdownMenuItem(value: 'neutral', child: Text('Neutral')),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => _colorKey = value);
+                }
+              },
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: _noteController,
+              minLines: 2,
+              maxLines: 4,
+              decoration: InputDecoration(
+                labelText: widget.isChinese ? '说明（可选）' : 'Note (optional)',
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(widget.isChinese ? '取消' : 'Cancel'),
+        ),
+        FilledButton(
+          onPressed: _save,
+          child: Text(widget.isChinese ? '保存' : 'Save'),
+        ),
+      ],
+    );
+  }
+}
+
+class _SeasonArtworkPainter extends CustomPainter {
+  const _SeasonArtworkPainter({
+    required this.theme,
+    required this.season,
+    required this.accent,
+    required this.muted,
+  });
+
+  final AppVisualTheme theme;
+  final int season;
+  final Color accent;
+  final Color muted;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final primary = Paint()
+      ..color =
+          accent.withValues(alpha: theme == AppVisualTheme.glass ? 0.72 : 0.62)
+      ..strokeWidth = theme == AppVisualTheme.wabiSabi ? 1.6 : 2
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+    final fill = Paint()
+      ..color =
+          accent.withValues(alpha: theme == AppVisualTheme.glass ? 0.22 : 0.16)
+      ..style = PaintingStyle.fill;
+
+    switch (theme) {
+      case AppVisualTheme.minimalism:
+        if (season == 0) {
+          canvas.drawLine(Offset(center.dx, size.height - 6),
+              Offset(center.dx, 10), primary);
+          canvas.drawArc(
+              Rect.fromCenter(
+                  center: Offset(center.dx - 6, 17), width: 14, height: 9),
+              0.1,
+              2.7,
+              false,
+              primary);
+        } else if (season == 1) {
+          canvas.drawCircle(center, 10, fill);
+          for (var i = 0; i < 8; i += 1) {
+            final angle = i * pi / 4;
+            canvas.drawLine(center + Offset(cos(angle), sin(angle)) * 15,
+                center + Offset(cos(angle), sin(angle)) * 21, primary);
+          }
+        } else if (season == 2) {
+          canvas.drawOval(
+              Rect.fromCenter(
+                  center: center + const Offset(-6, -3), width: 13, height: 25),
+              primary);
+          canvas.drawOval(
+              Rect.fromCenter(
+                  center: center + const Offset(7, 4), width: 13, height: 25),
+              primary);
+        } else {
+          for (var i = 0; i < 4; i += 1) {
+            final angle = i * pi / 4;
+            canvas.drawLine(center - Offset(cos(angle), sin(angle)) * 18,
+                center + Offset(cos(angle), sin(angle)) * 18, primary);
+          }
+        }
+      case AppVisualTheme.wabiSabi:
+        canvas.drawArc(Rect.fromCenter(center: center, width: 34, height: 31),
+            -0.4, 4.7 - season * 0.25, false, primary);
+        canvas.drawLine(Offset(8, size.height - 8),
+            Offset(size.width - 7, 9 + season * 4), primary);
+        canvas.drawCircle(center + Offset(8 - season * 3, -7 + season * 2),
+            4 + season.toDouble(), fill);
+      case AppVisualTheme.midCentury:
+        canvas.drawCircle(center, season == 1 ? 13 : 8, fill);
+        final rays = season == 1
+            ? 10
+            : season == 3
+                ? 6
+                : 5;
+        for (var i = 0; i < rays; i += 1) {
+          final angle = i * 2 * pi / rays + season * 0.28;
+          canvas.drawLine(center + Offset(cos(angle), sin(angle)) * 11,
+              center + Offset(cos(angle), sin(angle)) * 21, primary);
+        }
+        canvas.drawCircle(center + const Offset(15, 10), 5,
+            Paint()..color = muted.withValues(alpha: 0.28));
+      case AppVisualTheme.glass:
+        final glow = Paint()
+          ..color = accent.withValues(alpha: 0.28)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+        canvas.drawCircle(center, 14 + season.toDouble(), glow);
+        canvas.drawCircle(center, 12, primary);
+        for (var i = 0; i < 4 + season; i += 1) {
+          final angle = i * 2 * pi / (4 + season);
+          canvas.drawCircle(
+              center + Offset(cos(angle), sin(angle)) * 16, 3.2, fill);
+        }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SeasonArtworkPainter oldDelegate) =>
+      theme != oldDelegate.theme ||
+      season != oldDelegate.season ||
+      accent != oldDelegate.accent ||
+      muted != oldDelegate.muted;
+}
+
+class _PlanRangeHeader extends StatelessWidget {
+  const _PlanRangeHeader({
+    required this.palette,
+    required this.title,
+    required this.subtitle,
+    required this.isBusy,
+    required this.currentLabel,
+    required this.previousTooltip,
+    required this.nextTooltip,
+    required this.onPrevious,
+    required this.onCurrent,
+    required this.onNext,
+  });
+
+  final _HomePalette palette;
+  final String title;
+  final String subtitle;
+  final bool isBusy;
+  final String currentLabel;
+  final String previousTooltip;
+  final String nextTooltip;
+  final Future<void> Function() onPrevious;
+  final Future<void> Function() onCurrent;
+  final Future<void> Function() onNext;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 14,
+      runSpacing: 12,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title,
+                style: TextStyle(
+                    color: palette.ink,
+                    fontSize: 21,
+                    fontWeight: FontWeight.w800)),
+            const SizedBox(height: 5),
+            Text(subtitle, style: TextStyle(color: palette.muted, height: 1.4)),
+          ],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton.outlined(
+              tooltip: previousTooltip,
+              onPressed: isBusy ? null : () => unawaited(onPrevious()),
+              icon: const Icon(Icons.chevron_left_rounded),
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton(
+              onPressed: isBusy ? null : () => unawaited(onCurrent()),
+              child: Text(currentLabel),
+            ),
+            const SizedBox(width: 8),
+            IconButton.outlined(
+              tooltip: nextTooltip,
+              onPressed: isBusy ? null : () => unawaited(onNext()),
+              icon: const Icon(Icons.chevron_right_rounded),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _MonthDayCard extends StatelessWidget {
+  const _MonthDayCard({
+    required this.palette,
+    required this.dayNumber,
+    required this.day,
+    required this.today,
+    required this.templates,
+    required this.isChinese,
+    required this.isBusy,
+    required this.onOpen,
+    required this.onApplyTemplate,
+  });
+
+  final _HomePalette palette;
+  final int dayNumber;
+  final MonthPlanDay day;
+  final bool today;
+  final List<WeeklyPlanTemplate> templates;
+  final bool isChinese;
+  final bool isBusy;
+  final Future<void> Function() onOpen;
+  final Future<void> Function(int templateId) onApplyTemplate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: today ? palette.accentSoft : palette.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: today ? palette.accent : palette.rule),
+      ),
+      child: InkWell(
+        onTap: isBusy ? null : () => unawaited(onOpen()),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '$dayNumber',
+                      style: TextStyle(
+                          color: palette.ink, fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                  if (templates.isNotEmpty)
+                    _TemplateMenu(
+                      palette: palette,
+                      templates: templates,
+                      enabled: !isBusy,
+                      onSelected: onApplyTemplate,
+                    ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                day.hasPlan ? day.planName : (isChinese ? '空白日期' : 'Open day'),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    color: day.hasPlan ? palette.ink : palette.muted,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700),
+              ),
+              const Spacer(),
+              if (day.hasPlan) ...[
+                LinearProgressIndicator(
+                  value: day.completionRatio,
+                  minHeight: 4,
+                  borderRadius: BorderRadius.circular(999),
+                  backgroundColor: palette.rule,
+                  color: palette.accent,
+                ),
+                const SizedBox(height: 7),
+              ],
+              Text(
+                day.hasPlan
+                    ? '${day.completedCount}/${day.totalCount} · ${day.plannedDurationLabel}'
+                    : (isChinese ? '点击开始安排' : 'Click to schedule'),
+                style: TextStyle(color: palette.muted, fontSize: 11),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TemplateMenu extends StatelessWidget {
+  const _TemplateMenu({
+    required this.palette,
+    required this.templates,
+    required this.enabled,
+    required this.onSelected,
+  });
+
+  final _HomePalette palette;
+  final List<WeeklyPlanTemplate> templates;
+  final bool enabled;
+  final Future<void> Function(int templateId) onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<int>(
+      tooltip: '套用模板',
+      enabled: enabled,
+      onSelected: (id) => unawaited(onSelected(id)),
+      itemBuilder: (context) => templates
+          .map(
+            (template) => PopupMenuItem<int>(
+              value: template.id,
+              child: Text(
+                  '${template.templateName} · ${template.plannedDurationLabel}'),
+            ),
+          )
+          .toList(),
+      icon: Icon(Icons.auto_awesome_outlined, size: 19, color: palette.muted),
+    );
+  }
+}
+
 class _PageCanvas extends StatelessWidget {
   const _PageCanvas({
     required this.pageKey,
@@ -933,12 +2244,14 @@ class _ResponsivePair extends StatelessWidget {
 class _HeroStatement extends StatelessWidget {
   const _HeroStatement({
     required this.palette,
+    required this.dayIndex,
     required this.eyebrow,
     required this.title,
     required this.description,
   });
 
   final _HomePalette palette;
+  final int dayIndex;
   final String eyebrow;
   final String title;
   final String description;
@@ -986,12 +2299,63 @@ class _HeroStatement extends StatelessWidget {
         children: [
           if (palette.visualTheme == AppVisualTheme.midCentury)
             const Positioned(right: 4, top: 0, child: _MidCenturyOrnament()),
+          if (palette.visualTheme == AppVisualTheme.minimalism)
+            Positioned(
+              right: 2,
+              top: 0,
+              child: ExcludeSemantics(
+                child: Text(
+                  'D/${dayIndex.toString().padLeft(2, '0')}',
+                  style: TextStyle(
+                    color: palette.muted,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.8,
+                  ),
+                ),
+              ),
+            ),
+          if (palette.visualTheme == AppVisualTheme.wabiSabi)
+            Positioned(
+              right: 2,
+              top: 2,
+              child: ExcludeSemantics(
+                child: CustomPaint(
+                  size: const Size(92, 92),
+                  painter: _WabiHeroSealPainter(palette.accent),
+                ),
+              ),
+            ),
           if (palette.visualTheme == AppVisualTheme.glass)
             Positioned(
               right: 12,
               top: 2,
               child: Icon(Icons.blur_circular_rounded,
                   size: 88, color: palette.accent.withValues(alpha: 0.22)),
+            ),
+          if (palette.visualTheme == AppVisualTheme.glass)
+            Positioned(
+              left: 34,
+              top: 54,
+              right: 0,
+              child: ExcludeSemantics(
+                child: Opacity(
+                  opacity: 0.08,
+                  child: Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.fade,
+                    style: TextStyle(
+                      color: palette.accent,
+                      fontFamily: 'Segoe UI Variable Display',
+                      fontSize: 54,
+                      height: 1.02,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1.4,
+                    ),
+                  ),
+                ),
+              ),
             ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1010,26 +2374,48 @@ class _HeroStatement extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 18),
-              Text(
-                title,
-                style: TextStyle(
-                  color: darkHero ? palette.onInk : palette.ink,
-                  fontSize: switch (palette.visualTheme) {
-                    AppVisualTheme.minimalism => 42,
-                    AppVisualTheme.glass => 52,
-                    _ => 34,
-                  },
-                  height: 1.08,
-                  fontWeight: palette.visualTheme == AppVisualTheme.wabiSabi
-                      ? FontWeight.w500
-                      : FontWeight.w800,
-                  fontStyle: palette.visualTheme == AppVisualTheme.wabiSabi
-                      ? FontStyle.italic
-                      : FontStyle.normal,
-                  letterSpacing:
-                      palette.visualTheme == AppVisualTheme.minimalism
-                          ? -1.8
-                          : -1.0,
+              Semantics(
+                label: title,
+                child: ExcludeSemantics(
+                  child: Text(
+                    title,
+                    maxLines: 3,
+                    overflow: TextOverflow.fade,
+                    style: TextStyle(
+                      color: darkHero ? palette.onInk : palette.ink,
+                      fontFamily: switch (palette.visualTheme) {
+                        AppVisualTheme.wabiSabi => 'Georgia',
+                        AppVisualTheme.midCentury => 'Century Gothic',
+                        AppVisualTheme.glass => 'Segoe UI Variable Display',
+                        _ => 'Segoe UI',
+                      },
+                      fontSize: switch (palette.visualTheme) {
+                        AppVisualTheme.minimalism => 42,
+                        AppVisualTheme.glass => 52,
+                        _ => 34,
+                      },
+                      height: 1.08,
+                      fontWeight: palette.visualTheme == AppVisualTheme.wabiSabi
+                          ? FontWeight.w500
+                          : FontWeight.w800,
+                      fontStyle: palette.visualTheme == AppVisualTheme.wabiSabi
+                          ? FontStyle.italic
+                          : FontStyle.normal,
+                      letterSpacing: switch (palette.visualTheme) {
+                        AppVisualTheme.minimalism => -1.8,
+                        AppVisualTheme.wabiSabi => 0.3,
+                        _ => -1.0,
+                      },
+                      shadows: palette.visualTheme == AppVisualTheme.glass
+                          ? [
+                              Shadow(
+                                color: palette.accent.withValues(alpha: 0.38),
+                                blurRadius: 24,
+                              ),
+                            ]
+                          : null,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
@@ -1047,6 +2433,35 @@ class _HeroStatement extends StatelessWidget {
       ),
     );
   }
+}
+
+class _WabiHeroSealPainter extends CustomPainter {
+  const _WabiHeroSealPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withValues(alpha: 0.22)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.2
+      ..strokeCap = StrokeCap.round;
+    final rect = Rect.fromLTWH(8, 8, size.width - 16, size.height - 16);
+    canvas.drawArc(rect, -0.35, 4.85, false, paint);
+    canvas.drawLine(
+      Offset(size.width * 0.22, size.height * 0.69),
+      Offset(size.width * 0.72, size.height * 0.27),
+      Paint()
+        ..color = color.withValues(alpha: 0.12)
+        ..strokeWidth = 5
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _WabiHeroSealPainter oldDelegate) =>
+      color != oldDelegate.color;
 }
 
 class _FocusPanel extends StatelessWidget {
@@ -1600,14 +3015,14 @@ class _SectionLead extends StatelessWidget {
     required this.palette,
     required this.title,
     required this.description,
-    required this.actionLabel,
-    required this.onAction,
+    this.actionLabel,
+    this.onAction,
   });
 
   final _HomePalette palette;
   final String title;
   final String description;
-  final String actionLabel;
+  final String? actionLabel;
   final Future<void> Function()? onAction;
 
   @override
@@ -1642,27 +3057,28 @@ class _SectionLead extends StatelessWidget {
               ],
             ),
           ),
-          FilledButton(
-            onPressed: onAction == null ? null : () => unawaited(onAction!()),
-            style: FilledButton.styleFrom(
-              backgroundColor: palette.visualTheme == AppVisualTheme.glass
-                  ? const Color(0x24FFFFFF)
-                  : palette.ink,
-              foregroundColor: palette.visualTheme == AppVisualTheme.glass
-                  ? palette.ink
-                  : palette.onInk,
-              side: palette.visualTheme == AppVisualTheme.glass
-                  ? const BorderSide(color: Color(0x52FFFFFF))
-                  : BorderSide.none,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(
-                  palette.visualTheme == AppVisualTheme.glass ? 12 : 0,
+          if (actionLabel != null)
+            FilledButton(
+              onPressed: onAction == null ? null : () => unawaited(onAction!()),
+              style: FilledButton.styleFrom(
+                backgroundColor: palette.visualTheme == AppVisualTheme.glass
+                    ? const Color(0x24FFFFFF)
+                    : palette.ink,
+                foregroundColor: palette.visualTheme == AppVisualTheme.glass
+                    ? palette.ink
+                    : palette.onInk,
+                side: palette.visualTheme == AppVisualTheme.glass
+                    ? const BorderSide(color: Color(0x52FFFFFF))
+                    : BorderSide.none,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    palette.visualTheme == AppVisualTheme.glass ? 12 : 0,
+                  ),
                 ),
+                minimumSize: const Size(160, 46),
               ),
-              minimumSize: const Size(160, 46),
+              child: Text(actionLabel!),
             ),
-            child: Text(actionLabel),
-          ),
         ],
       ),
     );

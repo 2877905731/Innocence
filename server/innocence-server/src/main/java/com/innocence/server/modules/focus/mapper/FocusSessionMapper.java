@@ -15,12 +15,22 @@ public interface FocusSessionMapper {
 
     void insertStudyTimerRecord(StudyTimerRecord record);
 
+    void insertImportedStudyTimerRecord(StudyTimerRecord record);
+
     void finishStudyTimerRecord(
             @Param("sessionId") Long sessionId,
             @Param("actualEndTime") LocalDateTime actualEndTime,
             @Param("durationSeconds") int durationSeconds,
             @Param("completedPomodoroCount") int completedPomodoroCount,
             @Param("status") String status
+    );
+
+    void finishImportedStudyTimerRecord(
+            @Param("sessionId") Long sessionId,
+            @Param("userId") Long userId,
+            @Param("actualEndTime") LocalDateTime actualEndTime,
+            @Param("durationSeconds") int durationSeconds,
+            @Param("completedPomodoroCount") int completedPomodoroCount
     );
 
     int markCompletionNotificationSent(@Param("sessionId") Long sessionId);

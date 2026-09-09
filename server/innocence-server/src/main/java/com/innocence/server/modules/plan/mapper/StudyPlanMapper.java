@@ -4,6 +4,7 @@ import com.innocence.server.modules.plan.domain.DailyPlan;
 import com.innocence.server.modules.plan.domain.DailyPlanItem;
 import com.innocence.server.modules.plan.domain.WeeklyPlanTemplate;
 import com.innocence.server.modules.plan.domain.WeeklyPlanTemplateItem;
+import com.innocence.server.modules.plan.domain.AnnualPlanSegment;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -52,4 +53,28 @@ public interface StudyPlanMapper {
     void deleteWeeklyPlanTemplateByIdAndUserId(@Param("templateId") Long templateId, @Param("userId") Long userId);
 
     void insertWeeklyPlanTemplateItem(WeeklyPlanTemplateItem item);
+
+    List<AnnualPlanSegment> findAnnualSegmentsByUserIdAndYear(
+            @Param("userId") Long userId,
+            @Param("planYear") Integer planYear
+    );
+
+    AnnualPlanSegment findAnnualSegmentByIdAndUserId(
+            @Param("segmentId") Long segmentId,
+            @Param("userId") Long userId
+    );
+
+    AnnualPlanSegment findAnnualSegmentByClientEntityIdAndUserId(
+            @Param("clientEntityId") String clientEntityId,
+            @Param("userId") Long userId
+    );
+
+    void insertAnnualPlanSegment(AnnualPlanSegment segment);
+
+    void updateAnnualPlanSegment(AnnualPlanSegment segment);
+
+    void deleteAnnualPlanSegmentByIdAndUserId(
+            @Param("segmentId") Long segmentId,
+            @Param("userId") Long userId
+    );
 }

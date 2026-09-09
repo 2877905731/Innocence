@@ -7,6 +7,9 @@ import com.innocence.server.modules.plan.domain.DailyPlan;
 import com.innocence.server.modules.plan.domain.DailyPlanItem;
 import com.innocence.server.modules.plan.domain.WeeklyPlanTemplate;
 import com.innocence.server.modules.plan.domain.WeeklyPlanTemplateItem;
+import com.innocence.server.modules.plan.domain.AnnualPlanSegment;
+import com.innocence.server.modules.plan.dto.request.ApplyDayTemplateBatchRequest;
+import com.innocence.server.modules.plan.dto.request.SaveAnnualPlanSegmentRequest;
 import com.innocence.server.modules.plan.dto.request.ApplyWeeklyTemplateRequest;
 import com.innocence.server.modules.plan.dto.request.SaveTodayPlanRequest;
 import com.innocence.server.modules.plan.dto.request.TodayPlanItemRequest;
@@ -16,11 +19,17 @@ import com.innocence.server.modules.plan.dto.response.WeekPlanOverviewResponse;
 import com.innocence.server.modules.plan.dto.response.TodayPlanItemResponse;
 import com.innocence.server.modules.plan.dto.response.TodayPlanResponse;
 import com.innocence.server.modules.plan.dto.response.WeeklyPlanTemplateResponse;
+import com.innocence.server.modules.plan.dto.response.MonthPlanDayResponse;
+import com.innocence.server.modules.plan.dto.response.MonthPlanOverviewResponse;
+import com.innocence.server.modules.plan.dto.response.AnnualMonthSummaryResponse;
+import com.innocence.server.modules.plan.dto.response.AnnualPlanOverviewResponse;
+import com.innocence.server.modules.plan.dto.response.AnnualPlanSegmentResponse;
 import com.innocence.server.modules.plan.mapper.StudyPlanMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,6 +37,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.LinkedHashSet;
+import java.util.UUID;
 
 @Service
 public class StudyPlanService {
@@ -118,6 +129,96 @@ public class StudyPlanService {
         return response;
     }
 
+    @Transactional(readOnly = true)
+    public MonthPlanOverviewResponse getMonthPlanOverview(Long userId, YearMonth month) {
+        YearMonth normalizedMonth = month == null ? YearMonth.now() : month;
+        LocalDate startDate = normalizedMonth.atDay(1);
+        LocalDate endDate = normalizedMonth.atEndOfMonth();
+        List<DailyPlan> plans = studyPlanMapper.findDailyPlansByUserIdAndDateRange(
+                userId,
+                startDate,
+                endDate
+        );
+        Map<LocalDate, DailyPlan> planByDate = new HashMap<>();
+        Map<Long, List<DailyPlanItem>> itemsByPlanId = loadItemsByPlanId(plans);
+        for (DailyPlan plan : plans) {
+            planByDate.put(plan.getPlanDate(), plan);
+        }
+
+        List<MonthPlanDayResponse> days = new ArrayList<>();
+        for (int day = 1; day <= normalizedMonth.lengthOfMonth(); day++) {
+            LocalDate date = normalizedMonth.atDay(day);
+            DailyPlan plan = planByDate.get(date);
+            if (plan == null) {
+                days.add(new MonthPlanDayResponse(
+                        date.toString(), false, "", 0, 0, 0, false
+                ));
+                continue;
+            }
+            TodayPlanResponse summary = buildPlanResponse(
+                    plan,
+                    itemsByPlanId.getOrDefault(plan.getId(), List.of())
+            );
+            days.add(new MonthPlanDayResponse(
+                    date.toString(),
+                    summary.getTotalCount() > 0,
+                    summary.getPlanName(),
+                    summary.getCompletedCount(),
+                    summary.getTotalCount(),
+                    summary.getTotalPlannedMinutes(),
+                    false
+            ));
+        }
+        return new MonthPlanOverviewResponse(normalizedMonth.toString(), days);
+    }
+
+    @Transactional(readOnly = true)
+    public AnnualPlanOverviewResponse getAnnualPlanOverview(Long userId, int year) {
+        LocalDate startDate = LocalDate.of(year, 1, 1);
+        LocalDate endDate = LocalDate.of(year, 12, 31);
+        List<DailyPlan> plans = studyPlanMapper.findDailyPlansByUserIdAndDateRange(
+                userId,
+                startDate,
+                endDate
+        );
+        Map<Long, List<DailyPlanItem>> itemsByPlanId = loadItemsByPlanId(plans);
+        List<AnnualMonthSummaryResponse> months = new ArrayList<>();
+        for (int month = 1; month <= 12; month++) {
+            int plannedDayCount = 0;
+            int completedTaskCount = 0;
+            int totalTaskCount = 0;
+            int totalPlannedMinutes = 0;
+            for (DailyPlan plan : plans) {
+                if (plan.getPlanDate().getMonthValue() != month) {
+                    continue;
+                }
+                TodayPlanResponse summary = buildPlanResponse(
+                        plan,
+                        itemsByPlanId.getOrDefault(plan.getId(), List.of())
+                );
+                if (summary.getTotalCount() > 0) {
+                    plannedDayCount++;
+                }
+                completedTaskCount += summary.getCompletedCount();
+                totalTaskCount += summary.getTotalCount();
+                totalPlannedMinutes += summary.getTotalPlannedMinutes();
+            }
+            months.add(new AnnualMonthSummaryResponse(
+                    month,
+                    plannedDayCount,
+                    completedTaskCount,
+                    totalTaskCount,
+                    totalPlannedMinutes
+            ));
+        }
+        List<AnnualPlanSegmentResponse> segments = studyPlanMapper
+                .findAnnualSegmentsByUserIdAndYear(userId, year)
+                .stream()
+                .map(this::buildAnnualSegmentResponse)
+                .toList();
+        return new AnnualPlanOverviewResponse(year, months, segments);
+    }
+
     @Transactional
     public TodayPlanResponse saveTodayPlan(Long userId, SaveTodayPlanRequest request) {
         LocalDate normalizedPlanDate = normalizePlanDate(request.getPlanDate());
@@ -190,6 +291,11 @@ public class StudyPlanService {
         return responses;
     }
 
+    @Transactional(readOnly = true)
+    public List<WeeklyPlanTemplateResponse> getDayTemplates(Long userId) {
+        return getWeeklyTemplates(userId);
+    }
+
     @Transactional
     public WeeklyPlanTemplateResponse saveWeeklyTemplate(Long userId, SaveWeeklyTemplateRequest request) {
         List<TodayPlanItemRequest> requestItems = request.getItems() == null ? new ArrayList<>() : request.getItems();
@@ -235,6 +341,106 @@ public class StudyPlanService {
     }
 
     @Transactional
+    public WeeklyPlanTemplateResponse saveDayTemplate(Long userId, SaveWeeklyTemplateRequest request) {
+        return saveWeeklyTemplate(userId, request);
+    }
+
+    @Transactional
+    public List<TodayPlanResponse> applyDayTemplateBatch(
+            Long userId,
+            Long templateId,
+            ApplyDayTemplateBatchRequest request
+    ) {
+        if (request == null || request.getPlanDates().isEmpty()) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "At least one plan date is required.");
+        }
+        String strategy = request.getStrategy() == null
+                ? "skip"
+                : request.getStrategy().trim().toLowerCase(Locale.ROOT);
+        if (!strategy.equals("skip") && !strategy.equals("overwrite")) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "Strategy must be skip or overwrite.");
+        }
+        WeeklyPlanTemplate template = studyPlanMapper.findWeeklyTemplateByIdAndUserId(templateId, userId);
+        if (template == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "Day template not found.");
+        }
+
+        List<TodayPlanResponse> results = new ArrayList<>();
+        for (LocalDate planDate : new LinkedHashSet<>(request.getPlanDates())) {
+            DailyPlan existing = studyPlanMapper.findDailyPlanByUserIdAndDate(userId, planDate);
+            if (existing != null && strategy.equals("skip")) {
+                results.add(getTodayPlan(userId, planDate));
+                continue;
+            }
+            ApplyWeeklyTemplateRequest singleRequest = new ApplyWeeklyTemplateRequest();
+            singleRequest.setPlanDate(planDate);
+            results.add(applyWeeklyTemplate(userId, templateId, singleRequest));
+        }
+        return results;
+    }
+
+    @Transactional
+    public AnnualPlanOverviewResponse saveAnnualSegment(
+            Long userId,
+            Long segmentId,
+            SaveAnnualPlanSegmentRequest request
+    ) {
+        validateAnnualSegment(request);
+        AnnualPlanSegment segment = segmentId == null
+                ? null
+                : studyPlanMapper.findAnnualSegmentByIdAndUserId(segmentId, userId);
+        if (segmentId != null && segment == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "Annual plan segment not found.");
+        }
+        if (segment == null && request.getClientEntityId() != null && !request.getClientEntityId().isBlank()) {
+            segment = studyPlanMapper.findAnnualSegmentByClientEntityIdAndUserId(
+                    request.getClientEntityId().trim(),
+                    userId
+            );
+        }
+        boolean creating = segment == null;
+        if (creating) {
+            segment = new AnnualPlanSegment();
+            segment.setUserId(userId);
+            segment.setClientEntityId(
+                    request.getClientEntityId() == null || request.getClientEntityId().isBlank()
+                            ? UUID.randomUUID().toString()
+                            : request.getClientEntityId().trim()
+            );
+            segment.setRevision(1);
+        } else {
+            int expectedRevision = request.getRevision() == null ? 0 : request.getRevision();
+            int currentRevision = segment.getRevision() == null ? 0 : segment.getRevision();
+            if (expectedRevision > 0 && expectedRevision != currentRevision) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST, "Annual plan segment revision conflict.");
+            }
+            segment.setRevision(currentRevision + 1);
+        }
+        segment.setPlanYear(request.getYear());
+        segment.setTitle(request.getTitle().trim());
+        segment.setStartMonth(request.getStartMonth());
+        segment.setEndMonth(request.getEndMonth());
+        segment.setColorKey(normalizeColorKey(request.getColorKey()));
+        segment.setSortOrder(request.getSortOrder() == null ? 0 : request.getSortOrder());
+        segment.setNote(request.getNote() == null ? "" : request.getNote().trim());
+        if (creating) {
+            studyPlanMapper.insertAnnualPlanSegment(segment);
+        } else {
+            studyPlanMapper.updateAnnualPlanSegment(segment);
+        }
+        return getAnnualPlanOverview(userId, request.getYear());
+    }
+
+    @Transactional
+    public void deleteAnnualSegment(Long userId, Long segmentId) {
+        AnnualPlanSegment segment = studyPlanMapper.findAnnualSegmentByIdAndUserId(segmentId, userId);
+        if (segment == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "Annual plan segment not found.");
+        }
+        studyPlanMapper.deleteAnnualPlanSegmentByIdAndUserId(segmentId, userId);
+    }
+
+    @Transactional
     public TodayPlanResponse applyWeeklyTemplate(Long userId, Long templateId, ApplyWeeklyTemplateRequest request) {
         WeeklyPlanTemplate template = studyPlanMapper.findWeeklyTemplateByIdAndUserId(templateId, userId);
         if (template == null) {
@@ -275,6 +481,54 @@ public class StudyPlanService {
 
         studyPlanMapper.deleteWeeklyPlanTemplateItemsByTemplateId(templateId);
         studyPlanMapper.deleteWeeklyPlanTemplateByIdAndUserId(templateId, userId);
+    }
+
+    private Map<Long, List<DailyPlanItem>> loadItemsByPlanId(List<DailyPlan> plans) {
+        Map<Long, List<DailyPlanItem>> itemsByPlanId = new HashMap<>();
+        if (plans.isEmpty()) {
+            return itemsByPlanId;
+        }
+        List<Long> planIds = plans.stream().map(DailyPlan::getId).toList();
+        for (DailyPlanItem item : studyPlanMapper.findDailyPlanItemsByPlanIds(planIds)) {
+            itemsByPlanId.computeIfAbsent(item.getPlanId(), key -> new ArrayList<>()).add(item);
+        }
+        return itemsByPlanId;
+    }
+
+    private AnnualPlanSegmentResponse buildAnnualSegmentResponse(AnnualPlanSegment segment) {
+        return new AnnualPlanSegmentResponse(
+                String.valueOf(segment.getId()),
+                segment.getClientEntityId(),
+                segment.getPlanYear() == null ? 0 : segment.getPlanYear(),
+                segment.getTitle(),
+                segment.getStartMonth() == null ? 1 : segment.getStartMonth(),
+                segment.getEndMonth() == null ? 1 : segment.getEndMonth(),
+                normalizeColorKey(segment.getColorKey()),
+                segment.getSortOrder() == null ? 0 : segment.getSortOrder(),
+                segment.getNote() == null ? "" : segment.getNote(),
+                segment.getRevision() == null ? 0 : segment.getRevision(),
+                segment.getUpdateTime() == null ? "" : segment.getUpdateTime().toString()
+        );
+    }
+
+    private void validateAnnualSegment(SaveAnnualPlanSegmentRequest request) {
+        if (request.getStartMonth() == null || request.getEndMonth() == null) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Start and end month are required.");
+        }
+        if (request.getStartMonth() > request.getEndMonth()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "Start month must not be after end month.");
+        }
+    }
+
+    private String normalizeColorKey(String colorKey) {
+        if (colorKey == null || colorKey.isBlank()) {
+            return "accent";
+        }
+        String normalized = colorKey.trim().toLowerCase(Locale.ROOT);
+        if (!List.of("accent", "warm", "cool", "neutral").contains(normalized)) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "Unsupported annual segment color key.");
+        }
+        return normalized;
     }
 
     private TodayPlanResponse buildPlanResponse(DailyPlan plan, List<DailyPlanItem> items) {

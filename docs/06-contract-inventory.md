@@ -45,7 +45,7 @@ endpoints:
     method: POST
     path: "/api/app/v1/check-in/submit"
     source_behavior: "手动签到（接口草案 4.9）"
-    evidence_status: pending
+    evidence_status: implementation_matched_sample_pending
     trigger: "P02 签到收尾时以真实请求回放核对"
   - id: U05
     method: GET
@@ -104,6 +104,71 @@ endpoints:
     failures: "缺失/超限/类型不支持/无效图片返回 HTTP 400 + code=1000；会话失效返回 HTTP 401 + code=2000；存储失败返回 HTTP 500 + code=9000"
     evidence_status: server_http_and_client_toolchain_verified_runtime_picker_pending
     trigger: "2026-08-10 已完成服务端正常/负向 HTTP 回放、Flutter pub get/analyze/test 与 Windows Release 构建；真实文件选择和 DPI 实机验收待补"
+  - id: U14
+    method: POST
+    path: "/api/app/v1/sync/import-preview"
+    source_behavior: "登录后提交仅含类型、数量、日期范围和修订摘要的本机 manifest，由服务端返回当前账号对比预览；确认前不得上传业务正文"
+    request: "localProfileId + pendingOperationCount + dailyPlanDates + 按类型计数；不含 payload 正文"
+    success: "返回 token 所属目标账号、待导入数、云端日期冲突数与冲突日期"
+    evidence_status: client_server_implemented_unit_verified_http_pending
+    trigger: "2026-09-09 已完成客户端 manifest、服务端当前账号解析与冲突预检；Flutter/Maven 全量回归通过，真实 HTTP 回放待补"
+  - id: U15
+    method: POST
+    path: "/api/app/v1/sync/import"
+    source_behavior: "用户确认目标账号后，按 operationId/clientEntityId 幂等导入离线实体并逐项返回 accepted/rejected/conflict"
+    request: "localProfileId + targetUserNo + conflictStrategy(keep_server|overwrite) + 最多 500 条 typed outbox operation"
+    success: "按日模板→日计划→年度区间→专注→备忘录→签到意图顺序逐项事务导入；只有 accepted 在本机标记 synced，原始本地业务数据不删除"
+    failures: "目标账号不匹配整体 HTTP 403；单项非法/缺绑定返回 rejected；日期或模板冲突返回 conflict"
+    evidence_status: client_server_implemented_unit_verified_http_pending
+    trigger: "2026-09-09 已完成幂等结果表、当前用户隔离、冲突策略、本地结果回写与负向单测；真实 HTTP 重放/断线续传待补"
+  - id: U16
+    method: GET
+    path: "/api/app/v1/plans/day-templates"
+    source_behavior: "读取可复用的单日日程模板；替代把日模板命名为 weekly template 的新契约"
+    evidence_status: client_server_implemented_unit_verified
+    trigger: "新日模板路由已实现；旧 /weekly-templates 继续作为兼容接口"
+  - id: U17
+    method: POST
+    path: "/api/app/v1/plans/day-templates"
+    source_behavior: "把已保存且仍可编辑的短计划另存为日模板"
+    evidence_status: client_server_implemented_unit_verified
+    trigger: "短计划保存后继续编辑与另存日模板已实现；字段缺失/重名真实 HTTP 回放待补"
+  - id: U18
+    method: POST
+    path: "/api/app/v1/plans/day-templates/{templateId}/apply-batch"
+    source_behavior: "将日模板套用到月历中的一个或多个日期，并显式处理已有计划的覆盖/跳过/取消"
+    evidence_status: client_server_implemented_unit_verified
+    trigger: "覆盖/跳过显式策略、重复日期去重和跨租户模板拒绝已实现并有服务单测"
+  - id: U19
+    method: GET
+    path: "/api/app/v1/plans/month?month=YYYY-MM"
+    source_behavior: "返回完整月份的日期摘要，支撑长计划月历和前后月滑动"
+    evidence_status: client_server_implemented_unit_verified
+    trigger: "完整月历与横向前后月已实现；闰年 2 月 29 天服务/模型测试通过"
+  - id: U20
+    method: GET
+    path: "/api/app/v1/plans/year?year=YYYY"
+    source_behavior: "返回年度 12 个月摘要及年度计划区间，支撑超长计划年历"
+    evidence_status: client_server_implemented_unit_verified
+    trigger: "12 月摘要、年度区间和重叠展示已实现；空年份 12 月结构测试通过"
+  - id: U21
+    method: POST
+    path: "/api/app/v1/plans/annual-segments"
+    source_behavior: "按月为最小单位创建年度计划区间"
+    evidence_status: client_server_implemented_unit_verified
+    trigger: "按月拖动创建、重叠区间与 1..12 边界校验已实现"
+  - id: U22
+    method: PUT
+    path: "/api/app/v1/plans/annual-segments/{segmentId}"
+    source_behavior: "调整年度计划区间的起止月份、标题、颜色键或排序"
+    evidence_status: client_server_implemented_unit_verified
+    trigger: "编辑与 revision 冲突拒绝已实现并通过单测；真实 HTTP 回放待补"
+  - id: U23
+    method: DELETE
+    path: "/api/app/v1/plans/annual-segments/{segmentId}"
+    source_behavior: "删除当前用户的年度计划区间；离线端在 outbox 中保留删除操作作为补传墓碑"
+    evidence_status: client_server_implemented_unit_verified
+    trigger: "客户端删除墓碑、服务端当前用户限定删除与同步绑定解析已实现；重复删除真实 HTTP 回放待补"
 preview_queue:
   - priority: P1
     sample: "待收样本：认证/学习/签到/统计/首页聚合 5 组正常+空+边界请求"
@@ -115,6 +180,14 @@ compatibility_decisions:
     difference: "UI 全面推翻重建不影响接口契约；页面重写不改变接口边界"
     decision: "接口清单草案继续作为契约源，UI 重建期间不回改接口"
     checkpoint: "DEC-0004（RESUME 用户决策）"
+  - id: DEC-002
+    difference: "旧实现把长计划定义为周概览、把日模板命名为 weekly template，并让超长计划复用逐周日计划"
+    decision: "自 2026-09-08 起权威语义改为短=日、长=月、超长=年；旧 /week 与 /weekly-templates 仅作迁移兼容，不再指导新 UI 或新数据模型"
+    checkpoint: "DEC-0027 / progress 0040"
+  - id: DEC-003
+    difference: "旧同步默认已登录且全局最后修改覆盖"
+    decision: "增加未登录 local profile 和登录后导入确认；按实体类型执行冲突规则，服务端身份始终从 token 解析"
+    checkpoint: "DEC-0027 / progress 0040"
 undocumented_route_families:
   - family: "/api/admin/v1/**"
     evidence_status: pending

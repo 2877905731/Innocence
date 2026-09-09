@@ -124,6 +124,77 @@ public class FocusSessionService {
         return buildFinishedResponse(record);
     }
 
+    @Transactional
+    public Long importOfflineSession(
+            Long userId,
+            LocalDateTime startTime,
+            LocalDateTime plannedEndTime,
+            String taskName,
+            boolean bindPomodoro,
+            int pomodoroStudyMinutes,
+            int pomodoroBreakMinutes
+    ) {
+        if (startTime == null || plannedEndTime == null || !plannedEndTime.isAfter(startTime)) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "Offline focus time range is invalid.");
+        }
+        LocalDateTime importedAt = LocalDateTime.now();
+        LocalDateTime actualEndTime = plannedEndTime.isBefore(importedAt) ? plannedEndTime : importedAt;
+        if (actualEndTime.isBefore(startTime)) {
+            actualEndTime = startTime;
+        }
+        int durationSeconds = calculateElapsedSeconds(startTime, actualEndTime);
+
+        StudyTimerRecord record = new StudyTimerRecord();
+        record.setUserId(userId);
+        record.setTaskName(normalizeTaskName(taskName));
+        record.setPlannedEndTime(plannedEndTime);
+        record.setActualEndTime(actualEndTime);
+        record.setPlannedMinutes((int) Math.max(1, Duration.between(startTime, plannedEndTime).toMinutes()));
+        record.setDurationSeconds(durationSeconds);
+        record.setStatus("finished");
+        record.setBindPomodoroFlag(bindPomodoro ? 1 : 0);
+        record.setPomodoroStudyMinutes(bindPomodoro ? Math.max(pomodoroStudyMinutes, 0) : 0);
+        record.setPomodoroBreakMinutes(bindPomodoro ? Math.max(pomodoroBreakMinutes, 0) : 0);
+        record.setCompletedPomodoroCount(resolveImportedPomodoroCount(record, durationSeconds));
+        record.setCompletionNotifiedFlag(1);
+        record.setCreateTime(startTime);
+        record.setUpdateTime(importedAt);
+        focusSessionMapper.insertImportedStudyTimerRecord(record);
+        return record.getId();
+    }
+
+    @Transactional
+    public void finishImportedSession(Long userId, Long sessionId, LocalDateTime actualEndTime) {
+        StudyTimerRecord record = focusSessionMapper.findSessionByIdAndUserId(sessionId, userId);
+        if (record == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "Imported focus session was not found.");
+        }
+        LocalDateTime resolvedEnd = actualEndTime == null ? record.getPlannedEndTime() : actualEndTime;
+        if (resolvedEnd.isBefore(record.getCreateTime())) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "Offline focus finish time is invalid.");
+        }
+        if (record.getPlannedEndTime() != null && resolvedEnd.isAfter(record.getPlannedEndTime())) {
+            resolvedEnd = record.getPlannedEndTime();
+        }
+        int durationSeconds = calculateElapsedSeconds(record.getCreateTime(), resolvedEnd);
+        focusSessionMapper.finishImportedStudyTimerRecord(
+                sessionId,
+                userId,
+                resolvedEnd,
+                durationSeconds,
+                resolveImportedPomodoroCount(record, durationSeconds)
+        );
+    }
+
+    private int resolveImportedPomodoroCount(StudyTimerRecord record, int durationSeconds) {
+        if (!isPomodoroBound(record) || defaultNumber(record.getPomodoroStudyMinutes()) <= 0) {
+            return 0;
+        }
+        int cycleSeconds = (defaultNumber(record.getPomodoroStudyMinutes())
+                + defaultNumber(record.getPomodoroBreakMinutes())) * 60;
+        return cycleSeconds <= 0 ? 0 : durationSeconds / cycleSeconds;
+    }
+
     private void finalizeRecordAndNotify(StudyTimerRecord record, LocalDateTime finishTime) {
         finalizeRecord(record, finishTime);
         notificationService.createFocusCompletionNotifications(record.getUserId(), record);

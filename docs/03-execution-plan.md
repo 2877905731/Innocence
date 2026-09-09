@@ -4,11 +4,11 @@ document_type: execution_plan
 project_name: "Innocence"
 project_profile_path: docs/08-project-profile.md
 baseline:
-  project_root: "D:\\project\\Innocence"
+  project_root: "F:\\springmvc1\\Innocence"
   runtime: "Flutter + Java 21 + Spring Boot 3.3.2 + MyBatis + MySQL 8 + Redis"
-  current_phase: P00.5
-  current_gate: G00.5
-  evidence: "四主题参考、Windows 自适应桌面体验及信息架构/组件接口草案已生成（2026-08-10）"
+  current_phase: P01
+  current_gate: G01
+  evidence: "离线身份/SQLite/outbox/登录确认导入、四主题每日标语、短/月/年计划与 Windows 八方向 sizing loop 已实现；Flutter 49 项与 Maven 36 项通过，Windows Release 真实拖边/DPI 和同步真实 HTTP 回放仍待验收"
 invariants:
   - id: INV-001-TRUTHFUL-SCOPE
     enabled: true
@@ -28,6 +28,9 @@ invariants:
   - id: INV-006-THEME-PROMPTS-ARCHIVED
     enabled: true
     rule: 用户提供的主题提示词必须存档于 docs/planning/Innocence-UI设计规划.md
+  - id: INV-007-OFFLINE-OWNER-ISOLATION
+    enabled: true
+    rule: 未登录离线资料、账号缓存与服务端租户必须由 ownerScope 隔离，登录后先预览并确认目标账号再导入
 phases:
   - id: P00
     name: baseline_and_governance
@@ -78,6 +81,7 @@ phases:
       - 认证/会话/权限/设置模块收尾；会话槽位、黑名单、租户边界与头像上传服务端真实 HTTP 回放已完成
       - 按新 UI 重建：登录、注册、找回密码、资料、隐私、设置页面
       - DesktopPresentationTier、自适应 6+2 主 Shell、72×72 圆形 Focus Orb、认证入口与设置资料链路已落地；设置页与 Orb 必须绑定当前视觉主题，DPI 与真实文件选择待实机验收
+      - 按 `docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md` 增加未登录离线入口、local profile、本地仓储与登录后导入确认；本条为待实施项
     gate:
       id: G01
       status: in_progress
@@ -85,16 +89,26 @@ phases:
         - auth_flow_ui_redesigned（源码、部件测试与 Windows Release 构建已通过；DPI 实机待验收）
         - session_policy_verified（1 手机 + 1 电脑；真实 HTTP 回放已通过）
         - negative_tests_passed（拉黑/越权访问；服务层与真实 HTTP 回放已通过）
+        - offline_access_and_owner_scope_verified（无需登录可进入本地资料；离线资料、账号缓存和服务端租户互不可见；登录前无受保护接口请求）
   - id: P02
     name: learning_core_loop
     actions:
       - 计划/定时/签到/备忘录/首页收尾（已实现部分验收）
       - 按新 UI 重建：首页聚合、计划（短/长/超长）、定时与番茄、签到、备忘录页面
+      - 今日计划编辑器使用固定可见的48段昼夜时间轴，完整中英文覆盖，并保证选时后无需额外填写即可保存
+      - 今日计划时段按计划使用循环浅色渐变；计划卡显示等量同色小时间条并联动动画；已有时段支持首尾拖动且不得越过相邻计划，新建仅允许从空白段开始
+      - 计划层级按新决策改为：短计划编辑单日且保存后可继续编辑；长计划展示完整月历并可把日模板套用到一天或多天；超长计划展示 12 个月并按月拖动年度区间；旧周视图只保留兼容辅助
+      - 首页 Hero 按主题 + 本地日期 + 语言稳定轮换文案，四主题使用独立艺术字构图，侘寂主题允许英文主标题
+      - 玻璃态通用主操作改用蓝紫主题色，绿色仅用于成功语义
     gate:
       id: G02
       criteria:
         - personal_loop_closed（计划→学习→记录→签到→统计）
-        - today_plan_editor_redesigned
+        - today_plan_editor_redesigned（48段时间轴和保存始终可见；选时后可直接保存）
+        - today_plan_range_editing_verified（多计划颜色可区分；计划条数量与半小时格一致；首尾拖动防重叠；占用段不触发新建）
+        - planning_horizons_operational（短计划保存后可编辑；月历可前后月滑动并批量套用日模板；年历可查看 12 个月并按月拖动计划区间）
+        - theme_hero_rotation_verified（四主题文案池、同日稳定、跨午夜轮换、双语与专注态优先级通过）
+        - glass_action_palette_aligned（蓝紫主操作，绿色仅表达成功）
         - focus_timer_redesigned
   - id: P03
     name: social_skeleton
@@ -113,6 +127,7 @@ phases:
     actions:
       - 统计中心完善、举报处理、敏感词管理、公告与定向通知、后台管理
       - 按新 UI 重建：统计中心、后台页面
+      - 统计中心所有内层指标卡跟随四主题；顶部返回、刷新和窗口操作固定，正文独立滚动
     gate:
       id: G04
       criteria:
@@ -126,6 +141,7 @@ phases:
       - 完成窗口边缘吸附、置顶、托盘、DPI、多屏和安全状态持久化；首次 Canvas 按当前显示器工作区约 `84% × 82%` 居中显示为适中 Large，之后严格恢复用户上次的 Canvas 尺寸与位置
       - 页面不在 P05 末尾补做响应式；P01-P04 重建页面时同步实现三档布局
       - 完成四主题跨尺寸视觉统一与桌面通知联动
+      - 顶部常驻从左到右逐级缩小的三个圆环，分别一键进入 Large / Medium / Small Canvas，不使用弹出菜单；四边和四角由 Flutter 透明缩放框触发原生 Windows sizing loop，顶层 WM_NCHITTEST 只作补充，预设和手动尺寸共用窗口记忆
     gate:
       id: G05
       criteria:
@@ -135,6 +151,7 @@ phases:
         - small_canvas_supports_core_actions（专注、计划、消息、通知核心操作）
         - focus_orb_restores_context（主动收纳、状态可见、恢复不丢上下文）
         - resize_state_continuity_verified（拖拽跨断点不丢页面、草稿、滚动与计时状态）
+        - resize_presets_and_cursors_working（大中小预设进入对应断点；Windows Release 在四边四角真实拖动后尺寸改变，方向光标、最小尺寸、最大化与 Focus Orb 行为正确）
         - cross_device_notify_working
         - visual_consistent（四主题双端一致）
   - id: P06
@@ -151,6 +168,11 @@ phases:
         - release_candidate_confirmed
 next_actions:
   - id: NEXT-001
-    action: "继续 P01：按新 UI 重建资料、隐私与设置页面，并补会话冲突、权限拒绝和 Flutter 工具链验收"
-    inputs: []
+    action: "使用本地服务完成 import-preview/import 的真实 HTTP 回放，覆盖幂等重试、目标账号不匹配、保留云端与本地覆盖两种冲突策略"
+    inputs:
+      - docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md
+  - id: NEXT-002
+    action: "在 Windows Release + 100%/125%/150% DPI 下完成八方向真实拖动验收；自动化环境不可用时不得将此项标记完成"
+    inputs:
+      - docs/planning/Innocence-Windows自适应桌面体验.md
 ---

@@ -136,6 +136,8 @@
 
 ### 4.2 设备与同步基础
 
+本节描述服务端 MySQL 持久化。Windows 未登录离线资料使用独立的客户端本地数据库，至少包含 `local_profile`、各核心业务本地镜像、`sync_outbox` 与 `sync_binding`；它们不创建伪造服务端 `user_id`，也不等同于下方 `offline_sync_record`。
+
 #### `user_device`
 
 用途：设备信息表。
@@ -190,6 +192,8 @@
 | source_device_id | bigint | 来源设备 |
 | biz_type | varchar(32) | 业务类型：plan/memo/notice/state |
 | biz_id | bigint | 业务主键 |
+| client_entity_id | varchar(64) | 客户端实体 UUID，跨重试不变 |
+| operation_id | varchar(64) | 幂等操作 UUID |
 | sync_status | tinyint | 1待同步 2成功 3失败 |
 | sync_version | bigint | 版本号 |
 | create_time | datetime | 创建时间 |
@@ -212,7 +216,7 @@
 
 #### `offline_sync_record`
 
-用途：离线补传记录。
+用途：服务端记录已经通过鉴权接收的补传结果与重试状态；不是未登录离线资料的源数据库，未认证客户端不得直接写入。
 
 建议字段：
 
@@ -223,8 +227,11 @@
 | device_id | bigint | 设备 ID |
 | biz_type | varchar(32) | 业务类型 |
 | biz_id | bigint | 业务 ID |
-| payload_json | json | 待补传内容 |
+| client_entity_id | varchar(64) | 客户端实体 UUID |
+| operation_id | varchar(64) UK | 幂等操作 UUID |
+| payload_json | json | 规范化后的待处理内容；敏感字段最小化并按存储安全策略保护 |
 | sync_status | tinyint | 1待传 2成功 3失败 |
+| result_code | varchar(64) | accepted/rejected/conflict 或业务错误码 |
 | create_time | datetime | 创建时间 |
 | update_time | datetime | 更新时间 |
 
@@ -489,7 +496,7 @@
 
 #### `study_plan`
 
-用途：学习计划主表，统一短计划 / 长计划 / 超长计划。
+用途：按日期保存可执行的短计划。长计划月历由日期计划聚合得到；超长计划使用独立 `annual_plan_segment`，不再把三种层级塞进同一 `plan_type`。
 
 建议字段：
 
@@ -497,7 +504,7 @@
 | --- | --- | --- |
 | id | bigint PK | 主键 |
 | user_id | bigint | 用户 ID |
-| plan_type | varchar(32) | `short_day` / `long_week` / `ultra_day_range` |
+| plan_type | varchar(32) | 第一版固定 `short_day`；保留字段仅用于兼容旧数据迁移 |
 | plan_name | varchar(128) | 计划名称 |
 | start_date | date | 开始日期 |
 | end_date | date | 结束日期 |
@@ -512,7 +519,7 @@
 
 #### `study_plan_block`
 
-用途：短计划时间块、长计划按天套用块。
+用途：短计划时间块；长计划在月历中打开某天或套用模板后仍落为该日期的短计划块。
 
 建议字段：
 
@@ -527,6 +534,36 @@
 | duration_minutes | int | 时长分钟 |
 | create_time | datetime | 创建时间 |
 | update_time | datetime | 更新时间 |
+
+#### `annual_plan_segment`
+
+用途：超长计划的年度月区间。每条记录只属于一个自然年，以月份为最小粒度；多个目标可通过 `track_no` 分轨重叠。
+
+建议字段：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| id | bigint PK | 主键 |
+| user_id | bigint | 所属用户，必须来自当前登录上下文 |
+| client_entity_id | varchar(64) | 客户端实体 UUID，用于离线幂等映射 |
+| year_no | smallint | 自然年 |
+| start_month | tinyint | 开始月，1-12 |
+| end_month | tinyint | 结束月，1-12 且不小于开始月 |
+| segment_title | varchar(128) | 年度阶段名称 |
+| note_text | varchar(1000) | 可选阶段说明 |
+| color_key | varchar(32) | 主题无关的语义颜色键 |
+| track_no | int | 重叠区间的显示轨道 |
+| sort_no | int | 同轨排序 |
+| revision | bigint | 乐观锁修订号 |
+| deleted_time | datetime | 软删除墓碑时间，服务端确认同步前不物理清理 |
+| create_time | datetime | 创建时间 |
+| update_time | datetime | 更新时间 |
+
+约束与索引建议：
+
+- `uk_user_client_entity(user_id, client_entity_id)`
+- `idx_user_year(user_id, year_no)`
+- 检查 `start_month BETWEEN 1 AND 12`、`end_month BETWEEN 1 AND 12`、`start_month <= end_month`
 
 #### `study_plan_template`
 
