@@ -8,7 +8,7 @@ baseline:
   runtime: "Flutter + Java 21 + Spring Boot 3.3.2 + MyBatis + MySQL 8 + Redis"
   current_phase: P01
   current_gate: G01
-  evidence: "离线身份/SQLite/outbox/登录确认导入、四主题每日标语、短/月/年计划与 Windows 八方向 sizing loop 已实现；Flutter 49 项与 Maven 36 项通过，Windows Release 真实拖边/DPI 和同步真实 HTTP 回放仍待验收"
+  evidence: "离线身份/SQLite/outbox/登录确认导入、四主题每日标语、短/月/年计划与 Windows 八方向 sizing loop 已实现；Flutter 51 项与 Maven 36 项通过，用户已确认普通边框缩放和认证页拖窗可用；完整多 DPI 矩阵与同步真实 HTTP 回放仍待验收"
 invariants:
   - id: INV-001-TRUTHFUL-SCOPE
     enabled: true
@@ -81,7 +81,7 @@ phases:
       - 认证/会话/权限/设置模块收尾；会话槽位、黑名单、租户边界与头像上传服务端真实 HTTP 回放已完成
       - 按新 UI 重建：登录、注册、找回密码、资料、隐私、设置页面
       - DesktopPresentationTier、自适应 6+2 主 Shell、72×72 圆形 Focus Orb、认证入口与设置资料链路已落地；设置页与 Orb 必须绑定当前视觉主题，DPI 与真实文件选择待实机验收
-      - 按 `docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md` 增加未登录离线入口、local profile、本地仓储与登录后导入确认；本条为待实施项
+      - 按 `docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md` 完成未登录离线入口、local profile、本地仓储、离线安全设置分区与登录后导入确认
     gate:
       id: G01
       status: in_progress

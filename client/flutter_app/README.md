@@ -1,4 +1,4 @@
-# flutter_app
+# Innocence Flutter Client
 
 这里是 `Innocence` 的 Flutter 主工程，也是当前移动端与 Windows 桌面端联动开发的核心目录。
 
@@ -48,7 +48,7 @@ pubspec.yaml                 Flutter 依赖配置
 
 在当前目录下直接运行 Flutter 调试命令即可。
 
-### 构建 Windows 发布版
+### 构建 Windows Release
 
 当前项目经常需要验证 Windows 桌面可执行程序，最终产物通常位于：
 
@@ -58,6 +58,21 @@ pubspec.yaml                 Flutter 依赖配置
 
 - Flutter 逻辑代码真正打包进的是 `build/windows/x64/runner/Release/data/app.so`
 - 有时 `exe` 时间戳变化不明显，但 `app.so` 已更新
+
+正式发布时使用仓库内的打包脚本：
+
+```powershell
+pwsh -File windows/package_release.ps1
+```
+
+脚本会依次执行依赖解析、静态分析、完整 Flutter 测试和 Windows Release 构建，然后在
+`build/releases/v<version>/` 生成：
+
+- `Innocence-v<version>-windows-x64-setup.exe`：每用户安装器，支持开始菜单、可选桌面快捷方式和卸载
+- `Innocence-v<version>-windows-x64-portable.zip`：免安装便携包
+- `SHA256SUMS.txt`：两个发布资产的 SHA256 校验值
+
+安装器由 `windows/installer.iss` 定义，需要本机安装 Inno Setup 6。正式公开发布前还应使用可信代码签名证书签名；没有证书时必须在发布说明中明确安装器未签名。
 
 ## 前端协作注意事项
 
