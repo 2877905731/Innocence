@@ -356,3 +356,10 @@ checkpoints:
     status: complete
     path: progress/0049__20260917__P01__DONE__official-logo-windows-and-github-readme.md
     title: "正式 Logo 接入 Windows 并同步 GitHub README"
+  - sequence: "0050"
+    created_at: "2026-09-17T01:30:41+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0050__20260917__P01__DONE__bilingual-readme-and-project-badges.md
+    title: "中英文 README 与项目徽章同步"

@@ -3,12 +3,12 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-09-17"
-latest_checkpoint: "0049"
+latest_checkpoint: "0050"
 current_phase: P01
 current_gate: G01
-state: windows_official_logo_applied_and_github_readme_synced
-next_sequence: "0050"
-current_goal: "用户指定 Logo 已接入 Windows 应用、窗口、安装器和系统托盘，GitHub README 已展示正式 Logo；下一步在后续版本中重新打包发布"
+state: windows_official_logo_applied_bilingual_github_readme_synced
+next_sequence: "0051"
+current_goal: "正式 Logo、中文 README 与英文 README 已同步 GitHub，并使用与项目实际许可证和技术栈一致的徽章；下一步在后续版本中重新打包发布"
 recent_baseline:
   - checkpoint: "0015"
     result: "设置页完成 Large/Medium/Small 三档独立编排与黑名单新增入口；新增会话、认证、拉黑和跨租户权限负向测试，定向 Maven 7 项通过；Flutter/Dart SDK、数据库集成环境和头像上传后端路由仍不可用"
@@ -68,6 +68,8 @@ recent_baseline:
     result: "修正 Logo 抠图右边界：删除误收入的 x=1166–1199 外围画布，底板有效左右边界收敛为 x=89..1165；右侧 x=1166 起 alpha=0，圆角仍保留多级抗锯齿。"
   - checkpoint: "0049"
     result: "正式 Logo 已转换为含 16/20/24/32/40/48/64/128/256 九档的 Windows ICO；16–48 使用同源放大主标，64–256 保留完整字标；Release 构建成功且从 EXE 提取的新图标为 32×32、角点透明，根 README 已展示 Logo 并同步 GitHub。"
+  - checkpoint: "0050"
+    result: "新增完整英文 README_EN.md；中英文 README 均展示正式 Logo、双语切换和六枚一致徽章。许可证按仓库真实 LICENSE 使用 AGPL-3.0，技术栈徽章使用 Flutter、Dart >=3.4、Java 21、Spring Boot 3.3.2 与 Windows/Android，未采用不准确的 MIT/Python 示例。"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
@@ -135,6 +137,8 @@ user_decisions:
     decision: "Logo 的完整边界是白色圆角底板：保留底板及内部银灰字母 I、圆点、环线、INNOCENCE 字标和短横，只删除底板以外的外围画布并设为真实透明；本决策覆盖 DEC-0031 中保留外围留白与外部阴影的部分。"
   - id: DEC-0033
     decision: "修正后的白色圆角底板 Logo 作为 Windows 正式品牌图标，并展示在 GitHub 根 README；ICO 的 16–48 像素条目允许使用同源放大的 I、圆点与环线构图保证托盘辨识度，64–256 保留完整字标。"
+  - id: DEC-0034
+    decision: "GitHub 同时维护中文 README.md 与英文 README_EN.md，两者展示相同 Logo、语言切换和项目徽章；徽章必须反映仓库真实状态，因此许可证使用 AGPL-3.0，技术栈使用 Flutter/Dart/Java/Spring Boot，而不采用示例中的 MIT/Python。"
 unfinished:
   - id: TODO-005
     priority: P0
