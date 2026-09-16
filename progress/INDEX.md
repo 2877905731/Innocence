@@ -363,3 +363,10 @@ checkpoints:
     status: complete
     path: progress/0050__20260917__P01__DONE__bilingual-readme-and-project-badges.md
     title: "中英文 README 与项目徽章同步"
+  - sequence: "0051"
+    created_at: "2026-09-17T02:24:52+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0051__20260917__P01__DONE__windows-v1.0.1-release-published.md
+    title: "Windows 1.0.1 功能更新正式发布"

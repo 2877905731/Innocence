@@ -3,12 +3,12 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-09-17"
-latest_checkpoint: "0050"
+latest_checkpoint: "0051"
 current_phase: P01
 current_gate: G01
-state: windows_official_logo_applied_bilingual_github_readme_synced
-next_sequence: "0051"
-current_goal: "正式 Logo、中文 README 与英文 README 已同步 GitHub，并使用与项目实际许可证和技术栈一致的徽章；下一步在后续版本中重新打包发布"
+state: windows_v1_0_1_official_release_published
+next_sequence: "0052"
+current_goal: "Windows 1.0.1+2 已完成构建、安装冒烟、哈希校验并发布 GitHub 正式 Release；下一步补齐真实登录会话回放、跨 DPI 矩阵和 Authenticode 签名"
 recent_baseline:
   - checkpoint: "0015"
     result: "设置页完成 Large/Medium/Small 三档独立编排与黑名单新增入口；新增会话、认证、拉黑和跨租户权限负向测试，定向 Maven 7 项通过；Flutter/Dart SDK、数据库集成环境和头像上传后端路由仍不可用"
@@ -70,6 +70,8 @@ recent_baseline:
     result: "正式 Logo 已转换为含 16/20/24/32/40/48/64/128/256 九档的 Windows ICO；16–48 使用同源放大主标，64–256 保留完整字标；Release 构建成功且从 EXE 提取的新图标为 32×32、角点透明，根 README 已展示 Logo 并同步 GitHub。"
   - checkpoint: "0050"
     result: "新增完整英文 README_EN.md；中英文 README 均展示正式 Logo、双语切换和六枚一致徽章。许可证按仓库真实 LICENSE 使用 AGPL-3.0，技术栈徽章使用 Flutter、Dart >=3.4、Java 21、Spring Boot 3.3.2 与 Windows/Android，未采用不准确的 MIT/Python 示例。"
+  - checkpoint: "0051"
+    result: "Windows 1.0.1+2 安装器与便携包通过 analyze、54 项 Flutter 测试、39 项 Maven 测试、哈希及安装/启动/卸载验证；v1.0.1 正式 GitHub Release 已发布，3 个公开资产均为 uploaded 且 HTTP 200。"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
@@ -162,7 +164,7 @@ unfinished:
     gate: G01/G02
   - id: TODO-014
     priority: P1
-    item: "为后续 Windows Release 配置可信 Authenticode 代码签名证书；v1.0.0 当前为 NotSigned，发布说明已披露 SmartScreen 风险"
+    item: "为后续 Windows Release 配置可信 Authenticode 代码签名证书；v1.0.1 当前为 NotSigned，发布说明已披露 SmartScreen 风险"
     gate: G06
   - id: TODO-016
     priority: P1
@@ -170,14 +172,11 @@ unfinished:
     gate: G01/G02
 next_actions:
   - id: NEXT-001
-    action: "在下一次 Windows 版本发布时，使用已嵌入正式 Logo 的 Release 产物重新制作安装器、便携 ZIP 和 SHA256 清单"
-    inputs: ["client/flutter_app/windows/runner/resources/app_icon.ico", "client/flutter_app/windows/package_release.ps1", "client/flutter_app/build/windows/x64/runner/Release/innocence_flutter.exe"]
-  - id: NEXT-002
     action: "使用真实登录会话回放 U24/U25 与离线同步，并人工完成托盘菜单所有命令的端到端验收"
     inputs: ["docs/06-contract-inventory.md", "server/innocence-server", "client/flutter_app/build/windows/x64/runner/Release/innocence_flutter.exe"]
-  - id: NEXT-003
-    action: "继续 v1.0.0 的 100%/125%/150% DPI 矩阵，并在下一次 Windows 发布前配置 Authenticode 代码签名"
-    inputs: ["https://github.com/2877905731/Innocence/releases/tag/v1.0.0", "client/flutter_app/windows/package_release.ps1"]
+  - id: NEXT-002
+    action: "继续 v1.0.1 的 100%/125%/150% DPI 矩阵，并在下一次 Windows 发布前配置 Authenticode 代码签名"
+    inputs: ["https://github.com/2877905731/Innocence/releases/tag/v1.0.1", "client/flutter_app/windows/package_release.ps1"]
 required_reads:
   - AGENTS.md
   - docs/08-project-profile.md
