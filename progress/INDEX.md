@@ -342,3 +342,10 @@ checkpoints:
     status: complete
     path: progress/0047__20260910__P01__CORRECTION__logo-rounded-plate-cutout.md
     title: "Logo 边界纠正为白色圆角底板并完成真透明抠图"
+  - sequence: "0048"
+    created_at: "2026-09-17T01:08:17+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0048__20260917__P01__CORRECTION__logo-right-edge-cleanup.md
+    title: "Logo 抠图右侧残留画布清理"

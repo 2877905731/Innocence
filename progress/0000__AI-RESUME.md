@@ -2,13 +2,13 @@
 schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
-updated_at: "2026-09-10"
-latest_checkpoint: "0047"
+updated_at: "2026-09-17"
+latest_checkpoint: "0048"
 current_phase: P01
 current_gate: G01
 state: windows_tray_v1_implemented_user_logo_cutout_ready
-next_sequence: "0048"
-current_goal: "用户指定 Logo 已完成真透明抠图：保留白色圆角底板及内部品牌内容，只移除外围画布；下一步制作多尺寸 ICO、替换正式资源并构建 Windows 包"
+next_sequence: "0049"
+current_goal: "用户指定 Logo 的右侧残留画布已清除，白色圆角底板左右边界对称且外围真透明；下一步制作多尺寸 ICO、替换正式资源并构建 Windows 包"
 recent_baseline:
   - checkpoint: "0015"
     result: "设置页完成 Large/Medium/Small 三档独立编排与黑名单新增入口；新增会话、认证、拉黑和跨租户权限负向测试，定向 Maven 7 项通过；Flutter/Dart SDK、数据库集成环境和头像上传后端路由仍不可用"
@@ -64,6 +64,8 @@ recent_baseline:
     result: "用户指定新的银灰字母 I、圆点、环线与 INNOCENCE 字标 Logo，并明确保留白色圆角底板；原图已无损归档为 innocence-logo-v1-selected.png，SHA-256 与来源一致，尚未替换 ICO。"
   - checkpoint: "0047"
     result: "按用户纠正，仅保留白色圆角底板及内部品牌内容，移除外围画布并输出 1254×1254 ARGB 抠图母版；四角 alpha=0、中心 alpha=255、圆角含多级抗锯齿，内部抽样 RGB 与源图一致。"
+  - checkpoint: "0048"
+    result: "修正 Logo 抠图右边界：删除误收入的 x=1166–1199 外围画布，底板有效左右边界收敛为 x=89..1165；右侧 x=1166 起 alpha=0，圆角仍保留多级抗锯齿。"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
