@@ -1,10 +1,17 @@
-# Innocence
+<p align="center">
+  <img src="docs/design/logo/innocence-logo-v1-cutout.png" alt="Innocence Logo" width="180">
+</p>
 
-Innocence 是面向学习、自律、陪伴和团队互助的双端应用，当前以 Flutter + Spring Boot 为主线，覆盖 Windows 桌面端与移动端。
+<h1 align="center">Innocence</h1>
+
+<p align="center">面向学习、自律、陪伴和团队互助的双端应用</p>
+
+Innocence 当前以 Flutter + Spring Boot 为主线，覆盖 Windows 桌面端与移动端。
 
 ## 当前状态
 
 - Windows 端采用 Large / Medium / Small 自适应画布与 Focus Orb。
+- Windows 应用、窗口和系统托盘已使用正式 Innocence Logo。
 - 支持纯白、侘寂、Mid-Century Modern 和 Glass 四套可切换主题。
 - 已具备认证、资料、设置、备忘录、统计、通知、好友和团队等主要交互骨架。
 - 后端业务数据按当前登录用户隔离。

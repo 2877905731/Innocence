@@ -349,3 +349,10 @@ checkpoints:
     status: complete
     path: progress/0048__20260917__P01__CORRECTION__logo-right-edge-cleanup.md
     title: "Logo 抠图右侧残留画布清理"
+  - sequence: "0049"
+    created_at: "2026-09-17T01:20:26+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0049__20260917__P01__DONE__official-logo-windows-and-github-readme.md
+    title: "正式 Logo 接入 Windows 并同步 GitHub README"

@@ -12,7 +12,7 @@
 
 ## 正式抠图母版 V1
 
-状态：已完成，可作为多尺寸 Windows ICO 与托盘图标的正式视觉源。
+状态：已完成，并已用于 Windows 应用、窗口、安装器与系统托盘图标。
 
 - 文件：[innocence-logo-v1-cutout.png](./innocence-logo-v1-cutout.png)
 - 画布：`1254×1254`、`Format32bppArgb`
@@ -23,6 +23,14 @@
 - SHA-256：`1DB3D73496A8A396A9C8CD7D08F09AEAB3A7B1393D958B4067A436FE6F3988DD`
 
 提取使用确定性的圆角蒙版。OpenAI ImageGen 的背景提取尝试因输出为不透明棋盘格而未采用，也未写入项目。制作桌面/任务栏/托盘资源时，只允许按目标尺寸进行构图适配和清晰度优化，不得更换字形或改变品牌配色。
+
+### Windows ICO
+
+- 文件：[app_icon.ico](../../../client/flutter_app/windows/runner/resources/app_icon.ico)
+- 尺寸：`16 / 20 / 24 / 32 / 40 / 48 / 64 / 128 / 256`
+- 编码：9 个带 Alpha 的 32 位 PNG 图层
+- 小尺寸策略：`16–48` 使用同源放大的 `I + 圆点 + 环线` 构图；`64–256` 保留完整字标
+- SHA-256：`46DE2330866E91725B85318DAA9EAC917FAA1B95AD1AEEA0C16CB2C0D8C32220`
 
 ## 历史候选稿
 
