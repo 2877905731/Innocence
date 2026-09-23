@@ -5,6 +5,7 @@ import com.innocence.server.modules.plan.domain.DailyPlanItem;
 import com.innocence.server.modules.plan.domain.WeeklyPlanTemplate;
 import com.innocence.server.modules.plan.domain.WeeklyPlanTemplateItem;
 import com.innocence.server.modules.plan.domain.AnnualPlanSegment;
+import com.innocence.server.modules.plan.domain.AnnualPlanSubtask;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -74,6 +75,18 @@ public interface StudyPlanMapper {
     void updateAnnualPlanSegment(AnnualPlanSegment segment);
 
     void deleteAnnualPlanSegmentByIdAndUserId(
+            @Param("segmentId") Long segmentId,
+            @Param("userId") Long userId
+    );
+
+    List<AnnualPlanSubtask> findAnnualPlanSubtasksBySegmentId(
+            @Param("segmentId") Long segmentId,
+            @Param("userId") Long userId
+    );
+
+    void insertAnnualPlanSubtask(AnnualPlanSubtask subtask);
+
+    void deleteAnnualPlanSubtasksBySegmentIdAndUserId(
             @Param("segmentId") Long segmentId,
             @Param("userId") Long userId
     );

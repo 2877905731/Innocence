@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Innocence · 柔彩编辑式主题基准</title>
+  <meta name="description" content="Innocence Windows 主题二正式基准：高留白、编辑式排版与柔彩叠层的数据看板。">
+  <!--
+    视觉参考（仅作风格转译，不复用原帖图片）：
+    https://www.xiaohongshu.com/explore/680b7e7f000000001c004b38
+  -->
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17181b;
+      --ink-soft: #5d6068;
+      --ink-faint: #9b9da4;
+      --paper: #f8f8fa;
+      --panel: rgba(255, 255, 255, 0.84);
+      --panel-solid: #ffffff;
+      --line: rgba(24, 24, 28, 0.09);
+      --accent-a: #8e7dff;
+      --accent-a-rgb: 142, 125, 255;
+      --accent-b: #ff9ca9;
+      --accent-b-rgb: 255, 156, 169;
+      --accent-ink: #292443;
+      --accent-soft: #e7e2ff;
+      --accent-wash: #fff0f2;
+      --success: #72d59c;
+      --warning: #f5c96a;
+      --shadow: 0 26px 80px rgba(36, 38, 47, 0.15);
+      --soft-shadow: 0 12px 40px rgba(37, 39, 49, 0.08);
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(var(--accent-a-rgb), 0.20), transparent 26rem),
+        radial-gradient(circle at 90% 88%, rgba(var(--accent-b-rgb), 0.16), transparent 30rem),
+        #e9eaee;
+      color: var(--ink);
+      font-family: Inter, "SF Pro Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-feature-settings: "tnum" 1, "ss01" 1;
+      transition: background 450ms ease;
+    }
+
+    button, input { font: inherit; }
+    button { color: inherit; }
+
+    .preview-shell {
+      width: min(1520px, calc(100vw - 44px));
+      min-height: min(920px, calc(100vh - 44px));
+      margin: 22px auto;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 30px;
+      background: rgba(249, 249, 251, 0.92);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+    }
+
+    .window-bar {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      height: 64px;
+      padding: 0 20px 0 26px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.74);
+    }
+
+    .wordmark {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 760;
+      letter-spacing: 0.16em;
+    }
+
+    .brand-mark {
+      position: relative;
+      width: 30px;
+      height: 30px;
+      border: 1.5px solid var(--ink);
+      border-radius: 50%;
+    }
+
+    .brand-mark::before {
+      position: absolute;
+      top: 5px;
+      bottom: 5px;
+      left: 13px;
+      width: 2px;
+      content: "";
+      background: var(--ink);
+    }
+
+    .brand-mark::after {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      content: "";
+      background: var(--accent-a);
+    }
+
+    .size-rings {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--ink-faint);
+    }
+
+    .size-rings span {
+      display: block;
+      border: 1.5px solid currentColor;
+      border-radius: 50%;
+    }
+
+    .size-rings span:nth-child(1) { width: 17px; height: 17px; color: var(--ink); }
+    .size-rings span:nth-child(2) { width: 13px; height: 13px; }
+    .size-rings span:nth-child(3) { width: 9px; height: 9px; }
+
+    .window-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .window-action {
+      width: 34px;
+      height: 30px;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: #777982;
+      cursor: pointer;
+      transition: background 180ms ease, color 180ms ease;
+    }
+
+    .window-action:hover { background: rgba(22, 23, 27, 0.06); color: var(--ink); }
+    .window-action.close:hover { background: #ff6d76; color: #fff; }
+
+    .app-layout {
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr);
+      min-height: calc(min(920px, calc(100vh - 44px)) - 64px);
+    }
+
+    .side-rail {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 28px 16px 22px;
+      border-right: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.46);
+    }
+
+    .rail-button {
+      position: relative;
+      display: grid;
+      width: 48px;
+      height: 48px;
+      place-items: center;
+      border: 0;
+      border-radius: 15px;
+      background: transparent;
+      color: #868890;
+      cursor: pointer;
+      transition: color 180ms ease, background 180ms ease, transform 180ms ease;
+    }
+
+    .rail-button svg { width: 21px; height: 21px; }
+    .rail-button:hover { color: var(--ink); background: rgba(255, 255, 255, 0.76); }
+
+    .rail-button.active {
+      background: var(--ink);
+      box-shadow: 0 8px 22px rgba(22, 23, 28, 0.18);
+      color: #fff;
+    }
+
+    .rail-button.active::after {
+      position: absolute;
+      right: -22px;
+      width: 5px;
+      height: 18px;
+      border-radius: 9px;
+      content: "";
+      background: var(--accent-a);
+    }
+
+    .rail-spacer { flex: 1; }
+
+    .avatar {
+      display: grid;
+      width: 43px;
+      height: 43px;
+      place-items: center;
+      border: 3px solid rgba(255, 255, 255, 0.86);
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+      box-shadow: 0 6px 20px rgba(var(--accent-a-rgb), 0.24);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    main {
+      min-width: 0;
+      padding: 30px 34px 34px;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0.30)),
+        linear-gradient(90deg, rgba(20, 21, 24, 0.024) 1px, transparent 1px),
+        linear-gradient(rgba(20, 21, 24, 0.024) 1px, transparent 1px);
+      background-size: auto, 44px 44px, 44px 44px;
+    }
+
+    .topline {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 26px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--ink-faint);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 3.2vw, 44px);
+      font-weight: 420;
+      letter-spacing: -0.055em;
+      line-height: 1.04;
+    }
+
+    .topline-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 188px;
+      height: 42px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.68);
+      color: var(--ink-faint);
+      font-size: 12px;
+    }
+
+    .search svg { width: 16px; }
+
+    .icon-button {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.68);
+      cursor: pointer;
+    }
+
+    .icon-button svg { width: 17px; }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(0, 1.46fr) minmax(360px, 0.86fr);
+      gap: 18px;
+    }
+
+    .left-column, .right-column {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      border-radius: var(--radius-lg);
+      background: var(--panel);
+      box-shadow: var(--soft-shadow);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 214px;
+      min-height: 288px;
+      padding: 32px;
+      isolation: isolate;
+      background: linear-gradient(118deg, rgba(255,255,255,.96) 4%, rgba(var(--accent-a-rgb),.22) 48%, rgba(var(--accent-b-rgb),.24) 77%, rgba(255,255,255,.94) 100%);
+      background-size: 185% 185%;
+      animation: hero-wash 4.8s ease-in-out infinite alternate;
+    }
+
+    .hero::before,
+    .hero::after {
+      position: absolute;
+      z-index: -2;
+      border-radius: 34px;
+      content: "";
+      filter: saturate(108%);
+      opacity: 0.96;
+    }
+
+    .hero::before {
+      top: -54px;
+      right: 94px;
+      width: 290px;
+      height: 210px;
+      background: linear-gradient(145deg, rgba(var(--accent-a-rgb), 0.82), rgba(var(--accent-a-rgb), 0.08) 74%);
+      transform: rotate(-5deg);
+      animation: lavender-block 2.7s ease-in-out infinite alternate;
+    }
+
+    .hero::after {
+      right: -48px;
+      bottom: -88px;
+      width: 310px;
+      height: 248px;
+      background: linear-gradient(135deg, rgba(var(--accent-b-rgb), 0.72), rgba(var(--accent-b-rgb), 0.10) 72%);
+      transform: rotate(6deg);
+      animation: coral-block 3.1s ease-in-out infinite alternate;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      opacity: 0.24;
+      background-image: radial-gradient(circle, rgba(23, 24, 27, 0.22) 0.7px, transparent 0.8px);
+      background-size: 18px 18px;
+      mask-image: linear-gradient(90deg, #000, transparent 75%);
+    }
+
+    .hero-copy { align-self: stretch; display: flex; flex-direction: column; }
+
+    .status-line {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 7px 11px;
+      border: 1px solid rgba(26, 27, 31, 0.08);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.62);
+      color: var(--ink-soft);
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 4px rgba(114, 213, 156, 0.17);
+    }
+
+    .hero h2 {
+      max-width: 580px;
+      margin: 30px 0 10px;
+      font-size: clamp(36px, 4.7vw, 68px);
+      font-weight: 420;
+      letter-spacing: -0.065em;
+      line-height: 0.98;
+    }
+
+    .hero h2 em { color: var(--accent-a); font-style: normal; }
+    .hero-copy > p { margin: 0; color: var(--ink-soft); font-size: 13px; line-height: 1.65; }
+
+    .hero-actions { display: flex; gap: 10px; margin-top: auto; padding-top: 22px; }
+
+    .primary-button,
+    .secondary-button {
+      height: 42px;
+      padding: 0 18px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .primary-button {
+      border: 1px solid var(--ink);
+      background: var(--ink);
+      box-shadow: 0 10px 24px rgba(23, 24, 27, 0.16);
+      color: #fff;
+    }
+
+    .secondary-button {
+      border: 1px solid rgba(23, 24, 27, 0.12);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .primary-button:hover,
+    .secondary-button:hover { transform: translateY(-2px); }
+
+    .focus-orbit {
+      position: relative;
+      display: grid;
+      width: 180px;
+      height: 180px;
+      align-self: center;
+      justify-self: end;
+      place-items: center;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,0.95) 55%, transparent 56%),
+        conic-gradient(var(--ink) 0 67%, rgba(255,255,255,0.58) 67% 100%);
+      box-shadow: 0 18px 50px rgba(27, 27, 34, 0.12);
+    }
+
+    .focus-orbit::before {
+      position: absolute;
+      inset: 9px;
+      border: 1px dashed rgba(23, 24, 27, 0.18);
+      border-radius: inherit;
+      content: "";
+      animation: orbit 28s linear infinite;
+    }
+
+    .focus-time { text-align: center; }
+    .focus-time strong { display: block; font-size: 38px; font-weight: 500; letter-spacing: -0.055em; }
+    .focus-time span { display: block; margin-top: 5px; color: var(--ink-faint); font-size: 9px; font-weight: 750; letter-spacing: 0.18em; text-transform: uppercase; }
+
+    .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+    .metric {
+      min-height: 122px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.70);
+      box-shadow: 0 8px 30px rgba(37, 39, 49, 0.05);
+    }
+
+    .metric:nth-child(2) { background: linear-gradient(145deg, rgba(var(--accent-a-rgb), 0.25), rgba(255,255,255,0.76)); }
+    .metric:nth-child(3) { background: linear-gradient(145deg, rgba(var(--accent-b-rgb), 0.24), rgba(255,255,255,0.76)); }
+
+    .metric-label { display: flex; justify-content: space-between; color: var(--ink-faint); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+    .metric-value { display: flex; align-items: baseline; gap: 6px; margin-top: 17px; }
+    .metric-value strong { font-size: 30px; font-weight: 480; letter-spacing: -0.055em; }
+    .metric-value span { color: var(--ink-soft); font-size: 11px; }
+
+    .mini-bars { display: flex; align-items: end; gap: 4px; height: 24px; margin-top: 10px; }
+    .mini-bars i { flex: 1; border-radius: 3px 3px 1px 1px; background: var(--ink); opacity: 0.17; }
+    .mini-bars i:nth-child(2n) { opacity: 0.35; }
+    .mini-bars i:last-child { background: var(--accent-a); opacity: 1; }
+
+    .chart-card { padding: 23px 24px 20px; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .card-head h3 { margin: 4px 0 0; font-size: 18px; font-weight: 560; letter-spacing: -0.035em; }
+    .card-head p { margin: 0; color: var(--ink-faint); font-size: 9px; font-weight: 750; letter-spacing: 0.16em; text-transform: uppercase; }
+
+    .period-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      border-radius: 11px;
+      background: rgba(24, 24, 28, 0.045);
+    }
+
+    .period-tabs button {
+      min-width: 34px;
+      height: 25px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--ink-faint);
+      cursor: pointer;
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .period-tabs button.active { background: #fff; box-shadow: 0 4px 14px rgba(24,25,29,.07); color: var(--ink); }
+
+    .chart-wrap { position: relative; height: 164px; margin-top: 17px; }
+    .chart-wrap svg { width: 100%; height: 100%; overflow: visible; }
+    .chart-line { fill: none; stroke: var(--ink); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
+    .chart-accent { fill: none; stroke: var(--accent-a); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.6; }
+    .chart-grid line { stroke: rgba(23,24,27,.07); stroke-width: 1; }
+    .chart-labels { display: flex; justify-content: space-between; color: var(--ink-faint); font-size: 9px; }
+
+    .today-card { padding: 24px; }
+    .today-summary { display: flex; align-items: flex-end; justify-content: space-between; margin: 20px 0 18px; }
+    .today-summary strong { font-size: 48px; font-weight: 430; letter-spacing: -0.06em; line-height: .9; }
+    .today-summary span { color: var(--ink-faint); font-size: 10px; }
+
+    .task-list { display: grid; gap: 8px; }
+
+    .task {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 11px;
+      padding: 12px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.62);
+      cursor: pointer;
+      transition: transform 170ms ease, background 170ms ease;
+    }
+
+    .task:hover { transform: translateX(3px); background: rgba(255,255,255,.92); }
+    .task-time { color: var(--ink-faint); font-size: 9px; font-weight: 700; }
+    .task-copy strong { display: block; font-size: 12px; font-weight: 650; }
+    .task-copy span { display: block; margin-top: 3px; color: var(--ink-faint); font-size: 9px; }
+    .task-state { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-a); box-shadow: 0 0 0 5px rgba(var(--accent-a-rgb), .12); }
+    .task.done { opacity: .47; }
+    .task.done .task-copy strong { text-decoration: line-through; }
+    .task.done .task-state { background: var(--success); box-shadow: none; }
+
+    .palette-card { padding: 22px 24px; background: var(--ink); color: #fff; }
+    .palette-card .card-head p { color: rgba(255,255,255,.44); }
+    .palette-card .card-head h3 { color: #fff; }
+
+    .palette-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 20px; }
+
+    .palette-option {
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      background: rgba(255,255,255,.055);
+      color: rgba(255,255,255,.62);
+      cursor: pointer;
+      text-align: left;
+      transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+    }
+
+    .palette-option:hover { transform: translateY(-2px); background: rgba(255,255,255,.09); }
+    .palette-option.active { border-color: rgba(255,255,255,.42); background: rgba(255,255,255,.12); color: #fff; }
+
+    .swatch-pair { display: flex; height: 34px; overflow: hidden; border-radius: 9px; }
+    .swatch-pair i { flex: 1; }
+    .palette-option span { display: block; margin-top: 8px; font-size: 9px; font-weight: 700; letter-spacing: .08em; }
+
+    .quote-card {
+      display: grid;
+      min-height: 154px;
+      padding: 24px;
+      align-content: space-between;
+      background:
+        linear-gradient(135deg, rgba(var(--accent-a-rgb), 0.88), rgba(var(--accent-b-rgb), 0.78)),
+        #dcd7ff;
+      color: var(--accent-ink);
+    }
+
+    .quote-card p { max-width: 330px; margin: 0; font-size: 25px; font-weight: 450; letter-spacing: -0.045em; line-height: 1.14; }
+    .quote-card footer { display: flex; justify-content: space-between; color: rgba(27,27,33,.60); font-size: 9px; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
+
+    .preview-note {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 18px;
+      padding: 0 3px;
+      color: var(--ink-faint);
+      font-size: 9px;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    .preview-note span:last-child { text-align: right; }
+
+    [data-palette="butter"] {
+      --accent-a: #8674f5;
+      --accent-a-rgb: 134, 116, 245;
+      --accent-b: #f4ce78;
+      --accent-b-rgb: 244, 206, 120;
+      --accent-ink: #29243d;
+      --accent-soft: #ded8ff;
+      --accent-wash: #fff2cb;
+    }
+
+    [data-palette="mint"] {
+      --accent-a: #61ee8e;
+      --accent-a-rgb: 97, 238, 142;
+      --accent-b: #d9ff76;
+      --accent-b-rgb: 217, 255, 118;
+      --accent-ink: #14271a;
+      --accent-soft: #caffd9;
+      --accent-wash: #f3ffcc;
+    }
+
+    @keyframes orbit { to { transform: rotate(360deg); } }
+    @keyframes hero-wash { from { background-position: 0% 30%; } to { background-position: 100% 70%; } }
+    @keyframes lavender-block { from { transform: translate(-19px, 17px) rotate(-10deg); } to { transform: translate(0, 0) rotate(2deg); } }
+    @keyframes coral-block { from { transform: translate(19px, 0) rotate(6deg); } to { transform: translate(0, -18px) rotate(-6deg); } }
+
+    @media (max-width: 1180px) {
+      .dashboard { grid-template-columns: 1fr; }
+      .right-column { grid-template-columns: 1.2fr .8fr; }
+      .today-card { grid-row: span 2; }
+      .palette-card, .quote-card { min-height: 164px; }
+    }
+
+    @media (max-width: 820px) {
+      .preview-shell { width: 100%; min-height: 100vh; margin: 0; border-radius: 0; }
+      .window-bar { grid-template-columns: 1fr auto; }
+      .size-rings { display: none; }
+      .app-layout { grid-template-columns: 70px minmax(0, 1fr); }
+      .side-rail { padding-inline: 10px; }
+      main { padding: 24px 20px; }
+      .topline { align-items: center; }
+      .search { display: none; }
+      .hero { grid-template-columns: 1fr; min-height: auto; }
+      .focus-orbit { display: none; }
+      .metric-grid { grid-template-columns: 1fr; }
+      .right-column { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body data-palette="blush" data-target-platform="windows-desktop">
+  <div class="preview-shell">
+    <header class="window-bar">
+      <div class="wordmark"><span class="brand-mark" aria-hidden="true"></span><span>INNOCENCE</span></div>
+      <div class="size-rings" aria-label="画布尺寸预设"><span title="Large"></span><span title="Medium"></span><span title="Small"></span></div>
+      <div class="window-actions" aria-label="窗口操作">
+        <button class="window-action" aria-label="最小化">—</button>
+        <button class="window-action" aria-label="最大化">□</button>
+        <button class="window-action close" aria-label="关闭">×</button>
+      </div>
+    </header>
+
+    <div class="app-layout">
+      <aside class="side-rail" aria-label="主导航">
+        <button class="rail-button active" aria-label="首页" title="首页">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10.4 12 4l8 6.4V20H4z"/><path d="M9.2 20v-6.2h5.6V20"/></svg>
+        </button>
+        <button class="rail-button" aria-label="计划" title="计划">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4m8-4v4M4 10h16"/></svg>
+        </button>
+        <button class="rail-button" aria-label="专注" title="专注">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.8 2"/></svg>
+        </button>
+        <button class="rail-button" aria-label="统计" title="统计">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 19V9m7 10V5m7 14v-7"/></svg>
+        </button>
+        <button class="rail-button" aria-label="备忘" title="备忘">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4h9l3 3v13H6z"/><path d="M15 4v4h4M9 12h6m-6 4h4"/></svg>
+        </button>
+        <div class="rail-spacer"></div>
+        <button class="rail-button" aria-label="设置" title="设置">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19 14.6 21 16l-2 3.4-2.4-1a8 8 0 0 1-2.1 1.2L14.2 22h-4.4l-.3-2.4a8 8 0 0 1-2.1-1.2l-2.4 1L3 16l2-1.4a8 8 0 0 1 0-2.4L3 10.8l2-3.4 2.4 1a8 8 0 0 1 2.1-1.2L9.8 5h4.4l.3 2.2a8 8 0 0 1 2.1 1.2l2.4-1 2 3.4-2 1.4a8 8 0 0 1 0 2.4Z"/></svg>
+        </button>
+        <div class="avatar" aria-label="本机资料：林">林</div>
+      </aside>
+
+      <main>
+        <div class="topline">
+          <div>
+            <p class="eyebrow">Tue · September 22 · 本机资料</p>
+            <h1>早上好，林。<br>今天也向前一点。</h1>
+          </div>
+          <div class="topline-actions">
+            <div class="search" aria-label="搜索">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg>
+              <span>搜索计划与备忘</span>
+            </div>
+            <button class="icon-button" aria-label="通知">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="dashboard">
+          <div class="left-column">
+            <section class="card hero">
+              <div class="hero-grid" aria-hidden="true"></div>
+              <div class="hero-copy">
+                <div class="status-line"><span class="status-dot"></span>本周连续专注 5 天</div>
+                <h2>把今天，<br><em>完成得漂亮。</em></h2>
+                <p>当前任务 · 产品交互稿整理 / 预计 10:30 完成</p>
+                <div class="hero-actions">
+                  <button class="primary-button" id="focus-toggle">继续专注</button>
+                  <button class="secondary-button">查看今日计划</button>
+                </div>
+              </div>
+              <div class="focus-orbit" aria-label="今日专注进度 67%">
+                <div class="focus-time"><strong id="focus-time">42:18</strong><span>Focus today · 67%</span></div>
+              </div>
+            </section>
+
+            <section class="metric-grid" aria-label="今日关键指标">
+              <article class="metric">
+                <div class="metric-label"><span>完成计划</span><span>+2</span></div>
+                <div class="metric-value"><strong>7</strong><span>/ 10 项</span></div>
+                <div class="mini-bars" aria-hidden="true"><i style="height:34%"></i><i style="height:58%"></i><i style="height:48%"></i><i style="height:72%"></i><i style="height:62%"></i><i style="height:92%"></i><i style="height:78%"></i></div>
+              </article>
+              <article class="metric">
+                <div class="metric-label"><span>专注时长</span><span>周均</span></div>
+                <div class="metric-value"><strong>3.8</strong><span>小时</span></div>
+                <div class="mini-bars" aria-hidden="true"><i style="height:45%"></i><i style="height:70%"></i><i style="height:54%"></i><i style="height:84%"></i><i style="height:69%"></i><i style="height:96%"></i><i style="height:88%"></i></div>
+              </article>
+              <article class="metric">
+                <div class="metric-label"><span>今日状态</span><span>稳定</span></div>
+                <div class="metric-value"><strong>86</strong><span>/ 100</span></div>
+                <div class="mini-bars" aria-hidden="true"><i style="height:52%"></i><i style="height:58%"></i><i style="height:75%"></i><i style="height:68%"></i><i style="height:78%"></i><i style="height:83%"></i><i style="height:92%"></i></div>
+              </article>
+            </section>
+
+            <section class="card chart-card">
+              <div class="card-head">
+                <div><p>Momentum / 学习走势</p><h3>稳定积累，正在变得可见</h3></div>
+                <div class="period-tabs" aria-label="图表周期">
+                  <button>7D</button><button class="active">30D</button><button>1Y</button>
+                </div>
+              </div>
+              <div class="chart-wrap" aria-label="过去 30 天完成度与专注时长趋势图">
+                <svg viewBox="0 0 760 160" preserveAspectRatio="none" role="img">
+                  <defs>
+                    <linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0" stop-color="var(--accent-a)" stop-opacity=".24"/>
+                      <stop offset="1" stop-color="var(--accent-a)" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <g class="chart-grid"><line x1="0" y1="22" x2="760" y2="22"/><line x1="0" y1="70" x2="760" y2="70"/><line x1="0" y1="118" x2="760" y2="118"/></g>
+                  <path d="M0 125 C55 122,68 99,116 103 S190 77,236 88 S311 104,356 70 S430 52,474 60 S535 38,588 48 S677 24,760 31 L760 160 L0 160 Z" fill="url(#chartFill)"/>
+                  <path class="chart-accent" d="M0 125 C55 122,68 99,116 103 S190 77,236 88 S311 104,356 70 S430 52,474 60 S535 38,588 48 S677 24,760 31"/>
+                  <path class="chart-line" opacity=".42" d="M0 109 C48 92,93 111,135 89 S218 56,267 72 S342 104,392 83 S458 92,512 62 S606 67,654 45 S715 51,760 20"/>
+                  <circle cx="588" cy="48" r="5" fill="var(--panel-solid)" stroke="var(--accent-a)" stroke-width="3"/>
+                </svg>
+              </div>
+              <div class="chart-labels"><span>08.24</span><span>08.30</span><span>09.05</span><span>09.11</span><span>09.17</span><span>今天</span></div>
+            </section>
+          </div>
+
+          <div class="right-column">
+            <section class="card today-card">
+              <div class="card-head">
+                <div><p>Today / 今日计划</p><h3>清晰，不拥挤</h3></div>
+                <button class="icon-button" aria-label="新增计划" style="width:34px;height:34px;border-radius:12px">＋</button>
+              </div>
+              <div class="today-summary"><strong>07</strong><span>3 项已完成 · 4 项待处理</span></div>
+              <div class="task-list">
+                <article class="task done"><span class="task-time">08:30</span><div class="task-copy"><strong>晨间阅读与笔记</strong><span>阅读 · 45 分钟</span></div><span class="task-state"></span></article>
+                <article class="task"><span class="task-time">10:00</span><div class="task-copy"><strong>产品交互稿整理</strong><span>工作 · 正在进行</span></div><span class="task-state"></span></article>
+                <article class="task"><span class="task-time">14:30</span><div class="task-copy"><strong>英语听力训练</strong><span>学习 · 30 分钟</span></div><span class="task-state" style="background:var(--accent-b);box-shadow:0 0 0 5px rgba(var(--accent-b-rgb),.12)"></span></article>
+                <article class="task"><span class="task-time">19:20</span><div class="task-copy"><strong>轻力量训练</strong><span>健康 · 40 分钟</span></div><span class="task-state" style="background:var(--warning);box-shadow:0 0 0 5px rgba(245,201,106,.14)"></span></article>
+              </div>
+            </section>
+
+            <section class="card palette-card">
+              <div class="card-head"><div><p>Reference palette</p><h3>换一组气氛</h3></div></div>
+              <div class="palette-options">
+                <button class="palette-option active" data-set-palette="blush"><span class="swatch-pair"><i style="background:#8e7dff"></i><i style="background:#ff9ca9"></i></span><span>紫 / 珊瑚</span></button>
+                <button class="palette-option" data-set-palette="butter"><span class="swatch-pair"><i style="background:#8674f5"></i><i style="background:#f4ce78"></i></span><span>紫 / 奶油</span></button>
+                <button class="palette-option" data-set-palette="mint"><span class="swatch-pair"><i style="background:#61ee8e"></i><i style="background:#d9ff76"></i></span><span>薄荷 / 酸绿</span></button>
+              </div>
+            </section>
+
+            <blockquote class="card quote-card">
+              <p>“进度不需要轰鸣，<br>它会在每天的细节里发光。”</p>
+              <footer><span>Daily note · 05</span><span>Innocence</span></footer>
+            </blockquote>
+          </div>
+        </div>
+
+        <div class="preview-note"><span>Theme 02 baseline · Soft spectrum editorial</span><span>Reference translated for Innocence · No source imagery reused</span></div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const body = document.body;
+    const paletteButtons = [...document.querySelectorAll('[data-set-palette]')];
+    const paletteNames = { blush: '紫 / 珊瑚', butter: '紫 / 奶油', mint: '薄荷 / 酸绿' };
+
+    paletteButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const palette = button.dataset.setPalette;
+        body.dataset.palette = palette;
+        paletteButtons.forEach((item) => item.classList.toggle('active', item === button));
+        document.title = `Innocence · ${paletteNames[palette]}柔彩看板预览`;
+      });
+    });
+
+    document.querySelectorAll('.rail-button').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.rail-button').forEach((item) => item.classList.remove('active'));
+        button.classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('.period-tabs button').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.period-tabs button').forEach((item) => item.classList.remove('active'));
+        button.classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('.task').forEach((task) => {
+      task.addEventListener('click', () => task.classList.toggle('done'));
+    });
+
+    const focusToggle = document.querySelector('#focus-toggle');
+    const focusTime = document.querySelector('#focus-time');
+    let running = false;
+    let seconds = 42 * 60 + 18;
+    let timer;
+
+    focusToggle.addEventListener('click', () => {
+      running = !running;
+      focusToggle.textContent = running ? '暂停专注' : '继续专注';
+      window.clearInterval(timer);
+      if (running) {
+        timer = window.setInterval(() => {
+          seconds += 1;
+          const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
+          const rest = (seconds % 60).toString().padStart(2, '0');
+          focusTime.textContent = `${minutes}:${rest}`;
+        }, 1000);
+      }
+    });
+  </script>
+</body>
+</html>

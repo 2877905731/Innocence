@@ -1,0 +1,82 @@
+---
+schema_version: 1
+document_type: checkpoint
+sequence: "0053"
+created_at: "2026-09-23T09:35:11+08:00"
+phase: P01
+type: DECISION
+status: complete
+title: "任务存档直存直用与独立年度计划看板"
+objective: "按用户新图与文字要求，替换冲突的旧计划：短任务当前安排可存档，长任务可直接新建和套用存档，超长计划独立按年内 12 个月管理任务、子任务和动态时间跨度；首页柔彩浮层增加动效"
+completed:
+  - fact: "短任务编辑器可将尚未保存的当前安排单独存为任务存档，短计划页亦提供当前安排和空白存档入口；存档支持新增、修改与删除"
+    evidence: "TodayPlanEditorDialog、AdaptiveDesktopHome、SessionController、StudyPlanController 与 OfflineStore；Flutter 存档编辑器及本地存储测试通过"
+  - fact: "长任务月历展示任务存档区，可新建、编辑、删除，并选择多个日期按跳过或覆盖策略直接套用；本机离线与在线路径均已接入"
+    evidence: "AdaptiveDesktopHome、HomePage、SessionController、StudyPlanApi；Flutter 60 项测试通过"
+  - fact: "超长计划改为不依附长任务的年度任务看板：12 个月切换、用户可编辑的月份跨度、脉冲充能色条、多个子任务及逐项完成确认、编辑和删除"
+    evidence: "AnnualPlanOverview/AnnualPlanSubtask、AdaptiveDesktopHome、OfflineStore、StudyPlanService 与 Mapper；Flutter 60 项和 Maven 41 项测试通过"
+  - fact: "存档请求失败时不会误报成功：草稿与名称保留供重试，存档编辑器也不会在失败后关闭"
+    evidence: "TodayPlanEditorDialog 与 SessionController 返回实际保存结果；Flutter 失败路径测试通过"
+  - fact: "柔彩首页 Hero 背景与两个色块加入缓动动画，并遵从系统减少动画偏好；HTML 预览同步更新"
+    evidence: "AdaptiveDesktopHome、soft-spectrum-dashboard-preview.html；Windows Release 构建通过"
+  - fact: "正式 UI 提示词、年月计划实施规划、数据流及契约文档已按新用户决策更新，冲突旧规则让位于新方案"
+    evidence: "Innocence-UI设计规划.md 第 2.30 节及相关规划、执行、契约文档"
+changed_files:
+  - path: "client/flutter_app/lib/features/home/presentation/pages/adaptive_desktop_home.dart"
+    change: "短任务存档入口、月历存档区与批量套用、独立年度任务看板、柔彩首页动效"
+  - path: "client/flutter_app/lib/features/plans/presentation/widgets/today_plan_editor_dialog.dart"
+    change: "当前安排草稿直接存档、存档编辑模式及失败保留内容重试"
+  - path: "client/flutter_app/lib/features/home/presentation/pages/home_page.dart"
+    change: "串接存档、月历批量套用与年度计划界面动作"
+  - path: "client/flutter_app/lib/app/session_controller.dart"
+    change: "在线/离线存档删除、批量套用与年度子任务状态维护"
+  - path: "client/flutter_app/lib/core/local/offline_store.dart"
+    change: "本地数据库升级到 v4，增加年度子任务存储及存档更新/删除同步"
+  - path: "client/flutter_app/lib/features/plans/domain/models/annual_plan_overview.dart"
+    change: "年度子任务模型与完成比例"
+  - path: "client/flutter_app/lib/features/plans/data/study_plan_api.dart"
+    change: "任务存档删除接口"
+  - path: "server/innocence-server/src/main/java/com/innocence/server/modules/plan/service/StudyPlanService.java"
+    change: "租户限定的年度子任务保存、读取和校验"
+  - path: "server/innocence-server/src/main/resources/schema.sql"
+    change: "新增年度子任务表"
+  - path: "server/innocence-server/src/main/java/com/innocence/server/modules/sync/service/SyncImportService.java"
+    change: "支持离线任务存档删除的导入回放"
+  - path: "docs/design/templates/soft-spectrum-dashboard-preview.html"
+    change: "预览中的 Hero 背景和双色块动效"
+  - path: "docs/planning/Innocence-UI设计规划.md"
+    change: "归档用户新计划要求与可复用提示词，并明确覆盖冲突旧方案"
+  - path: "docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md"
+    change: "按短任务存档、长任务套用、独立年度任务重新定义计划实施规则"
+  - path: "docs/06-contract-inventory.md"
+    change: "登记存档删除及年度子任务字段契约"
+  - path: "docs/07-dataflow-and-module-map.md"
+    change: "同步任务存档和年度子任务数据流"
+  - path: "progress/0000__AI-RESUME.md"
+    change: "记录新决策、实现状态和下一步验收"
+  - path: "progress/INDEX.md"
+    change: "追加检查点 0053"
+evidence:
+  - command: "git fetch origin；git rev-list --left-right --count HEAD...origin/main"
+    result: "本地 main 与 origin/main 差异为 0 0；未覆盖未提交工作区"
+  - command: "flutter test --no-pub"
+    result: "60 项全部通过"
+  - command: "flutter analyze --no-pub"
+    result: "No issues found"
+  - command: "mvn.cmd -q test（临时项目 MySQL 容器与隔离测试环境）"
+    result: "Surefire 汇总 41 项，0 failure、0 error、0 skipped；测试容器已移除"
+  - command: "flutter build windows --release --no-pub"
+    result: "成功生成 build/windows/x64/runner/Release/innocence_flutter.exe"
+  - command: "git diff --check"
+    result: "通过，无空白错误"
+compatibility_and_security:
+  contract_impact: "新增年度子任务表及保存/响应字段、任务存档 DELETE 路由；旧年度区间与旧模板数据保持兼容"
+  tenant_impact: "在线子任务读写受当前用户 ID 与年度区间 ID 联合限制；离线数据按本机 owner scope 隔离"
+  sensitive_data: "未复制或记录测试数据库口令及用户敏感数据"
+risks_or_blockers:
+  - "Windows Release 已编译并通过自动化回归，但仍需人工检查柔彩动画、任务操作和 100%/125%/150% DPI 下各尺寸布局；真实在线 HTTP 回放尚未完成"
+next_actions:
+  - id: NEXT-TASK-ARCHIVE-ANNUAL-VISUAL-QA
+    action: "在 Windows Release 人工检查短任务存档、长任务套用、年度 12 个月切换与子任务操作、柔彩动效及多 DPI 布局"
+    inputs: ["client/flutter_app/build/windows/x64/runner/Release/innocence_flutter.exe", "docs/design/templates/soft-spectrum-dashboard-preview.html"]
+---

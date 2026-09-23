@@ -23,6 +23,7 @@ import 'package:innocence_flutter/features/plans/domain/models/today_plan.dart';
 import 'package:innocence_flutter/features/plans/domain/models/month_plan_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/annual_plan_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/weekly_plan_template.dart';
+import 'package:innocence_flutter/features/plans/presentation/widgets/today_plan_editor_dialog.dart';
 import 'package:innocence_flutter/features/stats/domain/models/stats_overview.dart';
 import 'package:innocence_flutter/features/team/domain/models/team_chat_overview.dart';
 import 'package:innocence_flutter/features/team/domain/models/team_overview.dart';
@@ -71,6 +72,9 @@ class AdaptiveDesktopHome extends StatefulWidget {
     required this.onCurrentYear,
     required this.onNextYear,
     required this.onApplyDayTemplateToDate,
+    required this.onApplyDayTemplateToDates,
+    required this.onSavePlanAsDayTemplate,
+    required this.onDeleteDayTemplate,
     required this.onSaveAnnualSegment,
     required this.onDeleteAnnualSegment,
     this.bannerMessage,
@@ -122,6 +126,14 @@ class AdaptiveDesktopHome extends StatefulWidget {
     String planDate, {
     required PlanApplyStrategy strategy,
   }) onApplyDayTemplateToDate;
+  final Future<void> Function(
+    int templateId,
+    List<String> planDates, {
+    required PlanApplyStrategy strategy,
+  }) onApplyDayTemplateToDates;
+  final Future<bool> Function(String templateName, TodayPlan sourcePlan)
+      onSavePlanAsDayTemplate;
+  final Future<void> Function(int templateId) onDeleteDayTemplate;
   final Future<void> Function(AnnualPlanSegment segment) onSaveAnnualSegment;
   final Future<void> Function(AnnualPlanSegment segment) onDeleteAnnualSegment;
 
@@ -142,6 +154,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
   String _selectedDestinationId = 'home';
   String _windowMode = 'canvas';
   _PlanHorizon _planHorizon = _PlanHorizon.day;
+  bool _showAnnualMonthInDay = false;
   Timer? _sloganRefreshTimer;
 
   bool get _isChinese => widget.appLanguage.isChinese;
@@ -239,13 +252,109 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
     }
   }
 
-  Future<void> _openMonthFromYear(int month) async {
-    final monthValue =
-        '${widget.annualPlanOverview.year.toString().padLeft(4, '0')}-'
-        '${month.toString().padLeft(2, '0')}';
-    await widget.onLoadMonthOverview(monthValue);
-    if (mounted) {
-      setState(() => _planHorizon = _PlanHorizon.month);
+  void _selectDayPlanTab(bool showAnnualMonth) {
+    if (_showAnnualMonthInDay == showAnnualMonth) {
+      return;
+    }
+    setState(() => _showAnnualMonthInDay = showAnnualMonth);
+    if (showAnnualMonth) {
+      unawaited(widget.onLoadAnnualOverview(DateTime.now().year));
+    }
+  }
+
+  Future<void> _openAnnualYearFromDay() async {
+    setState(() => _planHorizon = _PlanHorizon.year);
+    await widget.onLoadAnnualOverview(DateTime.now().year);
+  }
+
+  Future<void> _openDayAnnualFromHome() async {
+    setState(() {
+      _selectedDestinationId = 'plans';
+      _planHorizon = _PlanHorizon.day;
+      _showAnnualMonthInDay = true;
+    });
+    await widget.onLoadAnnualOverview(DateTime.now().year);
+  }
+
+  Future<void> _saveCurrentPlanAsArchive() async {
+    if (!widget.todayPlan.hasItems) {
+      return;
+    }
+    var enteredArchiveName = widget.todayPlan.planName == 'Today'
+        ? _text('今日安排存档', 'Today archive')
+        : widget.todayPlan.planName;
+    final name = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(_text('保存为任务存档', 'Save as task archive')),
+        content: TextFormField(
+          initialValue: enteredArchiveName,
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: _text('存档名称', 'Archive name'),
+          ),
+          onChanged: (value) => enteredArchiveName = value,
+          onFieldSubmitted: (value) => Navigator.of(context).pop(value.trim()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(_text('取消', 'Cancel')),
+          ),
+          FilledButton(
+            onPressed: () =>
+                Navigator.of(context).pop(enteredArchiveName.trim()),
+            child: Text(_text('保存存档', 'Save archive')),
+          ),
+        ],
+      ),
+    );
+    if (name == null || name.isEmpty) {
+      return;
+    }
+    await widget.onSavePlanAsDayTemplate(name, widget.todayPlan);
+  }
+
+  Future<void> _openArchiveEditor({WeeklyPlanTemplate? template}) async {
+    final initialPlan = TodayPlan.empty(widget.todayPlan.planDate).copyWith(
+      planName: template?.templateName ?? '',
+      items: template?.items ?? const [],
+    );
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => TodayPlanEditorDialog(
+        initialPlan: initialPlan,
+        archiveMode: true,
+        lockPlanName: template != null,
+        onSaveArchive: (plan) => widget.onSavePlanAsDayTemplate(
+          plan.planName,
+          plan,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deleteArchive(WeeklyPlanTemplate template) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(_text('删除任务存档？', 'Delete task archive?')),
+        content: Text(template.templateName),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(_text('取消', 'Cancel')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(_text('删除', 'Delete')),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await widget.onDeleteDayTemplate(template.id);
     }
   }
 
@@ -510,14 +619,18 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
                 : widget.onStartFocus,
             onToggle: widget.onToggleFocus,
           ),
-          secondary: _PlanPanel(
+          secondary: _HomePlanTabs(
             palette: palette,
             plan: widget.todayPlan,
+            annualOverview: widget.annualPlanOverview,
             isChinese: _isChinese,
             isBusy: widget.isBusy,
             density: spec.defaultDensity,
             onEdit: widget.onEditTodayPlan,
             onToggle: widget.onToggleTodayPlanItem,
+            onLoadAnnual: () =>
+                widget.onLoadAnnualOverview(DateTime.now().year),
+            onOpenAnnualBoard: _openDayAnnualFromHome,
           ),
         ),
         const SizedBox(height: 20),
@@ -539,8 +652,8 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
                   'Last ${widget.statsOverview.rangeDays} days'),
             ),
             _MetricData(
-              label: _text('计划完成率', 'Plan completion'),
-              value: '${widget.statsOverview.planCompletionRate}%',
+              label: _text('今日计划完成率', 'Today plan completion'),
+              value: '${(widget.todayPlan.completionRatio * 100).round()}%',
               note: _text(
                   '今日 ${widget.todayPlan.completedCount}/${widget.todayPlan.totalCount}',
                   'Today ${widget.todayPlan.completedCount}/${widget.todayPlan.totalCount}'),
@@ -599,6 +712,42 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
       _PlanHorizon.month => _text('长计划', 'Monthly plan'),
       _PlanHorizon.year => _text('超长计划', 'Annual plan'),
     };
+    if (_planHorizon == _PlanHorizon.year) {
+      return _AnnualPlanBoard(
+        palette: palette,
+        overview: widget.annualPlanOverview,
+        isChinese: _isChinese,
+        isBusy: widget.isBusy,
+        pageSpec: spec,
+        pageVisualTheme: widget.visualTheme,
+        pageIntro: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _SectionLead(
+              palette: palette,
+              title: horizonTitle,
+              description: _text(
+                '超长计划独立管理年内目标。月份刻度会随任务列表保持在顶部。',
+                'Annual goals are independent. The month ruler stays visible as tasks scroll.',
+              ),
+            ),
+            const SizedBox(height: 16),
+            _PlanHorizonSwitcher(
+              palette: palette,
+              selected: _planHorizon,
+              isChinese: _isChinese,
+              onSelected: _selectPlanHorizon,
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+        onPreviousYear: widget.onPreviousYear,
+        onCurrentYear: widget.onCurrentYear,
+        onNextYear: widget.onNextYear,
+        onSaveSegment: widget.onSaveAnnualSegment,
+        onDeleteSegment: widget.onDeleteAnnualSegment,
+      );
+    }
     return _PageCanvas(
       pageKey: const PageStorageKey<String>('desktop.plans'),
       spec: spec,
@@ -609,8 +758,8 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
           palette: palette,
           title: horizonTitle,
           description: _text(
-            '在日计划、周计划与长期日程之间切换；所有安排都写入同一套日期计划。',
-            'Switch between daily, weekly, and long-term views backed by the same dated plans.',
+            '短计划管理当天安排，长计划负责按月套用任务存档，超长计划独立管理年内目标。',
+            'Daily plans manage today, monthly plans apply task archives, and annual plans manage independent goals.',
           ),
         ),
         const SizedBox(height: 16),
@@ -622,34 +771,124 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
         ),
         const SizedBox(height: 20),
         if (_planHorizon == _PlanHorizon.day) ...[
-          _SectionLead(
+          _Panel(
             palette: palette,
-            title: widget.todayPlan.planName.trim().isEmpty
-                ? _text('今日计划', 'Today plan')
-                : widget.todayPlan.planName,
-            description: _text(
-              '${widget.todayPlan.planDate} · '
-                  '${widget.todayPlan.completedCount}/${widget.todayPlan.totalCount} '
-                  '已完成 · ${widget.todayPlan.plannedDurationLabel}',
-              '${widget.todayPlan.planDate} · '
-                  '${widget.todayPlan.completedCount}/${widget.todayPlan.totalCount} '
-                  'complete · ${widget.todayPlan.plannedDurationLabel}',
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                for (final tab in [false, true])
+                  OutlinedButton.icon(
+                    key: ValueKey(tab
+                        ? 'day-plan-tab-annual-month'
+                        : 'day-plan-tab-today'),
+                    onPressed: () => _selectDayPlanTab(tab),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: _showAnnualMonthInDay == tab
+                          ? palette.accentSoft
+                          : palette.surface,
+                      foregroundColor: _showAnnualMonthInDay == tab
+                          ? palette.accent
+                          : palette.ink,
+                      side: BorderSide(
+                        color: _showAnnualMonthInDay == tab
+                            ? palette.accent
+                            : palette.rule,
+                      ),
+                    ),
+                    icon: Icon(tab
+                        ? Icons.calendar_view_month_outlined
+                        : Icons.today_outlined),
+                    label: Text(tab
+                        ? _text('本月超长任务', 'Annual tasks this month')
+                        : _text('今日安排', 'Today schedule')),
+                  ),
+              ],
             ),
-            actionLabel: _text('编辑今日计划', 'Edit today plan'),
-            onAction: widget.isBusy ? null : widget.onEditTodayPlan,
           ),
-          const SizedBox(height: 20),
-          _PlanPanel(
-            palette: palette,
-            plan: widget.todayPlan,
-            isChinese: _isChinese,
-            isBusy: widget.isBusy,
-            density: spec.defaultDensity,
-            onEdit: widget.onEditTodayPlan,
-            onToggle: widget.onToggleTodayPlanItem,
-            showHeaderAction: false,
-          ),
-        ] else if (_planHorizon == _PlanHorizon.month)
+          const SizedBox(height: 16),
+          if (!_showAnnualMonthInDay) ...[
+            _SectionLead(
+              palette: palette,
+              title: widget.todayPlan.planName.trim().isEmpty
+                  ? _text('今日计划', 'Today plan')
+                  : widget.todayPlan.planName,
+              description: _text(
+                '${widget.todayPlan.planDate} · '
+                    '${widget.todayPlan.completedCount}/${widget.todayPlan.totalCount} '
+                    '已完成 · ${widget.todayPlan.plannedDurationLabel}',
+                '${widget.todayPlan.planDate} · '
+                    '${widget.todayPlan.completedCount}/${widget.todayPlan.totalCount} '
+                    'complete · ${widget.todayPlan.plannedDurationLabel}',
+              ),
+              actionLabel: _text('编辑今日计划', 'Edit today plan'),
+              onAction: widget.isBusy ? null : widget.onEditTodayPlan,
+            ),
+            const SizedBox(height: 20),
+            _PlanPanel(
+              palette: palette,
+              plan: widget.todayPlan,
+              isChinese: _isChinese,
+              isBusy: widget.isBusy,
+              density: spec.defaultDensity,
+              onEdit: widget.onEditTodayPlan,
+              onToggle: widget.onToggleTodayPlanItem,
+              showHeaderAction: false,
+            ),
+            const SizedBox(height: 14),
+            _Panel(
+              palette: palette,
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  FilledButton.icon(
+                    key: const ValueKey('save-current-plan-as-archive'),
+                    onPressed: widget.isBusy || !widget.todayPlan.hasItems
+                        ? null
+                        : _saveCurrentPlanAsArchive,
+                    icon: const Icon(Icons.inventory_2_outlined),
+                    label: Text(_text(
+                      '保存当前安排为任务存档',
+                      'Save current plan as archive',
+                    )),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: widget.isBusy ? null : _openArchiveEditor,
+                    icon: const Icon(Icons.add_box_outlined),
+                    label: Text(_text(
+                      '新建空白任务存档',
+                      'Create blank task archive',
+                    )),
+                  ),
+                  Text(
+                    _text(
+                      '存档不绑定日期，可在长计划中重复套用。',
+                      'Archives are date-free and reusable in monthly plans.',
+                    ),
+                    style: TextStyle(color: palette.muted, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ] else
+            _AnnualPlanBoard(
+              key: ValueKey(
+                  'day-annual-${DateTime.now().year}-${DateTime.now().month}'),
+              palette: palette,
+              overview: widget.annualPlanOverview,
+              previewMonth: DateTime.now().month,
+              isChinese: _isChinese,
+              isBusy: widget.isBusy,
+              onOpenFullYear: _openAnnualYearFromDay,
+              onPreviousYear: widget.onPreviousYear,
+              onCurrentYear: widget.onCurrentYear,
+              onNextYear: widget.onNextYear,
+              onSaveSegment: widget.onSaveAnnualSegment,
+              onDeleteSegment: widget.onDeleteAnnualSegment,
+            ),
+        ] else
           _MonthPlanBoard(
             palette: palette,
             overview: widget.monthPlanOverview,
@@ -661,20 +900,11 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
             onNextMonth: widget.onNextMonth,
             onOpenDate: widget.onOpenPlanDate,
             onApplyTemplate: widget.onApplyDayTemplateToDate,
-          )
-        else
-          _AnnualPlanBoard(
-            palette: palette,
-            visualTheme: widget.visualTheme,
-            overview: widget.annualPlanOverview,
-            isChinese: _isChinese,
-            isBusy: widget.isBusy,
-            onPreviousYear: widget.onPreviousYear,
-            onCurrentYear: widget.onCurrentYear,
-            onNextYear: widget.onNextYear,
-            onOpenMonth: _openMonthFromYear,
-            onSaveSegment: widget.onSaveAnnualSegment,
-            onDeleteSegment: widget.onDeleteAnnualSegment,
+            onApplyTemplateBatch: widget.onApplyDayTemplateToDates,
+            onCreateTemplate: _openArchiveEditor,
+            onEditTemplate: (template) =>
+                _openArchiveEditor(template: template),
+            onDeleteTemplate: _deleteArchive,
           ),
       ],
     );
@@ -1111,6 +1341,10 @@ class _MonthPlanBoard extends StatelessWidget {
     required this.onNextMonth,
     required this.onOpenDate,
     required this.onApplyTemplate,
+    required this.onApplyTemplateBatch,
+    required this.onCreateTemplate,
+    required this.onEditTemplate,
+    required this.onDeleteTemplate,
   });
 
   final _HomePalette palette;
@@ -1127,6 +1361,14 @@ class _MonthPlanBoard extends StatelessWidget {
     String date, {
     required PlanApplyStrategy strategy,
   }) onApplyTemplate;
+  final Future<void> Function(
+    int templateId,
+    List<String> planDates, {
+    required PlanApplyStrategy strategy,
+  }) onApplyTemplateBatch;
+  final Future<void> Function() onCreateTemplate;
+  final Future<void> Function(WeeklyPlanTemplate template) onEditTemplate;
+  final Future<void> Function(WeeklyPlanTemplate template) onDeleteTemplate;
 
   Future<void> _applyTemplate(
     BuildContext context,
@@ -1174,6 +1416,28 @@ class _MonthPlanBoard extends StatelessWidget {
     );
   }
 
+  Future<void> _applyTemplateBatch(
+    BuildContext context,
+    WeeklyPlanTemplate template,
+  ) async {
+    final result = await showDialog<_TemplateBatchSelection>(
+      context: context,
+      builder: (context) => _TemplateBatchApplyDialog(
+        isChinese: isChinese,
+        overview: overview,
+        template: template,
+      ),
+    );
+    if (result == null || result.planDates.isEmpty) {
+      return;
+    }
+    await onApplyTemplateBatch(
+      template.id,
+      result.planDates,
+      strategy: result.strategy,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final monthStart =
@@ -1216,6 +1480,17 @@ class _MonthPlanBoard extends StatelessWidget {
               onPrevious: onPreviousMonth,
               onCurrent: onCurrentMonth,
               onNext: onNextMonth,
+            ),
+            const SizedBox(height: 16),
+            _DayTemplateArchiveShelf(
+              palette: palette,
+              templates: templates,
+              isChinese: isChinese,
+              isBusy: isBusy,
+              onCreate: onCreateTemplate,
+              onApply: (template) => _applyTemplateBatch(context, template),
+              onEdit: onEditTemplate,
+              onDelete: onDeleteTemplate,
             ),
             const SizedBox(height: 18),
             LayoutBuilder(
@@ -1303,8 +1578,8 @@ class _MonthPlanBoard extends StatelessWidget {
             const SizedBox(height: 14),
             Text(
               isChinese
-                  ? '左右滑动切换月份；点击日期编辑短计划，日期菜单可套用日模板。'
-                  : 'Swipe to change month. Open a date to edit its daily plan or apply a day template.',
+                  ? '左右滑动切换月份；点击日期编辑短计划，或从上方任务存档架直接套用。'
+                  : 'Swipe to change month. Open a date to edit its daily plan or apply an archive above.',
               style: TextStyle(color: palette.muted, fontSize: 12),
             ),
           ],
@@ -1334,32 +1609,360 @@ class _MonthPlanBoard extends StatelessWidget {
       '${value.day.toString().padLeft(2, '0')}';
 }
 
-class _AnnualPlanBoard extends StatelessWidget {
-  const _AnnualPlanBoard({
+class _DayTemplateArchiveShelf extends StatelessWidget {
+  const _DayTemplateArchiveShelf({
     required this.palette,
-    required this.visualTheme,
+    required this.templates,
+    required this.isChinese,
+    required this.isBusy,
+    required this.onCreate,
+    required this.onApply,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final _HomePalette palette;
+  final List<WeeklyPlanTemplate> templates;
+  final bool isChinese;
+  final bool isBusy;
+  final Future<void> Function() onCreate;
+  final Future<void> Function(WeeklyPlanTemplate template) onApply;
+  final Future<void> Function(WeeklyPlanTemplate template) onEdit;
+  final Future<void> Function(WeeklyPlanTemplate template) onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const ValueKey('monthly-task-archive-shelf'),
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: palette.accentSoft.withValues(alpha: 0.48),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.rule),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isChinese ? '任务存档' : 'Task archives',
+                      style: TextStyle(
+                        color: palette.ink,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      isChinese
+                          ? '从存档直接选择一个或多个日期套用，也可以从零制作新存档。'
+                          : 'Apply an archive to one or more dates, or create a new archive from scratch.',
+                      style: TextStyle(color: palette.muted, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              FilledButton.icon(
+                key: const ValueKey('create-task-archive'),
+                onPressed: isBusy ? null : onCreate,
+                icon: const Icon(Icons.add_rounded),
+                label: Text(isChinese ? '新建存档' : 'New archive'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (templates.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
+              decoration: BoxDecoration(
+                color: palette.surface,
+                borderRadius: BorderRadius.circular(13),
+                border: Border.all(color: palette.rule),
+              ),
+              child: Text(
+                isChinese
+                    ? '还没有任务存档。可以从短计划保存当前安排，或在这里新建。'
+                    : 'No task archives yet. Save a daily plan or create one here.',
+                style: TextStyle(color: palette.muted),
+              ),
+            )
+          else
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: templates.map((template) {
+                return Container(
+                  constraints:
+                      const BoxConstraints(minWidth: 250, maxWidth: 340),
+                  padding: const EdgeInsets.all(13),
+                  decoration: BoxDecoration(
+                    color: palette.surface,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: palette.rule),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: palette.accentSoft,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.inventory_2_outlined,
+                          color: palette.accent,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              template.templateName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: palette.ink,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              isChinese
+                                  ? '${template.itemCount} 个任务 · ${template.plannedDurationLabel}'
+                                  : '${template.itemCount} tasks · ${template.plannedDurationLabel}',
+                              style: TextStyle(
+                                color: palette.muted,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: isChinese ? '直接套用' : 'Apply',
+                        onPressed: isBusy ? null : () => onApply(template),
+                        icon: const Icon(Icons.playlist_add_check_rounded),
+                      ),
+                      PopupMenuButton<String>(
+                        enabled: !isBusy,
+                        tooltip: isChinese ? '存档操作' : 'Archive actions',
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            onEdit(template);
+                          } else if (value == 'delete') {
+                            onDelete(template);
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: Text(isChinese ? '编辑存档' : 'Edit archive'),
+                          ),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Text(isChinese ? '删除存档' : 'Delete archive'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TemplateBatchSelection {
+  const _TemplateBatchSelection({
+    required this.planDates,
+    required this.strategy,
+  });
+
+  final List<String> planDates;
+  final PlanApplyStrategy strategy;
+}
+
+class _TemplateBatchApplyDialog extends StatefulWidget {
+  const _TemplateBatchApplyDialog({
+    required this.isChinese,
     required this.overview,
+    required this.template,
+  });
+
+  final bool isChinese;
+  final MonthPlanOverview overview;
+  final WeeklyPlanTemplate template;
+
+  @override
+  State<_TemplateBatchApplyDialog> createState() =>
+      _TemplateBatchApplyDialogState();
+}
+
+class _TemplateBatchApplyDialogState extends State<_TemplateBatchApplyDialog> {
+  final Set<String> _selectedDates = {};
+  PlanApplyStrategy _strategy = PlanApplyStrategy.skip;
+
+  @override
+  Widget build(BuildContext context) {
+    final monthStart =
+        DateTime.tryParse('${widget.overview.month}-01') ?? DateTime.now();
+    final dayCount = DateTime(monthStart.year, monthStart.month + 1, 0).day;
+    String dateFor(int day) => '${monthStart.year.toString().padLeft(4, '0')}-'
+        '${monthStart.month.toString().padLeft(2, '0')}-'
+        '${day.toString().padLeft(2, '0')}';
+
+    return AlertDialog(
+      title: Text(
+        widget.isChinese
+            ? '套用“${widget.template.templateName}”'
+            : 'Apply “${widget.template.templateName}”',
+      ),
+      content: SizedBox(
+        width: 560,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.isChinese
+                  ? '选择本月一个或多个日期。带圆点的日期已有计划。'
+                  : 'Choose one or more dates. Dotted dates already contain a plan.',
+            ),
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: List.generate(dayCount, (index) {
+                final day = index + 1;
+                final date = dateFor(day);
+                final existing = widget.overview.dayFor(date).hasPlan;
+                return FilterChip(
+                  key: ValueKey('archive-apply-day-$day'),
+                  selected: _selectedDates.contains(date),
+                  avatar: existing ? const Icon(Icons.circle, size: 7) : null,
+                  label: Text('$day'),
+                  onSelected: (selected) {
+                    setState(() {
+                      if (selected) {
+                        _selectedDates.add(date);
+                      } else {
+                        _selectedDates.remove(date);
+                      }
+                    });
+                  },
+                );
+              }),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              widget.isChinese ? '已有计划时' : 'When a plan already exists',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 10,
+              children: [
+                ChoiceChip(
+                  selected: _strategy == PlanApplyStrategy.skip,
+                  label: Text(widget.isChinese ? '跳过' : 'Skip'),
+                  onSelected: (_) =>
+                      setState(() => _strategy = PlanApplyStrategy.skip),
+                ),
+                ChoiceChip(
+                  selected: _strategy == PlanApplyStrategy.overwrite,
+                  label: Text(widget.isChinese ? '覆盖' : 'Overwrite'),
+                  onSelected: (_) => setState(
+                    () => _strategy = PlanApplyStrategy.overwrite,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(widget.isChinese ? '取消' : 'Cancel'),
+        ),
+        FilledButton.icon(
+          key: const ValueKey('apply-task-archive-batch'),
+          onPressed: _selectedDates.isEmpty
+              ? null
+              : () => Navigator.of(context).pop(
+                    _TemplateBatchSelection(
+                      planDates: _selectedDates.toList()..sort(),
+                      strategy: _strategy,
+                    ),
+                  ),
+          icon: const Icon(Icons.playlist_add_check_rounded),
+          label: Text(
+            widget.isChinese
+                ? '套用到 ${_selectedDates.length} 天'
+                : 'Apply to ${_selectedDates.length} days',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AnnualPlanBoard extends StatefulWidget {
+  const _AnnualPlanBoard({
+    super.key,
+    required this.palette,
+    required this.overview,
+    this.previewMonth,
+    this.onOpenFullYear,
+    this.pageSpec,
+    this.pageVisualTheme,
+    this.pageIntro,
     required this.isChinese,
     required this.isBusy,
     required this.onPreviousYear,
     required this.onCurrentYear,
     required this.onNextYear,
-    required this.onOpenMonth,
     required this.onSaveSegment,
     required this.onDeleteSegment,
-  });
+  }) : assert(
+            pageSpec == null || (pageVisualTheme != null && pageIntro != null));
 
   final _HomePalette palette;
-  final AppVisualTheme visualTheme;
   final AnnualPlanOverview overview;
+  final int? previewMonth;
+  final Future<void> Function()? onOpenFullYear;
+  final DesktopPresentationSpec? pageSpec;
+  final AppVisualTheme? pageVisualTheme;
+  final Widget? pageIntro;
   final bool isChinese;
   final bool isBusy;
   final Future<void> Function() onPreviousYear;
   final Future<void> Function() onCurrentYear;
   final Future<void> Function() onNextYear;
-  final Future<void> Function(int month) onOpenMonth;
   final Future<void> Function(AnnualPlanSegment segment) onSaveSegment;
   final Future<void> Function(AnnualPlanSegment segment) onDeleteSegment;
+
+  @override
+  State<_AnnualPlanBoard> createState() => _AnnualPlanBoardState();
+}
+
+class _AnnualPlanBoardState extends State<_AnnualPlanBoard> {
+  int? _selectedMonth;
 
   Future<void> _openSegmentEditor(
     BuildContext context, {
@@ -1370,15 +1973,15 @@ class _AnnualPlanBoard extends StatelessWidget {
     final result = await showDialog<AnnualPlanSegment>(
       context: context,
       builder: (context) => _AnnualSegmentDialog(
-        isChinese: isChinese,
-        year: overview.year,
+        isChinese: widget.isChinese,
+        year: widget.overview.year,
         initial: initial,
         startMonth: startMonth,
         endMonth: endMonth,
       ),
     );
-    if (result != null) {
-      await onSaveSegment(result);
+    if (result != null && mounted) {
+      await widget.onSaveSegment(result);
     }
   }
 
@@ -1389,111 +1992,635 @@ class _AnnualPlanBoard extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(isChinese ? '删除年度计划？' : 'Delete annual plan?'),
+        title: Text(
+          widget.isChinese ? '删除年度任务？' : 'Delete annual task?',
+        ),
         content: Text(segment.title),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(isChinese ? '取消' : 'Cancel'),
+            child: Text(widget.isChinese ? '取消' : 'Cancel'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(isChinese ? '删除' : 'Delete'),
+            child: Text(widget.isChinese ? '删除' : 'Delete'),
           ),
         ],
       ),
     );
-    if (confirmed == true) {
-      await onDeleteSegment(segment);
+    if (confirmed == true && mounted) {
+      await widget.onDeleteSegment(segment);
     }
+  }
+
+  Future<void> _toggleSubtask(
+    AnnualPlanSegment segment,
+    AnnualPlanSubtask subtask,
+  ) async {
+    final updated = segment.subtasks
+        .map(
+          (item) => identical(item, subtask) || item.id == subtask.id
+              ? item.copyWith(completed: !item.completed)
+              : item,
+        )
+        .toList();
+    await widget.onSaveSegment(segment.copyWith(subtasks: updated));
+  }
+
+  Future<void> _adjustTaskProgress(
+    AnnualPlanSegment segment,
+    int delta,
+  ) async {
+    if ((delta > 0 && segment.isCompleted) ||
+        (delta < 0 && segment.progressPercent == 0)) {
+      return;
+    }
+    await widget.onSaveSegment(segment.adjustProgress(delta));
+  }
+
+  Future<void> _completeTask(AnnualPlanSegment segment) async {
+    if (segment.isCompleted) return;
+    await widget.onSaveSegment(segment.copyWith(progressPercent: 100));
+  }
+
+  Future<void> _editSubtask(
+    BuildContext context,
+    AnnualPlanSegment segment, {
+    AnnualPlanSubtask? initial,
+  }) async {
+    final result = await showDialog<AnnualPlanSubtask>(
+      context: context,
+      builder: (context) => _AnnualSubtaskDialog(
+        isChinese: widget.isChinese,
+        initial: initial,
+      ),
+    );
+    if (result == null || !mounted) {
+      return;
+    }
+    final subtasks = [...segment.subtasks];
+    if (initial == null) {
+      subtasks.add(result.copyWith(sortOrder: subtasks.length));
+    } else {
+      final index = subtasks.indexWhere(
+        (item) => identical(item, initial) || item.id == initial.id,
+      );
+      if (index >= 0) {
+        subtasks[index] = result.copyWith(sortOrder: index);
+      }
+    }
+    await widget.onSaveSegment(segment.copyWith(subtasks: subtasks));
+  }
+
+  Future<void> _deleteSubtask(
+    BuildContext context,
+    AnnualPlanSegment segment,
+    AnnualPlanSubtask subtask,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(widget.isChinese ? '删除子任务？' : 'Delete subtask?'),
+        content: Text(subtask.title),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(widget.isChinese ? '取消' : 'Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(widget.isChinese ? '删除' : 'Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
+    final subtasks = segment.subtasks
+        .where(
+          (item) => !(identical(item, subtask) || item.id == subtask.id),
+        )
+        .toList();
+    await widget.onSaveSegment(
+      segment.copyWith(
+        subtasks: [
+          for (var index = 0; index < subtasks.length; index += 1)
+            subtasks[index].copyWith(sortOrder: index),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final effectiveMonth = widget.previewMonth ?? _selectedMonth;
+    final visibleSegments = effectiveMonth == null
+        ? widget.overview.segments
+        : widget.overview.segments
+            .where(
+              (segment) =>
+                  effectiveMonth >= segment.startMonth &&
+                  effectiveMonth <= segment.endMonth,
+            )
+            .toList();
+    if (widget.pageSpec != null) {
+      return _buildFullPage(visibleSegments);
+    }
     return _Panel(
-      palette: palette,
+      palette: widget.palette,
       emphasized: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _PlanRangeHeader(
-            palette: palette,
-            title: isChinese
-                ? '${overview.year} 年计划'
-                : '${overview.year} annual plan',
-            subtitle: isChinese
-                ? '在 12 个月上拖动划定计划区间；区间允许相互重叠。'
-                : 'Drag across the 12-month track to create a plan range. Ranges may overlap.',
-            isBusy: isBusy,
-            currentLabel: isChinese ? '今年' : 'This year',
-            previousTooltip: isChinese ? '上一年' : 'Previous year',
-            nextTooltip: isChinese ? '下一年' : 'Next year',
-            onPrevious: onPreviousYear,
-            onCurrent: onCurrentYear,
-            onNext: onNextYear,
-          ),
-          const SizedBox(height: 18),
-          _AnnualMonthTrack(
-            palette: palette,
-            isChinese: isChinese,
-            enabled: !isBusy,
-            segments: overview.segments,
-            onRangeSelected: (start, end) => _openSegmentEditor(
-              context,
-              startMonth: start,
-              endMonth: end,
-            ),
-          ),
-          if (overview.segments.isNotEmpty) ...[
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 9,
-              runSpacing: 9,
-              children: overview.segments.map((segment) {
-                return InputChip(
-                  avatar: Icon(Icons.route_rounded,
-                      size: 17, color: palette.accent),
-                  label: Text(
-                    '${segment.title} · ${segment.startMonth}–${segment.endMonth}',
+          if (widget.previewMonth == null)
+            _PlanRangeHeader(
+              palette: widget.palette,
+              title: widget.isChinese
+                  ? '${widget.overview.year} 年度任务'
+                  : '${widget.overview.year} annual tasks',
+              subtitle: widget.isChinese
+                  ? '年度任务独立于长计划；充能框标示月份跨度，框内色彩显示任务进度。'
+                  : 'Annual tasks are independent from monthly plans. The charge frame marks the month span; its fill shows task progress.',
+              isBusy: widget.isBusy,
+              currentLabel: widget.isChinese ? '今年' : 'This year',
+              previousTooltip: widget.isChinese ? '上一年' : 'Previous year',
+              nextTooltip: widget.isChinese ? '下一年' : 'Next year',
+              onPrevious: widget.onPreviousYear,
+              onCurrent: widget.onCurrentYear,
+              onNext: widget.onNextYear,
+            )
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.isChinese
+                      ? '${widget.overview.year} 年 ${widget.previewMonth} 月超长任务'
+                      : 'Annual tasks · ${widget.previewMonth}/${widget.overview.year}',
+                  style: TextStyle(
+                    color: widget.palette.ink,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
                   ),
-                  onPressed: isBusy
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  widget.isChinese
+                      ? '只显示覆盖本月的独立年度任务；进度可在这里直接更新。'
+                      : 'Independent annual tasks spanning this month. Update their progress here.',
+                  style: TextStyle(color: widget.palette.muted),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: widget.onOpenFullYear == null
+                        ? null
+                        : () => unawaited(widget.onOpenFullYear!()),
+                    icon: const Icon(Icons.open_in_full_rounded),
+                    label: Text(widget.isChinese ? '查看全年' : 'View full year'),
+                  ),
+                ),
+              ],
+            ),
+          const SizedBox(height: 18),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  widget.previewMonth == null
+                      ? (widget.isChinese ? '月份导航' : 'Month navigation')
+                      : (widget.isChinese
+                          ? '本月任务 · ${visibleSegments.length} 项'
+                          : '${visibleSegments.length} tasks this month'),
+                  style: TextStyle(
+                    color: widget.palette.ink,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              if (widget.previewMonth == null)
+                TextButton.icon(
+                  onPressed: widget.isBusy
                       ? null
-                      : () => _openSegmentEditor(context, initial: segment),
-                  onDeleted:
-                      isBusy ? null : () => _confirmDelete(context, segment),
-                );
-              }).toList(),
+                      : () => setState(() => _selectedMonth = null),
+                  icon: const Icon(Icons.apps_rounded),
+                  label: Text(widget.isChinese ? '全部任务' : 'All tasks'),
+                ),
+              const SizedBox(width: 8),
+              FilledButton.icon(
+                key: const ValueKey('create-annual-task'),
+                onPressed: widget.isBusy
+                    ? null
+                    : () => _openSegmentEditor(
+                          context,
+                          startMonth: effectiveMonth ?? 1,
+                          endMonth: effectiveMonth ?? 1,
+                        ),
+                icon: const Icon(Icons.add_rounded),
+                label: Text(
+                  widget.isChinese ? '新建年度任务' : 'New annual task',
+                ),
+              ),
+            ],
+          ),
+          if (widget.previewMonth == null) ...[
+            const SizedBox(height: 10),
+            _AnnualMonthSelector(
+              palette: widget.palette,
+              selectedMonth: _selectedMonth,
+              segments: widget.overview.segments,
+              onSelected: (month) => setState(
+                () => _selectedMonth = _selectedMonth == month ? null : month,
+              ),
             ),
           ],
           const SizedBox(height: 20),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final columns = constraints.maxWidth >= 1050
-                  ? 4
-                  : constraints.maxWidth >= 720
-                      ? 3
-                      : constraints.maxWidth >= 460
-                          ? 2
-                          : 1;
-              final width =
-                  (constraints.maxWidth - (columns - 1) * 12) / columns;
-              return Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: overview.months.map((month) {
-                  return SizedBox(
-                    width: width,
-                    child: _AnnualMonthCard(
-                      palette: palette,
-                      visualTheme: visualTheme,
-                      summary: month,
-                      isChinese: isChinese,
-                      onOpen: isBusy ? null : () => onOpenMonth(month.month),
+          if (visibleSegments.isEmpty)
+            _AnnualEmptyState(
+              palette: widget.palette,
+              isChinese: widget.isChinese,
+              selectedMonth: effectiveMonth,
+              onCreate: widget.isBusy
+                  ? null
+                  : () => _openSegmentEditor(
+                        context,
+                        startMonth: effectiveMonth ?? 1,
+                        endMonth: effectiveMonth ?? 1,
+                      ),
+            )
+          else
+            ...visibleSegments.map(_buildTaskCard),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFullPage(List<AnnualPlanSegment> visibleSegments) {
+    final spec = widget.pageSpec!;
+    final horizontal = _pageCanvasHorizontal(spec);
+    final maxWidth = _pageCanvasMaxWidth(spec);
+    Widget centered(Widget child) => Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: SizedBox(width: double.infinity, child: child),
+          ),
+        );
+
+    return _ThemedHomeBackdrop(
+      visualTheme: widget.pageVisualTheme!,
+      palette: widget.palette,
+      child: CustomScrollView(
+        key: const PageStorageKey<String>('desktop.plans.annual'),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(horizontal, 24, horizontal, 0),
+              child: centered(Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  widget.pageIntro!,
+                  _Panel(
+                    palette: widget.palette,
+                    emphasized: true,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _PlanRangeHeader(
+                          palette: widget.palette,
+                          title: widget.isChinese
+                              ? '${widget.overview.year} 年度任务'
+                              : '${widget.overview.year} annual tasks',
+                          subtitle: widget.isChinese
+                              ? '年度任务独立于长计划；充能框标示月份跨度，框内色彩显示任务进度。'
+                              : 'Annual tasks are independent from monthly plans. The charge frame marks the month span; its fill shows task progress.',
+                          isBusy: widget.isBusy,
+                          currentLabel: widget.isChinese ? '今年' : 'This year',
+                          previousTooltip:
+                              widget.isChinese ? '上一年' : 'Previous year',
+                          nextTooltip: widget.isChinese ? '下一年' : 'Next year',
+                          onPrevious: widget.onPreviousYear,
+                          onCurrent: widget.onCurrentYear,
+                          onNext: widget.onNextYear,
+                        ),
+                        const SizedBox(height: 18),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(
+                              widget.isChinese ? '月份导航' : 'Month navigation',
+                              style: TextStyle(
+                                color: widget.palette.ink,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            TextButton.icon(
+                              onPressed: widget.isBusy
+                                  ? null
+                                  : () => setState(() => _selectedMonth = null),
+                              icon: const Icon(Icons.apps_rounded),
+                              label:
+                                  Text(widget.isChinese ? '全部任务' : 'All tasks'),
+                            ),
+                            FilledButton.icon(
+                              key: const ValueKey('create-annual-task'),
+                              onPressed: widget.isBusy
+                                  ? null
+                                  : () => _openSegmentEditor(
+                                        context,
+                                        startMonth: _selectedMonth ?? 1,
+                                        endMonth: _selectedMonth ?? 1,
+                                      ),
+                              icon: const Icon(Icons.add_rounded),
+                              label: Text(widget.isChinese
+                                  ? '新建年度任务'
+                                  : 'New annual task'),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  );
-                }).toList(),
-              );
-            },
+                  ),
+                ],
+              )),
+            ),
+          ),
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _AnnualStickyMonthHeader(
+              palette: widget.palette,
+              horizontal: horizontal,
+              maxWidth: maxWidth,
+              child: _AnnualMonthSelector(
+                palette: widget.palette,
+                selectedMonth: _selectedMonth,
+                segments: widget.overview.segments,
+                onSelected: (month) => setState(() =>
+                    _selectedMonth = _selectedMonth == month ? null : month),
+              ),
+            ),
+          ),
+          if (visibleSegments.isEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 32),
+                child: centered(_AnnualEmptyState(
+                  palette: widget.palette,
+                  isChinese: widget.isChinese,
+                  selectedMonth: _selectedMonth,
+                  onCreate: widget.isBusy
+                      ? null
+                      : () => _openSegmentEditor(
+                            context,
+                            startMonth: _selectedMonth ?? 1,
+                            endMonth: _selectedMonth ?? 1,
+                          ),
+                )),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(horizontal, 8, horizontal, 32),
+              sliver: SliverList.builder(
+                itemCount: visibleSegments.length,
+                itemBuilder: (context, index) =>
+                    centered(_buildTaskCard(visibleSegments[index])),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTaskCard(AnnualPlanSegment segment) => Padding(
+        padding: const EdgeInsets.only(bottom: 14),
+        child: _AnnualTaskCard(
+          palette: widget.palette,
+          segment: segment,
+          isChinese: widget.isChinese,
+          isBusy: widget.isBusy,
+          onEdit: () => _openSegmentEditor(context, initial: segment),
+          onDelete: () => _confirmDelete(context, segment),
+          onAddSubtask: () => _editSubtask(context, segment),
+          onEditSubtask: (subtask) =>
+              _editSubtask(context, segment, initial: subtask),
+          onDeleteSubtask: (subtask) =>
+              _deleteSubtask(context, segment, subtask),
+          onToggleSubtask: (subtask) => _toggleSubtask(segment, subtask),
+          onProgressChange: (delta) => _adjustTaskProgress(segment, delta),
+          onCompleteTask: () => _completeTask(segment),
+        ),
+      );
+}
+
+class _AnnualStickyMonthHeader extends SliverPersistentHeaderDelegate {
+  _AnnualStickyMonthHeader({
+    required this.palette,
+    required this.horizontal,
+    required this.maxWidth,
+    required this.child,
+  });
+
+  final _HomePalette palette;
+  final double horizontal;
+  final double maxWidth;
+  final Widget child;
+
+  @override
+  double get minExtent => 74;
+
+  @override
+  double get maxExtent => 74;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      key: const ValueKey('annual-sticky-month-ruler'),
+      decoration: BoxDecoration(
+        color: palette.background,
+        border: Border(bottom: BorderSide(color: palette.rule)),
+        boxShadow: overlapsContent
+            ? [
+                BoxShadow(
+                  color: palette.ink.withValues(alpha: 0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
+      ),
+      padding: EdgeInsets.fromLTRB(horizontal, 10, horizontal, 10),
+      child: Align(
+        alignment: Alignment.center,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: SizedBox(width: double.infinity, child: child),
+        ),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _AnnualStickyMonthHeader oldDelegate) => true;
+}
+
+class _AnnualMonthSelector extends StatelessWidget {
+  const _AnnualMonthSelector({
+    required this.palette,
+    required this.selectedMonth,
+    required this.segments,
+    required this.onSelected,
+  });
+
+  final _HomePalette palette;
+  final int? selectedMonth;
+  final List<AnnualPlanSegment> segments;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 19),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final grid = _AnnualMonthGrid(constraints.maxWidth);
+          return SizedBox(
+            height: 54,
+            child: Stack(
+              children: [
+                for (var month = 1; month <= 12; month += 1)
+                  Positioned(
+                    left: grid.left(month),
+                    width: grid.cellWidth,
+                    top: 0,
+                    bottom: 0,
+                    child: _AnnualMonthButton(
+                      palette: palette,
+                      month: month,
+                      selected: selectedMonth == month,
+                      count: segments
+                          .where((segment) =>
+                              month >= segment.startMonth &&
+                              month <= segment.endMonth)
+                          .length,
+                      onPressed: () => onSelected(month),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _AnnualMonthGrid {
+  const _AnnualMonthGrid(this.width);
+
+  static const gap = 4.0;
+  final double width;
+
+  double get cellWidth => (width - gap * 11) / 12;
+  double left(int month) => (month - 1) * (cellWidth + gap);
+  double spanWidth(int startMonth, int endMonth) =>
+      left(endMonth) + cellWidth - left(startMonth);
+}
+
+class _AnnualMonthButton extends StatelessWidget {
+  const _AnnualMonthButton({
+    required this.palette,
+    required this.month,
+    required this.selected,
+    required this.count,
+    required this.onPressed,
+  });
+
+  final _HomePalette palette;
+  final int month;
+  final bool selected;
+  final int count;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      key: ValueKey('annual-month-$month'),
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        backgroundColor: selected ? palette.accent : palette.surface,
+        foregroundColor: selected ? palette.onInk : palette.ink,
+        side: BorderSide(color: selected ? palette.accent : palette.rule),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('$month',
+              style:
+                  const TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
+          if (count > 0)
+            Text('$count',
+                style: TextStyle(
+                  fontSize: 9,
+                  color: selected
+                      ? palette.onInk.withValues(alpha: 0.78)
+                      : palette.muted,
+                )),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnnualEmptyState extends StatelessWidget {
+  const _AnnualEmptyState({
+    required this.palette,
+    required this.isChinese,
+    required this.selectedMonth,
+    required this.onCreate,
+  });
+
+  final _HomePalette palette;
+  final bool isChinese;
+  final int? selectedMonth;
+  final VoidCallback? onCreate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+      decoration: BoxDecoration(
+        color: palette.surface,
+        border: Border.all(color: palette.rule),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.route_outlined, color: palette.accent),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              selectedMonth == null
+                  ? (isChinese ? '还没有年度任务。' : 'No annual tasks yet.')
+                  : (isChinese
+                      ? '$selectedMonth 月暂无跨期任务。'
+                      : 'No task spans month $selectedMonth.'),
+              style: TextStyle(color: palette.muted),
+            ),
+          ),
+          TextButton.icon(
+            onPressed: onCreate,
+            icon: const Icon(Icons.add_rounded),
+            label: Text(isChinese ? '新建' : 'Create'),
           ),
         ],
       ),
@@ -1501,144 +2628,452 @@ class _AnnualPlanBoard extends StatelessWidget {
   }
 }
 
-class _AnnualMonthTrack extends StatefulWidget {
-  const _AnnualMonthTrack({
+class _AnnualTaskCard extends StatelessWidget {
+  const _AnnualTaskCard({
     required this.palette,
+    required this.segment,
     required this.isChinese,
-    required this.enabled,
-    required this.segments,
-    required this.onRangeSelected,
+    required this.isBusy,
+    required this.onEdit,
+    required this.onDelete,
+    required this.onAddSubtask,
+    required this.onEditSubtask,
+    required this.onDeleteSubtask,
+    required this.onToggleSubtask,
+    required this.onProgressChange,
+    required this.onCompleteTask,
   });
 
   final _HomePalette palette;
+  final AnnualPlanSegment segment;
   final bool isChinese;
-  final bool enabled;
-  final List<AnnualPlanSegment> segments;
-  final Future<void> Function(int startMonth, int endMonth) onRangeSelected;
+  final bool isBusy;
+  final Future<void> Function() onEdit;
+  final Future<void> Function() onDelete;
+  final Future<void> Function() onAddSubtask;
+  final Future<void> Function(AnnualPlanSubtask subtask) onEditSubtask;
+  final Future<void> Function(AnnualPlanSubtask subtask) onDeleteSubtask;
+  final Future<void> Function(AnnualPlanSubtask subtask) onToggleSubtask;
+  final Future<void> Function(int delta) onProgressChange;
+  final Future<void> Function() onCompleteTask;
 
   @override
-  State<_AnnualMonthTrack> createState() => _AnnualMonthTrackState();
+  Widget build(BuildContext context) {
+    final color = _annualColor(segment.colorKey);
+    return Container(
+      key: ValueKey('annual-task-${segment.id}-${segment.clientEntityId}'),
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.rule),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      segment.title,
+                      style: TextStyle(
+                        color: palette.ink,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      isChinese
+                          ? '${segment.startMonth} 月 — ${segment.endMonth} 月 · ${segment.completedSubtaskCount}/${segment.subtasks.length} 完成'
+                          : 'Month ${segment.startMonth} — ${segment.endMonth} · ${segment.completedSubtaskCount}/${segment.subtasks.length} complete',
+                      style: TextStyle(color: palette.muted, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: isChinese ? '编辑年度任务' : 'Edit annual task',
+                onPressed: isBusy ? null : () => unawaited(onEdit()),
+                icon: const Icon(Icons.edit_outlined),
+              ),
+              IconButton(
+                tooltip: isChinese ? '删除年度任务' : 'Delete annual task',
+                onPressed: isBusy ? null : () => unawaited(onDelete()),
+                icon: const Icon(Icons.delete_outline_rounded),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  isChinese ? '任务进度' : 'Task progress',
+                  style: TextStyle(
+                    color: palette.ink,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              Text(
+                '${segment.progressPercent}%',
+                key: ValueKey('annual-progress-value-${segment.id}'),
+                style: TextStyle(
+                  color: segment.isCompleted ? color : palette.ink,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _ChargingMonthSpan(
+            key: ValueKey(
+                'annual-charge-${segment.id}-${segment.clientEntityId}'),
+            palette: palette,
+            color: color,
+            startMonth: segment.startMonth,
+            endMonth: segment.endMonth,
+            progressPercent: segment.progressPercent,
+          ),
+          const SizedBox(height: 9),
+          Wrap(
+            spacing: 7,
+            runSpacing: 7,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              for (final step in const [10, 5, 1])
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    OutlinedButton(
+                      key: ValueKey('annual-progress-plus$step-${segment.id}'),
+                      onPressed: isBusy || segment.isCompleted
+                          ? null
+                          : () => unawaited(onProgressChange(step)),
+                      child: Text('+$step%'),
+                    ),
+                    const SizedBox(width: 4),
+                    OutlinedButton(
+                      key: ValueKey('annual-progress-minus$step-${segment.id}'),
+                      onPressed: isBusy || segment.progressPercent == 0
+                          ? null
+                          : () => unawaited(onProgressChange(-step)),
+                      child: Text('−$step%'),
+                    ),
+                  ],
+                ),
+              FilledButton.icon(
+                key: ValueKey('annual-task-complete-${segment.id}'),
+                onPressed: isBusy || segment.isCompleted
+                    ? null
+                    : () => unawaited(onCompleteTask()),
+                icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                label: Text(isChinese
+                    ? (segment.isCompleted ? '已完成' : '完成任务')
+                    : (segment.isCompleted ? 'Completed' : 'Complete task')),
+              ),
+            ],
+          ),
+          if (segment.note.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              segment.note,
+              style: TextStyle(color: palette.muted, height: 1.45),
+            ),
+          ],
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  isChinese ? '子任务' : 'Subtasks',
+                  style: TextStyle(
+                    color: palette.ink,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: isBusy ? null : () => unawaited(onAddSubtask()),
+                icon: const Icon(Icons.add_rounded, size: 18),
+                label: Text(isChinese ? '添加子任务' : 'Add subtask'),
+              ),
+            ],
+          ),
+          if (segment.subtasks.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Text(
+                isChinese
+                    ? '还没有子任务，可以为这个年度任务继续拆分。'
+                    : 'No subtasks yet. Break this annual task into actionable steps.',
+                style: TextStyle(color: palette.muted),
+              ),
+            )
+          else
+            ...segment.subtasks.map(
+              (subtask) => _AnnualSubtaskRow(
+                palette: palette,
+                subtask: subtask,
+                isChinese: isChinese,
+                isBusy: isBusy,
+                color: color,
+                onToggle: () => onToggleSubtask(subtask),
+                onEdit: () => onEditSubtask(subtask),
+                onDelete: () => onDeleteSubtask(subtask),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
-class _AnnualMonthTrackState extends State<_AnnualMonthTrack> {
-  int? _anchorMonth;
-  int? _currentMonth;
+class _AnnualSubtaskRow extends StatelessWidget {
+  const _AnnualSubtaskRow({
+    required this.palette,
+    required this.subtask,
+    required this.isChinese,
+    required this.isBusy,
+    required this.color,
+    required this.onToggle,
+    required this.onEdit,
+    required this.onDelete,
+  });
 
-  int _monthAt(double dx, double width) {
-    if (width <= 0) {
-      return 1;
+  final _HomePalette palette;
+  final AnnualPlanSubtask subtask;
+  final bool isChinese;
+  final bool isBusy;
+  final Color color;
+  final Future<void> Function() onToggle;
+  final Future<void> Function() onEdit;
+  final Future<void> Function() onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.fromLTRB(13, 10, 7, 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.075),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: palette.rule),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  subtask.title,
+                  style: TextStyle(
+                    color: palette.ink,
+                    fontWeight: FontWeight.w700,
+                    decoration:
+                        subtask.completed ? TextDecoration.lineThrough : null,
+                  ),
+                ),
+                if (subtask.detail.isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    subtask.detail,
+                    style: TextStyle(color: palette.muted, fontSize: 12),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          IconButton(
+            tooltip: isChinese ? '编辑子任务' : 'Edit subtask',
+            onPressed: isBusy ? null : () => unawaited(onEdit()),
+            icon: const Icon(Icons.edit_outlined, size: 19),
+          ),
+          IconButton(
+            tooltip: isChinese ? '删除子任务' : 'Delete subtask',
+            onPressed: isBusy ? null : () => unawaited(onDelete()),
+            icon: const Icon(Icons.delete_outline_rounded, size: 19),
+          ),
+          const SizedBox(width: 2),
+          Semantics(
+            button: true,
+            label: subtask.completed
+                ? (isChinese ? '取消完成' : 'Mark incomplete')
+                : (isChinese ? '确认完成' : 'Confirm completion'),
+            child: IconButton.filledTonal(
+              key: ValueKey('annual-subtask-complete-${subtask.id}'),
+              tooltip: subtask.completed
+                  ? (isChinese ? '已完成，点击撤销' : 'Completed. Click to undo')
+                  : (isChinese ? '确认完成' : 'Confirm completion'),
+              onPressed: isBusy ? null : () => unawaited(onToggle()),
+              style: IconButton.styleFrom(
+                foregroundColor: subtask.completed ? palette.onInk : color,
+                backgroundColor:
+                    subtask.completed ? color : color.withValues(alpha: 0.12),
+              ),
+              icon: Icon(
+                subtask.completed
+                    ? Icons.check_rounded
+                    : Icons.radio_button_unchecked_rounded,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChargingMonthSpan extends StatefulWidget {
+  const _ChargingMonthSpan({
+    super.key,
+    required this.palette,
+    required this.color,
+    required this.startMonth,
+    required this.endMonth,
+    required this.progressPercent,
+  });
+
+  final _HomePalette palette;
+  final Color color;
+  final int startMonth;
+  final int endMonth;
+  final int progressPercent;
+
+  @override
+  State<_ChargingMonthSpan> createState() => _ChargingMonthSpanState();
+}
+
+class _ChargingMonthSpanState extends State<_ChargingMonthSpan>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    if (reduceMotion) {
+      _controller.stop();
+    } else if (!_controller.isAnimating) {
+      _controller.repeat();
     }
-    return ((dx.clamp(0, width - 0.01) / width) * 12).floor() + 1;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final start = widget.startMonth.clamp(1, 12);
+    final end = widget.endMonth.clamp(start, 12);
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final start = _anchorMonth == null || _currentMonth == null
-            ? null
-            : min(_anchorMonth!, _currentMonth!);
-        final end = _anchorMonth == null || _currentMonth == null
-            ? null
-            : max(_anchorMonth!, _currentMonth!);
-        final cellWidth = width / 12;
-        return Semantics(
-          label: widget.isChinese
-              ? '年度月份区间轨道，按住并左右拖动创建计划'
-              : 'Annual month range track. Drag across months to create a plan.',
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onHorizontalDragStart: widget.enabled
-                ? (details) {
-                    final month = _monthAt(details.localPosition.dx, width);
-                    setState(() {
-                      _anchorMonth = month;
-                      _currentMonth = month;
-                    });
-                  }
-                : null,
-            onHorizontalDragUpdate: widget.enabled
-                ? (details) {
-                    final month = _monthAt(details.localPosition.dx, width);
-                    if (month != _currentMonth) {
-                      setState(() => _currentMonth = month);
-                    }
-                  }
-                : null,
-            onHorizontalDragEnd: widget.enabled
-                ? (_) {
-                    final selectedStart = start;
-                    final selectedEnd = end;
-                    setState(() {
-                      _anchorMonth = null;
-                      _currentMonth = null;
-                    });
-                    if (selectedStart != null && selectedEnd != null) {
-                      unawaited(
-                          widget.onRangeSelected(selectedStart, selectedEnd));
-                    }
-                  }
-                : null,
-            child: SizedBox(
-              height: 76,
-              child: Stack(
-                children: [
-                  Row(
-                    children: List.generate(12, (index) {
-                      final month = index + 1;
-                      final covered = widget.segments.any(
-                        (segment) =>
-                            month >= segment.startMonth &&
-                            month <= segment.endMonth,
-                      );
-                      return Expanded(
-                        child: Container(
-                          margin: EdgeInsets.only(right: index == 11 ? 0 : 3),
-                          decoration: BoxDecoration(
-                            color: covered
-                                ? widget.palette.accentSoft
-                                : widget.palette.surface,
-                            border: Border.all(color: widget.palette.rule),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            '$month',
-                            style: TextStyle(
-                              color: covered
-                                  ? widget.palette.accent
-                                  : widget.palette.muted,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
+        final grid = _AnnualMonthGrid(constraints.maxWidth);
+        final spanWidth = grid.spanWidth(start, end);
+        return SizedBox(
+          key: ValueKey(
+              'annual-month-span-${widget.startMonth}-${widget.endMonth}'),
+          height: 28,
+          child: Stack(
+            children: [
+              for (var month = 1; month <= 12; month += 1)
+                Positioned(
+                  left: grid.left(month),
+                  width: grid.cellWidth,
+                  top: 0,
+                  bottom: 0,
+                  child: DecoratedBox(
+                    key: ValueKey('annual-month-track-$month'),
+                    decoration: BoxDecoration(
+                      color: widget.palette.rule.withValues(alpha: 0.55),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                   ),
-                  if (start != null && end != null)
-                    Positioned(
-                      left: (start - 1) * cellWidth,
-                      width: (end - start + 1) * cellWidth,
-                      top: 3,
-                      bottom: 3,
-                      child: IgnorePointer(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color:
-                                widget.palette.accent.withValues(alpha: 0.24),
-                            border: Border.all(
-                              color: widget.palette.accent,
-                              width: 2,
+                ),
+              Positioned(
+                left: grid.left(start),
+                width: spanWidth,
+                top: 0,
+                bottom: 0,
+                child: Stack(
+                  key: ValueKey('annual-month-active-$start-$end'),
+                  children: [
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: widget.palette.surface.withValues(alpha: 0.55),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    ),
+                    Positioned.fill(
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(
+                            end: widget.progressPercent.clamp(0, 100) / 100),
+                        duration: MediaQuery.disableAnimationsOf(context)
+                            ? Duration.zero
+                            : const Duration(milliseconds: 550),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, progress, child) => Align(
+                          alignment: Alignment.centerLeft,
+                          child: SizedBox(
+                            key: ValueKey(
+                                'annual-month-charge-fill-$start-$end'),
+                            width: spanWidth * progress,
+                            height: 28,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: AnimatedBuilder(
+                                animation: _controller,
+                                builder: (context, child) => RepaintBoundary(
+                                  child: CustomPaint(
+                                    painter: _SeamlessChargePainter(
+                                      color: widget.color,
+                                      phase: _controller.value,
+                                    ),
+                                    child: const SizedBox.expand(),
+                                  ),
+                                ),
+                              ),
                             ),
-                            borderRadius: BorderRadius.circular(9),
                           ),
                         ),
                       ),
                     ),
-                ],
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            border:
+                                Border.all(color: widget.color, width: 1.25),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
         );
       },
@@ -1646,109 +3081,115 @@ class _AnnualMonthTrackState extends State<_AnnualMonthTrack> {
   }
 }
 
-class _AnnualMonthCard extends StatelessWidget {
-  const _AnnualMonthCard({
-    required this.palette,
-    required this.visualTheme,
-    required this.summary,
-    required this.isChinese,
-    required this.onOpen,
-  });
+class _SeamlessChargePainter extends CustomPainter {
+  const _SeamlessChargePainter({required this.color, required this.phase});
 
-  final _HomePalette palette;
-  final AppVisualTheme visualTheme;
-  final AnnualMonthSummary summary;
-  final bool isChinese;
-  final Future<void> Function()? onOpen;
+  final Color color;
+  final double phase;
 
   @override
-  Widget build(BuildContext context) {
-    final season = (summary.month - 1) ~/ 3;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onOpen == null ? null : () => unawaited(onOpen!()),
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          height: 176,
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: palette.surface,
-            border: Border.all(color: palette.rule),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      isChinese
-                          ? '${summary.month} 月'
-                          : _shortMonth(summary.month),
-                      style: TextStyle(
-                        color: palette.ink,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  ExcludeSemantics(
-                    child: CustomPaint(
-                      size: const Size(54, 46),
-                      painter: _SeasonArtworkPainter(
-                        theme: visualTheme,
-                        season: season,
-                        accent: palette.accent,
-                        muted: palette.muted,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Text(
-                isChinese
-                    ? '${summary.plannedDayCount} 个计划日'
-                    : '${summary.plannedDayCount} planned days',
-                style: TextStyle(color: palette.muted, fontSize: 12),
-              ),
-              const SizedBox(height: 8),
-              LinearProgressIndicator(
-                value: summary.completionRatio,
-                minHeight: 4,
-                borderRadius: BorderRadius.circular(99),
-                color: palette.accent,
-                backgroundColor: palette.rule,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${summary.completedTaskCount}/${summary.totalTaskCount} · '
-                '${summary.plannedDurationLabel}',
-                style: TextStyle(color: palette.muted, fontSize: 11),
-              ),
-            ],
-          ),
-        ),
-      ),
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+    final rect = Offset.zero & size;
+    canvas.save();
+    canvas.clipRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(6)),
     );
+    final deep = Color.lerp(color, Colors.black, 0.13)!;
+    final bright = Color.lerp(color, Colors.white, 0.24)!;
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = LinearGradient(
+          colors: [deep, color, bright, color, deep],
+          stops: const [0, 0.25, 0.52, 0.78, 1],
+        ).createShader(rect),
+    );
+
+    final pulse = 0.13 + 0.045 * sin(2 * pi * phase);
+    for (final seed in const [0.05, 0.55]) {
+      final x = ((phase + seed) % 1) * size.width;
+      for (final offset in [-size.width, 0.0, size.width]) {
+        final center = Offset(x + offset, size.height * 0.50);
+        final radius = max(42.0, size.width * 0.28);
+        canvas.drawCircle(
+          center,
+          radius,
+          Paint()
+            ..shader = RadialGradient(
+              colors: [
+                Colors.white.withValues(alpha: pulse),
+                Colors.white.withValues(alpha: 0),
+              ],
+            ).createShader(Rect.fromCircle(center: center, radius: radius)),
+        );
+      }
+    }
+
+    for (var index = 0; index < 18; index += 1) {
+      final cycle = index.isEven ? 1 : 2;
+      final seed = (index * 0.61803398875) % 1;
+      final x = ((seed + phase * cycle) % 1) * size.width;
+      final y = 4.5 + (index * 7.1) % max(5.0, size.height - 9);
+      final opacity = 0.30 + (index % 4) * 0.12;
+      final dotRadius = index % 5 == 0 ? 1.5 : 0.8;
+      for (final offset in [-size.width, 0.0, size.width]) {
+        canvas.drawCircle(
+          Offset(x + offset, y),
+          dotRadius,
+          Paint()..color = Colors.white.withValues(alpha: opacity),
+        );
+        if (index % 3 == 0) {
+          canvas.drawLine(
+            Offset(x + offset - 3, y + 1.2),
+            Offset(x + offset + 2, y - 1.2),
+            Paint()
+              ..color = Colors.white.withValues(alpha: opacity * 0.65)
+              ..strokeWidth = 0.9
+              ..strokeCap = StrokeCap.round,
+          );
+        }
+      }
+    }
+    canvas.drawLine(
+      const Offset(0, 1),
+      Offset(size.width, 1),
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.20)
+        ..strokeWidth = 1,
+    );
+    canvas.restore();
   }
 
-  static String _shortMonth(int month) => const [
-        'JAN',
-        'FEB',
-        'MAR',
-        'APR',
-        'MAY',
-        'JUN',
-        'JUL',
-        'AUG',
-        'SEP',
-        'OCT',
-        'NOV',
-        'DEC',
-      ][month - 1];
+  @override
+  bool shouldRepaint(covariant _SeamlessChargePainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.phase != phase;
+}
+
+class _AnnualColorOption {
+  const _AnnualColorOption(this.key, this.zh, this.en, this.color);
+
+  final String key;
+  final String zh;
+  final String en;
+  final Color color;
+}
+
+const _annualColorOptions = <_AnnualColorOption>[
+  _AnnualColorOption('accent', '电光紫', 'Electric violet', Color(0xFF7657F7)),
+  _AnnualColorOption('warm', '跃动橙', 'Vivid orange', Color(0xFFF46A25)),
+  _AnnualColorOption('cool', '亮蓝', 'Bright blue', Color(0xFF2675E8)),
+  _AnnualColorOption('neutral', '翠绿', 'Emerald green', Color(0xFF0BAD70)),
+  _AnnualColorOption('coral', '珊瑚红', 'Coral red', Color(0xFFF3445A)),
+  _AnnualColorOption('gold', '鎏金黄', 'Golden yellow', Color(0xFFE6A300)),
+  _AnnualColorOption('cyan', '湖水青', 'Clear cyan', Color(0xFF00A8BE)),
+];
+
+Color _annualColor(String colorKey) {
+  for (final option in _annualColorOptions) {
+    if (option.key == colorKey) return option.color;
+  }
+  return _annualColorOptions.first.color;
 }
 
 class _AnnualSegmentDialog extends StatefulWidget {
@@ -1775,6 +3216,8 @@ class _AnnualSegmentDialogState extends State<_AnnualSegmentDialog> {
   late final TextEditingController _noteController;
   late RangeValues _months;
   late String _colorKey;
+  late int _progressPercent;
+  late List<AnnualPlanSubtask> _subtasks;
   String? _errorText;
 
   @override
@@ -1787,6 +3230,31 @@ class _AnnualSegmentDialogState extends State<_AnnualSegmentDialog> {
       (widget.initial?.endMonth ?? widget.endMonth).toDouble(),
     );
     _colorKey = widget.initial?.colorKey ?? 'accent';
+    _progressPercent = widget.initial?.progressPercent ?? 0;
+    _subtasks = [...?widget.initial?.subtasks];
+  }
+
+  Future<void> _editSubtask({AnnualPlanSubtask? initial}) async {
+    final result = await showDialog<AnnualPlanSubtask>(
+      context: context,
+      builder: (context) => _AnnualSubtaskDialog(
+        isChinese: widget.isChinese,
+        initial: initial,
+      ),
+    );
+    if (result == null || !mounted) {
+      return;
+    }
+    setState(() {
+      if (initial == null) {
+        _subtasks.add(result.copyWith(sortOrder: _subtasks.length));
+      } else {
+        final index = _subtasks.indexOf(initial);
+        if (index >= 0) {
+          _subtasks[index] = result.copyWith(sortOrder: index);
+        }
+      }
+    });
   }
 
   @override
@@ -1815,8 +3283,13 @@ class _AnnualSegmentDialogState extends State<_AnnualSegmentDialog> {
         colorKey: _colorKey,
         sortOrder: initial?.sortOrder ?? 0,
         note: _noteController.text.trim(),
+        progressPercent: _progressPercent,
         revision: initial?.revision ?? 0,
         updateTime: initial?.updateTime ?? '',
+        subtasks: [
+          for (var index = 0; index < _subtasks.length; index += 1)
+            _subtasks[index].copyWith(sortOrder: index),
+        ],
       ),
     );
   }
@@ -1826,65 +3299,251 @@ class _AnnualSegmentDialogState extends State<_AnnualSegmentDialog> {
     return AlertDialog(
       title: Text(
         widget.initial == null
-            ? (widget.isChinese ? '新建年度计划' : 'New annual plan')
-            : (widget.isChinese ? '编辑年度计划' : 'Edit annual plan'),
+            ? (widget.isChinese ? '新建年度任务' : 'New annual task')
+            : (widget.isChinese ? '编辑年度任务' : 'Edit annual task'),
       ),
       content: SizedBox(
-        width: 460,
+        width: 620,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: _titleController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: widget.isChinese ? '任务名称' : 'Task name',
+                  errorText: _errorText,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                widget.isChinese
+                    ? '${_months.start.round()} 月 — ${_months.end.round()} 月'
+                    : 'Month ${_months.start.round()} — ${_months.end.round()}',
+              ),
+              RangeSlider(
+                min: 1,
+                max: 12,
+                divisions: 11,
+                values: _months,
+                labels: RangeLabels(
+                  '${_months.start.round()}',
+                  '${_months.end.round()}',
+                ),
+                onChanged: (value) => setState(() => _months = value),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                widget.isChinese
+                    ? '任务进度 · $_progressPercent%'
+                    : 'Task progress · $_progressPercent%',
+              ),
+              Slider(
+                value: _progressPercent.toDouble(),
+                min: 0,
+                max: 100,
+                divisions: 100,
+                label: '$_progressPercent%',
+                onChanged: (value) =>
+                    setState(() => _progressPercent = value.round()),
+              ),
+              const SizedBox(height: 6),
+              DropdownButtonFormField<String>(
+                initialValue: _colorKey,
+                decoration: InputDecoration(
+                  labelText: widget.isChinese ? '标记颜色' : 'Color marker',
+                ),
+                items: [
+                  for (final option in _annualColorOptions)
+                    DropdownMenuItem(
+                      value: option.key,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 18,
+                            height: 18,
+                            decoration: BoxDecoration(
+                              color: option.color,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(widget.isChinese ? option.zh : option.en),
+                        ],
+                      ),
+                    ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _colorKey = value);
+                  }
+                },
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _noteController,
+                minLines: 2,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  labelText: widget.isChinese ? '说明（可选）' : 'Note (optional)',
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.isChinese ? '子任务' : 'Subtasks',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: _editSubtask,
+                    icon: const Icon(Icons.add_rounded),
+                    label: Text(widget.isChinese ? '添加' : 'Add'),
+                  ),
+                ],
+              ),
+              if (_subtasks.isEmpty)
+                Text(
+                  widget.isChinese
+                      ? '可以现在拆分子任务，也可以保存后再添加。'
+                      : 'Add subtasks now, or add them after saving.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                )
+              else
+                ..._subtasks.asMap().entries.map(
+                      (entry) => ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        title: Text(entry.value.title),
+                        subtitle: entry.value.detail.isEmpty
+                            ? null
+                            : Text(entry.value.detail),
+                        trailing: Wrap(
+                          spacing: 2,
+                          children: [
+                            IconButton(
+                              tooltip: widget.isChinese ? '编辑' : 'Edit',
+                              onPressed: () =>
+                                  _editSubtask(initial: entry.value),
+                              icon: const Icon(Icons.edit_outlined, size: 19),
+                            ),
+                            IconButton(
+                              tooltip: widget.isChinese ? '删除' : 'Delete',
+                              onPressed: () => setState(
+                                () => _subtasks.removeAt(entry.key),
+                              ),
+                              icon: const Icon(
+                                Icons.delete_outline_rounded,
+                                size: 19,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(widget.isChinese ? '取消' : 'Cancel'),
+        ),
+        FilledButton(
+          onPressed: _save,
+          child: Text(widget.isChinese ? '保存' : 'Save'),
+        ),
+      ],
+    );
+  }
+}
+
+class _AnnualSubtaskDialog extends StatefulWidget {
+  const _AnnualSubtaskDialog({
+    required this.isChinese,
+    this.initial,
+  });
+
+  final bool isChinese;
+  final AnnualPlanSubtask? initial;
+
+  @override
+  State<_AnnualSubtaskDialog> createState() => _AnnualSubtaskDialogState();
+}
+
+class _AnnualSubtaskDialogState extends State<_AnnualSubtaskDialog> {
+  late final TextEditingController _titleController;
+  late final TextEditingController _detailController;
+  String? _errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.initial?.title ?? '');
+    _detailController =
+        TextEditingController(text: widget.initial?.detail ?? '');
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _detailController.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final title = _titleController.text.trim();
+    if (title.isEmpty) {
+      setState(() {
+        _errorText = widget.isChinese ? '请输入子任务名称。' : 'Enter a subtask title.';
+      });
+      return;
+    }
+    final initial = widget.initial;
+    Navigator.of(context).pop(
+      AnnualPlanSubtask(
+        id: initial?.id ?? '',
+        title: title,
+        detail: _detailController.text.trim(),
+        completed: initial?.completed ?? false,
+        sortOrder: initial?.sortOrder ?? 0,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        widget.initial == null
+            ? (widget.isChinese ? '添加子任务' : 'Add subtask')
+            : (widget.isChinese ? '编辑子任务' : 'Edit subtask'),
+      ),
+      content: SizedBox(
+        width: 440,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
               controller: _titleController,
               autofocus: true,
               decoration: InputDecoration(
-                labelText: widget.isChinese ? '计划标题' : 'Plan title',
+                labelText: widget.isChinese ? '子任务名称' : 'Subtask title',
                 errorText: _errorText,
               ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              widget.isChinese
-                  ? '${_months.start.round()} 月 — ${_months.end.round()} 月'
-                  : 'Month ${_months.start.round()} — ${_months.end.round()}',
-            ),
-            RangeSlider(
-              min: 1,
-              max: 12,
-              divisions: 11,
-              values: _months,
-              labels: RangeLabels(
-                '${_months.start.round()}',
-                '${_months.end.round()}',
-              ),
-              onChanged: (value) => setState(() => _months = value),
-            ),
-            const SizedBox(height: 6),
-            DropdownButtonFormField<String>(
-              initialValue: _colorKey,
-              decoration: InputDecoration(
-                labelText: widget.isChinese ? '标记颜色' : 'Color marker',
-              ),
-              items: const [
-                DropdownMenuItem(value: 'accent', child: Text('Accent')),
-                DropdownMenuItem(value: 'warm', child: Text('Warm')),
-                DropdownMenuItem(value: 'cool', child: Text('Cool')),
-                DropdownMenuItem(value: 'neutral', child: Text('Neutral')),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _colorKey = value);
-                }
-              },
-            ),
             const SizedBox(height: 14),
             TextField(
-              controller: _noteController,
+              controller: _detailController,
               minLines: 2,
               maxLines: 4,
               decoration: InputDecoration(
-                labelText: widget.isChinese ? '说明（可选）' : 'Note (optional)',
+                labelText: widget.isChinese ? '内容描述' : 'Description',
               ),
             ),
           ],
@@ -1902,111 +3561,6 @@ class _AnnualSegmentDialogState extends State<_AnnualSegmentDialog> {
       ],
     );
   }
-}
-
-class _SeasonArtworkPainter extends CustomPainter {
-  const _SeasonArtworkPainter({
-    required this.theme,
-    required this.season,
-    required this.accent,
-    required this.muted,
-  });
-
-  final AppVisualTheme theme;
-  final int season;
-  final Color accent;
-  final Color muted;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final primary = Paint()
-      ..color =
-          accent.withValues(alpha: theme == AppVisualTheme.glass ? 0.72 : 0.62)
-      ..strokeWidth = theme == AppVisualTheme.wabiSabi ? 1.6 : 2
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-    final fill = Paint()
-      ..color =
-          accent.withValues(alpha: theme == AppVisualTheme.glass ? 0.22 : 0.16)
-      ..style = PaintingStyle.fill;
-
-    switch (theme) {
-      case AppVisualTheme.minimalism:
-        if (season == 0) {
-          canvas.drawLine(Offset(center.dx, size.height - 6),
-              Offset(center.dx, 10), primary);
-          canvas.drawArc(
-              Rect.fromCenter(
-                  center: Offset(center.dx - 6, 17), width: 14, height: 9),
-              0.1,
-              2.7,
-              false,
-              primary);
-        } else if (season == 1) {
-          canvas.drawCircle(center, 10, fill);
-          for (var i = 0; i < 8; i += 1) {
-            final angle = i * pi / 4;
-            canvas.drawLine(center + Offset(cos(angle), sin(angle)) * 15,
-                center + Offset(cos(angle), sin(angle)) * 21, primary);
-          }
-        } else if (season == 2) {
-          canvas.drawOval(
-              Rect.fromCenter(
-                  center: center + const Offset(-6, -3), width: 13, height: 25),
-              primary);
-          canvas.drawOval(
-              Rect.fromCenter(
-                  center: center + const Offset(7, 4), width: 13, height: 25),
-              primary);
-        } else {
-          for (var i = 0; i < 4; i += 1) {
-            final angle = i * pi / 4;
-            canvas.drawLine(center - Offset(cos(angle), sin(angle)) * 18,
-                center + Offset(cos(angle), sin(angle)) * 18, primary);
-          }
-        }
-      case AppVisualTheme.wabiSabi:
-        canvas.drawArc(Rect.fromCenter(center: center, width: 34, height: 31),
-            -0.4, 4.7 - season * 0.25, false, primary);
-        canvas.drawLine(Offset(8, size.height - 8),
-            Offset(size.width - 7, 9 + season * 4), primary);
-        canvas.drawCircle(center + Offset(8 - season * 3, -7 + season * 2),
-            4 + season.toDouble(), fill);
-      case AppVisualTheme.midCentury:
-        canvas.drawCircle(center, season == 1 ? 13 : 8, fill);
-        final rays = season == 1
-            ? 10
-            : season == 3
-                ? 6
-                : 5;
-        for (var i = 0; i < rays; i += 1) {
-          final angle = i * 2 * pi / rays + season * 0.28;
-          canvas.drawLine(center + Offset(cos(angle), sin(angle)) * 11,
-              center + Offset(cos(angle), sin(angle)) * 21, primary);
-        }
-        canvas.drawCircle(center + const Offset(15, 10), 5,
-            Paint()..color = muted.withValues(alpha: 0.28));
-      case AppVisualTheme.glass:
-        final glow = Paint()
-          ..color = accent.withValues(alpha: 0.28)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
-        canvas.drawCircle(center, 14 + season.toDouble(), glow);
-        canvas.drawCircle(center, 12, primary);
-        for (var i = 0; i < 4 + season; i += 1) {
-          final angle = i * 2 * pi / (4 + season);
-          canvas.drawCircle(
-              center + Offset(cos(angle), sin(angle)) * 16, 3.2, fill);
-        }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _SeasonArtworkPainter oldDelegate) =>
-      theme != oldDelegate.theme ||
-      season != oldDelegate.season ||
-      accent != oldDelegate.accent ||
-      muted != oldDelegate.muted;
 }
 
 class _PlanRangeHeader extends StatelessWidget {
@@ -2222,16 +3776,8 @@ class _PageCanvas extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final horizontal = switch (spec.tier) {
-      DesktopPresentationTier.large => 32.0,
-      DesktopPresentationTier.medium => 24.0,
-      DesktopPresentationTier.small || null => 16.0,
-    };
-    final maxWidth = switch (spec.tier) {
-      DesktopPresentationTier.large => 1320.0,
-      DesktopPresentationTier.medium => 980.0,
-      DesktopPresentationTier.small || null => double.infinity,
-    };
+    final horizontal = _pageCanvasHorizontal(spec);
+    final maxWidth = _pageCanvasMaxWidth(spec);
 
     final content = SingleChildScrollView(
       key: pageKey,
@@ -2254,6 +3800,19 @@ class _PageCanvas extends StatelessWidget {
     );
   }
 }
+
+double _pageCanvasHorizontal(DesktopPresentationSpec spec) =>
+    switch (spec.tier) {
+      DesktopPresentationTier.large => 32.0,
+      DesktopPresentationTier.medium => 24.0,
+      DesktopPresentationTier.small || null => 16.0,
+    };
+
+double _pageCanvasMaxWidth(DesktopPresentationSpec spec) => switch (spec.tier) {
+      DesktopPresentationTier.large => 1320.0,
+      DesktopPresentationTier.medium => 980.0,
+      DesktopPresentationTier.small || null => double.infinity,
+    };
 
 class _ResponsivePair extends StatelessWidget {
   const _ResponsivePair({
@@ -2293,7 +3852,7 @@ class _ResponsivePair extends StatelessWidget {
   }
 }
 
-class _HeroStatement extends StatelessWidget {
+class _HeroStatement extends StatefulWidget {
   const _HeroStatement({
     required this.palette,
     required this.dayIndex,
@@ -2309,14 +3868,108 @@ class _HeroStatement extends StatelessWidget {
   final String description;
 
   @override
+  State<_HeroStatement> createState() => _HeroStatementState();
+}
+
+class _HeroStatementState extends State<_HeroStatement>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _motion;
+
+  @override
+  void initState() {
+    super.initState();
+    _motion = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2700),
+    );
+  }
+
+  void _syncMotion() {
+    if (widget.palette.visualTheme == AppVisualTheme.minimalism &&
+        !MediaQuery.disableAnimationsOf(context)) {
+      if (!_motion.isAnimating) {
+        _motion.repeat(reverse: true);
+      }
+    } else {
+      _motion.stop();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncMotion();
+  }
+
+  @override
+  void didUpdateWidget(covariant _HeroStatement oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.palette.visualTheme != widget.palette.visualTheme) {
+      _syncMotion();
+    }
+  }
+
+  @override
+  void dispose() {
+    _motion.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final palette = widget.palette;
+    final dayIndex = widget.dayIndex;
+    final eyebrow = widget.eyebrow;
+    final title = widget.title;
+    final description = widget.description;
+    return AnimatedBuilder(
+      animation: _motion,
+      builder: (context, child) => _buildHero(
+        palette,
+        dayIndex,
+        eyebrow,
+        title,
+        description,
+      ),
+    );
+  }
+
+  Widget _buildHero(
+    _HomePalette palette,
+    int dayIndex,
+    String eyebrow,
+    String title,
+    String description,
+  ) {
+    final motion = Curves.easeInOutSine.transform(_motion.value);
+    final drift = (motion - 0.5) * 2;
     final decoration = switch (palette.visualTheme) {
       AppVisualTheme.minimalism => BoxDecoration(
-          color: palette.background,
-          border: Border(
-            top: BorderSide(color: palette.ink, width: 2),
-            bottom: BorderSide(color: palette.rule),
+          gradient: LinearGradient(
+            begin: Alignment(-1 + drift * 0.52, -1 + drift * 0.22),
+            end: Alignment(1 - drift * 0.22, 1 - drift * 0.38),
+            colors: [
+              palette.surface,
+              Color.alphaBlend(
+                palette.artTwo.withValues(alpha: 0.57 + motion * 0.24),
+                palette.surface,
+              ),
+              Color.alphaBlend(
+                palette.artOne.withValues(alpha: 0.28 + motion * 0.28),
+                palette.surface,
+              ),
+            ],
+            stops: [0.0, 0.44 + motion * 0.22, 1.0],
           ),
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.82)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x18252635),
+              blurRadius: 34,
+              offset: Offset(0, 16),
+            ),
+          ],
         ),
       AppVisualTheme.wabiSabi => BoxDecoration(
           color: palette.surface,
@@ -2340,8 +3993,8 @@ class _HeroStatement extends StatelessWidget {
     final darkHero = palette.visualTheme == AppVisualTheme.midCentury ||
         palette.visualTheme == AppVisualTheme.glass;
     return Container(
-      padding: EdgeInsets.fromLTRB(
-        palette.visualTheme == AppVisualTheme.minimalism ? 4 : 28,
+      padding: const EdgeInsets.fromLTRB(
+        28,
         28,
         28,
         30,
@@ -2353,17 +4006,13 @@ class _HeroStatement extends StatelessWidget {
             const Positioned(right: 4, top: 0, child: _MidCenturyOrnament()),
           if (palette.visualTheme == AppVisualTheme.minimalism)
             Positioned(
-              right: 2,
-              top: 0,
+              right: -18,
+              top: -22,
               child: ExcludeSemantics(
-                child: Text(
-                  'D/${dayIndex.toString().padLeft(2, '0')}',
-                  style: TextStyle(
-                    color: palette.muted,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.8,
-                  ),
+                child: _SoftSpectrumHeroOrnament(
+                  palette: palette,
+                  dayIndex: dayIndex,
+                  progress: motion,
                 ),
               ),
             ),
@@ -2442,7 +4091,7 @@ class _HeroStatement extends StatelessWidget {
                         _ => 'Segoe UI',
                       },
                       fontSize: switch (palette.visualTheme) {
-                        AppVisualTheme.minimalism => 42,
+                        AppVisualTheme.minimalism => 46,
                         AppVisualTheme.glass => 52,
                         _ => 34,
                       },
@@ -2454,7 +4103,7 @@ class _HeroStatement extends StatelessWidget {
                           ? FontStyle.italic
                           : FontStyle.normal,
                       letterSpacing: switch (palette.visualTheme) {
-                        AppVisualTheme.minimalism => -1.8,
+                        AppVisualTheme.minimalism => -2.2,
                         AppVisualTheme.wabiSabi => 0.3,
                         _ => -1.0,
                       },
@@ -2480,6 +4129,112 @@ class _HeroStatement extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SoftSpectrumHeroOrnament extends StatelessWidget {
+  const _SoftSpectrumHeroOrnament({
+    required this.palette,
+    required this.dayIndex,
+    required this.progress,
+  });
+
+  final _HomePalette palette;
+  final int dayIndex;
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 250,
+      height: 168,
+      child: Stack(
+        children: [
+          Positioned(
+            right: 26,
+            top: 0,
+            child: Transform.translate(
+              offset: Offset(-19 * progress, 17 * (1 - progress)),
+              child: Transform.rotate(
+                angle: -0.17 + progress * 0.20,
+                child: Container(
+                  width: 170,
+                  height: 108,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        palette.accent.withValues(alpha: 0.48),
+                        palette.artTwo.withValues(alpha: 0.16),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            right: -6,
+            bottom: 0,
+            child: Transform.translate(
+              offset: Offset(19 * (1 - progress), -18 * progress),
+              child: Transform.rotate(
+                angle: 0.11 - progress * 0.21,
+                child: Container(
+                  width: 146,
+                  height: 92,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(28),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        palette.artOne.withValues(alpha: 0.52),
+                        palette.artOne.withValues(alpha: 0.08),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            right: 72,
+            top: 50,
+            child: Container(
+              width: 76,
+              height: 76,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: palette.surface.withValues(alpha: 0.88),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: palette.ink.withValues(alpha: 0.16),
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x17252635),
+                    blurRadius: 18,
+                    offset: Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Text(
+                'D/${dayIndex.toString().padLeft(2, '0')}',
+                style: TextStyle(
+                  color: palette.ink,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.4,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -2644,9 +4399,197 @@ class _FocusPanel extends StatelessWidget {
           : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(
-          palette.visualTheme == AppVisualTheme.glass ? 12 : 0,
+          palette.visualTheme == AppVisualTheme.glass ||
+                  palette.visualTheme == AppVisualTheme.minimalism
+              ? 14
+              : 0,
         ),
       ),
+    );
+  }
+}
+
+class _HomePlanTabs extends StatefulWidget {
+  const _HomePlanTabs({
+    required this.palette,
+    required this.plan,
+    required this.annualOverview,
+    required this.isChinese,
+    required this.isBusy,
+    required this.density,
+    required this.onEdit,
+    required this.onToggle,
+    required this.onLoadAnnual,
+    required this.onOpenAnnualBoard,
+  });
+
+  final _HomePalette palette;
+  final TodayPlan plan;
+  final AnnualPlanOverview annualOverview;
+  final bool isChinese;
+  final bool isBusy;
+  final ComponentPresentationDensity density;
+  final Future<void> Function() onEdit;
+  final Future<void> Function(int index, bool completed) onToggle;
+  final Future<void> Function() onLoadAnnual;
+  final Future<void> Function() onOpenAnnualBoard;
+
+  @override
+  State<_HomePlanTabs> createState() => _HomePlanTabsState();
+}
+
+class _HomePlanTabsState extends State<_HomePlanTabs> {
+  bool _showAnnualMonth = false;
+
+  String _text(String zh, String en) => widget.isChinese ? zh : en;
+
+  void _select(bool annual) {
+    if (_showAnnualMonth == annual) return;
+    setState(() => _showAnnualMonth = annual);
+    if (annual) unawaited(widget.onLoadAnnual());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = widget.palette;
+    final now = DateTime.now();
+    final segments = widget.annualOverview.year == now.year
+        ? widget.annualOverview.segments
+            .where(
+              (segment) =>
+                  now.month >= segment.startMonth &&
+                  now.month <= segment.endMonth,
+            )
+            .toList()
+        : <AnnualPlanSegment>[];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _Panel(
+          palette: palette,
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final annual in [false, true])
+                OutlinedButton(
+                  key: ValueKey(annual
+                      ? 'home-plan-tab-annual-month'
+                      : 'home-plan-tab-today'),
+                  onPressed: () => _select(annual),
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: _showAnnualMonth == annual
+                        ? palette.accentSoft
+                        : palette.surface,
+                    foregroundColor: _showAnnualMonth == annual
+                        ? palette.accent
+                        : palette.ink,
+                    side: BorderSide(
+                      color: _showAnnualMonth == annual
+                          ? palette.accent
+                          : palette.rule,
+                    ),
+                  ),
+                  child: Text(annual
+                      ? _text('本月超长任务', 'Annual this month')
+                      : _text('今日计划', 'Today plan')),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (!_showAnnualMonth)
+          _PlanPanel(
+            palette: palette,
+            plan: widget.plan,
+            isChinese: widget.isChinese,
+            isBusy: widget.isBusy,
+            density: widget.density,
+            onEdit: widget.onEdit,
+            onToggle: widget.onToggle,
+          )
+        else
+          _Panel(
+            palette: palette,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _PanelTitle(
+                  palette: palette,
+                  title: _text('本月超长任务', 'Annual tasks this month'),
+                  subtitle: _text(
+                    '${now.month} 月 · ${segments.length} 项',
+                    'Month ${now.month} · ${segments.length} tasks',
+                  ),
+                  actionLabel: _text('打开面板', 'Open board'),
+                  onAction: widget.onOpenAnnualBoard,
+                ),
+                const SizedBox(height: 12),
+                if (segments.isEmpty)
+                  _EmptyMessage(
+                    palette: palette,
+                    icon: Icons.calendar_view_month_outlined,
+                    message: _text('本月没有超长任务。', 'No annual tasks this month.'),
+                  )
+                else
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 220),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          for (final segment in segments)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 11),
+                              child: InkWell(
+                                onTap: () =>
+                                    unawaited(widget.onOpenAnnualBoard()),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            segment.title,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              color: palette.ink,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                        Text(
+                                          '${segment.progressPercent}%',
+                                          style: TextStyle(
+                                            color: palette.accent,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5),
+                                    _ChargingMonthSpan(
+                                      key: ValueKey(
+                                          'annual-charge-${segment.id}-${segment.clientEntityId}'),
+                                      palette: palette,
+                                      color: _annualColor(segment.colorKey),
+                                      startMonth: segment.startMonth,
+                                      endMonth: segment.endMonth,
+                                      progressPercent: segment.progressPercent,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }
@@ -2949,7 +4892,7 @@ class _MetricTile extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const Spacer(),
+            const SizedBox(height: 18),
             Text(
               metric.value,
               maxLines: 1,
@@ -3154,7 +5097,10 @@ class _SectionLead extends StatelessWidget {
                     : BorderSide.none,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(
-                    palette.visualTheme == AppVisualTheme.glass ? 12 : 0,
+                    palette.visualTheme == AppVisualTheme.glass ||
+                            palette.visualTheme == AppVisualTheme.minimalism
+                        ? 14
+                        : 0,
                   ),
                 ),
                 minimumSize: const Size(160, 46),
@@ -3215,12 +5161,16 @@ class _HoverSurfaceState extends State<_HoverSurface> {
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     final glass = widget.palette.visualTheme == AppVisualTheme.glass;
     final mid = widget.palette.visualTheme == AppVisualTheme.midCentury;
+    final softSpectrum =
+        widget.palette.visualTheme == AppVisualTheme.minimalism;
     final lift = _hovered && !reduceMotion
         ? glass
             ? -5.0
             : mid
                 ? -3.0
-                : -1.0
+                : softSpectrum
+                    ? -3.0
+                    : -1.0
         : 0.0;
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -3403,13 +5353,24 @@ class _EmptyMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final glass = palette.visualTheme == AppVisualTheme.glass;
+    final softSpectrum = palette.visualTheme == AppVisualTheme.minimalism;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: glass ? const Color(0x32101D3B) : palette.background,
-        borderRadius: BorderRadius.circular(glass ? 12 : 0),
-        border: glass ? Border.all(color: const Color(0x42FFFFFF)) : null,
+        color: glass ? const Color(0x32101D3B) : palette.surface,
+        borderRadius: BorderRadius.circular(
+          glass
+              ? 12
+              : softSpectrum
+                  ? 16
+                  : 0,
+        ),
+        border: glass
+            ? Border.all(color: const Color(0x42FFFFFF))
+            : softSpectrum
+                ? Border.all(color: palette.rule)
+                : null,
       ),
       child: Row(
         children: [
@@ -3438,6 +5399,8 @@ class _HomePalette {
     required this.rule,
     required this.accent,
     required this.accentSoft,
+    required this.artOne,
+    required this.artTwo,
     required this.onInk,
     required this.onInkMuted,
     required this.visualTheme,
@@ -3451,6 +5414,8 @@ class _HomePalette {
   final Color rule;
   final Color accent;
   final Color accentSoft;
+  final Color artOne;
+  final Color artTwo;
   final Color onInk;
   final Color onInkMuted;
   final AppVisualTheme visualTheme;
@@ -3461,11 +5426,39 @@ class _HomePalette {
   }) {
     return switch (visualTheme) {
       AppVisualTheme.minimalism => BoxDecoration(
-          color: emphasized ? background : surface,
-          border: Border(
-            top: BorderSide(
-                color: emphasized ? ink : rule, width: emphasized ? 2 : 1),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: emphasized
+                ? [
+                    surface,
+                    Color.alphaBlend(
+                      artTwo.withValues(alpha: hovered ? 0.52 : 0.34),
+                      surface,
+                    ),
+                  ]
+                : [
+                    surface,
+                    Color.alphaBlend(
+                      artOne.withValues(alpha: hovered ? 0.16 : 0.08),
+                      surface,
+                    ),
+                  ],
           ),
+          borderRadius: BorderRadius.circular(emphasized ? 22 : 18),
+          border: Border.all(
+            color: hovered
+                ? accent.withValues(alpha: 0.38)
+                : Colors.white.withValues(alpha: 0.80),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF252635)
+                  .withValues(alpha: hovered ? 0.12 : 0.065),
+              blurRadius: hovered ? 32 : 22,
+              offset: Offset(0, hovered ? 14 : 9),
+            ),
+          ],
         ),
       AppVisualTheme.wabiSabi => BoxDecoration(
           color: emphasized ? surfaceStrong : surface,
@@ -3529,6 +5522,8 @@ class _HomePalette {
         tokens.accent.withValues(alpha: tokens.isDark ? 0.24 : 0.18),
         tokens.softPanel,
       ),
+      artOne: tokens.artOne,
+      artTwo: tokens.artTwo,
       onInk: glass ? tokens.ink : tokens.onAccent,
       onInkMuted: glass
           ? tokens.muted
@@ -3560,6 +5555,9 @@ class _ThemedHomeBackdrop extends StatelessWidget {
     if (visualTheme == AppVisualTheme.glass) {
       return GlassMotionBackdrop(child: child);
     }
+    if (visualTheme == AppVisualTheme.minimalism) {
+      return child;
+    }
     return DecoratedBox(
       decoration: BoxDecoration(
         color: palette.background,
@@ -3579,13 +5577,7 @@ class _HomeBackdropPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (visualTheme == AppVisualTheme.minimalism) {
-      final paint = Paint()..color = palette.ink.withValues(alpha: 0.025);
-      for (double y = 8; y < size.height; y += 8) {
-        canvas.drawLine(
-            Offset.zero.translate(0, y), Offset(size.width, y), paint);
-      }
-    } else if (visualTheme == AppVisualTheme.midCentury) {
+    if (visualTheme == AppVisualTheme.midCentury) {
       canvas.drawCircle(Offset(size.width - 72, 92), 58,
           Paint()..color = const Color(0x33E5A536));
       canvas.drawRect(Rect.fromLTWH(size.width - 150, 146, 112, 24),

@@ -41,7 +41,7 @@ class OfflineStore {
     _database = await factory.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 3,
+        version: 5,
         onConfigure: (database) async {
           await database.execute('PRAGMA foreign_keys = ON');
         },
@@ -88,6 +88,23 @@ class OfflineStore {
                     ELSE 0
                   END''',
             );
+          }
+          if (oldVersion < 4) {
+            await _createLocalAnnualSegmentTable(database);
+            await _createLocalAnnualSubtaskTable(database);
+          }
+          if (oldVersion < 5) {
+            await _createLocalAnnualSegmentTable(database);
+            final columns = await database.rawQuery(
+              'PRAGMA table_info(local_annual_segment)',
+            );
+            if (!columns
+                .any((column) => column['name'] == 'progress_percent')) {
+              await database.execute(
+                'ALTER TABLE local_annual_segment '
+                'ADD COLUMN progress_percent INTEGER NOT NULL DEFAULT 0',
+              );
+            }
           }
         },
       ),
@@ -600,23 +617,45 @@ class OfflineStore {
     required TodayPlan sourcePlan,
   }) async {
     final database = await _readyDatabase();
-    final idRows = await database.rawQuery(
-      'SELECT COALESCE(MAX(CAST(template_id AS INTEGER)), 0) + 1 AS next_id '
-      'FROM local_day_template WHERE owner_scope = ?',
-      [ownerScope],
+    final existingRows = await database.query(
+      'local_day_template',
+      columns: ['template_id', 'created_at'],
+      where: 'owner_scope = ? AND template_name = ?',
+      whereArgs: [ownerScope, templateName],
+      limit: 1,
     );
-    final templateId = idRows.first['next_id'] as int;
+    final templateId = existingRows.isEmpty
+        ? await _nextDayTemplateId(database, ownerScope)
+        : int.parse('${existingRows.first['template_id']}');
     final now = DateTime.now().toUtc().toIso8601String();
     await database.transaction((transaction) async {
-      await transaction.insert('local_day_template', {
-        'owner_scope': ownerScope,
-        'template_id': '$templateId',
-        'template_name': templateName,
-        'source_plan_name': sourcePlan.planName,
-        'created_at': now,
-        'updated_at': now,
-        'dirty': 1,
-      });
+      if (existingRows.isEmpty) {
+        await transaction.insert('local_day_template', {
+          'owner_scope': ownerScope,
+          'template_id': '$templateId',
+          'template_name': templateName,
+          'source_plan_name': sourcePlan.planName,
+          'created_at': now,
+          'updated_at': now,
+          'dirty': 1,
+        });
+      } else {
+        await transaction.update(
+          'local_day_template',
+          {
+            'source_plan_name': sourcePlan.planName,
+            'updated_at': now,
+            'dirty': 1,
+          },
+          where: 'owner_scope = ? AND template_id = ?',
+          whereArgs: [ownerScope, '$templateId'],
+        );
+        await transaction.delete(
+          'local_day_template_item',
+          where: 'owner_scope = ? AND template_id = ?',
+          whereArgs: [ownerScope, '$templateId'],
+        );
+      }
       for (var index = 0; index < sourcePlan.items.length; index += 1) {
         final item = sourcePlan.items[index];
         await transaction.insert('local_day_template_item', {
@@ -635,12 +674,37 @@ class OfflineStore {
         ownerScope: ownerScope,
         aggregateType: 'day_template',
         aggregateId: '$templateId',
-        operationType: 'create',
+        operationType: existingRows.isEmpty ? 'create' : 'update',
         payload: {
           'templateName': templateName,
           'sourcePlanName': sourcePlan.planName,
           'items': sourcePlan.items.map((item) => item.toSaveJson()).toList(),
         },
+        createdAt: now,
+      );
+    });
+    return loadDayTemplates(ownerScope);
+  }
+
+  Future<List<WeeklyPlanTemplate>> deleteDayTemplate(
+    String ownerScope,
+    int templateId,
+  ) async {
+    final database = await _readyDatabase();
+    final now = DateTime.now().toUtc().toIso8601String();
+    await database.transaction((transaction) async {
+      await transaction.delete(
+        'local_day_template',
+        where: 'owner_scope = ? AND template_id = ?',
+        whereArgs: [ownerScope, '$templateId'],
+      );
+      await _enqueue(
+        transaction,
+        ownerScope: ownerScope,
+        aggregateType: 'day_template',
+        aggregateId: '$templateId',
+        operationType: 'delete',
+        payload: const {},
         createdAt: now,
       );
     });
@@ -712,6 +776,41 @@ class OfflineStore {
       whereArgs: [ownerScope, year],
       orderBy: 'sort_order ASC, updated_at ASC',
     );
+    final segments = <Map<String, dynamic>>[];
+    for (final row in segmentRows) {
+      final segmentId = '${row['segment_id']}';
+      final subtaskRows = await database.query(
+        'local_annual_segment_subtask',
+        where: 'owner_scope = ? AND segment_id = ?',
+        whereArgs: [ownerScope, segmentId],
+        orderBy: 'sort_order ASC, subtask_id ASC',
+      );
+      segments.add({
+        'id': segmentId,
+        'clientEntityId': row['client_entity_id'],
+        'year': row['year'],
+        'title': row['title'],
+        'startMonth': row['start_month'],
+        'endMonth': row['end_month'],
+        'colorKey': row['color_key'],
+        'sortOrder': row['sort_order'],
+        'note': row['note'],
+        'progressPercent': row['progress_percent'],
+        'revision': row['revision'],
+        'updateTime': row['updated_at'],
+        'subtasks': subtaskRows
+            .map(
+              (subtask) => {
+                'id': subtask['subtask_id'],
+                'title': subtask['title'],
+                'detail': subtask['detail'],
+                'completed': subtask['completed'],
+                'sortOrder': subtask['sort_order'],
+              },
+            )
+            .toList(),
+      });
+    }
     return AnnualPlanOverview.fromJson({
       'year': year,
       'months': planRows
@@ -725,23 +824,7 @@ class OfflineStore {
             },
           )
           .toList(),
-      'segments': segmentRows
-          .map(
-            (row) => {
-              'id': row['segment_id'],
-              'clientEntityId': row['client_entity_id'],
-              'year': row['year'],
-              'title': row['title'],
-              'startMonth': row['start_month'],
-              'endMonth': row['end_month'],
-              'colorKey': row['color_key'],
-              'sortOrder': row['sort_order'],
-              'note': row['note'],
-              'revision': row['revision'],
-              'updateTime': row['updated_at'],
-            },
-          )
-          .toList(),
+      'segments': segments,
     });
   }
 
@@ -753,6 +836,9 @@ class OfflineStore {
         draft.endMonth > 12 ||
         draft.startMonth > draft.endMonth) {
       throw ArgumentError('Annual segment months must be within 1...12.');
+    }
+    if (draft.progressPercent < 0 || draft.progressPercent > 100) {
+      throw ArgumentError('Annual task progress must be within 0...100.');
     }
     final database = await _readyDatabase();
     final segmentId = draft.id.trim().isEmpty ? _uuidV4() : draft.id;
@@ -780,12 +866,30 @@ class OfflineStore {
           'color_key': draft.colorKey,
           'sort_order': draft.sortOrder,
           'note': draft.note,
+          'progress_percent': draft.progressPercent,
           'revision': draft.revision + 1,
           'updated_at': now,
           'dirty': 1,
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
+      await transaction.delete(
+        'local_annual_segment_subtask',
+        where: 'owner_scope = ? AND segment_id = ?',
+        whereArgs: [ownerScope, segmentId],
+      );
+      for (var index = 0; index < draft.subtasks.length; index += 1) {
+        final subtask = draft.subtasks[index];
+        await transaction.insert('local_annual_segment_subtask', {
+          'owner_scope': ownerScope,
+          'segment_id': segmentId,
+          'subtask_id': subtask.id.trim().isEmpty ? _uuidV4() : subtask.id,
+          'title': subtask.title,
+          'detail': subtask.detail,
+          'completed': subtask.completed ? 1 : 0,
+          'sort_order': index,
+        });
+      }
       await _enqueue(
         transaction,
         ownerScope: ownerScope,
@@ -808,6 +912,11 @@ class OfflineStore {
     final database = await _readyDatabase();
     final now = DateTime.now().toUtc().toIso8601String();
     await database.transaction((transaction) async {
+      await transaction.delete(
+        'local_annual_segment_subtask',
+        where: 'owner_scope = ? AND segment_id = ?',
+        whereArgs: [ownerScope, segment.id],
+      );
       await transaction.delete(
         'local_annual_segment',
         where: 'owner_scope = ? AND segment_id = ?',
@@ -1401,10 +1510,23 @@ class OfflineStore {
         color_key TEXT NOT NULL DEFAULT 'accent',
         sort_order INTEGER NOT NULL DEFAULT 0,
         note TEXT NOT NULL DEFAULT '',
+        progress_percent INTEGER NOT NULL DEFAULT 0,
         revision INTEGER NOT NULL DEFAULT 0,
         updated_at TEXT NOT NULL,
         dirty INTEGER NOT NULL DEFAULT 1,
         PRIMARY KEY (owner_scope, segment_id)
+      )''',
+      '''CREATE TABLE local_annual_segment_subtask (
+        owner_scope TEXT NOT NULL,
+        segment_id TEXT NOT NULL,
+        subtask_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        detail TEXT NOT NULL DEFAULT '',
+        completed INTEGER NOT NULL DEFAULT 0,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (owner_scope, segment_id, subtask_id),
+        FOREIGN KEY (owner_scope, segment_id)
+          REFERENCES local_annual_segment(owner_scope, segment_id) ON DELETE CASCADE
       )''',
       '''CREATE TABLE local_focus_session (
         owner_scope TEXT NOT NULL,
@@ -1515,6 +1637,49 @@ class OfflineStore {
     );
   }
 
+  static Future<void> _createLocalAnnualSubtaskTable(
+    DatabaseExecutor database,
+  ) {
+    return database.execute(
+      '''CREATE TABLE IF NOT EXISTS local_annual_segment_subtask (
+        owner_scope TEXT NOT NULL,
+        segment_id TEXT NOT NULL,
+        subtask_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        detail TEXT NOT NULL DEFAULT '',
+        completed INTEGER NOT NULL DEFAULT 0,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (owner_scope, segment_id, subtask_id),
+        FOREIGN KEY (owner_scope, segment_id)
+          REFERENCES local_annual_segment(owner_scope, segment_id) ON DELETE CASCADE
+      )''',
+    );
+  }
+
+  static Future<void> _createLocalAnnualSegmentTable(
+    DatabaseExecutor database,
+  ) {
+    return database.execute(
+      '''CREATE TABLE IF NOT EXISTS local_annual_segment (
+        owner_scope TEXT NOT NULL,
+        segment_id TEXT NOT NULL,
+        client_entity_id TEXT NOT NULL,
+        year INTEGER NOT NULL,
+        start_month INTEGER NOT NULL,
+        end_month INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        color_key TEXT NOT NULL DEFAULT 'accent',
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        note TEXT NOT NULL DEFAULT '',
+        progress_percent INTEGER NOT NULL DEFAULT 0,
+        revision INTEGER NOT NULL DEFAULT 0,
+        updated_at TEXT NOT NULL,
+        dirty INTEGER NOT NULL DEFAULT 1,
+        PRIMARY KEY (owner_scope, segment_id)
+      )''',
+    );
+  }
+
   static LocalProfile _profileFromRow(Map<String, Object?> row) {
     return LocalProfile(
       localProfileId: '${row['local_profile_id']}',
@@ -1564,6 +1729,18 @@ class OfflineStore {
     final rows = await database.rawQuery(
       'SELECT COALESCE(MAX(memo_id), 0) + 1 AS next_id '
       'FROM local_memo WHERE owner_scope = ?',
+      [ownerScope],
+    );
+    return rows.first['next_id'] as int;
+  }
+
+  static Future<int> _nextDayTemplateId(
+    DatabaseExecutor database,
+    String ownerScope,
+  ) async {
+    final rows = await database.rawQuery(
+      'SELECT COALESCE(MAX(CAST(template_id AS INTEGER)), 0) + 1 AS next_id '
+      'FROM local_day_template WHERE owner_scope = ?',
       [ownerScope],
     );
     return rows.first['next_id'] as int;

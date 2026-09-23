@@ -1,0 +1,82 @@
+---
+schema_version: 1
+document_type: checkpoint
+sequence: "0054"
+created_at: "2026-09-23T10:42:54+08:00"
+phase: P01
+type: DECISION
+status: complete
+title: "今日完成率与本月超长任务分页、年度任务进度及无缝充能条"
+objective: "按用户补充的两张图修正首页完成率，增加本月超长任务浏览与独立任务级进度，并加强柔彩动效及 12 个月对齐"
+completed:
+  - fact: "首页指标明确为今日计划完成率，直接使用今日任务已完成数/总数；离线写入后还会刷新统计页的周期汇总"
+    evidence: "AdaptiveDesktopHome、SessionController 和新增今日完成率/离线统计测试；2/2 显示 100% 的部件断言通过"
+  - fact: "首页今日计划卡及短计划页均可切换到本月超长任务；只筛选覆盖当前月份的独立年度任务，并可进入完整年度面板"
+    evidence: "AdaptiveDesktopHome 的 _HomePlanTabs 与 _AnnualPlanBoard；部件测试覆盖本月浏览和全年入口"
+  - fact: "年度任务自身持久化 0–100% 进度，提供 +10%、+5%、+1% 及直接完成；子任务勾选独立，旧客户端省略字段时保留已存值"
+    evidence: "AnnualPlanSegment、OfflineStore v5、StudyPlanService/Mapper/schema.sql；Flutter 与 Maven 回归通过"
+  - fact: "月份跨度条改为蓝紫柔光与稀疏闪点的周期动画，首尾连续；任务卡跨度条与全年 12 等宽月份列左右边界一一对应"
+    evidence: "_SeamlessChargePainter 与 _AnnualMonthSelector；部件测试验证首末月几何边界"
+  - fact: "柔彩首页 Hero 背景及两个色块的移动周期缩短、幅度增大，并在减少动画模式下静止；HTML 预览同步"
+    evidence: "AdaptiveDesktopHome 与 soft-spectrum-dashboard-preview.html；Windows Release 构建成功"
+  - fact: "正式设计提示词与实施/契约/数据流/执行规划均按用户新要求更新，冲突旧描述让位于本决策"
+    evidence: "Innocence-UI设计规划.md 第 2.31 节及相关规划文档"
+changed_files:
+  - path: "client/flutter_app/lib/features/home/presentation/pages/adaptive_desktop_home.dart"
+    change: "今日完成率、本月超长任务双入口、年度任务进度按钮与月跨度无缝动画、Hero 动效及布局修复"
+  - path: "client/flutter_app/lib/features/plans/domain/models/annual_plan_overview.dart"
+    change: "年度任务 progressPercent 模型、边界钳制与 JSON 兼容"
+  - path: "client/flutter_app/lib/core/local/offline_store.dart"
+    change: "本地数据库 v5 迁移、年度进度持久化及离线同步字段"
+  - path: "client/flutter_app/lib/app/session_controller.dart"
+    change: "离线今日计划和存档套用后刷新统计汇总"
+  - path: "server/innocence-server/src/main/java/com/innocence/server/modules/plan/service/StudyPlanService.java"
+    change: "年度任务级进度保存、校验及旧客户端兼容"
+  - path: "server/innocence-server/src/main/resources/mapper/plan/StudyPlanMapper.xml"
+    change: "年度进度字段读取与写入"
+  - path: "server/innocence-server/src/main/resources/schema.sql"
+    change: "年度进度列及已有开发数据库的兼容迁移"
+  - path: "client/flutter_app/test/features/home/adaptive_annual_progress_test.dart"
+    change: "首页完成率、当月分页、任务增量/完成和 12 月边界的部件回归"
+  - path: "client/flutter_app/test/app/session_controller_offline_plan_test.dart"
+    change: "离线今日计划勾选后的统计刷新回归"
+  - path: "server/innocence-server/src/test/java/com/innocence/server/modules/plan/service/StudyPlanServiceTest.java"
+    change: "年度进度保存、越界拒绝及省略字段保留值回归"
+  - path: "docs/design/templates/soft-spectrum-dashboard-preview.html"
+    change: "背景与两色块动效速度和幅度同步"
+  - path: "docs/planning/Innocence-UI设计规划.md"
+    change: "存档用户补充要求与可复用提示词，明确今日完成率和统计周期语义"
+  - path: "docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md"
+    change: "登记年度任务独立进度、本月分页、无缝色条与验收口径"
+  - path: "docs/06-contract-inventory.md"
+    change: "登记年度进度字段及兼容规则"
+  - path: "docs/07-dataflow-and-module-map.md"
+    change: "同步任务级进度与离线统计刷新数据流"
+  - path: "docs/03-execution-plan.md"
+    change: "同步实施范围与最新验证基线"
+  - path: "progress/0000__AI-RESUME.md"
+    change: "更新当前状态、决策与下一步"
+  - path: "progress/INDEX.md"
+    change: "追加检查点 0054"
+evidence:
+  - command: "flutter analyze --no-pub"
+    result: "No issues found"
+  - command: "flutter test --no-pub"
+    result: "63 项全部通过"
+  - command: "mvn.cmd -q test（项目临时 MySQL 开发容器）"
+    result: "Surefire 汇总 43 项，0 failures、0 errors、0 skipped；仅本次启动的容器已停止并移除，数据卷保留"
+  - command: "flutter build windows --release --no-pub"
+    result: "成功生成 build/windows/x64/runner/Release/innocence_flutter.exe"
+  - command: "git diff --check"
+    result: "通过，无空白错误；Git 仅提示现有工作区的 LF/CRLF 转换警告"
+compatibility_and_security:
+  contract_impact: "年度任务新增 progressPercent 0–100 字段；旧数据默认 0，旧客户端更新时省略字段保留原值；本地数据库迁移 v4→v5"
+  tenant_impact: "服务端仍按当前会话租户限定年度任务；本机离线数据沿用 owner scope 隔离"
+  sensitive_data: "未复制或记录数据库口令、用户身份或真实业务数据"
+risks_or_blockers:
+  - "Windows Release 已编译并通过自动化回归，但动画观感、Large/Medium/Small 与 100%/125%/150% DPI 仍需人工视觉检查；真实在线 HTTP 回放尚未完成"
+next_actions:
+  - id: NEXT-ANNUAL-PROGRESS-VISUAL-QA
+    action: "在 Windows Release 人工检查本月分页、年度增量/直接完成、无缝跨度条与柔彩方块动效，覆盖多尺寸和 DPI"
+    inputs: ["client/flutter_app/build/windows/x64/runner/Release/innocence_flutter.exe", "docs/design/templates/soft-spectrum-dashboard-preview.html"]
+---

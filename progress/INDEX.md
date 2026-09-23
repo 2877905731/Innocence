@@ -370,3 +370,45 @@ checkpoints:
     status: complete
     path: progress/0051__20260917__P01__DONE__windows-v1.0.1-release-published.md
     title: "Windows 1.0.1 功能更新正式发布"
+  - sequence: "0052"
+    created_at: "2026-09-22T14:59:24+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0052__20260922__P01__DECISION__soft-spectrum-theme-replaces-minimalism.md
+    title: "柔彩编辑式看板正式替换主题二纯白极简"
+  - sequence: "0053"
+    created_at: "2026-09-23T09:35:11+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0053__20260923__P01__DECISION__task-archives-independent-annual-board.md
+    title: "任务存档直存直用与独立年度计划看板"
+  - sequence: "0054"
+    created_at: "2026-09-23T10:42:54+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0054__20260923__P01__DECISION__annual-progress-month-preview-and-seamless-charge.md
+    title: "今日完成率与本月超长任务分页、年度任务进度及无缝充能条"
+  - sequence: "0055"
+    created_at: "2026-09-23T11:11:14+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0055__20260923__P01__DECISION__vivid-annual-colors-and-sticky-month-ruler.md
+    title: "年度任务七色高辨识色条与吸顶月份刻度"
+  - sequence: "0056"
+    created_at: "2026-09-23T11:22:39+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0056__20260923__P01__DONE__annual-ruler-verification-and-windows-build.md
+    title: "年度月份吸顶与七色进度条完成自动化验证及 Windows 构建"
+  - sequence: "0057"
+    created_at: "2026-09-23T11:50:46+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0057__20260923__P01__DECISION__unified-annual-charge-and-bidirectional-progress.md
+    title: "年度脉冲跨度与任务进度合一并支持双向调整"

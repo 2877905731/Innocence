@@ -8,6 +8,8 @@ import com.innocence.server.modules.plan.domain.DailyPlanItem;
 import com.innocence.server.modules.plan.domain.WeeklyPlanTemplate;
 import com.innocence.server.modules.plan.domain.WeeklyPlanTemplateItem;
 import com.innocence.server.modules.plan.domain.AnnualPlanSegment;
+import com.innocence.server.modules.plan.domain.AnnualPlanSubtask;
+import com.innocence.server.modules.plan.dto.request.AnnualPlanSubtaskRequest;
 import com.innocence.server.modules.plan.dto.request.ApplyDayTemplateBatchRequest;
 import com.innocence.server.modules.plan.dto.request.SaveAnnualPlanSegmentRequest;
 import com.innocence.server.modules.plan.dto.request.ApplyWeeklyTemplateRequest;
@@ -24,6 +26,7 @@ import com.innocence.server.modules.plan.dto.response.MonthPlanOverviewResponse;
 import com.innocence.server.modules.plan.dto.response.AnnualMonthSummaryResponse;
 import com.innocence.server.modules.plan.dto.response.AnnualPlanOverviewResponse;
 import com.innocence.server.modules.plan.dto.response.AnnualPlanSegmentResponse;
+import com.innocence.server.modules.plan.dto.response.AnnualPlanSubtaskResponse;
 import com.innocence.server.modules.plan.mapper.StudyPlanMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -423,10 +426,37 @@ public class StudyPlanService {
         segment.setColorKey(normalizeColorKey(request.getColorKey()));
         segment.setSortOrder(request.getSortOrder() == null ? 0 : request.getSortOrder());
         segment.setNote(request.getNote() == null ? "" : request.getNote().trim());
+        segment.setProgressPercent(request.getProgressPercent() == null
+                ? (creating || segment.getProgressPercent() == null ? 0 : segment.getProgressPercent())
+                : request.getProgressPercent());
         if (creating) {
             studyPlanMapper.insertAnnualPlanSegment(segment);
         } else {
             studyPlanMapper.updateAnnualPlanSegment(segment);
+        }
+        studyPlanMapper.deleteAnnualPlanSubtasksBySegmentIdAndUserId(
+                segment.getId(),
+                userId
+        );
+        int subtaskOrder = 0;
+        for (AnnualPlanSubtaskRequest requestSubtask : request.getSubtasks()) {
+            AnnualPlanSubtask subtask = new AnnualPlanSubtask();
+            subtask.setSegmentId(segment.getId());
+            subtask.setUserId(userId);
+            subtask.setTitle(requestSubtask.getTitle().trim());
+            subtask.setDetail(
+                    requestSubtask.getDetail() == null
+                            ? ""
+                            : requestSubtask.getDetail().trim()
+            );
+            subtask.setStatus(Boolean.TRUE.equals(requestSubtask.getCompleted()) ? 1 : 0);
+            subtask.setSortOrder(
+                    requestSubtask.getSortOrder() == null
+                            ? subtaskOrder
+                            : requestSubtask.getSortOrder()
+            );
+            studyPlanMapper.insertAnnualPlanSubtask(subtask);
+            subtaskOrder++;
         }
         return getAnnualPlanOverview(userId, request.getYear());
     }
@@ -437,6 +467,7 @@ public class StudyPlanService {
         if (segment == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "Annual plan segment not found.");
         }
+        studyPlanMapper.deleteAnnualPlanSubtasksBySegmentIdAndUserId(segmentId, userId);
         studyPlanMapper.deleteAnnualPlanSegmentByIdAndUserId(segmentId, userId);
     }
 
@@ -496,6 +527,17 @@ public class StudyPlanService {
     }
 
     private AnnualPlanSegmentResponse buildAnnualSegmentResponse(AnnualPlanSegment segment) {
+        List<AnnualPlanSubtaskResponse> subtasks = studyPlanMapper
+                .findAnnualPlanSubtasksBySegmentId(segment.getId(), segment.getUserId())
+                .stream()
+                .map(subtask -> new AnnualPlanSubtaskResponse(
+                        String.valueOf(subtask.getId()),
+                        subtask.getTitle(),
+                        subtask.getDetail() == null ? "" : subtask.getDetail(),
+                        subtask.getStatus() != null && subtask.getStatus() == 1,
+                        subtask.getSortOrder() == null ? 0 : subtask.getSortOrder()
+                ))
+                .toList();
         return new AnnualPlanSegmentResponse(
                 String.valueOf(segment.getId()),
                 segment.getClientEntityId(),
@@ -506,17 +548,40 @@ public class StudyPlanService {
                 normalizeColorKey(segment.getColorKey()),
                 segment.getSortOrder() == null ? 0 : segment.getSortOrder(),
                 segment.getNote() == null ? "" : segment.getNote(),
+                segment.getProgressPercent() == null ? 0 : segment.getProgressPercent(),
                 segment.getRevision() == null ? 0 : segment.getRevision(),
-                segment.getUpdateTime() == null ? "" : segment.getUpdateTime().toString()
+                segment.getUpdateTime() == null ? "" : segment.getUpdateTime().toString(),
+                subtasks
         );
     }
 
     private void validateAnnualSegment(SaveAnnualPlanSegmentRequest request) {
-        if (request.getStartMonth() == null || request.getEndMonth() == null) {
-            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Start and end month are required.");
+        if (request == null || request.getYear() == null || request.getYear() < 1
+                || request.getYear() > 9999 || request.getTitle() == null
+                || request.getTitle().isBlank() || request.getTitle().length() > 96) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Annual task year and title are required.");
+        }
+        if (request.getStartMonth() == null || request.getEndMonth() == null
+                || request.getStartMonth() < 1 || request.getStartMonth() > 12
+                || request.getEndMonth() < 1 || request.getEndMonth() > 12) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Start and end month must be within 1...12.");
         }
         if (request.getStartMonth() > request.getEndMonth()) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "Start month must not be after end month.");
+        }
+        if (request.getProgressPercent() != null
+                && (request.getProgressPercent() < 0 || request.getProgressPercent() > 100)) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Annual task progress must be within 0...100.");
+        }
+        if (request.getSubtasks().size() > 100) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "An annual task supports at most 100 subtasks.");
+        }
+        for (AnnualPlanSubtaskRequest subtask : request.getSubtasks()) {
+            if (subtask == null || subtask.getTitle() == null
+                    || subtask.getTitle().isBlank() || subtask.getTitle().length() > 128
+                    || (subtask.getDetail() != null && subtask.getDetail().length() > 500)) {
+                throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Invalid annual subtask.");
+            }
         }
     }
 
@@ -525,7 +590,7 @@ public class StudyPlanService {
             return "accent";
         }
         String normalized = colorKey.trim().toLowerCase(Locale.ROOT);
-        if (!List.of("accent", "warm", "cool", "neutral").contains(normalized)) {
+        if (!List.of("accent", "warm", "cool", "neutral", "coral", "gold", "cyan").contains(normalized)) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "Unsupported annual segment color key.");
         }
         return normalized;

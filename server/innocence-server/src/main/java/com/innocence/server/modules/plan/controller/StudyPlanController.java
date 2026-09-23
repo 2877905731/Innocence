@@ -100,6 +100,12 @@ public class StudyPlanController {
         );
     }
 
+    @DeleteMapping("/day-templates/{templateId}")
+    public ApiResponse<Boolean> deleteDayTemplate(@PathVariable("templateId") Long templateId) {
+        studyPlanService.deleteWeeklyTemplate(currentUserId(), templateId);
+        return ApiResponse.success(Boolean.TRUE);
+    }
+
     @PostMapping("/annual-segments")
     public ApiResponse<AnnualPlanOverviewResponse> createAnnualSegment(
             @Valid @RequestBody SaveAnnualPlanSegmentRequest request

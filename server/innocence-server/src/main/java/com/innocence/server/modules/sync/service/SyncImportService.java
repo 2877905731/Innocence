@@ -230,6 +230,14 @@ public class SyncImportService {
             String strategy,
             SyncImportOperationRequest operation
     ) {
+        if ("delete".equals(operation.operationType())) {
+            Long serverId = boundLong(userId, localProfileId, operation);
+            if (serverId == null) {
+                return "";
+            }
+            studyPlanService.deleteWeeklyTemplate(userId, serverId);
+            return String.valueOf(serverId);
+        }
         SaveWeeklyTemplateRequest request = convert(operation.payload(), SaveWeeklyTemplateRequest.class);
         String existingBinding = findBinding(userId, localProfileId, operation);
         WeeklyPlanTemplate cloudTemplate = studyPlanMapper.findWeeklyTemplateByUserIdAndName(

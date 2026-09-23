@@ -25,10 +25,19 @@ class TodayPlanEditorDialog extends StatefulWidget {
     super.key,
     required this.initialPlan,
     this.onSave,
+    this.onSaveArchive,
+    this.onSaveAsArchive,
+    this.archiveMode = false,
+    this.lockPlanName = false,
   });
 
   final TodayPlan initialPlan;
   final Future<void> Function(TodayPlan plan)? onSave;
+  final Future<bool> Function(TodayPlan plan)? onSaveArchive;
+  final Future<bool> Function(String archiveName, TodayPlan plan)?
+      onSaveAsArchive;
+  final bool archiveMode;
+  final bool lockPlanName;
 
   @override
   State<TodayPlanEditorDialog> createState() => _TodayPlanEditorDialogState();
@@ -45,6 +54,8 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
   bool _dirty = false;
   bool _saving = false;
   DateTime? _savedAt;
+  String? _archiveSavedMessage;
+  String? _pendingArchiveName;
 
   bool get _isChinese =>
       Localizations.localeOf(context).languageCode.toLowerCase() == 'zh';
@@ -271,7 +282,7 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
     });
   }
 
-  Future<void> _save() async {
+  TodayPlan _draftPlan() {
     final scheduledItems = <TodayPlanItem>[];
     final sortedBlocks = List<_EditablePlanBlock>.from(_blocks)
       ..sort((left, right) => left.startSlot.compareTo(right.startSlot));
@@ -319,13 +330,144 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
       );
     }
 
-    final result = TodayPlan.empty(widget.initialPlan.planDate).copyWith(
-      planName: _planNameController.text.trim().isEmpty
-          ? 'Today'
-          : _planNameController.text.trim(),
+    final enteredPlanName = _planNameController.text.trim();
+    return TodayPlan.empty(widget.initialPlan.planDate).copyWith(
+      planName: enteredPlanName.isEmpty ? 'Today' : enteredPlanName,
       items: [...scheduledItems, ...flexibleItems],
     );
+  }
+
+  Future<void> _saveAsArchive() async {
+    final onSaveAsArchive = widget.onSaveAsArchive;
+    if (onSaveAsArchive == null) {
+      return;
+    }
+    final draft = _draftPlan();
+    if (!draft.hasItems) {
+      setState(() {
+        _validationMessage = _text(
+          '请先添加任务，再保存为任务存档。',
+          'Add a task before saving an archive.',
+        );
+      });
+      return;
+    }
+    var enteredArchiveName = _pendingArchiveName ??
+        (draft.planName == 'Today' ? '' : draft.planName);
+    final archiveName = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(_text('保存为任务存档', 'Save as task archive')),
+        content: TextFormField(
+          initialValue: enteredArchiveName,
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: _text('存档名称', 'Archive name'),
+            helperText: _text(
+              '仅保存存档；当天安排请另按“保存当天计划”。',
+              'This saves the archive. Save the daily plan separately.',
+            ),
+          ),
+          onChanged: (value) => enteredArchiveName = value,
+          onFieldSubmitted: (value) => Navigator.of(context).pop(value.trim()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(_text('取消', 'Cancel')),
+          ),
+          FilledButton(
+            onPressed: () =>
+                Navigator.of(context).pop(enteredArchiveName.trim()),
+            child: Text(_text('保存存档', 'Save archive')),
+          ),
+        ],
+      ),
+    );
+    if (archiveName == null || !mounted) {
+      return;
+    }
+    if (archiveName.isEmpty) {
+      setState(() {
+        _validationMessage = _text(
+          '请输入任务存档名称。',
+          'Enter a task archive name.',
+        );
+      });
+      return;
+    }
+    _pendingArchiveName = archiveName;
+    setState(() => _saving = true);
+    try {
+      final saved = await onSaveAsArchive(archiveName, draft);
+      if (mounted) {
+        setState(() {
+          _archiveSavedMessage = saved
+              ? _text(
+                  '当前安排已保存为任务存档。',
+                  'Current plan saved as a task archive.',
+                )
+              : null;
+          _validationMessage = saved
+              ? null
+              : _text('存档未保存，请重试。', 'Archive not saved. Please retry.');
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _saving = false);
+      }
+    }
+  }
+
+  Future<void> _save() async {
+    final enteredPlanName = _planNameController.text.trim();
+    if (widget.archiveMode && enteredPlanName.isEmpty) {
+      setState(() {
+        _validationMessage = _text(
+          '请输入任务存档名称。',
+          'Enter a task archive name.',
+        );
+      });
+      return;
+    }
+    final result = _draftPlan();
+    if (widget.archiveMode && !result.hasItems) {
+      setState(() {
+        _validationMessage = _text(
+          '请至少添加一个任务后再保存存档。',
+          'Add at least one task before saving the archive.',
+        );
+      });
+      return;
+    }
+
     final onSave = widget.onSave;
+    final onSaveArchive = widget.onSaveArchive;
+    if (widget.archiveMode && onSaveArchive != null) {
+      setState(() => _saving = true);
+      try {
+        final saved = await onSaveArchive(result);
+        if (!mounted) {
+          return;
+        }
+        if (saved) {
+          Navigator.of(context).pop();
+        } else {
+          setState(() {
+            _validationMessage = _text(
+              '存档未保存，请重试。',
+              'Archive not saved. Please retry.',
+            );
+          });
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _saving = false);
+        }
+      }
+      return;
+    }
     if (onSave == null) {
       Navigator.of(context).pop(result);
       return;
@@ -333,6 +475,10 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
     setState(() => _saving = true);
     await onSave(result);
     if (!mounted) {
+      return;
+    }
+    if (widget.archiveMode) {
+      Navigator.of(context).pop();
       return;
     }
     setState(() {
@@ -398,25 +544,59 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _text('今日计划时间安排', 'Today plan scheduler'),
+                    widget.archiveMode
+                        ? _text('任务存档编辑器', 'Task archive editor')
+                        : _text('今日计划时间安排', 'Today plan scheduler'),
                     style: textTheme.titleLarge,
                   ),
                   const SizedBox(height: 6),
                   Text(
                     _text(
-                      '先选择开始时间，再选择结束时间；每一格代表 30 分钟。',
-                      'Choose a start time, then an end time. Each bar represents 30 minutes.',
+                      widget.archiveMode
+                          ? '建立可重复套用的任务与时间结构；每一格代表 30 分钟。'
+                          : '先选择开始时间，再选择结束时间；每一格代表 30 分钟。',
+                      widget.archiveMode
+                          ? 'Build a reusable task and time structure. Each bar represents 30 minutes.'
+                          : 'Choose a start time, then an end time. Each bar represents 30 minutes.',
                     ),
                     style: textTheme.bodyMedium,
                   ),
+                  if (!widget.archiveMode &&
+                      widget.onSaveAsArchive != null) ...[
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        key: const ValueKey('today-plan-save-as-archive'),
+                        onPressed: _saving ? null : _saveAsArchive,
+                        icon: const Icon(Icons.inventory_2_outlined),
+                        label: Text(_text(
+                          '保存当前安排为任务存档',
+                          'Save current plan as archive',
+                        )),
+                      ),
+                    ),
+                    if (_archiveSavedMessage != null)
+                      Text(
+                        _archiveSavedMessage!,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                  ],
                   const SizedBox(height: 14),
                   TextField(
                     controller: _planNameController,
+                    enabled: !widget.lockPlanName,
                     decoration: InputDecoration(
-                      labelText: _text('计划名称', 'Plan name'),
+                      labelText: widget.archiveMode
+                          ? _text('存档名称', 'Archive name')
+                          : _text('计划名称', 'Plan name'),
                       hintText: _text(
-                        '留空则使用“今日计划”',
-                        'Leave blank to use Today',
+                        widget.archiveMode ? '例如：工作日学习安排' : '留空则使用“今日计划”',
+                        widget.archiveMode
+                            ? 'For example: Weekday study routine'
+                            : 'Leave blank to use Today',
                       ),
                     ),
                   ),
@@ -574,7 +754,11 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
                                 child:
                                     CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : Text(_text('保存当天计划', 'Save daily plan')),
+                            : Text(
+                                widget.archiveMode
+                                    ? _text('保存任务存档', 'Save task archive')
+                                    : _text('保存当天计划', 'Save daily plan'),
+                              ),
                       ),
                     ],
                   ),

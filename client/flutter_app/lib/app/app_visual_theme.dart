@@ -40,7 +40,7 @@ extension AppVisualThemeX on AppVisualTheme {
       };
 
   String label({required bool isChinese}) => switch (this) {
-        AppVisualTheme.minimalism => isChinese ? '纯白' : 'Pure white',
+        AppVisualTheme.minimalism => isChinese ? '柔彩' : 'Soft spectrum',
         AppVisualTheme.wabiSabi => isChinese ? '侘寂' : 'Wabi-sabi',
         AppVisualTheme.midCentury => isChinese ? '中世纪' : 'Mid-century',
         AppVisualTheme.glass => isChinese ? '玻璃态' : 'Glass',
@@ -110,16 +110,16 @@ class AppVisualTokens {
 
   static AppVisualTokens of(AppVisualTheme theme) => switch (theme) {
         AppVisualTheme.minimalism => const AppVisualTokens(
-            canvas: Color(0xFFFFFFFF),
-            panel: Color(0xFFFFFFFF),
-            softPanel: Color(0xFFF4F4F2),
-            ink: Color(0xFF111111),
-            muted: Color(0xFF696966),
-            line: Color(0xFFE3E3DF),
-            accent: Color(0xFF3157D5),
+            canvas: Color(0xFFF4F4F7),
+            panel: Color(0xFFFCFCFE),
+            softPanel: Color(0xFFEEEAF9),
+            ink: Color(0xFF17181B),
+            muted: Color(0xFF686A72),
+            line: Color(0xFFDADAE2),
+            accent: Color(0xFF8E7DFF),
             onAccent: Colors.white,
-            artOne: Color(0xFF111111),
-            artTwo: Color(0xFFDCE4FF),
+            artOne: Color(0xFFFF9CA9),
+            artTwo: Color(0xFFE7E2FF),
             isDark: false,
             isGlass: false,
           ),
@@ -168,6 +168,13 @@ class AppVisualTokens {
       };
 
   ThemeData toThemeData(AppVisualTheme visualTheme) {
+    final softSpectrum = visualTheme == AppVisualTheme.minimalism;
+    final componentRadius = switch (visualTheme) {
+      AppVisualTheme.minimalism => 14.0,
+      AppVisualTheme.wabiSabi => 4.0,
+      AppVisualTheme.midCentury => 12.0,
+      AppVisualTheme.glass => 14.0,
+    };
     final scheme = ColorScheme.fromSeed(
       seedColor: accent,
       brightness: isDark ? Brightness.dark : Brightness.light,
@@ -184,7 +191,9 @@ class AppVisualTokens {
       outlineVariant: line.withValues(alpha: 0.62),
     );
     final inputBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: BorderRadius.circular(
+        softSpectrum ? 16 : componentRadius,
+      ),
       borderSide: BorderSide(color: line),
     );
 
@@ -210,7 +219,18 @@ class AppVisualTokens {
                 ),
               ),
             )
-          : null,
+          : softSpectrum
+              ? DialogThemeData(
+                  backgroundColor: const Color(0xFFFCFCFE),
+                  surfaceTintColor: Colors.transparent,
+                  elevation: 20,
+                  shadowColor: const Color(0x26252635),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    side: const BorderSide(color: Color(0xBFFFFFFF)),
+                  ),
+                )
+              : null,
       textTheme: TextTheme(
         displayLarge: TextStyle(
           color: ink,
@@ -265,15 +285,46 @@ class AppVisualTokens {
           elevation: 0,
           backgroundColor: accent,
           foregroundColor: onAccent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(componentRadius),
+          ),
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
         ),
       ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          minimumSize: const Size(0, 48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(componentRadius),
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(0, 48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(componentRadius),
+          ),
+        ),
+      ),
+      cardTheme: softSpectrum
+          ? CardThemeData(
+              elevation: 0,
+              color: panel,
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(color: line.withValues(alpha: 0.72)),
+              ),
+            )
+          : const CardThemeData(),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: ink,
         contentTextStyle: TextStyle(color: canvas),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(componentRadius),
+        ),
       ),
       tooltipTheme: isGlass
           ? TooltipThemeData(
@@ -295,7 +346,26 @@ class AppVisualTokens {
                 fontWeight: FontWeight.w600,
               ),
             )
-          : null,
+          : softSpectrum
+              ? TooltipThemeData(
+                  decoration: BoxDecoration(
+                    color: const Color(0xF217181B),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x26252635),
+                        blurRadius: 18,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  textStyle: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                )
+              : null,
     );
   }
 }

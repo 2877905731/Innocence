@@ -6,6 +6,188 @@ import 'package:innocence_flutter/features/plans/domain/models/today_plan.dart';
 import 'package:innocence_flutter/features/plans/presentation/widgets/today_plan_editor_dialog.dart';
 
 void main() {
+  testWidgets('a blank task archive can be created with a flexible task', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    TodayPlan? savedArchive;
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('zh', 'CN'),
+        supportedLocales: const [Locale('zh', 'CN')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: ElevatedButton(
+              onPressed: () => showDialog<void>(
+                context: context,
+                builder: (context) => TodayPlanEditorDialog(
+                  initialPlan: TodayPlan.empty('2026-09-23'),
+                  archiveMode: true,
+                  onSaveArchive: (plan) async {
+                    savedArchive = plan;
+                    return true;
+                  },
+                ),
+              ),
+              child: const Text('新建存档'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('新建存档'));
+    await tester.pumpAndSettle();
+    expect(find.text('任务存档编辑器'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).first, '考试复习');
+    await tester.ensureVisible(find.text('添加灵活任务'));
+    await tester.tap(find.text('添加灵活任务'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, '任务名称'),
+      '复习第一章',
+    );
+    await tester.tap(find.byKey(const ValueKey('today-plan-save')));
+    await tester.pumpAndSettle();
+
+    expect(savedArchive?.planName, '考试复习');
+    expect(savedArchive?.items.single.title, '复习第一章');
+    expect(find.text('任务存档编辑器'), findsNothing);
+  });
+
+  testWidgets('the current unsaved arrangement can be archived in the editor', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    TodayPlan? dailyPlan;
+    TodayPlan? archivedPlan;
+    String? archivedName;
+    var archiveWillSave = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('zh', 'CN'),
+        supportedLocales: const [Locale('zh', 'CN')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: ElevatedButton(
+              onPressed: () => showDialog<void>(
+                context: context,
+                builder: (context) => TodayPlanEditorDialog(
+                  initialPlan: TodayPlan.empty('2026-09-23'),
+                  onSave: (plan) async => dailyPlan = plan,
+                  onSaveAsArchive: (name, plan) async {
+                    archivedName = name;
+                    archivedPlan = plan;
+                    return archiveWillSave;
+                  },
+                ),
+              ),
+              child: const Text('编辑安排'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('编辑安排'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('today-plan-slot-4')));
+    await tester.tap(find.byKey(const ValueKey('today-plan-slot-5')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('today-plan-save-as-archive')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(TextField),
+      ),
+      '晨间复习',
+    );
+    await tester.tap(find.text('保存存档'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('存档未保存，请重试。'), findsOneWidget);
+    expect(find.text('当前安排已保存为任务存档。'), findsNothing);
+    archiveWillSave = true;
+    await tester.tap(find.byKey(const ValueKey('today-plan-save-as-archive')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('保存存档'));
+    await tester.pumpAndSettle();
+
+    expect(archivedName, '晨间复习');
+    expect(archivedPlan?.items, hasLength(1));
+    expect(dailyPlan, isNull);
+    expect(find.text('今日计划时间安排'), findsOneWidget);
+    expect(find.text('当前安排已保存为任务存档。'), findsOneWidget);
+  });
+
+  testWidgets('failed archive save keeps the archive editor open', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('zh', 'CN'),
+        supportedLocales: const [Locale('zh', 'CN')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: ElevatedButton(
+              onPressed: () => showDialog<void>(
+                context: context,
+                builder: (context) => TodayPlanEditorDialog(
+                  initialPlan: TodayPlan.empty('2026-09-23'),
+                  archiveMode: true,
+                  onSaveArchive: (_) async => false,
+                ),
+              ),
+              child: const Text('新建存档'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('新建存档'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, '失败重试');
+    await tester.ensureVisible(find.text('添加灵活任务'));
+    await tester.tap(find.text('添加灵活任务'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, '任务名称'), '复习');
+    await tester.tap(find.byKey(const ValueKey('today-plan-save')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('任务存档编辑器'), findsOneWidget);
+    expect(find.text('存档未保存，请重试。'), findsOneWidget);
+  });
+
   testWidgets(
     'Chinese 48-slot timeline saves a selected block without extra editing',
     (tester) async {

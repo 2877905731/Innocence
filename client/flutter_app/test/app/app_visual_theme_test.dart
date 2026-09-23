@@ -4,7 +4,7 @@ import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  test('visual theme defaults to pure white minimalism', () async {
+  test('visual theme defaults to the soft-spectrum editorial theme', () async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
 
@@ -13,7 +13,19 @@ void main() {
     expect(controller.currentTheme, AppVisualTheme.minimalism);
     expect(
       AppVisualTokens.of(controller.currentTheme).canvas,
-      const Color(0xFFFFFFFF),
+      const Color(0xFFF4F4F7),
+    );
+    expect(
+      AppVisualTokens.of(controller.currentTheme).accent,
+      const Color(0xFF8E7DFF),
+    );
+    expect(
+      controller.currentTheme.label(isChinese: true),
+      '柔彩',
+    );
+    expect(
+      controller.currentTheme.label(isChinese: false),
+      'Soft spectrum',
     );
   });
 

@@ -255,7 +255,7 @@ class _ThemeBrandTitle extends StatelessWidget {
       width: width,
       height: height,
       child: switch (theme) {
-        AppVisualTheme.minimalism => _minimalistMark(),
+        AppVisualTheme.minimalism => _softSpectrumMark(),
         AppVisualTheme.wabiSabi => _wabiSabiMark(),
         AppVisualTheme.midCentury => _midCenturyMark(),
         AppVisualTheme.glass => _glassMark(),
@@ -263,36 +263,89 @@ class _ThemeBrandTitle extends StatelessWidget {
     );
   }
 
-  Widget _minimalistMark() {
-    final size = compact ? 52.0 : 76.0;
+  Widget _softSpectrumMark() {
+    final size = compact ? 48.0 : 68.0;
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        Text(
-          compact ? 'INNO\nCENCE' : 'INNO\n—CENCE',
-          style: TextStyle(
-            color: tokens.ink,
-            fontSize: size,
-            height: 0.82,
-            letterSpacing: compact ? -2.8 : -5.2,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
         Positioned(
-          left: compact ? 120 : 176,
-          top: compact ? 8 : 11,
-          child: Container(
-            width: compact ? 9 : 11,
-            height: compact ? 9 : 11,
-            color: tokens.accent,
-          ),
-        ),
-        Positioned(
-          left: compact ? 210 : 271,
-          top: compact ? 77 : 112,
+          left: compact ? 78 : 104,
+          top: compact ? 1 : 2,
           child: Transform.rotate(
-            angle: -0.12,
-            child: Container(width: 52, height: 3, color: tokens.accent),
+            angle: -0.055,
+            child: Container(
+              width: compact ? 142 : 188,
+              height: compact ? 72 : 98,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(compact ? 20 : 28),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    tokens.accent.withValues(alpha: 0.48),
+                    tokens.artTwo.withValues(alpha: 0.24),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          left: compact ? 156 : 204,
+          top: compact ? 54 : 73,
+          child: Transform.rotate(
+            angle: 0.075,
+            child: Container(
+              width: compact ? 126 : 164,
+              height: compact ? 54 : 72,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(compact ? 18 : 25),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    tokens.artOne.withValues(alpha: 0.58),
+                    tokens.artOne.withValues(alpha: 0.12),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 0,
+          top: compact ? 6 : 8,
+          child: RichText(
+            text: TextSpan(
+              style: TextStyle(
+                color: tokens.ink,
+                fontFamily: 'Segoe UI Variable Display',
+                fontSize: size,
+                height: 0.84,
+                letterSpacing: compact ? -3.0 : -4.6,
+                fontWeight: FontWeight.w800,
+              ),
+              children: [
+                const TextSpan(text: 'INNO\n'),
+                TextSpan(
+                  text: 'CENCE',
+                  style: TextStyle(color: tokens.accent),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          left: compact ? 3 : 5,
+          bottom: compact ? -1 : 1,
+          child: Text(
+            'SOFT / SPECTRUM',
+            style: TextStyle(
+              color: tokens.muted,
+              fontSize: compact ? 8 : 9,
+              fontWeight: FontWeight.w800,
+              letterSpacing: compact ? 1.6 : 2.2,
+            ),
           ),
         ),
       ],
@@ -693,27 +746,50 @@ class _AuthArtworkPainter extends CustomPainter {
     final artPaint = Paint()..style = PaintingStyle.fill;
     switch (theme) {
       case AppVisualTheme.minimalism:
-        artPaint.color = tokens.artTwo;
-        canvas.drawCircle(
-            Offset(size.width * 0.12, size.height * 0.84), 88, artPaint);
-        artPaint
-          ..color = tokens.artOne
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2;
-        canvas.drawArc(
-          Rect.fromCircle(
-              center: Offset(size.width * 0.18, size.height * 0.8),
-              radius: 124),
-          -1.3,
-          2.2,
-          false,
+        final lavenderRect = Rect.fromLTWH(
+          size.width * 0.015,
+          size.height * 0.67,
+          size.width * 0.28,
+          size.height * 0.24,
+        );
+        artPaint.shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            tokens.accent.withValues(alpha: 0.48),
+            tokens.artTwo.withValues(alpha: 0.12),
+          ],
+        ).createShader(lavenderRect);
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(lavenderRect, const Radius.circular(34)),
+          artPaint,
+        );
+        final coralRect = Rect.fromLTWH(
+          size.width * 0.16,
+          size.height * 0.77,
+          size.width * 0.26,
+          size.height * 0.18,
+        );
+        artPaint.shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            tokens.artOne.withValues(alpha: 0.58),
+            tokens.artOne.withValues(alpha: 0.08),
+          ],
+        ).createShader(coralRect);
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(coralRect, const Radius.circular(30)),
           artPaint,
         );
         artPaint
-          ..style = PaintingStyle.fill
-          ..color = tokens.accent;
-        canvas.drawRect(
-          Rect.fromLTWH(size.width * 0.055, size.height * 0.735, 10, 10),
+          ..shader = null
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..color = tokens.ink.withValues(alpha: 0.26);
+        canvas.drawCircle(
+          Offset(size.width * 0.23, size.height * 0.78),
+          58,
           artPaint,
         );
       case AppVisualTheme.wabiSabi:

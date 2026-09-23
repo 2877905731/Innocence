@@ -168,7 +168,7 @@ class SessionController extends ChangeNotifier {
   }
 
   String _weeklyTemplateSavedMessage() {
-    return _message('周模板已保存。', 'Weekly template saved.');
+    return _message('任务存档已保存。', 'Task archive saved.');
   }
 
   Future<void> initialize() async {
@@ -623,6 +623,10 @@ class SessionController extends ChangeNotifier {
           ownerScope,
           DateTime.parse(savedPlan.planDate).year,
         );
+        _statsOverview = await _offlineStore.loadStatsOverview(
+          ownerScope,
+          days: _statsRangeDays,
+        );
         _bannerMessage = _message(
           '计划已保存在本机，登录并确认后可同步。',
           'Plan saved on this device. Sign in and confirm to sync it.',
@@ -695,7 +699,7 @@ class SessionController extends ChangeNotifier {
     );
   }
 
-  Future<void> savePlanAsWeeklyTemplate(
+  Future<bool> savePlanAsWeeklyTemplate(
     String templateName,
     TodayPlan sourcePlan, {
     String successMessage = '',
@@ -704,36 +708,39 @@ class SessionController extends ChangeNotifier {
         successMessage.isEmpty ? _weeklyTemplateSavedMessage() : successMessage;
     if (!sourcePlan.hasItems) {
       _bannerMessage = _message(
-        '请先为这一天创建任务，再保存为日计划模板。',
-        'Create tasks for that day before saving a day template.',
+        '请先添加任务，再保存为任务存档。',
+        'Add a task before saving the task archive.',
       );
       notifyListeners();
-      return;
+      return false;
     }
 
     final ownerScope = localOwnerScope;
     if (isOffline && ownerScope != null) {
+      var saved = false;
       await _runBusyAction(() async {
         _weeklyTemplates = await _offlineStore.saveDayTemplate(
           ownerScope,
           templateName: templateName,
           sourcePlan: sourcePlan,
         );
+        saved = true;
         _bannerMessage = _message(
-          '日计划模板已保存在本机。',
-          'Day template saved on this device.',
+          '任务存档已保存在本机。',
+          'Task archive saved on this device.',
         );
       },
-          fallbackMessage:
-              _message('保存本地日模板失败。', 'Failed to save the local day template.'));
-      return;
+          fallbackMessage: _message(
+              '保存本机任务存档失败。', 'Failed to save the local task archive.'));
+      return saved;
     }
 
     final currentSession = _session;
     if (currentSession == null) {
-      return;
+      return false;
     }
 
+    var saved = false;
     await _runBusyAction(() async {
       final templates = await _studyPlanApi.saveDayTemplate(
         currentSession,
@@ -741,28 +748,46 @@ class SessionController extends ChangeNotifier {
         sourcePlan: sourcePlan,
       );
       _weeklyTemplates = templates;
+      saved = true;
       _bannerMessage = resolvedSuccessMessage;
     },
         fallbackMessage:
-            _message('保存日模板失败。', 'Failed to save the day template.'));
+            _message('保存任务存档失败。', 'Failed to save the task archive.'));
+    return saved;
   }
 
   Future<void> deleteWeeklyTemplate(int templateId) async {
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        _weeklyTemplates =
+            await _offlineStore.deleteDayTemplate(ownerScope, templateId);
+        _bannerMessage = _message(
+          '任务存档已从本机删除。',
+          'Task archive deleted from this device.',
+        );
+      },
+          fallbackMessage: _message(
+            '删除本地任务存档失败。',
+            'Failed to delete the local task archive.',
+          ));
+      return;
+    }
     final currentSession = _session;
     if (currentSession == null) {
       return;
     }
 
     await _runBusyAction(() async {
-      final templates = await _studyPlanApi.deleteWeeklyTemplate(
+      final templates = await _studyPlanApi.deleteDayTemplate(
         currentSession,
         templateId: templateId,
       );
       _weeklyTemplates = templates;
-      _bannerMessage = _message('周模板已删除。', 'Weekly template deleted.');
+      _bannerMessage = _message('任务存档已删除。', 'Task archive deleted.');
     },
         fallbackMessage:
-            _message('删除周模板失败。', 'Failed to delete the weekly template.'));
+            _message('删除任务存档失败。', 'Failed to delete the task archive.'));
   }
 
   Future<void> copyPlanToDate(
@@ -921,6 +946,10 @@ class SessionController extends ChangeNotifier {
           ownerScope,
           DateTime.parse(planDate).year,
         );
+        _statsOverview = await _offlineStore.loadStatsOverview(
+          ownerScope,
+          days: _statsRangeDays,
+        );
         _bannerMessage = resolvedSuccessMessage;
       },
           fallbackMessage: _message(
@@ -956,6 +985,100 @@ class SessionController extends ChangeNotifier {
     },
         fallbackMessage:
             _message('应用日模板失败。', 'Failed to apply the day template.'));
+  }
+
+  Future<void> applyDayTemplateToDates(
+    int templateId,
+    List<String> planDates, {
+    required PlanApplyStrategy strategy,
+  }) async {
+    final uniqueDates = planDates
+        .where((date) => DateTime.tryParse(date.trim()) != null)
+        .map((date) => date.trim())
+        .toSet()
+        .toList()
+      ..sort();
+    if (uniqueDates.isEmpty) {
+      _bannerMessage = _message(
+        '请至少选择一个有效日期。',
+        'Choose at least one valid date.',
+      );
+      notifyListeners();
+      return;
+    }
+
+    final ownerScope = localOwnerScope;
+    if (isOffline && ownerScope != null) {
+      await _runBusyAction(() async {
+        for (final planDate in uniqueDates) {
+          final appliedPlan = await _offlineStore.applyDayTemplate(
+            ownerScope,
+            templateId: templateId,
+            planDate: planDate,
+            strategy: strategy,
+          );
+          if (appliedPlan.planDate == _todayPlan.planDate) {
+            _todayPlan = appliedPlan;
+          }
+        }
+        _monthPlanOverview = await _offlineStore.loadMonthOverview(
+          ownerScope,
+          _monthPlanOverview.month,
+        );
+        _annualPlanOverview = await _offlineStore.loadAnnualOverview(
+          ownerScope,
+          _annualPlanOverview.year,
+        );
+        _statsOverview = await _offlineStore.loadStatsOverview(
+          ownerScope,
+          days: _statsRangeDays,
+        );
+        _bannerMessage = _message(
+          '任务存档已套用到 ${uniqueDates.length} 天。',
+          'Task archive applied to ${uniqueDates.length} days.',
+        );
+      },
+          fallbackMessage: _message(
+            '批量套用本地任务存档失败。',
+            'Failed to apply the local task archive.',
+          ));
+      return;
+    }
+
+    final currentSession = _session;
+    if (currentSession == null) {
+      return;
+    }
+    await _runBusyAction(() async {
+      final plans = await _studyPlanApi.applyDayTemplateBatch(
+        currentSession,
+        templateId: templateId,
+        planDates: uniqueDates,
+        strategy: strategy,
+      );
+      for (final plan in plans) {
+        if (plan.planDate == _todayPlan.planDate) {
+          _todayPlan = plan;
+        }
+      }
+      await _refreshAfterPlanMutation(currentSession, reloadTodayPlan: false);
+      _monthPlanOverview = await _studyPlanApi.getMonthPlanOverview(
+        currentSession,
+        month: _monthPlanOverview.month,
+      );
+      _annualPlanOverview = await _studyPlanApi.getAnnualPlanOverview(
+        currentSession,
+        year: _annualPlanOverview.year,
+      );
+      _bannerMessage = _message(
+        '任务存档已套用到 ${uniqueDates.length} 天。',
+        'Task archive applied to ${uniqueDates.length} days.',
+      );
+    },
+        fallbackMessage: _message(
+          '批量套用任务存档失败。',
+          'Failed to apply the task archive.',
+        ));
   }
 
   Future<void> applyWeeklyTemplateToDates(
@@ -3352,12 +3475,12 @@ class SessionController extends ChangeNotifier {
         _annualPlanOverview =
             await _offlineStore.saveAnnualSegment(ownerScope, segment);
         _bannerMessage = _message(
-          '年度区间已保存在本机。',
-          'Annual segment saved on this device.',
+          '年度任务已保存在本机。',
+          'Annual task saved on this device.',
         );
       },
-          fallbackMessage: _message(
-              '保存本地年度区间失败。', 'Failed to save the local annual segment.'));
+          fallbackMessage:
+              _message('保存本机年度任务失败。', 'Failed to save the local annual task.'));
       return;
     }
     final currentSession = _session;
@@ -3367,10 +3490,10 @@ class SessionController extends ChangeNotifier {
     await _runBusyAction(() async {
       _annualPlanOverview =
           await _studyPlanApi.saveAnnualSegment(currentSession, segment);
-      _bannerMessage = _message('年度区间已保存。', 'Annual segment saved.');
+      _bannerMessage = _message('年度任务已保存。', 'Annual task saved.');
     },
         fallbackMessage:
-            _message('保存年度区间失败。', 'Failed to save the annual segment.'));
+            _message('保存年度任务失败。', 'Failed to save the annual task.'));
   }
 
   Future<void> deleteAnnualSegment(AnnualPlanSegment segment) async {
@@ -3380,12 +3503,12 @@ class SessionController extends ChangeNotifier {
         _annualPlanOverview =
             await _offlineStore.deleteAnnualSegment(ownerScope, segment);
         _bannerMessage = _message(
-          '年度区间已从本机删除。',
-          'Annual segment deleted from this device.',
+          '年度任务已从本机删除。',
+          'Annual task deleted from this device.',
         );
       },
           fallbackMessage: _message(
-              '删除本地年度区间失败。', 'Failed to delete the local annual segment.'));
+              '删除本机年度任务失败。', 'Failed to delete the local annual task.'));
       return;
     }
     final currentSession = _session;
@@ -3395,10 +3518,10 @@ class SessionController extends ChangeNotifier {
     await _runBusyAction(() async {
       _annualPlanOverview =
           await _studyPlanApi.deleteAnnualSegment(currentSession, segment);
-      _bannerMessage = _message('年度区间已删除。', 'Annual segment deleted.');
+      _bannerMessage = _message('年度任务已删除。', 'Annual task deleted.');
     },
         fallbackMessage:
-            _message('删除年度区间失败。', 'Failed to delete the annual segment.'));
+            _message('删除年度任务失败。', 'Failed to delete the annual task.'));
   }
 
   Future<void> loadCurrentWeek() async {

@@ -240,6 +240,8 @@ class _InnocenceAppState extends State<InnocenceApp> {
                 onNextYear: widget.sessionController.loadNextYear,
                 onApplyDayTemplateToDate:
                     widget.sessionController.applyDayTemplateToDate,
+                onApplyDayTemplateToDates:
+                    widget.sessionController.applyDayTemplateToDates,
                 onSaveAnnualSegment: widget.sessionController.saveAnnualSegment,
                 onDeleteAnnualSegment:
                     widget.sessionController.deleteAnnualSegment,

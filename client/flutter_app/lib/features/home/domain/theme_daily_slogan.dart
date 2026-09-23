@@ -43,8 +43,9 @@ class ThemeDailySlogans {
 
   static const _wabiSubtitleZh = '给重要的事，留一块安静的位置。';
   static const _wabiSubtitleEn = 'Leave quiet room for what matters.';
-  static const _minimalSubtitleZh = '移除噪音，只保留下一步。';
-  static const _minimalSubtitleEn = 'Remove noise. Keep the next action.';
+  static const _softSpectrumSubtitleZh = '让计划、专注与进度，在柔和色彩里清晰推进。';
+  static const _softSpectrumSubtitleEn =
+      'Let plans, focus, and progress move clearly through soft color.';
   static const _midCenturySubtitleZh = '让计划、专注和进度组成今天的好设计。';
   static const _midCenturySubtitleEn =
       'Let plans, focus and progress shape the day.';
@@ -100,46 +101,46 @@ class ThemeDailySlogans {
     AppVisualTheme.minimalism: [
       ThemeDailySlogan(
           dayIndex: 1,
-          titleZh: '今天，只做重要的。',
-          titleEn: 'Today, only what matters.',
-          subtitleZh: _minimalSubtitleZh,
-          subtitleEn: _minimalSubtitleEn),
+          titleZh: '把今天，完成得漂亮。',
+          titleEn: 'Make today beautifully complete.',
+          subtitleZh: _softSpectrumSubtitleZh,
+          subtitleEn: _softSpectrumSubtitleEn),
       ThemeDailySlogan(
           dayIndex: 2,
-          titleZh: '少一点。完成多一点。',
-          titleEn: 'Less noise. More done.',
-          subtitleZh: _minimalSubtitleZh,
-          subtitleEn: _minimalSubtitleEn),
+          titleZh: '让进度，在细节里发光。',
+          titleEn: 'Let progress glow in the details.',
+          subtitleZh: _softSpectrumSubtitleZh,
+          subtitleEn: _softSpectrumSubtitleEn),
       ThemeDailySlogan(
           dayIndex: 3,
-          titleZh: '清晰，然后开始。',
-          titleEn: 'Get clear. Then begin.',
-          subtitleZh: _minimalSubtitleZh,
-          subtitleEn: _minimalSubtitleEn),
+          titleZh: '清晰计划，也保留一点颜色。',
+          titleEn: 'Plan clearly. Leave room for color.',
+          subtitleZh: _softSpectrumSubtitleZh,
+          subtitleEn: _softSpectrumSubtitleEn),
       ThemeDailySlogan(
           dayIndex: 4,
-          titleZh: '一件事，一个结果。',
-          titleEn: 'One thing. One result.',
-          subtitleZh: _minimalSubtitleZh,
-          subtitleEn: _minimalSubtitleEn),
+          titleZh: '向前一点，就是今日亮点。',
+          titleEn: 'One step forward brightens the day.',
+          subtitleZh: _softSpectrumSubtitleZh,
+          subtitleEn: _softSpectrumSubtitleEn),
       ThemeDailySlogan(
           dayIndex: 5,
-          titleZh: '留白，也是安排。',
-          titleEn: 'Space is part of the plan.',
-          subtitleZh: _minimalSubtitleZh,
-          subtitleEn: _minimalSubtitleEn),
+          titleZh: '把重要的事，排成好看的节奏。',
+          titleEn: 'Give what matters a beautiful rhythm.',
+          subtitleZh: _softSpectrumSubtitleZh,
+          subtitleEn: _softSpectrumSubtitleEn),
       ThemeDailySlogan(
           dayIndex: 6,
-          titleZh: '把复杂留在门外。',
-          titleEn: 'Leave complexity outside.',
-          subtitleZh: _minimalSubtitleZh,
-          subtitleEn: _minimalSubtitleEn),
+          titleZh: '今天的积累，正在变得可见。',
+          titleEn: 'Today’s progress is becoming visible.',
+          subtitleZh: _softSpectrumSubtitleZh,
+          subtitleEn: _softSpectrumSubtitleEn),
       ThemeDailySlogan(
           dayIndex: 7,
-          titleZh: '现在，进入正题。',
-          titleEn: 'Now, get to the point.',
-          subtitleZh: _minimalSubtitleZh,
-          subtitleEn: _minimalSubtitleEn),
+          titleZh: '轻一点开始，稳一点完成。',
+          titleEn: 'Start lightly. Finish steadily.',
+          subtitleZh: _softSpectrumSubtitleZh,
+          subtitleEn: _softSpectrumSubtitleEn),
     ],
     AppVisualTheme.midCentury: [
       ThemeDailySlogan(

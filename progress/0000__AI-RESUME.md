@@ -2,13 +2,13 @@
 schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
-updated_at: "2026-09-17"
-latest_checkpoint: "0051"
+updated_at: "2026-09-23"
+latest_checkpoint: "0057"
 current_phase: P01
 current_gate: G01
-state: windows_v1_0_1_official_release_published
-next_sequence: "0052"
-current_goal: "Windows 1.0.1+2 已完成构建、安装冒烟、哈希校验并发布 GitHub 正式 Release；下一步补齐真实登录会话回放、跨 DPI 矩阵和 Authenticode 签名"
+state: annual_charge_progress_unified_build_verified_visual_qa_pending
+next_sequence: "0058"
+current_goal: "年度任务唯一充能框已合并月份跨度和任务进度，空框起步、随进度平滑增减，+10/−10、+5/−5、+1/−1 和直接完成已接入现有持久化；年度定向测试、Flutter 全套 63 项、静态分析与 Windows Release 构建通过。下一步在 Large/Medium/Small 与多 DPI 下人工确认实际视觉和动效"
 recent_baseline:
   - checkpoint: "0015"
     result: "设置页完成 Large/Medium/Small 三档独立编排与黑名单新增入口；新增会话、认证、拉黑和跨租户权限负向测试，定向 Maven 7 项通过；Flutter/Dart SDK、数据库集成环境和头像上传后端路由仍不可用"
@@ -72,6 +72,18 @@ recent_baseline:
     result: "新增完整英文 README_EN.md；中英文 README 均展示正式 Logo、双语切换和六枚一致徽章。许可证按仓库真实 LICENSE 使用 AGPL-3.0，技术栈徽章使用 Flutter、Dart >=3.4、Java 21、Spring Boot 3.3.2 与 Windows/Android，未采用不准确的 MIT/Python 示例。"
   - checkpoint: "0051"
     result: "Windows 1.0.1+2 安装器与便携包通过 analyze、54 项 Flutter 测试、39 项 Maven 测试、哈希及安装/启动/卸载验证；v1.0.1 正式 GitHub Release 已发布，3 个公开资产均为 uploaded 且 HTTP 200。"
+  - checkpoint: "0052"
+    result: "主题二由纯白极简完整替换为柔彩编辑式看板，覆盖认证、Canvas、首页、设置、二级页、Focus Orb 与共享控件；完整提示词和正式 HTML 基准已归档，flutter analyze、56 项测试、diff 检查与 Windows Release 构建通过。"
+  - checkpoint: "0053"
+    result: "短任务草稿可直接存档且失败后可保留内容重试，长任务可新建/编辑/删除及批量套用存档，超长任务独立按年内 12 个月展示多子任务、完成确认与动态跨度色条；Hero 双色块动效同步 HTML；Flutter 60 项、Maven 41 项及 Windows Release 构建通过。"
+  - checkpoint: "0054"
+    result: "首页今日计划完成率由当日完成比例计算且离线统计同步刷新；今日页增加本月超长任务分页；年度任务独立进度支持 +10/+5/+1 与直接完成，月份跨度条无缝循环并与 12 月列对齐，Hero 方块动效更显著；Flutter 63 项、Maven 43 项、analyze 与 Windows Release 构建通过。"
+  - checkpoint: "0055"
+    result: "年度色条改为紫/橙/蓝/绿/珊瑚红/金黄/青七色，按钮与灰槽/激活条共用 12 列几何；年度页月份导航改为可交互的吸顶 Sliver。主要 UI 改动后 flutter analyze 通过；新部件测试、Maven 回归与 Release 构建受自动授权用量限制未运行，不能标记验收完成。"
+  - checkpoint: "0056"
+    result: "补齐上轮未执行的验证：年度部件定向测试通过，Flutter 全套 63/63、Maven 全套 44/44、flutter analyze 和 Windows Release 构建通过；本轮临时 MySQL 容器已停止并移除，数据卷保留；不同 DPI 的实际视觉/动效仍待人工验收。"
+  - checkpoint: "0057"
+    result: "用户将年度任务的独立进度条合并进月份脉冲框：外框精确表示月份，0–100% 控制内部填充，0% 空框、100% 满框；首页本月预览共用组件，+10/−10、+5/−5、+1/−1 双向钳制且完成后可回退。年度定向测试、Flutter 全套 63 项、analyze 与 Windows Release 构建通过；服务端未变更，上轮 Maven 44 项通过。"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
@@ -141,6 +153,16 @@ user_decisions:
     decision: "修正后的白色圆角底板 Logo 作为 Windows 正式品牌图标，并展示在 GitHub 根 README；ICO 的 16–48 像素条目允许使用同源放大的 I、圆点与环线构图保证托盘辨识度，64–256 保留完整字标。"
   - id: DEC-0034
     decision: "GitHub 同时维护中文 README.md 与英文 README_EN.md，两者展示相同 Logo、语言切换和项目徽章；徽章必须反映仓库真实状态，因此许可证使用 AGPL-3.0，技术栈使用 Flutter/Dart/Java/Spring Boot，而不采用示例中的 MIT/Python。"
+  - id: DEC-0035
+    decision: "主题二正式由纯白极简替换为柔彩编辑式看板（Soft Spectrum Editorial），默认使用灰白纸面、薰衣草紫与珊瑚粉，完整覆盖认证、Canvas Shell、主界面、设置、二级页、Focus Orb 和共享控件；内部 minimalism 枚举与存储值仅为兼容保留。本决策覆盖 DEC-0009 与 DEC-0015 的主题二部分。"
+  - id: DEC-0036
+    decision: "短任务当前安排可单独保存为任务存档；长任务月历提供显式存档区以新建和直接套用存档；超长任务独立于长任务，以年内 12 个月、可编辑月份跨度及脉冲色条、多子任务与逐项确认/编辑/删除呈现；柔彩首页 Hero 背景及两个色块持续缓动，减少动画偏好时静止。与旧计划冲突处以本决策为准。"
+  - id: DEC-0037
+    decision: "首页完成率明确采用今日计划完成比例，统计页仍按 7/30 天汇总且离线写入后刷新；今日计划可切换浏览本月独立超长任务；年度任务另存 0–100% 任务级进度并允许 +10/+5/+1 或直接完成，子任务状态独立；月份跨度条参考蓝紫 Ultra 充能动态，首尾无缝循环且与 12 月导航列对齐；柔彩 Hero 两方块缩短周期并扩大幅度。本决策覆盖 DEC-0036 中低速方块及未定义任务级进度的部分。"
+  - id: DEC-0038
+    decision: "年度任务脉冲条须提供鲜明且易区分的七色可选项，旧 accent/warm/cool/neutral 键保留并映射为紫/橙/蓝/绿，新增 coral/gold/cyan；流光使用任务本色，月份导航、灰色槽位和激活跨度条必须共用 12 列位置公式并保持同高同圆角；年度页滚动时 1–12 月导航吸顶且可继续筛选。本决策覆盖 DEC-0037 中统一蓝紫混色的视觉限定。"
+  - id: DEC-0039
+    decision: "年度任务删除独立线性进度条，以月份跨度完整外框和 progressPercent 驱动的内填充组成唯一脉冲充能组件；0% 为空框、进度变化平滑增减、100% 满框，七色和吸顶刻度保持。按钮改为 +10/−10、+5/−5、+1/−1 成对控制并保留直接完成，100% 可减量回退；本月预览复用充能组件，子任务状态独立。此决策覆盖 DEC-0037 的双进度条呈现和仅增量操作，也将 DEC-0038 的全跨度彩色条收敛为全跨度描边框。"
 unfinished:
   - id: TODO-005
     priority: P0
@@ -171,6 +193,18 @@ unfinished:
     item: "使用真实登录会话回放 U24/U25 pause/resume，并人工点击托盘设置、暂停/继续和退出；当前单元测试、Release 编译、关闭/恢复和右键菜单出现已验证"
     gate: G01/G02
 next_actions:
+  - id: NEXT-ANNUAL-RULER-VISUAL-QA
+    action: "在 Windows Release 人工检查 0% 空框、各进度比例与 100% 满框的实际视觉、七色色样、月份槽位贴合、滚动吸顶和双向按钮的 Large/Medium/Small、多 DPI 状态；自动化测试和构建已通过"
+    inputs: ["client/flutter_app/build/windows/x64/runner/Release/innocence_flutter.exe", "client/flutter_app/test/features/home/adaptive_annual_progress_test.dart"]
+  - id: NEXT-ANNUAL-PROGRESS-VISUAL-QA
+    action: "在 Windows Release 人工检查首页今日完成率、本月超长任务分页、年度进度按钮、12 月几何对齐与无缝充能色条，并覆盖 Large/Medium/Small 和多 DPI"
+    inputs: ["client/flutter_app/build/windows/x64/runner/Release/innocence_flutter.exe", "docs/design/templates/soft-spectrum-dashboard-preview.html"]
+  - id: NEXT-TASK-ARCHIVE-ANNUAL-VISUAL-QA
+    action: "在 Windows Release 人工检查短任务存档、长任务批量套用、年度 12 个月切换与子任务操作、柔彩动效及 100%/125%/150% DPI 各尺寸布局"
+    inputs: ["client/flutter_app/build/windows/x64/runner/Release/innocence_flutter.exe", "docs/design/templates/soft-spectrum-dashboard-preview.html"]
+  - id: NEXT-THEME-02-VISUAL-QA
+    action: "在 Windows Release 对柔彩主题执行 Large/Medium/Small/Focus Orb 与设置页的 100%/125%/150% DPI 人工视觉验收"
+    inputs: ["client/flutter_app/build/windows/x64/runner/Release/innocence_flutter.exe", "docs/design/templates/soft-spectrum-dashboard-preview.html"]
   - id: NEXT-001
     action: "使用真实登录会话回放 U24/U25 与离线同步，并人工完成托盘菜单所有命令的端到端验收"
     inputs: ["docs/06-contract-inventory.md", "server/innocence-server", "client/flutter_app/build/windows/x64/runner/Release/innocence_flutter.exe"]

@@ -453,6 +453,7 @@ class HomePage extends StatelessWidget {
     required this.onCurrentYear,
     required this.onNextYear,
     required this.onApplyDayTemplateToDate,
+    required this.onApplyDayTemplateToDates,
     required this.onSaveAnnualSegment,
     required this.onDeleteAnnualSegment,
     required this.onSavePlanAsWeeklyTemplate,
@@ -670,9 +671,14 @@ class HomePage extends StatelessWidget {
     String planDate, {
     required PlanApplyStrategy strategy,
   }) onApplyDayTemplateToDate;
+  final Future<void> Function(
+    int templateId,
+    List<String> planDates, {
+    required PlanApplyStrategy strategy,
+  }) onApplyDayTemplateToDates;
   final Future<void> Function(AnnualPlanSegment segment) onSaveAnnualSegment;
   final Future<void> Function(AnnualPlanSegment segment) onDeleteAnnualSegment;
-  final Future<void> Function(String templateName, TodayPlan sourcePlan)
+  final Future<bool> Function(String templateName, TodayPlan sourcePlan)
       onSavePlanAsWeeklyTemplate;
   final Future<void> Function(int templateId) onApplyWeeklyTemplate;
   final Future<void> Function(int templateId, String planDate)
@@ -704,6 +710,7 @@ class HomePage extends StatelessWidget {
         return TodayPlanEditorDialog(
           initialPlan: todayPlan,
           onSave: onSaveTodayPlan,
+          onSaveAsArchive: onSavePlanAsWeeklyTemplate,
         );
       },
     );
@@ -730,7 +737,7 @@ class HomePage extends StatelessWidget {
     await _openSaveTemplateDialogForPlan(
       context,
       sourcePlan: todayPlan,
-      title: _contextText(context, '保存周模板', 'Save weekly template'),
+      title: _contextText(context, '保存任务存档', 'Save task archive'),
       hintText: _contextText(
         context,
         '例如：深度学习工作日',
@@ -745,19 +752,19 @@ class HomePage extends StatelessWidget {
     required String title,
     required String hintText,
   }) async {
-    final controller = TextEditingController();
+    var enteredArchiveName = '';
     final result = await showDialog<String>(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text(title),
-          content: TextField(
-            controller: controller,
+          content: TextFormField(
             decoration: InputDecoration(
-              labelText: _contextText(context, '模板名称', 'Template name'),
+              labelText: _contextText(context, '存档名称', 'Archive name'),
               hintText: hintText,
             ),
             autofocus: true,
+            onChanged: (value) => enteredArchiveName = value,
           ),
           actions: [
             TextButton(
@@ -766,14 +773,13 @@ class HomePage extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () =>
-                  Navigator.of(context).pop(controller.text.trim()),
+                  Navigator.of(context).pop(enteredArchiveName.trim()),
               child: Text(_contextText(context, '保存', 'Save')),
             ),
           ],
         );
       },
     );
-    controller.dispose();
 
     if (result == null || result.isEmpty) {
       return;
@@ -812,6 +818,7 @@ class HomePage extends StatelessWidget {
         return TodayPlanEditorDialog(
           initialPlan: plan,
           onSave: onSaveTodayPlan,
+          onSaveAsArchive: onSavePlanAsWeeklyTemplate,
         );
       },
     );
@@ -1066,6 +1073,9 @@ class HomePage extends StatelessWidget {
         onCurrentYear: onCurrentYear,
         onNextYear: onNextYear,
         onApplyDayTemplateToDate: onApplyDayTemplateToDate,
+        onApplyDayTemplateToDates: onApplyDayTemplateToDates,
+        onSavePlanAsDayTemplate: onSavePlanAsWeeklyTemplate,
+        onDeleteDayTemplate: onDeleteWeeklyTemplate,
         onSaveAnnualSegment: onSaveAnnualSegment,
         onDeleteAnnualSegment: onDeleteAnnualSegment,
       );
@@ -2176,7 +2186,7 @@ class _DesktopWidgetHome extends StatelessWidget {
                               icon: Icons.view_timeline_rounded,
                               text: _contextText(
                                 context,
-                                '短计划支持半小时排程、日模板保存和清单勾选完成。',
+                                '短计划支持半小时排程、保存为任务存档和清单勾选完成。',
                                 'Short plans support half-hour scheduling, saved daily templates, and completion ticks.',
                               ),
                             )
@@ -7008,7 +7018,7 @@ class _DesktopWidgetHomeV2State extends State<_DesktopWidgetHomeV2> {
           if (previewPlanItems.isEmpty)
             const _DesktopHintCard(
               icon: Icons.view_timeline_rounded,
-              text: '短计划支持半小时排程、日模板保存和清单勾选完成。',
+              text: '短计划支持半小时排程、保存为任务存档和清单勾选完成。',
             )
           else
             ...previewPlanItems.map((entry) {

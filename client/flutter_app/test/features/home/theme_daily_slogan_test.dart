@@ -54,4 +54,12 @@ void main() {
 
     expect(indexes, hasLength(1));
   });
+
+  test('soft-spectrum copy replaces the legacy minimal slogans', () {
+    final pool = ThemeDailySlogans.poolFor(AppVisualTheme.minimalism);
+
+    expect(pool.first.titleZh, '把今天，完成得漂亮。');
+    expect(pool.first.titleEn, 'Make today beautifully complete.');
+    expect(pool.first.subtitleZh, '让计划、专注与进度，在柔和色彩里清晰推进。');
+  });
 }

@@ -1,5 +1,7 @@
 package com.innocence.server.modules.plan.dto.response;
 
+import java.util.List;
+
 public record AnnualPlanSegmentResponse(
         String id,
         String clientEntityId,
@@ -10,7 +12,9 @@ public record AnnualPlanSegmentResponse(
         String colorKey,
         int sortOrder,
         String note,
+        int progressPercent,
         int revision,
-        String updateTime
+        String updateTime,
+        List<AnnualPlanSubtaskResponse> subtasks
 ) {
 }

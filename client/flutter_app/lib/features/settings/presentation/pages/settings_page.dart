@@ -876,8 +876,10 @@ class _SettingsPageState extends State<SettingsPage> {
             _visualTheme;
     final tokens = AppVisualTokens.of(visualTheme);
     final glass = visualTheme == AppVisualTheme.glass;
+    final softSpectrum = visualTheme == AppVisualTheme.minimalism;
     final radius = switch (visualTheme) {
-      AppVisualTheme.minimalism || AppVisualTheme.wabiSabi => 0.0,
+      AppVisualTheme.minimalism => 20.0,
+      AppVisualTheme.wabiSabi => 0.0,
       AppVisualTheme.midCentury => 16.0,
       AppVisualTheme.glass => 20.0,
     };
@@ -899,7 +901,15 @@ class _SettingsPageState extends State<SettingsPage> {
                     offset: Offset(0, 12),
                   ),
                 ]
-              : null,
+              : softSpectrum
+                  ? const [
+                      BoxShadow(
+                        color: Color(0x14252635),
+                        blurRadius: 24,
+                        offset: Offset(0, 10),
+                      ),
+                    ]
+                  : null,
         ),
         child: Wrap(
           spacing: 8,
@@ -936,7 +946,15 @@ class _SettingsPageState extends State<SettingsPage> {
                   offset: Offset(0, 14),
                 ),
               ]
-            : null,
+            : softSpectrum
+                ? const [
+                    BoxShadow(
+                      color: Color(0x14252635),
+                      blurRadius: 26,
+                      offset: Offset(0, 11),
+                    ),
+                  ]
+                : null,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1776,11 +1794,13 @@ class _SettingsSurfaceState extends State<_SettingsSurface> {
             AppVisualTheme.minimalism;
     final tokens = AppVisualTokens.of(visualTheme);
     final radius = switch (visualTheme) {
-      AppVisualTheme.minimalism || AppVisualTheme.wabiSabi => 0.0,
+      AppVisualTheme.minimalism => 20.0,
+      AppVisualTheme.wabiSabi => 0.0,
       AppVisualTheme.midCentury => 18.0,
       AppVisualTheme.glass => 22.0,
     };
     final glass = visualTheme == AppVisualTheme.glass;
+    final softSpectrum = visualTheme == AppVisualTheme.minimalism;
     final materializedChild = Material(
       type: MaterialType.transparency,
       child: widget.child,
@@ -1788,13 +1808,20 @@ class _SettingsSurfaceState extends State<_SettingsSurface> {
     return KeyedSubtree(
       key: ValueKey('settings.${widget.section.name}'),
       child: MouseRegion(
-        onEnter: glass ? (_) => setState(() => _hovered = true) : null,
-        onExit: glass ? (_) => setState(() => _hovered = false) : null,
+        onEnter: glass || softSpectrum
+            ? (_) => setState(() => _hovered = true)
+            : null,
+        onExit: glass || softSpectrum
+            ? (_) => setState(() => _hovered = false)
+            : null,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOutCubic,
-          transform:
-              Matrix4.translationValues(0, glass && _hovered ? -4 : 0, 0),
+          transform: Matrix4.translationValues(
+            0,
+            _hovered ? (glass ? -4 : -2) : 0,
+            0,
+          ),
           padding: glass ? EdgeInsets.zero : widget.padding,
           decoration: BoxDecoration(
             color: glass
@@ -1818,7 +1845,17 @@ class _SettingsSurfaceState extends State<_SettingsSurface> {
                       offset: Offset(0, _hovered ? 18 : 12),
                     ),
                   ]
-                : null,
+                : softSpectrum
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF252635).withValues(
+                            alpha: _hovered ? 0.12 : 0.07,
+                          ),
+                          blurRadius: _hovered ? 32 : 22,
+                          offset: Offset(0, _hovered ? 14 : 9),
+                        ),
+                      ]
+                    : null,
           ),
           child: glass
               ? ClipRRect(

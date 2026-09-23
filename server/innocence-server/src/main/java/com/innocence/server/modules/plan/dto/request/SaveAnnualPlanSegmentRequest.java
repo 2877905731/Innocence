@@ -5,6 +5,10 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SaveAnnualPlanSegmentRequest {
 
@@ -38,7 +42,15 @@ public class SaveAnnualPlanSegmentRequest {
     @Size(max = 500)
     private String note;
 
+    @Min(0)
+    @Max(100)
+    private Integer progressPercent;
+
     private Integer revision;
+
+    @Valid
+    @Size(max = 100)
+    private List<AnnualPlanSubtaskRequest> subtasks = new ArrayList<>();
 
     public String getClientEntityId() { return clientEntityId; }
     public void setClientEntityId(String clientEntityId) { this.clientEntityId = clientEntityId; }
@@ -56,6 +68,12 @@ public class SaveAnnualPlanSegmentRequest {
     public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
+    public Integer getProgressPercent() { return progressPercent; }
+    public void setProgressPercent(Integer progressPercent) { this.progressPercent = progressPercent; }
     public Integer getRevision() { return revision; }
     public void setRevision(Integer revision) { this.revision = revision; }
+    public List<AnnualPlanSubtaskRequest> getSubtasks() { return subtasks; }
+    public void setSubtasks(List<AnnualPlanSubtaskRequest> subtasks) {
+        this.subtasks = subtasks == null ? new ArrayList<>() : subtasks;
+    }
 }

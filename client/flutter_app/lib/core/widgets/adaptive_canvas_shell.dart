@@ -5,6 +5,7 @@ import 'package:innocence_flutter/core/layout/desktop_presentation.dart';
 import 'package:innocence_flutter/core/widgets/desktop_close_button.dart';
 import 'package:innocence_flutter/core/widgets/desktop_drag_region.dart';
 import 'package:innocence_flutter/core/widgets/desktop_resize_frame.dart';
+import 'package:innocence_flutter/core/widgets/soft_spectrum_backdrop.dart';
 import 'package:innocence_flutter/core/widgets/wabi_sabi_paper.dart';
 
 @immutable
@@ -104,6 +105,7 @@ class AdaptiveCanvasShell extends StatelessWidget {
         );
 
         final themedContent = switch (visualTheme) {
+          AppVisualTheme.minimalism => SoftSpectrumBackdrop(child: content),
           AppVisualTheme.wabiSabi =>
             WabiSabiPaper(color: palette.background, child: content),
           AppVisualTheme.glass => DecoratedBox(
@@ -487,21 +489,38 @@ class _BrandMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final softSpectrum = palette.isSoftSpectrum;
     return Container(
       width: 42,
       height: 42,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: palette.isGlass ? const Color(0x24FFFFFF) : palette.ink,
+        color: palette.isGlass
+            ? const Color(0x24FFFFFF)
+            : softSpectrum
+                ? palette.surface
+                : palette.ink,
         border: Border.all(
-          color: palette.isGlass ? const Color(0x52FFFFFF) : palette.ink,
+          color: palette.isGlass
+              ? const Color(0x52FFFFFF)
+              : softSpectrum
+                  ? palette.ink
+                  : palette.ink,
         ),
-        borderRadius: BorderRadius.circular(palette.isGlass ? 12 : 0),
+        borderRadius: BorderRadius.circular(
+          palette.isGlass
+              ? 12
+              : softSpectrum
+                  ? 21
+                  : 0,
+        ),
       ),
       child: Text(
         'I',
         style: TextStyle(
-          color: palette.isGlass ? palette.ink : palette.navigation,
+          color: palette.isGlass || softSpectrum
+              ? palette.ink
+              : palette.navigation,
           fontSize: 20,
           fontWeight: FontWeight.w900,
           height: 1,
@@ -527,6 +546,7 @@ class _UserMark extends StatelessWidget {
     final normalized = displayName.trim();
     final initial = normalized.isEmpty ? 'I' : normalized.characters.first;
     final size = compact ? 34.0 : 40.0;
+    final softSpectrum = palette.isSoftSpectrum;
     return Tooltip(
       message: normalized.isEmpty ? 'Innocence' : normalized,
       child: Container(
@@ -534,13 +554,21 @@ class _UserMark extends StatelessWidget {
         height: size,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: palette.accentSoft,
+          color: softSpectrum ? null : palette.accentSoft,
+          gradient: softSpectrum
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [palette.accent, const Color(0xFFFF9CA9)],
+                )
+              : null,
           border: Border.all(color: palette.rule),
+          borderRadius: BorderRadius.circular(softSpectrum ? size / 2 : 0),
         ),
         child: Text(
           initial.toUpperCase(),
           style: TextStyle(
-            color: palette.ink,
+            color: softSpectrum ? Colors.white : palette.ink,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -562,11 +590,23 @@ class _SyncStatus extends StatelessWidget {
       decoration: BoxDecoration(
         color: palette.surface,
         border: Border.all(color: palette.rule),
+        borderRadius: BorderRadius.circular(
+          palette.isSoftSpectrum || palette.isGlass ? 12 : 0,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(width: 7, height: 7, color: palette.success),
+          Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(
+              color: palette.success,
+              shape: palette.isSoftSpectrum || palette.isGlass
+                  ? BoxShape.circle
+                  : BoxShape.rectangle,
+            ),
+          ),
           const SizedBox(width: 7),
           Text(
             label,
@@ -603,14 +643,36 @@ class _RailButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onPressed,
-          child: SizedBox(
+          borderRadius: BorderRadius.circular(
+            palette.isSoftSpectrum ? 15 : 0,
+          ),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
             height: 48,
+            decoration: BoxDecoration(
+              color: selected && palette.isSoftSpectrum
+                  ? palette.ink
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(
+                palette.isSoftSpectrum ? 15 : 0,
+              ),
+              boxShadow: selected && palette.isSoftSpectrum
+                  ? const [
+                      BoxShadow(
+                        color: Color(0x2417181B),
+                        blurRadius: 18,
+                        offset: Offset(0, 8),
+                      ),
+                    ]
+                  : null,
+            ),
             child: Stack(
               alignment: Alignment.center,
               children: [
                 if (selected)
                   Positioned(
-                    left: 0,
+                    left: palette.isSoftSpectrum ? null : 0,
+                    right: palette.isSoftSpectrum ? -10 : null,
                     top: 9,
                     bottom: 9,
                     child: Container(width: 3, color: palette.accent),
@@ -620,7 +682,11 @@ class _RailButton extends StatelessWidget {
                       ? destination.selectedIcon ?? destination.icon
                       : destination.icon,
                   size: 22,
-                  color: selected ? palette.ink : palette.muted,
+                  color: selected && palette.isSoftSpectrum
+                      ? Colors.white
+                      : selected
+                          ? palette.ink
+                          : palette.muted,
                 ),
                 if (destination.badgeCount > 0)
                   Positioned(
@@ -629,7 +695,12 @@ class _RailButton extends StatelessWidget {
                     child: Container(
                       width: 8,
                       height: 8,
-                      color: palette.danger,
+                      decoration: BoxDecoration(
+                        color: palette.danger,
+                        shape: palette.isSoftSpectrum
+                            ? BoxShape.circle
+                            : BoxShape.rectangle,
+                      ),
                     ),
                   ),
               ],
@@ -709,6 +780,7 @@ class _CanvasPalette {
     required this.success,
     required this.danger,
     required this.isGlass,
+    required this.isSoftSpectrum,
   });
 
   final Color background;
@@ -722,6 +794,7 @@ class _CanvasPalette {
   final Color success;
   final Color danger;
   final bool isGlass;
+  final bool isSoftSpectrum;
 
   static _CanvasPalette of(
     BuildContext context,
@@ -745,6 +818,7 @@ class _CanvasPalette {
       success: colors.tertiary,
       danger: colors.error,
       isGlass: glass,
+      isSoftSpectrum: visualTheme == AppVisualTheme.minimalism,
     );
   }
 }

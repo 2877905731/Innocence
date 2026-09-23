@@ -252,7 +252,48 @@ void main() {
     expect(month.dayFor('2026-09-12').totalPlannedMinutes, 30);
   });
 
-  test('creates, updates, and deletes annual month segments', () async {
+  test('updates and deletes a reusable task archive by name', () async {
+    final profile = await store.getOrCreateLocalProfile();
+    final firstPlan = TodayPlan.empty('2026-09-08').copyWith(
+      planName: 'Morning',
+      items: const [
+        TodayPlanItem(
+          id: 0,
+          title: 'Read',
+          completed: false,
+          plannedMinutes: 20,
+          actualMinutes: 0,
+          startSlot: null,
+          endSlot: null,
+          sortOrder: 0,
+        ),
+      ],
+    );
+    final created = await store.saveDayTemplate(
+      profile.ownerScope,
+      templateName: 'Reading archive',
+      sourcePlan: firstPlan,
+    );
+    final updated = await store.saveDayTemplate(
+      profile.ownerScope,
+      templateName: 'Reading archive',
+      sourcePlan: firstPlan.copyWith(
+        items: [firstPlan.items.single.copyWith(title: 'Read two chapters')],
+      ),
+    );
+    final deleted = await store.deleteDayTemplate(
+      profile.ownerScope,
+      created.single.id,
+    );
+
+    expect(updated, hasLength(1));
+    expect(updated.single.id, created.single.id);
+    expect(updated.single.items.single.title, 'Read two chapters');
+    expect(deleted, isEmpty);
+  });
+
+  test('creates, updates, and deletes independent annual tasks with subtasks',
+      () async {
     final profile = await store.getOrCreateLocalProfile();
     const draft = AnnualPlanSegment(
       id: '',
@@ -264,15 +305,40 @@ void main() {
       colorKey: 'accent',
       sortOrder: 0,
       note: 'One calm step at a time',
+      progressPercent: 15,
       revision: 0,
       updateTime: '',
+      subtasks: [
+        AnnualPlanSubtask(
+          id: '',
+          title: 'First step',
+          detail: 'Write the outline',
+          completed: false,
+          sortOrder: 0,
+        ),
+        AnnualPlanSubtask(
+          id: '',
+          title: 'Second step',
+          detail: 'Review the outline',
+          completed: false,
+          sortOrder: 1,
+        ),
+      ],
     );
 
     final created = await store.saveAnnualSegment(profile.ownerScope, draft);
     final segment = created.segments.single;
     final updated = await store.saveAnnualSegment(
       profile.ownerScope,
-      segment.copyWith(endMonth: 6, title: 'Foundation first'),
+      segment.copyWith(
+        endMonth: 6,
+        title: 'Foundation first',
+        progressPercent: 36,
+        subtasks: [
+          segment.subtasks.first.copyWith(completed: true),
+          segment.subtasks.last,
+        ],
+      ),
     );
     final deleted = await store.deleteAnnualSegment(
       profile.ownerScope,
@@ -280,9 +346,44 @@ void main() {
     );
 
     expect(segment.id, isNotEmpty);
+    expect(segment.subtasks, hasLength(2));
+    expect(segment.subtasks.first.id, isNotEmpty);
+    expect(segment.subtasks.first.detail, 'Write the outline');
+    expect(segment.progressPercent, 15);
     expect(updated.segments.single.endMonth, 6);
     expect(updated.segments.single.revision, 2);
+    expect(updated.segments.single.completedSubtaskCount, 1);
+    expect(updated.segments.single.progressPercent, 36);
     expect(deleted.segments, isEmpty);
+  });
+
+  test('upgrades a version 4 annual task with zero progress', () async {
+    final path = '${tempDirectory.path}${Platform.pathSeparator}offline.db';
+    final legacy = await databaseFactoryFfi.openDatabase(
+      path,
+      options: OpenDatabaseOptions(
+        version: 4,
+        onCreate: (database, version) async {
+          await database.execute('''CREATE TABLE local_annual_segment (
+            owner_scope TEXT NOT NULL,
+            segment_id TEXT NOT NULL,
+            progress_marker TEXT NOT NULL DEFAULT '',
+            PRIMARY KEY (owner_scope, segment_id)
+          )''');
+          await database.insert('local_annual_segment', {
+            'owner_scope': 'local:test',
+            'segment_id': 'existing',
+          });
+        },
+      ),
+    );
+    await legacy.close();
+
+    await store.initialize();
+    final migrated = await databaseFactoryFfi.openDatabase(path);
+    final rows = await migrated.query('local_annual_segment');
+    expect(rows.single['progress_percent'], 0);
+    await migrated.close();
   });
 
   test('builds metadata-only manifest and dependency-ordered operations',

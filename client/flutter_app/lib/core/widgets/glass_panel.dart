@@ -103,14 +103,38 @@ class _ThemeAwarePanelState extends State<_ThemeAwarePanel> {
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     final radius = switch (widget.visualTheme) {
-      AppVisualTheme.minimalism || AppVisualTheme.wabiSabi => 0.0,
+      AppVisualTheme.minimalism => 20.0,
+      AppVisualTheme.wabiSabi => 0.0,
       AppVisualTheme.midCentury => 18.0,
       AppVisualTheme.glass => 22.0,
     };
     final decoration = switch (widget.visualTheme) {
       AppVisualTheme.minimalism => BoxDecoration(
-          color: tokens.panel,
-          border: Border(top: BorderSide(color: tokens.ink, width: 2)),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              tokens.panel,
+              Color.alphaBlend(
+                tokens.artTwo.withValues(alpha: _hovered ? 0.34 : 0.18),
+                tokens.panel,
+              ),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(
+            color: _hovered
+                ? tokens.accent.withValues(alpha: 0.42)
+                : Colors.white.withValues(alpha: 0.78),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF252635)
+                  .withValues(alpha: _hovered ? 0.12 : 0.07),
+              blurRadius: _hovered ? 32 : 22,
+              offset: Offset(0, _hovered ? 14 : 9),
+            ),
+          ],
         ),
       AppVisualTheme.wabiSabi => BoxDecoration(color: tokens.panel),
       AppVisualTheme.midCentury => BoxDecoration(
@@ -146,6 +170,7 @@ class _ThemeAwarePanelState extends State<_ThemeAwarePanel> {
         ),
     };
 
+    final softSpectrum = widget.visualTheme == AppVisualTheme.minimalism;
     final content = glass
         ? ClipRRect(
             borderRadius: BorderRadius.circular(radius),
@@ -157,11 +182,17 @@ class _ThemeAwarePanelState extends State<_ThemeAwarePanel> {
               child: Padding(padding: widget.padding, child: widget.child),
             ),
           )
-        : Padding(padding: widget.padding, child: widget.child);
+        : ClipRRect(
+            borderRadius: BorderRadius.circular(radius),
+            child: Padding(padding: widget.padding, child: widget.child),
+          );
 
     return MouseRegion(
-      onEnter: glass ? (_) => setState(() => _hovered = true) : null,
-      onExit: glass ? (_) => setState(() => _hovered = false) : null,
+      onEnter:
+          glass || softSpectrum ? (_) => setState(() => _hovered = true) : null,
+      onExit: glass || softSpectrum
+          ? (_) => setState(() => _hovered = false)
+          : null,
       child: AnimatedContainer(
         key: ValueKey(widget.visualTheme),
         duration:
@@ -169,7 +200,7 @@ class _ThemeAwarePanelState extends State<_ThemeAwarePanel> {
         curve: Curves.easeOutCubic,
         transform: Matrix4.translationValues(
           0,
-          glass && _hovered && !reduceMotion ? -4 : 0,
+          (glass || softSpectrum) && _hovered && !reduceMotion ? -4 : 0,
           0,
         ),
         decoration: decoration,

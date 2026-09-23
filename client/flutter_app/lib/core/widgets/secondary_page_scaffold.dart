@@ -4,6 +4,7 @@ import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/widgets/desktop_close_button.dart';
 import 'package:innocence_flutter/core/widgets/glass_motion_backdrop.dart';
 import 'package:innocence_flutter/core/widgets/material_localization_scope.dart';
+import 'package:innocence_flutter/core/widgets/soft_spectrum_backdrop.dart';
 import 'package:innocence_flutter/core/widgets/wabi_sabi_paper.dart';
 
 class SecondaryPageScaffold extends StatelessWidget {
@@ -77,10 +78,12 @@ class SecondaryPageScaffold extends StatelessWidget {
       child: Scaffold(
         backgroundColor: tokens.canvas,
         body: switch (resolvedVisualTheme) {
+          AppVisualTheme.minimalism => SoftSpectrumBackdrop(child: content),
           AppVisualTheme.wabiSabi =>
             WabiSabiPaper(color: tokens.canvas, child: content),
           AppVisualTheme.glass => GlassMotionBackdrop(child: content),
-          _ => ColoredBox(color: tokens.canvas, child: content),
+          AppVisualTheme.midCentury =>
+            ColoredBox(color: tokens.canvas, child: content),
         },
       ),
     );

@@ -14,6 +14,7 @@ public class AnnualPlanSegment {
     private String colorKey;
     private Integer sortOrder;
     private String note;
+    private Integer progressPercent;
     private Integer revision;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
@@ -38,6 +39,8 @@ public class AnnualPlanSegment {
     public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
+    public Integer getProgressPercent() { return progressPercent; }
+    public void setProgressPercent(Integer progressPercent) { this.progressPercent = progressPercent; }
     public Integer getRevision() { return revision; }
     public void setRevision(Integer revision) { this.revision = revision; }
     public LocalDateTime getCreateTime() { return createTime; }

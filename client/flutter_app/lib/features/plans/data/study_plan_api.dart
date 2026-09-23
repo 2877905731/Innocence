@@ -145,6 +145,17 @@ class StudyPlanApi {
         .toList();
   }
 
+  Future<List<WeeklyPlanTemplate>> deleteDayTemplate(
+    AppSession session, {
+    required int templateId,
+  }) async {
+    await _apiClient.delete(
+      'plans/day-templates/$templateId',
+      headers: session.authHeaders,
+    );
+    return getDayTemplates(session);
+  }
+
   Future<AnnualPlanOverview> saveAnnualSegment(
     AppSession session,
     AnnualPlanSegment segment,

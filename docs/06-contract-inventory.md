@@ -140,19 +140,19 @@ endpoints:
   - id: U16
     method: GET
     path: "/api/app/v1/plans/day-templates"
-    source_behavior: "读取可复用的单日日程模板；替代把日模板命名为 weekly template 的新契约"
+    source_behavior: "读取可复用的任务存档；月历直接展示存档架，旧 weekly template 名称仅供兼容"
     evidence_status: client_server_implemented_unit_verified
     trigger: "新日模板路由已实现；旧 /weekly-templates 继续作为兼容接口"
   - id: U17
     method: POST
     path: "/api/app/v1/plans/day-templates"
-    source_behavior: "把已保存且仍可编辑的短计划另存为日模板"
+    source_behavior: "把短计划当前安排存为任务存档，或从长计划月历新建空白存档；同名保存更新内容"
     evidence_status: client_server_implemented_unit_verified
     trigger: "短计划保存后继续编辑与另存日模板已实现；字段缺失/重名真实 HTTP 回放待补"
   - id: U18
     method: POST
     path: "/api/app/v1/plans/day-templates/{templateId}/apply-batch"
-    source_behavior: "将日模板套用到月历中的一个或多个日期，并显式处理已有计划的覆盖/跳过/取消"
+    source_behavior: "从月历可见存档架直接选择一个或多个日期套用任务存档，并显式处理覆盖/跳过/取消"
     evidence_status: client_server_implemented_unit_verified
     trigger: "覆盖/跳过显式策略、重复日期去重和跨租户模板拒绝已实现并有服务单测"
   - id: U19
@@ -164,27 +164,33 @@ endpoints:
   - id: U20
     method: GET
     path: "/api/app/v1/plans/year?year=YYYY"
-    source_behavior: "返回年度 12 个月摘要及年度计划区间，支撑超长计划年历"
+    source_behavior: "返回独立年度任务及其子任务，以及每项任务持久化的 progressPercent（0..100，100 表示任务完成）；月份跨度决定充能框边界、progressPercent 决定框内填充，两者均由同一年度任务数据驱动；兼容保留 12 个月摘要，今日页本月分页和年度主视图读取同一份年度任务"
     evidence_status: client_server_implemented_unit_verified
     trigger: "12 月摘要、年度区间和重叠展示已实现；空年份 12 月结构测试通过"
   - id: U21
     method: POST
     path: "/api/app/v1/plans/annual-segments"
-    source_behavior: "按月为最小单位创建年度计划区间"
+    source_behavior: "按月为最小单位创建独立年度任务，附带多条子任务与完成状态；progressPercent 可省略且默认为 0，必须在 0..100；colorKey 接受兼容旧键 accent/warm/cool/neutral 与新增 coral/gold/cyan，未知值拒绝"
     evidence_status: client_server_implemented_unit_verified
-    trigger: "按月拖动创建、重叠区间与 1..12 边界校验已实现"
+    trigger: "年度任务编辑器支持起止月份、颜色和子任务；服务端 1..12 边界与子任务有效性校验、租户限定读写已通过单测"
   - id: U22
     method: PUT
     path: "/api/app/v1/plans/annual-segments/{segmentId}"
-    source_behavior: "调整年度计划区间的起止月份、标题、颜色键或排序"
+    source_behavior: "原子替换年度任务的起止月份、标题、七选一 colorKey、说明、progressPercent 和子任务列表；+10/−10、+5/−5、+1/−1 与直接完成复用此接口并将进度钳制在 0..100，100 后可减量回退；旧客户端省略 progressPercent 时保留既有值；完成确认、编辑、删除子任务均经此接口保存"
     evidence_status: client_server_implemented_unit_verified
     trigger: "编辑与 revision 冲突拒绝已实现并通过单测；真实 HTTP 回放待补"
   - id: U23
     method: DELETE
     path: "/api/app/v1/plans/annual-segments/{segmentId}"
-    source_behavior: "删除当前用户的年度计划区间；离线端在 outbox 中保留删除操作作为补传墓碑"
+    source_behavior: "删除当前用户的年度任务及子任务；离线端在 outbox 中保留删除操作作为补传墓碑"
     evidence_status: client_server_implemented_unit_verified
     trigger: "客户端删除墓碑、服务端当前用户限定删除与同步绑定解析已实现；重复删除真实 HTTP 回放待补"
+  - id: U24
+    method: DELETE
+    path: "/api/app/v1/plans/day-templates/{templateId}"
+    source_behavior: "删除当前用户的任务存档；离线删除进入 outbox"
+    evidence_status: client_server_implemented_unit_verified
+    trigger: "任务存档架的删除入口连接到在线和离线删除；离线存档更新/删除测试与 Spring 全套测试通过，同步按本地绑定解析服务端 id；真实 HTTP 回放待补"
 preview_queue:
   - priority: P1
     sample: "待收样本：认证/学习/签到/统计/首页聚合 5 组正常+空+边界请求"
@@ -200,6 +206,10 @@ compatibility_decisions:
     difference: "旧实现把长计划定义为周概览、把日模板命名为 weekly template，并让超长计划复用逐周日计划"
     decision: "自 2026-09-08 起权威语义改为短=日、长=月、超长=年；旧 /week 与 /weekly-templates 仅作迁移兼容，不再指导新 UI 或新数据模型"
     checkpoint: "DEC-0027 / progress 0040"
+  - id: DEC-004
+    difference: "旧年度页的季节月卡可进入长计划，且缺少子任务、完成确认和动态跨度显示"
+    decision: "自 2026-09-23 起年度任务独立于月历；12 月按钮只筛选，年度任务保存用户编辑的月份跨度及多子任务；任务存档在长计划月历显式可见"
+    contract_test_required: true
   - id: DEC-003
     difference: "旧同步默认已登录且全局最后修改覆盖"
     decision: "增加未登录 local profile 和登录后导入确认；按实体类型执行冲突规则，服务端身份始终从 token 解析"

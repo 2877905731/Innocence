@@ -49,11 +49,28 @@ void main() {
           'title': 'Spring foundation',
           'startMonth': 2,
           'endMonth': 5,
-          'colorKey': 'spring',
+          'colorKey': 'warm',
           'sortOrder': 0,
           'note': '',
+          'progressPercent': 35,
           'revision': 1,
           'updateTime': '',
+          'subtasks': [
+            {
+              'id': '11',
+              'title': 'Draft outline',
+              'detail': 'Cover the first milestone',
+              'completed': true,
+              'sortOrder': 0,
+            },
+            {
+              'id': '12',
+              'title': 'Review outline',
+              'detail': '',
+              'completed': false,
+              'sortOrder': 1,
+            },
+          ],
         },
         {
           'id': '2',
@@ -62,7 +79,7 @@ void main() {
           'title': 'Exam season',
           'startMonth': 4,
           'endMonth': 6,
-          'colorKey': 'summer',
+          'colorKey': 'cool',
           'sortOrder': 1,
           'note': '',
           'revision': 1,
@@ -75,6 +92,18 @@ void main() {
     expect(overview.monthAt(2).plannedDayCount, 4);
     expect(overview.monthAt(1).totalTaskCount, 0);
     expect(overview.segments, hasLength(2));
+    expect(overview.segments.first.completedSubtaskCount, 1);
+    expect(overview.segments.first.completionRatio, 0.5);
+    expect(overview.segments.first.progressPercent, 35);
+    expect(overview.segments.first.adjustProgress(10).progressPercent, 45);
+    expect(overview.segments.first.adjustProgress(100).progressPercent, 100);
+    expect(overview.segments.first.adjustProgress(100).isCompleted, isTrue);
+    expect(overview.segments.first.adjustProgress(-5).progressPercent, 30);
+    expect(overview.segments.first.adjustProgress(-100).progressPercent, 0);
+    expect(overview.segments.first.adjustProgress(-100).isCompleted, isFalse);
+    expect(overview.segments.last.progressPercent, 0);
+    expect(overview.segments.first.toSaveJson()['progressPercent'], 35);
+    expect(overview.segments.first.toSaveJson()['subtasks'], hasLength(2));
     expect(
       overview.segments.where(
         (segment) => segment.startMonth <= 4 && segment.endMonth >= 4,

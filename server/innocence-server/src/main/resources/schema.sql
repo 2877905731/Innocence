@@ -431,11 +431,44 @@ CREATE TABLE IF NOT EXISTS annual_plan_segment
     color_key        VARCHAR(24)  NOT NULL DEFAULT 'accent',
     sort_order       INT          NOT NULL DEFAULT 0,
     note             VARCHAR(500) NOT NULL DEFAULT '',
+    progress_percent TINYINT UNSIGNED NOT NULL DEFAULT 0,
     revision         INT          NOT NULL DEFAULT 1,
     create_time      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uk_annual_segment_client (user_id, client_entity_id),
     KEY idx_annual_segment_user_year (user_id, plan_year, sort_order)
+);
+
+SET @annual_segment_progress_sql = (
+    SELECT IF(
+        EXISTS(
+            SELECT 1
+            FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'annual_plan_segment'
+              AND COLUMN_NAME = 'progress_percent'
+        ),
+        'SELECT 1',
+        'ALTER TABLE annual_plan_segment ADD COLUMN progress_percent TINYINT UNSIGNED NOT NULL DEFAULT 0 AFTER note'
+    )
+);
+PREPARE annual_segment_progress_stmt FROM @annual_segment_progress_sql;
+EXECUTE annual_segment_progress_stmt;
+DEALLOCATE PREPARE annual_segment_progress_stmt;
+
+CREATE TABLE IF NOT EXISTS annual_plan_segment_subtask
+(
+    id          BIGINT PRIMARY KEY AUTO_INCREMENT,
+    segment_id  BIGINT       NOT NULL,
+    user_id     BIGINT       NOT NULL,
+    title       VARCHAR(128) NOT NULL,
+    detail      VARCHAR(500) NOT NULL DEFAULT '',
+    status      TINYINT      NOT NULL DEFAULT 0,
+    sort_order  INT          NOT NULL DEFAULT 0,
+    create_time DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_annual_subtask_segment (segment_id, sort_order),
+    KEY idx_annual_subtask_user (user_id)
 );
 
 CREATE TABLE IF NOT EXISTS study_timer_record

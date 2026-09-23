@@ -62,7 +62,20 @@
         <result property="colorKey" column="color_key"/>
         <result property="sortOrder" column="sort_order"/>
         <result property="note" column="note"/>
+        <result property="progressPercent" column="progress_percent"/>
         <result property="revision" column="revision"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="AnnualPlanSubtaskResultMap" type="com.innocence.server.modules.plan.domain.AnnualPlanSubtask">
+        <id property="id" column="id"/>
+        <result property="segmentId" column="segment_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="detail" column="detail"/>
+        <result property="status" column="status"/>
+        <result property="sortOrder" column="sort_order"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
@@ -217,10 +230,10 @@
     <insert id="insertAnnualPlanSegment" useGeneratedKeys="true" keyProperty="id">
         insert into annual_plan_segment
             (user_id, client_entity_id, plan_year, title, start_month, end_month,
-             color_key, sort_order, note, revision)
+             color_key, sort_order, note, progress_percent, revision)
         values
             (#{userId}, #{clientEntityId}, #{planYear}, #{title}, #{startMonth}, #{endMonth},
-             #{colorKey}, #{sortOrder}, #{note}, #{revision})
+             #{colorKey}, #{sortOrder}, #{note}, #{progressPercent}, #{revision})
     </insert>
 
     <update id="updateAnnualPlanSegment">
@@ -232,6 +245,7 @@
             color_key = #{colorKey},
             sort_order = #{sortOrder},
             note = #{note},
+            progress_percent = #{progressPercent},
             revision = #{revision}
         where id = #{id}
           and user_id = #{userId}
@@ -240,6 +254,27 @@
     <delete id="deleteAnnualPlanSegmentByIdAndUserId">
         delete from annual_plan_segment
         where id = #{segmentId}
+          and user_id = #{userId}
+    </delete>
+
+    <select id="findAnnualPlanSubtasksBySegmentId" resultMap="AnnualPlanSubtaskResultMap">
+        select *
+        from annual_plan_segment_subtask
+        where segment_id = #{segmentId}
+          and user_id = #{userId}
+        order by sort_order asc, id asc
+    </select>
+
+    <insert id="insertAnnualPlanSubtask" useGeneratedKeys="true" keyProperty="id">
+        insert into annual_plan_segment_subtask
+            (segment_id, user_id, title, detail, status, sort_order)
+        values
+            (#{segmentId}, #{userId}, #{title}, #{detail}, #{status}, #{sortOrder})
+    </insert>
+
+    <delete id="deleteAnnualPlanSubtasksBySegmentIdAndUserId">
+        delete from annual_plan_segment_subtask
+        where segment_id = #{segmentId}
           and user_id = #{userId}
     </delete>
 

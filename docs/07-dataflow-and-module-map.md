@@ -113,7 +113,7 @@ pitfalls:
     contract_test_required: true
   - id: DIFF-005
     category: plan_horizon
-    description: "短/长/超长的权威语义分别为日/月/年；旧 week 与 weekly-template 路由仅兼容已有实现，客户端必须映射为月历辅助与日模板"
+    description: "短/长/超长分别为日计划、带任务存档架的月历、独立年度任务板；年度任务含用户编辑的月份跨度、七选一 colorKey、独立 progressPercent 与多子任务，不自动关联日/月计划。吸顶月份刻度与唯一脉冲充能框共用 12 列坐标，完整外框表示跨度、内部从左到右填充表示 progressPercent；+10/−10、+5/−5、+1/−1 与直接完成复用原保存接口，双向钳制 0–100，子任务仍独立。今日页本月分页复用年度任务查询与同一充能组件；离线日任务变更后同步重算统计完成率。旧 week 与 weekly-template 路由仅作兼容"
     contract_test_required: true
   - id: DIFF-006
     category: conflict_strategy

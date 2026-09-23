@@ -5,6 +5,7 @@ import 'package:innocence_flutter/features/account/domain/models/user_profile.da
 import 'package:innocence_flutter/features/settings/domain/models/setting_overview.dart';
 import 'package:innocence_flutter/features/settings/domain/models/widget_setting.dart';
 import 'package:innocence_flutter/features/settings/presentation/pages/settings_page.dart';
+import 'package:innocence_flutter/core/widgets/soft_spectrum_backdrop.dart';
 
 void main() {
   testWidgets('offline mode exposes only device-safe settings', (tester) async {
@@ -143,6 +144,15 @@ void main() {
     expect(find.text('Admin tools'), findsNothing);
     expect(find.text('Cancel account'), findsNothing);
     expect(find.text('Refresh'), findsNothing);
+    expect(find.byType(SoftSpectrumBackdrop), findsOneWidget);
+
+    await tester.tap(find.text('Appearance'));
+    await tester.pump();
+    expect(
+      find.byKey(const ValueKey('settings-visual-theme-minimalism')),
+      findsOneWidget,
+    );
+    expect(find.text('Soft spectrum'), findsNWidgets(2));
 
     await tester.tap(find.text('Desktop experience'));
     await tester.pump();
