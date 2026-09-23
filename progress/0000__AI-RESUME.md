@@ -3,12 +3,12 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-09-23"
-latest_checkpoint: "0057"
+latest_checkpoint: "0058"
 current_phase: P01
 current_gate: G01
-state: annual_charge_progress_unified_build_verified_visual_qa_pending
-next_sequence: "0058"
-current_goal: "年度任务唯一充能框已合并月份跨度和任务进度，空框起步、随进度平滑增减，+10/−10、+5/−5、+1/−1 和直接完成已接入现有持久化；年度定向测试、Flutter 全套 63 项、静态分析与 Windows Release 构建通过。下一步在 Large/Medium/Small 与多 DPI 下人工确认实际视觉和动效"
+state: windows_v1_1_0_released_visual_qa_pending
+next_sequence: "0059"
+current_goal: "Windows v1.1.0+3 已从提交 420b832 构建安装器、便携包和 SHA256 清单，main 与 v1.1.0 标签已推送，GitHub 正式 Release 三个资产公开可下载；Flutter 63 项与 Maven 44 项通过。下一步仍需多尺寸/DPI 实机视觉矩阵、真实联网同步回放和 Authenticode 签名"
 recent_baseline:
   - checkpoint: "0015"
     result: "设置页完成 Large/Medium/Small 三档独立编排与黑名单新增入口；新增会话、认证、拉黑和跨租户权限负向测试，定向 Maven 7 项通过；Flutter/Dart SDK、数据库集成环境和头像上传后端路由仍不可用"
@@ -84,6 +84,8 @@ recent_baseline:
     result: "补齐上轮未执行的验证：年度部件定向测试通过，Flutter 全套 63/63、Maven 全套 44/44、flutter analyze 和 Windows Release 构建通过；本轮临时 MySQL 容器已停止并移除，数据卷保留；不同 DPI 的实际视觉/动效仍待人工验收。"
   - checkpoint: "0057"
     result: "用户将年度任务的独立进度条合并进月份脉冲框：外框精确表示月份，0–100% 控制内部填充，0% 空框、100% 满框；首页本月预览共用组件，+10/−10、+5/−5、+1/−1 双向钳制且完成后可回退。年度定向测试、Flutter 全套 63 项、analyze 与 Windows Release 构建通过；服务端未变更，上轮 Maven 44 项通过。"
+  - checkpoint: "0058"
+    result: "Windows v1.1.0+3 功能版已发布：420b832 推送 origin/main，注释标签 v1.1.0 指向该提交；隔离工作区完成 Flutter 63 项、静态分析、Windows Release 与 Inno Setup 构建，Maven 44 项通过；安装器、便携 ZIP、SHA256 清单的本地及 GitHub 摘要一致，正式 Release ID 394293985，三个公开下载地址 HTTP 200。安装器未签名，未做本轮安装/多 DPI 实机验收。"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
@@ -186,7 +188,7 @@ unfinished:
     gate: G01/G02
   - id: TODO-014
     priority: P1
-    item: "为后续 Windows Release 配置可信 Authenticode 代码签名证书；v1.0.1 当前为 NotSigned，发布说明已披露 SmartScreen 风险"
+    item: "为后续 Windows Release 配置可信 Authenticode 代码签名证书；v1.1.0 当前为 NotSigned，发布说明已披露 SmartScreen 风险"
     gate: G06
   - id: TODO-016
     priority: P1
@@ -209,8 +211,8 @@ next_actions:
     action: "使用真实登录会话回放 U24/U25 与离线同步，并人工完成托盘菜单所有命令的端到端验收"
     inputs: ["docs/06-contract-inventory.md", "server/innocence-server", "client/flutter_app/build/windows/x64/runner/Release/innocence_flutter.exe"]
   - id: NEXT-002
-    action: "继续 v1.0.1 的 100%/125%/150% DPI 矩阵，并在下一次 Windows 发布前配置 Authenticode 代码签名"
-    inputs: ["https://github.com/2877905731/Innocence/releases/tag/v1.0.1", "client/flutter_app/windows/package_release.ps1"]
+    action: "继续 v1.1.0 的 100%/125%/150% DPI 矩阵，并在下一次 Windows 发布前配置 Authenticode 代码签名"
+    inputs: ["https://github.com/2877905731/Innocence/releases/tag/v1.1.0", "client/flutter_app/windows/package_release.ps1"]
 required_reads:
   - AGENTS.md
   - docs/08-project-profile.md

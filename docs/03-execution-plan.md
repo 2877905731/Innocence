@@ -4,11 +4,11 @@ document_type: execution_plan
 project_name: "Innocence"
 project_profile_path: docs/08-project-profile.md
 baseline:
-  project_root: "F:\\springmvc1\\Innocence"
+  project_root: "D:\\project\\Innocence"
   runtime: "Flutter + Java 21 + Spring Boot 3.3.2 + MyBatis + MySQL 8 + Redis"
   current_phase: P01
   current_gate: G01
-  evidence: "离线身份/SQLite/outbox/登录确认导入、柔彩主题、每日标语、任务存档与独立年度任务板及 Windows 八方向 sizing loop 已实现；首页今日完成率、本月超长任务分页、年度任务独立进度已补齐。2026-09-23 最新年度任务 UI 将月份跨度外框与 0–100% 进度填充合为唯一七色脉冲充能组件，删除独立任务进度条并新增成对增减按钮；月份槽位共用坐标且刻度滚动吸顶。年度部件定向测试、Flutter 全套 63 项、flutter analyze 与 Windows Release 构建通过；后端本轮未改，上轮 Maven 全套 44 项通过。Large/Medium/Small 多 DPI 实机视觉矩阵与同步真实 HTTP 回放仍待验收"
+  evidence: "离线身份/SQLite/outbox/登录确认导入、柔彩主题、每日标语、任务存档与独立年度任务板及 Windows 八方向 sizing loop 已实现；首页今日完成率、本月超长任务分页、年度任务独立进度已补齐。2026-09-23 年度任务 UI 将月份跨度外框与 0–100% 进度填充合为唯一七色脉冲充能组件，删除独立任务进度条并新增成对增减按钮；月份槽位共用坐标且刻度滚动吸顶。v1.1.0+3 已正式发布，隔离打包前 Flutter 全套 63 项、flutter analyze、Windows Release 构建及 Maven 全套 44 项通过，三个 GitHub 资产公开可下载。Large/Medium/Small 多 DPI 实机视觉矩阵与同步真实 HTTP 回放仍待验收"
 invariants:
   - id: INV-001-TRUTHFUL-SCOPE
     enabled: true

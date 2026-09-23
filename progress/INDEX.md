@@ -412,3 +412,10 @@ checkpoints:
     status: complete
     path: progress/0057__20260923__P01__DECISION__unified-annual-charge-and-bidirectional-progress.md
     title: "年度脉冲跨度与任务进度合一并支持双向调整"
+  - sequence: "0058"
+    created_at: "2026-09-23T12:16:06+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0058__20260923__P01__DONE__windows-v1.1.0-release-published.md
+    title: "Windows v1.1.0 柔彩主题与年度任务正式发布"
