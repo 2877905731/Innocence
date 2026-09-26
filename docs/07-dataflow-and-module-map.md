@@ -11,6 +11,9 @@ topology:
     - id: flutter_desktop
       name: "Flutter 桌面端（Windows 自适应 Canvas + Focus Orb）"
       owner: "Innocence"
+    - id: admin_web
+      name: "独立管理员网站（浏览器静态资源，经同域反向代理访问服务端）"
+      owner: "Innocence"
     - id: backend
       name: "Spring Boot 后端（innocence-server）"
       owner: "Innocence"
@@ -29,6 +32,10 @@ topology:
       to: backend
       call: "REST /api/app/v1 + WebSocket /ws/app（Small/Orb 状态摘要可复用 /home/widget 轻量接口）"
       auth: "Bearer token"
+    - from: admin_web
+      to: backend
+      call: "REST /api/admin/v1（同域 /api 反向代理）"
+      auth: "独立 admin_web 会话槽位 + Bearer token + 服务端管理员白名单"
     - from: flutter_desktop
       to: desktop_local_store
       call: "local profile、账户缓存、日/月/年计划、专注、备忘录与待同步操作的事务读写"
@@ -122,6 +129,7 @@ pitfalls:
 code_locations:
   backend: "server/innocence-server/src/main/java/com/innocence/server/modules/（account/checkin/focus/friend/home/memo/notification/plan/report/setting/stats/system/team）"
   frontend: "client/flutter_app/lib/features/（account/admin/auth/checkin/focus/friends/home/memos/notifications/plans/settings/stats/team）+ core/（network/config/theme/platform/layout/widgets）"
+  admin_frontend: "client/admin_web/src/（独立管理员网站；登录、概览、举报、用户、团队、公告）"
   database: "server/innocence-server/src/main/resources/schema.sql + infra/docker/docker-compose.dev.yml"
 project_boundary:
   read:

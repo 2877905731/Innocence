@@ -26,7 +26,7 @@ public class SessionAuthService {
         }
 
         String normalizedDeviceType = normalizeDeviceType(deviceType);
-        String deviceSlot = "windows".equals(normalizedDeviceType) ? "desktop" : "mobile";
+        String deviceSlot = resolveDeviceSlot(normalizedDeviceType);
         UserSession session = userMapper.findSessionByUserIdAndSlot(userId, deviceSlot);
         if (session == null || session.getStatus() == null || session.getStatus() != 1) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "登录已失效，请重新登录");
@@ -59,15 +59,23 @@ public class SessionAuthService {
     }
 
     private String normalizeDeviceType(String deviceType) {
+        if (deviceType == null || deviceType.isBlank()) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "缺少设备类型");
+        }
         String normalized = deviceType.trim().toLowerCase();
         return switch (normalized) {
             case "android", "ios", "mobile", "phone" -> "android";
             case "windows", "desktop", "pc" -> "windows";
+            case "admin_web" -> "admin_web";
             default -> throw new BusinessException(ErrorCode.UNAUTHORIZED, "不支持的设备类型");
         };
     }
 
     private String resolveDeviceSlot(String deviceType) {
-        return "windows".equals(normalizeDeviceType(deviceType)) ? "desktop" : "mobile";
+        return switch (normalizeDeviceType(deviceType)) {
+            case "windows" -> "desktop";
+            case "admin_web" -> "admin_web";
+            default -> "mobile";
+        };
     }
 }

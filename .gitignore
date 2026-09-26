@@ -29,7 +29,12 @@ build/
 # Env
 .env
 .env.*
+!**/.env.example
 server/innocence-server/config/
+
+# Admin web
+node_modules/
+client/admin_web/dist/
 
 # Runtime uploads
 data/uploads/

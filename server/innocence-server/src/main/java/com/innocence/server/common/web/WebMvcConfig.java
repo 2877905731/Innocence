@@ -27,7 +27,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/app/v1/**",
                         "/api/admin/v1/**"
                 )
-                .excludePathPatterns("/api/app/v1/system/**", "/api/app/v1/auth/**");
+                .excludePathPatterns("/api/app/v1/system/**", "/api/app/v1/auth/**", "/api/admin/v1/auth/login");
     }
 
     @Override

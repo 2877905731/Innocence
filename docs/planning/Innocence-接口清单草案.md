@@ -448,6 +448,8 @@
 
 ### 6.1 管理员认证与首页
 
+> 2026-09-26 实现对齐：独立管理员网页第一版使用 `POST /api/admin/v1/auth/login`，提交 `email`、`password`、`deviceId`，并使用专属 `admin_web` 会话槽位；另有 `/auth/me`、`/auth/logout`。概览已实现 `/dashboard/overview`，字段为 `userCount`、`availableUserCount`、`teamCount`、`pendingReportCount`、`todayStudyMinutes`。下表中的 `username`、`adminInfo`、`todayNoticeCount` 和 `/dashboard/trend` 属于早期草案，尚未按该形态实现。其余后台列表也以当前 Controller 的 `limit` 语义为准，分页版留待后续契约升级；详细映射见 `docs/06-contract-inventory.md`。
+
 | 接口 | 方法 | 用途 | 关键请求参数 | 关键返回字段 |
 | --- | --- | --- | --- | --- |
 | `/auth/login` | POST | 管理员登录 | `username` `password` | `accessToken` `adminInfo` |

@@ -216,8 +216,26 @@ compatibility_decisions:
     checkpoint: "DEC-0027 / progress 0040"
 undocumented_route_families:
   - family: "/api/admin/v1/**"
-    evidence_status: pending
-    trigger: "P04 后台完善时核对实现与草案差异"
+    evidence_status: source_and_unit_verified_http_pending
+    trigger: "独立管理员网站已对接现有举报、用户、团队、公告接口；真实管理员 HTTP 回放和服务器部署待验收"
+admin_web_contract:
+  updated_at: "2026-09-26"
+  base_url: "同域 /api；本地 Vite 转发到 http://127.0.0.1:8080"
+  envelope: "HTTP 2xx 且 code=0 为成功；非 0 使用 message，401 清理网页会话"
+  auth: "POST /api/admin/v1/auth/login，body=email/password/deviceId；服务端先校验密码及管理员白名单，再创建 admin_web 会话；返回 accessToken/tokenType/deviceType/deviceSlot/deviceId/userInfo"
+  headers: "后续请求 Authorization: Bearer {accessToken}、X-Device-Type: admin_web、X-Device-Id；X-User-Id 不作为身份输入"
+  routes:
+    - "GET /auth/me；POST /auth/logout；GET /dashboard/overview"
+    - "GET /reports?status&reportType&limit；GET /reports/{id}；POST /reports/{id}/review（decision/deleteContent/punishmentType/durationDays/reason）"
+    - "GET /users/search?keyword&limit；GET /users/{id}、/users/{id}/reports、/users/{id}/punishments；POST /users/{id}/punishments/{punishmentId}/lift"
+    - "GET /teams?keyword&status&limit；GET /teams/{id}；POST /teams/{id}/remove-member?memberUserId、/teams/{id}/dissolve"
+    - "GET /announcements?limit；POST /announcements（title/content）；POST /announcements/{id}/delete"
+  dashboard_fields: "userCount、availableUserCount（status=1）、teamCount（status=1）、pendingReportCount、todayStudyMinutes（当日结束的计时记录之 duration_seconds/60）"
+  ordering_and_pagination: "当前管理列表为 limit 上限内的最近记录；前端最多请求 100 条，不能当作总数；概览计数另由聚合 SQL 返回"
+  time_semantics: "管理列表延用现有 yyyy-MM-dd HH:mm 服务端显示字符串；概览当日按数据库会话时区的 current_date() 统计，部署时应与业务时区对齐"
+  negative_paths: "密码错误 401、非管理员 403、过期/替换会话 401、缺字段 400、找不到资源 404、审核重复或非法参数 400；网络和 5xx 均展示错误不伪造成功"
+  retry_and_storage: "只手动重试读取请求；写入请求不自动重试；token 仅存当前标签页 sessionStorage，退出时撤销服务端会话"
+  evidence: "AdminAuthController、AdminDashboardController、现有四组管理 Controller、client/admin_web/src/api.ts；真实 HTTP 样本待收集"
 ---
 
 # 契约清单说明

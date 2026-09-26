@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: ${INNOCENCE_DB_URL}
+    username: ${INNOCENCE_DB_USER}
+    password: ${INNOCENCE_DB_PASSWORD}
+  sql:
+    init:
+      mode: never
+  data:
+    redis:
+      host: ${INNOCENCE_REDIS_HOST}
+      port: ${INNOCENCE_REDIS_PORT:6379}
+      password: ${INNOCENCE_REDIS_PASSWORD:}
+  mail:
+    host: ${INNOCENCE_MAIL_HOST}
+    port: ${INNOCENCE_MAIL_PORT:465}
+    username: ${INNOCENCE_MAIL_USERNAME}
+    password: ${INNOCENCE_MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+
+server:
+  address: ${INNOCENCE_BIND_ADDRESS:127.0.0.1}
+  port: ${INNOCENCE_PORT:8080}
+
+innocence:
+  admin:
+    emails: ${INNOCENCE_ADMIN_EMAILS}

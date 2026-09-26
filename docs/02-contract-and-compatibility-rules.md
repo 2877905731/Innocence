@@ -86,6 +86,7 @@ compatibility:
 
 - 前台接口前缀：`/api/app/v1`；后台：`/api/admin/v1`；实时通道：`/ws/app`
 - 鉴权：登录返回 `accessToken`，请求头 `Authorization: Bearer {token}`；设备信息 `X-Device-Id`、`X-Device-Type`（`mobile` / `desktop`）
+- 独立管理员网页使用保留的 `X-Device-Type: admin_web` 与 `user_session.device_slot=admin_web`；仅 `/api/admin/v1/auth/login` 可在管理员白名单校验后签发该会话，普通用户登录路由不能申请此类型。当前后台 Controller 仍支持已有 Flutter 管理入口；网页请求以同域 `/api` 转发。
 - 统一返回结构：`{ code, message, data, requestId, serverTime }`，`code=0` 成功，非 0 为可读业务错误码（不裸抛 HTTP 500）
 - 分页结构：`{ pageNo, pageSize, total, list }`
 - 时间统一 ISO 8601；需同步的写接口返回 `syncVersion` / `revision` + `updateTime`；客户端提交带 `clientTime` / `clientVersion` / `deviceId`，离线可重放写操作还必须带稳定的 `clientEntityId`、`operationId` 和 `baseRevision`

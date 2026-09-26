@@ -23,6 +23,7 @@ import com.innocence.server.modules.account.dto.response.UserProfileResponse;
 import com.innocence.server.modules.checkin.service.CheckInService;
 import com.innocence.server.modules.friend.mapper.FriendMapper;
 import com.innocence.server.modules.account.mapper.UserMapper;
+import com.innocence.server.modules.report.service.AdminAccessService;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -113,6 +114,22 @@ public class AccountService {
         User user = requireUser(userAuth.getUserId());
         UserProfile profile = requireProfile(userAuth.getUserId());
         UserSession session = createOrReplaceSession(userAuth.getUserId(), request.getDeviceType(), request.getDeviceId());
+        return buildAuthResponse(user, profile, session);
+    }
+
+    @Transactional
+    public AuthTokenResponse loginAdminByPassword(String email, String password, String deviceId,
+                                                  AdminAccessService adminAccessService) {
+        UserAuth userAuth = requireUserAuth(email);
+        String expectedHash = sha256(password + userAuth.getPasswordSalt());
+        if (!expectedHash.equals(userAuth.getPasswordHash())) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "邮箱或密码错误");
+        }
+        adminAccessService.requireAdmin(userAuth.getUserId());
+        User user = requireUser(userAuth.getUserId());
+        UserProfile profile = requireProfile(userAuth.getUserId());
+        userMapper.updateUserLoginTime(userAuth.getUserId());
+        UserSession session = persistSession(userAuth.getUserId(), "admin_web", "admin_web", deviceId);
         return buildAuthResponse(user, profile, session);
     }
 
@@ -343,6 +360,10 @@ public class AccountService {
     private UserSession createOrReplaceSession(Long userId, String deviceType, String deviceId) {
         String normalizedType = normalizeDeviceType(deviceType);
         String deviceSlot = normalizeDeviceSlot(normalizedType);
+        return persistSession(userId, normalizedType, deviceSlot, deviceId);
+    }
+
+    private UserSession persistSession(Long userId, String normalizedType, String deviceSlot, String deviceId) {
         LocalDateTime now = LocalDateTime.now();
 
         UserSession session = new UserSession();
