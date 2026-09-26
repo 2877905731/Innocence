@@ -267,6 +267,22 @@ void main() {
     await tester.ensureVisible(fullYear);
     await tester.tap(fullYear);
     await tester.pump();
+    final stickyHeader =
+        find.byKey(const ValueKey('annual-sticky-month-ruler'));
+    final headerDecoration =
+        tester.widget<Container>(stickyHeader).decoration! as BoxDecoration;
+    expect(headerDecoration.color, isNull);
+    expect(headerDecoration.gradient, isA<LinearGradient>());
+    expect(
+      (headerDecoration.gradient! as LinearGradient)
+          .colors
+          .every((color) => color.a < 1),
+      isTrue,
+    );
+    expect(
+      find.ancestor(of: stickyHeader, matching: find.byType(BackdropFilter)),
+      findsOneWidget,
+    );
     final firstMonth =
         tester.getRect(find.byKey(const ValueKey('annual-month-1')));
     final lastMonth =
@@ -307,6 +323,14 @@ void main() {
     expect((fourthTrack.left - active.left).abs(), lessThan(0.01));
     expect((eleventhTrack.right - active.right).abs(), lessThan(0.01));
     expect(active.height, fourthTrack.height);
+    final emptyTrack = find.descendant(
+      of: referenceCard,
+      matching: find.byKey(const ValueKey('annual-month-track-12')),
+    );
+    final trackDecoration =
+        tester.widget<DecoratedBox>(emptyTrack).decoration as BoxDecoration;
+    expect(trackDecoration.color, const Color(0x55334490));
+    expect(trackDecoration.border, isNotNull);
 
     final annualScroll = find.byKey(
       const PageStorageKey<String>('desktop.plans.annual'),
@@ -326,5 +350,16 @@ void main() {
     final stillPinnedTop =
         tester.getRect(find.byKey(const ValueKey('annual-month-1'))).top;
     expect((pinnedTop - stillPinnedTop).abs(), lessThan(0.1));
+    final monthFour = find.byKey(const ValueKey('annual-month-4'));
+    await tester.tap(monthFour);
+    await tester.pump();
+    expect(
+      tester
+          .widget<OutlinedButton>(monthFour)
+          .style!
+          .foregroundColor!
+          .resolve({}),
+      const Color(0xFF08111F),
+    );
   });
 }

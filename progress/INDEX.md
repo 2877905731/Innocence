@@ -419,3 +419,10 @@ checkpoints:
     status: complete
     path: progress/0058__20260923__P01__DONE__windows-v1.1.0-release-published.md
     title: "Windows v1.1.0 柔彩主题与年度任务正式发布"
+  - sequence: "0059"
+    created_at: "2026-09-26T19:54:56+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0059__20260926__P01__CORRECTION__glass-annual-sticky-surface.md
+    title: "玻璃态年度任务吸顶月份栏与进度槽表面纠偏"

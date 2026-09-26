@@ -2438,11 +2438,21 @@ class _AnnualStickyMonthHeader extends SliverPersistentHeaderDelegate {
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
+    final glass = palette.visualTheme == AppVisualTheme.glass;
+    final header = Container(
       key: const ValueKey('annual-sticky-month-ruler'),
       decoration: BoxDecoration(
-        color: palette.background,
-        border: Border(bottom: BorderSide(color: palette.rule)),
+        color: glass ? null : palette.background,
+        gradient: glass
+            ? const LinearGradient(
+                colors: [Color(0xBC253988), Color(0xBC5B318C)],
+              )
+            : null,
+        border: Border(
+          bottom: BorderSide(
+            color: glass ? const Color(0x58E0E8FF) : palette.rule,
+          ),
+        ),
         boxShadow: overlapsContent
             ? [
                 BoxShadow(
@@ -2462,6 +2472,14 @@ class _AnnualStickyMonthHeader extends SliverPersistentHeaderDelegate {
         ),
       ),
     );
+    return glass
+        ? ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+              child: header,
+            ),
+          )
+        : header;
   }
 
   @override
@@ -2548,6 +2566,7 @@ class _AnnualMonthButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final glass = palette.visualTheme == AppVisualTheme.glass;
     return OutlinedButton(
       key: ValueKey('annual-month-$month'),
       onPressed: onPressed,
@@ -2556,8 +2575,16 @@ class _AnnualMonthButton extends StatelessWidget {
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         backgroundColor: selected ? palette.accent : palette.surface,
-        foregroundColor: selected ? palette.onInk : palette.ink,
-        side: BorderSide(color: selected ? palette.accent : palette.rule),
+        foregroundColor: selected
+            ? (glass ? palette.background : palette.onInk)
+            : palette.ink,
+        side: BorderSide(
+          color: selected
+              ? palette.accent
+              : glass
+                  ? const Color(0x58E0E8FF)
+                  : palette.rule,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       child: Column(
@@ -2571,7 +2598,8 @@ class _AnnualMonthButton extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 9,
                   color: selected
-                      ? palette.onInk.withValues(alpha: 0.78)
+                      ? (glass ? palette.background : palette.onInk)
+                          .withValues(alpha: 0.78)
                       : palette.muted,
                 )),
         ],
@@ -2985,6 +3013,7 @@ class _ChargingMonthSpanState extends State<_ChargingMonthSpan>
   Widget build(BuildContext context) {
     final start = widget.startMonth.clamp(1, 12);
     final end = widget.endMonth.clamp(start, 12);
+    final glass = widget.palette.visualTheme == AppVisualTheme.glass;
     return LayoutBuilder(
       builder: (context, constraints) {
         final grid = _AnnualMonthGrid(constraints.maxWidth);
@@ -3004,7 +3033,12 @@ class _ChargingMonthSpanState extends State<_ChargingMonthSpan>
                   child: DecoratedBox(
                     key: ValueKey('annual-month-track-$month'),
                     decoration: BoxDecoration(
-                      color: widget.palette.rule.withValues(alpha: 0.55),
+                      color: glass
+                          ? const Color(0x55334490)
+                          : widget.palette.rule.withValues(alpha: 0.55),
+                      border: glass
+                          ? Border.all(color: const Color(0x38E0E8FF))
+                          : null,
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),
@@ -3020,7 +3054,9 @@ class _ChargingMonthSpanState extends State<_ChargingMonthSpan>
                     Positioned.fill(
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: widget.palette.surface.withValues(alpha: 0.55),
+                          color: glass
+                              ? const Color(0x36243571)
+                              : widget.palette.surface.withValues(alpha: 0.55),
                           borderRadius: BorderRadius.circular(6),
                         ),
                       ),
