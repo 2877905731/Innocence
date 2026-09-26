@@ -426,3 +426,10 @@ checkpoints:
     status: complete
     path: progress/0059__20260926__P01__CORRECTION__glass-annual-sticky-surface.md
     title: "玻璃态年度任务吸顶月份栏与进度槽表面纠偏"
+  - sequence: "0060"
+    created_at: "2026-09-26T20:13:30+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0060__20260926__P01__DONE__windows-v1.1.1-glass-annual-release.md
+    title: "Windows v1.1.1 玻璃态年度任务修复正式发布"

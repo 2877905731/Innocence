@@ -3,12 +3,12 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-09-26"
-latest_checkpoint: "0059"
+latest_checkpoint: "0060"
 current_phase: P01
 current_gate: G01
-state: glass_annual_surface_correction_built_visual_qa_pending
-next_sequence: "0060"
-current_goal: "本地 main 已包含 Windows v1.1.0+3 和独立后台网站基础版；根据用户截图修正玻璃态年度任务吸顶月份栏与进度槽表面，Flutter 63 项、analyze 和 Windows Release 构建通过，但新构建尚未实机目视验收，D 盘运行中的便携版未被替换。后续仍需多尺寸/DPI 视觉矩阵、真实联网同步回放和 Authenticode 签名"
+state: windows_v1_1_1_released_visual_qa_pending
+next_sequence: "0061"
+current_goal: "Windows v1.1.1+4 已发布：玻璃态年度任务月份栏视觉修复从提交 a385af1 推送到 main 与 v1.1.1 标签，正式 GitHub Release 三项资产均已上传且远端 SHA256 摘要匹配本地；Flutter 63 项、analyze、Windows Release 和 Inno Setup 构建通过。新版本尚未做多尺寸/DPI 实机目视验收，D 盘运行中的旧便携版未替换；后续还需真实联网同步回放和 Authenticode 签名"
 recent_baseline:
   - checkpoint: "0015"
     result: "设置页完成 Large/Medium/Small 三档独立编排与黑名单新增入口；新增会话、认证、拉黑和跨租户权限负向测试，定向 Maven 7 项通过；Flutter/Dart SDK、数据库集成环境和头像上传后端路由仍不可用"
@@ -88,6 +88,8 @@ recent_baseline:
     result: "Windows v1.1.0+3 功能版已发布：420b832 推送 origin/main，注释标签 v1.1.0 指向该提交；隔离工作区完成 Flutter 63 项、静态分析、Windows Release 与 Inno Setup 构建，Maven 44 项通过；安装器、便携 ZIP、SHA256 清单的本地及 GitHub 摘要一致，正式 Release ID 394293985，三个公开下载地址 HTTP 200。安装器未签名，未做本轮安装/多 DPI 实机验收。"
   - checkpoint: "0059"
     result: "修正玻璃态年度任务吸顶月份栏的不透明近黑底、过亮的未覆盖月份槽及选中月份低对比文字；年度定向测试 1/1、Flutter 全套 63/63、analyze、diff 检查与 Windows Release 构建通过，新二进制尚未实机目视验收或替换 D 盘便携版。"
+  - checkpoint: "0060"
+    result: "Windows v1.1.1+4 补丁版已发布：提交 a385af1 与注释标签 v1.1.1 推送 origin；完整打包流程的 Flutter 63 项、analyze、Windows Release、Inno Setup 通过，安装器/便携 ZIP/校验清单三项资产上传到正式 Release 397222629 且远端摘要匹配；下载 CDN HEAD 超时，未宣称下载地址逐一 HTTP 200，实机视觉仍待验收。"
 user_decisions:
   - id: DEC-0001
     decision: "模板治理框架全量 9 文档落地；planning 文档并存引用"
@@ -216,8 +218,8 @@ next_actions:
     action: "使用真实登录会话回放 U24/U25 与离线同步，并人工完成托盘菜单所有命令的端到端验收"
     inputs: ["docs/06-contract-inventory.md", "server/innocence-server", "client/flutter_app/build/windows/x64/runner/Release/innocence_flutter.exe"]
   - id: NEXT-002
-    action: "继续 v1.1.0 的 100%/125%/150% DPI 矩阵，并在下一次 Windows 发布前配置 Authenticode 代码签名"
-    inputs: ["https://github.com/2877905731/Innocence/releases/tag/v1.1.0", "client/flutter_app/windows/package_release.ps1"]
+    action: "继续 v1.1.1 的 100%/125%/150% DPI 矩阵，并在下一次 Windows 发布前配置 Authenticode 代码签名"
+    inputs: ["https://github.com/2877905731/Innocence/releases/tag/v1.1.1", "client/flutter_app/windows/package_release.ps1"]
 required_reads:
   - AGENTS.md
   - docs/08-project-profile.md
