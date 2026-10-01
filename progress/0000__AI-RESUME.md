@@ -3,14 +3,14 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-01"
-latest_checkpoint: "0082"
-next_sequence: "0083"
+latest_checkpoint: "0083"
+next_sequence: "0084"
 current_phase: P01
 current_gate: G01
-state: v1.2.0_dual_platform_release_built_android_offline_runtime_verified_publish_pending
-current_goal: "2026-10-01 用户要求发布目前成果的小版本，包括 Android，并明确先发本机离线版、联网后续接入。双端统一 v1.2.0+5；最终 analyze 无问题、93 项全量与8项离线编译/恢复专项通过，Windows安装器/便携包及独立发行签名的Android离线Release APK构建成功。API36独立模拟器断网安装、凌晨00:00–02:00/午夜23:00–24:00、短距离拖动、计划保存、专注起停、备忘录保存、同签名覆盖/冷启动保留资料和两主题切换核对通过，最终进程日志无筛选到的Flutter致命/溢出错误。下一步提交/推送源码与v1.2.0标签并发布GitHub四项资产；实体手机、Windows视觉矩阵及真实联网同步待办保留。"
+state: v1.2.0_windows_and_android_offline_release_published_device_and_visual_acceptance_pending
+current_goal: "2026-10-01 用户小版本发布请求已完成：v1.2.0+5源码8cb34fe与标签已推送，GitHub正式Release400708565为latest/draft=false/prerelease=false；Windows安装器/便携包、Android本机离线签名APK和SHA256清单四项公开，摘要逐项一致，四个下载HEAD200且长度匹配。最终analyze无问题、93项全量/8项离线编译恢复专项通过；API36断网安装、凌晨/午夜圆盘/短拖、计划/专注/备忘录、冷启动/覆盖保留与两主题核对，最终PID错误筛选0。Android联网后续接入；Windows仍未AuthentiCode签名，实体手机、完整手机页、Windows视觉矩阵与真实同步仍待验收，P01/G01不自动通过。"
 current_baseline:
-  - "2026-10-01 v1.2.0 离线发行准备（0082及当前代码）：共享版本1.2.0+5、签名与Logo、专用入口、请求守卫、离线Manifest覆盖及双端脚本已接入；最终analyze无问题、93项全量与8项离线编译/恢复专项通过。双端正式包已构建，API36飞行模式安装/冷启动/同签名覆盖保留两段计划和备忘录、专注起停及两主题核对通过；公开发布仍待执行。"
+  - "2026-10-01 v1.2.0 双端正式发布（0083）：源码8cb34fe/注释标签已推送，Release400708565公开/latest；Windows安装器/便携包、Android离线签名APK及清单4/4摘要匹配/下载HEAD200。analyze无问题、93项全量/8项离线专项通过，API36飞行模式安装/冷启动/覆盖保留两段计划与备忘录、专注起停/两主题通过。APK正式证书SHA256 c39218092db96b3c4085b0853bb781399b7d4fe1747a9d1032844b8154c05837，后续不可丢失/更换密钥；Windows未签名、实体手机和真实联网待补。"
   - "2026-10-01 Android 短计划圆盘（0081）：24小时/48半小时刻度、凌晨月亮、明确00:00与24:00、点选起止/已有段激活/首尾拖动/带语义半小时微调；输入非整点或半点明确拒绝，不静默舍入。邻接防重叠、最短半小时及盘顶连续角度钳制验证通过。Android纵向内容与固定保存可应对320dp、1.5倍字体、键盘280dp和英文横屏；analyze无问题、18项专项与89项全量通过，Debug APK212.5秒构建成功，两主题宿主渲染图目视核对；安装后触控与实体设备未验收。"
   - "2026-09-30 玻璃月份栏/二级浮层（0080）：月份栏收回内容宽度并采用中性圆角/22px磨砂，移除旧蓝紫实色带，12月几何与进度回归通过。13个文件的弹层调用统一入口，玻璃弹层18px虚化底层页面、约82%中性主体、45%遮罩、24px圆角及清晰输入/菜单底；保留Material路由、焦点、取消和返回语义。analyze无问题、78项全量回归及最终嵌套草稿回归通过，Windows Release/Android Debug构建成功；Windows年度编辑实际画面及API36专注弹窗核对，未由助手提交业务数据。吸顶滚动/DPI/性能仍待验收。"
   - "2026-09-30 简约白浮窗层次（0079）：WhiteFrostedPanel采用18px背景模糊、约65–85%暖白透明渐层、内亮边/外柔影；CitrusWhiteHero替换透明标语区并适配窄屏，签到/摘要/指标局部磨砂，标题细橙线、指标圆点及Android图标浅底接入。analyze无问题、77项回归通过、Windows Release/Android Debug构建成功；API36默认首页和约320dp宽/1.5倍字体截图可见，无筛选到的Flutter致命/溢出日志。Windows仅信息卡片区可见，标语/小画布/多DPI待验收，未进行远端Git动作。"
@@ -67,7 +67,7 @@ unfinished:
     gate: G01/Android-A1
   - id: TODO-WINDOWS-VISUAL
     priority: P0
-    item: "Windows v1.1.1 玻璃态年度页及 Large/Medium/Small/Focus Orb 的 100%/125%/150% DPI、八方向拖边、四主题视觉和实际动效验收；不要把 D 盘旧便携版当新构建。"
+    item: "Windows v1.2.0年度页及Large/Medium/Small/Focus Orb的100%/125%/150%DPI、八方向拖边、四主题视觉和实际动效验收；不要把D盘旧便携版当新构建。"
     gate: G01/G05/G06
   - id: TODO-SYNC-HTTP
     priority: P0
@@ -79,16 +79,16 @@ unfinished:
     gate: G01
   - id: TODO-WINDOWS-RELEASE
     priority: P1
-    item: "下次 Windows 发布前处理 Authenticode；网络可用时核对 v1.1.1 三个公开资产下载链路。"
+    item: "下次Windows发布处理Authenticode；v1.2.0四个公开资产下载HEAD200/摘要校验已通过，本轮未做Windows安装/卸载。"
     gate: G06
   - id: TODO-ANDROID-BASELINE
     priority: P0
-    item: "Android A0 尚未通过：两主题 Shell 与离线冷启动在 API36 模拟器验证；仍须连接实体设备并处理 SDK license 警告。月／年计划和业务详情页逐页视觉/MD3 核对、令牌保护、WebSocket／推送和发行签名仍是后续差距。"
+    item: "Android A0尚未通过：v1.2.0本机离线APK正式签名/发行及API36安装/核心流程/覆盖保留已完成子集；仍须连接实体设备、处理SDK license警告，补月/年与二级手机页、键盘/大字体/前后台性能。联网会话保护、真实同步、WebSocket/推送后续接入，不重复列发行签名为未完成。"
     gate: Android-A0
 next_actions:
-  - id: NEXT-V1-2-0-PUBLISH
-    action: "完成双端Release打包、独立API36模拟器安装/冷启动/升级、版本/签名/权限/摘要校验；按用户发布授权提交并推送源码/标签，发布GitHub安装器、便携ZIP、离线APK与SHA256清单，新增0083实际发布DONE记录。"
-    inputs: ["client/flutter_app/windows/package_release.ps1", "client/flutter_app/android/package_release.ps1", "docs/releases/v1.2.0.md"]
+  - id: NEXT-V1-2-0-DEVICE-ACCEPTANCE
+    action: "双端发布已完成；后续连接实体Android设备核对正式离线APK的圆盘邻接/键盘/返回、大字体/两主题与长时间恢复，并继续手机月/年及二级页面验收；保留发行密钥安全备份。"
+    inputs: ["https://github.com/2877905731/Innocence/releases/tag/v1.2.0", "progress/0083__20261001__P01__DONE__v1.2.0-windows-and-android-offline-release.md"]
   - id: NEXT-ANDROID-PLAN-CLOCK-RUNTIME
     action: "默认API36圆盘运行子集已由v1.2.0正式APK补齐；继续在实体设备核对首尾拖动/邻接停止、大字体/键盘/系统返回。不要接管用户草稿或向真实账号保存合成任务；跨日进一步范围待用户补充。"
     inputs: ["client/flutter_app/lib/features/plans/presentation/widgets/plan_clock_range_picker.dart", "client/flutter_app/test/features/plans/android_plan_clock_test.dart", "F:/AndroidSdk-Innocence/captures/20261001-plan-clock/"]
@@ -117,8 +117,8 @@ next_actions:
     action: "在实体手机或可正常弹出软键盘的模拟器复验邮箱／验证码输入、遮挡和系统返回；补齐真实认证失败等负向回放。"
     inputs: ["client/flutter_app/lib/features/auth/presentation/pages/auth_page.dart", "docs/06-contract-inventory.md"]
   - id: NEXT-WINDOWS-VERIFY
-    action: "继续 G01/G05/G06 的 Windows v1.1.1 实机视觉矩阵与同步 HTTP 回放。"
-    inputs: ["progress/0060__20260926__P01__DONE__windows-v1.1.1-glass-annual-release.md", "docs/06-contract-inventory.md"]
+    action: "继续G01/G05/G06的Windows v1.2.0实机视觉矩阵、安装/卸载、Authenticode与同步HTTP回放。"
+    inputs: ["progress/0083__20261001__P01__DONE__v1.2.0-windows-and-android-offline-release.md", "docs/06-contract-inventory.md"]
 history:
   index: progress/INDEX.md
   archived_checkpoints: "progress/archive/0001–0057（原名；逐项路径见 INDEX）"
@@ -139,5 +139,6 @@ history:
   checkpoint_0080: progress/0080__20260930__P01__CORRECTION__glass-frosted-dialog-and-month-ruler.md
   checkpoint_0081: progress/0081__20261001__P01__DECISION__android-short-plan-clock.md
   checkpoint_0082: progress/0082__20261001__P01__DECISION__v1.2.0-android-offline-release-scope.md
+  checkpoint_0083: progress/0083__20261001__P01__DONE__v1.2.0-windows-and-android-offline-release.md
 workspace_note: "工作区另有未跟踪的 0052__20260926__P04__DONE__admin-web-local-foundation.md，与已跟踪的 0052 序号重复；其余未跟踪报告产物和 admin_web/.vite 属于现有工作区内容，本次未改动。"
 ---

@@ -587,3 +587,10 @@ checkpoints:
     status: complete
     path: progress/0082__20261001__P01__DECISION__v1.2.0-android-offline-release-scope.md
     title: "v1.2.0 双端小版本与 Android 本机离线发行范围"
+  - sequence: "0083"
+    created_at: "2026-10-01T14:47:40+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0083__20261001__P01__DONE__v1.2.0-windows-and-android-offline-release.md
+    title: "v1.2.0 双端正式发布与 Android 本机离线安装验证"

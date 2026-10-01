@@ -8,11 +8,11 @@ baseline:
   runtime: "Flutter + Java 21 + Spring Boot 3.3.2 + MyBatis + MySQL 8 + Redis"
   current_phase: P01
   current_gate: G01
-  evidence: "离线身份/SQLite/outbox/登录确认导入、柔彩主题、每日标语、任务存档与独立年度任务板及 Windows 八方向 sizing loop 已实现；首页今日完成率、本月超长任务分页、年度任务独立进度已补齐。年度任务 UI 将月份跨度外框与 0–100% 进度填充合为唯一七色脉冲充能组件，月份槽位共用坐标且刻度滚动吸顶。2026-09-26 发布 v1.1.1+4，修复玻璃态年度月份栏的近黑色条带、过亮月份槽和选中态对比；Flutter 63 项、analyze、Windows Release 与 Inno Setup 构建通过，GitHub 正式 Release 三项资产为 uploaded 且远端摘要与本地一致。安装器未签名；Large/Medium/Small 多 DPI 实机视觉矩阵与同步真实 HTTP 回放仍待验收"
+  evidence: "2026-10-01 正式发布 v1.2.0+5（0083）：两主题双端覆盖、玻璃折射/弹层、Android三点侧栏与短计划圆盘；Windows安装器/便携包及独立签名Android本机离线APK已公开，四项资产摘要全匹配、下载HEAD200。analyze无问题、93项全量/8项离线编译恢复专项通过；API36断网安装、计划/专注/备忘录、冷启动/覆盖保留与两主题运行子集通过。既有离线身份/SQLite/outbox、任务存档/独立年度板和Windows自适应/托盘逻辑保留。Windows安装器未签名；多尺寸/多DPI、Android实体手机与真实同步HTTP仍待验收，项目P01/G01未因此通过"
 android_track:
   status: in_progress
   plan_path: docs/planning/Innocence-Android版本实施规划.md
-  current_step: "A0 导航与离线范围已确认，实体设备和 SDK 许可仍待补；A1 侧边栏 Shell、离线重启恢复已实现，简约白色与液态玻璃主题开始覆盖 Android 页面"
+  current_step: "v1.2.0本机离线发行子集完成，正式签名/无联网权限/独立API36核心流程及覆盖保留有证据；实体设备/SDK许可、完整手机详情与长时间恢复仍待补，A0–A5不自动通过"
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 invariants:

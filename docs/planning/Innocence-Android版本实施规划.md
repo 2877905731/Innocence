@@ -49,7 +49,7 @@ Android 是手机主应用。第一版要在手机上完整完成「计划 → �
 | 数据与业务 | `SessionController`、API 模型、SQLite `OfflineStore` 和同步队列已在同一 Flutter 工程；服务端把 `android` 归入 mobile 会话槽 | 审计平台分支、令牌存储、断网恢复和跨设备写入；共享业务逻辑，移动端单独呈现 |
 | 页面 | `HomePage` 有非 Windows 分支，认证页和二级页含大量桌面优先布局与窗口语义 | 建立手机路由、导航和触控页面；逐页替换桌面呈现，不把现有非 Windows 分支当成已验收手机版 |
 | MD3 界面 | Flutter 主题数据已设置 `useMaterial3: true`，但应用仍从四主题控制器生成全局主题；非 Windows 页面并未因此完成 MD3 手机体验 | Android 建立独立的 MD3 `ColorScheme`、`TextTheme`、组件主题和移动页面；Windows 四主题路径保持现状 |
-| 发行 | Android Manifest 仍用工程默认名称与图标；Gradle release 当前使用 debug 签名 | 固化应用 ID、名称、图标、版本、正式签名、产物与升级验证；正式发布前移除 debug 签名 |
+| 发行 | v1.2.0+5 已正式发布 Innocence 品牌/独立签名的本机离线 APK，应用 ID 延续；最终无 INTERNET，API36覆盖安装保留资料 | 沿用发行密钥，继续实体设备/长时间/完整手机页验收；联网发行需另行固化 HTTPS 与权限 |
 | 通知 | MVP 要求手机推送，现有契约有通知与实时通道规划 | 确定推送通道、设备令牌登记和权限流程；前台消息、后台推送及已读状态要与服务端对齐 |
 
 以上是源码核对，不等于 Android 构建或运行验证。计划执行时，先补一份可复现的构建和设备基线记录。

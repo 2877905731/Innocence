@@ -111,5 +111,5 @@ change_policy:
 - UI 规划与主题存档：`docs/planning/Innocence-UI设计规划.md`
 - Windows 自适应体验：`docs/planning/Innocence-Windows自适应桌面体验.md`
 - Windows 信息架构与组件接口：`docs/planning/Innocence-Windows信息架构与组件体系.md`（已确认）
-- Android 版本实施规划：`docs/planning/Innocence-Android版本实施规划.md`（MD3 首版基线、左上角三点按钮侧边栏导航及未登录本机离线首发范围已确认；模拟器离线冷启动子集已验证，实体设备与真实导入仍待验收）
+- Android 版本实施规划：`docs/planning/Innocence-Android版本实施规划.md`（MD3交互基础/两主题/三点侧边栏；v1.2.0已发行独立签名的本机离线APK，API36安装/冷启动/覆盖保留及计划/专注/备忘录有证据；实体设备、完整手机详情与真实联网导入仍待验收）
 - 离线模式、主题标语、年月计划与窗口缩放：`docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md`（已实现主要链路；真实同步回放与完整 DPI 矩阵待验收）
