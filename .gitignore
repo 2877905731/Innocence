@@ -27,6 +27,12 @@ out/
 build/
 
 # Env
+*.jks
+*.keystore
+*.p12
+**/key.properties
+**/signing-credentials.xml
+**/signing-credentials.clixml
 .env
 .env.*
 !**/.env.example

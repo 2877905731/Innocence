@@ -21,11 +21,23 @@
 
 Innocence 当前以 Flutter + Spring Boot 为主线，覆盖 Windows 桌面端与移动端。
 
+## 下载 v1.2.0
+
+| 平台 | 下载 | 范围 |
+|---|---|---|
+| Windows x64 | [安装器](https://github.com/2877905731/Innocence/releases/download/v1.2.0/Innocence-v1.2.0-windows-x64-setup.exe) · [便携 ZIP](https://github.com/2877905731/Innocence/releases/download/v1.2.0/Innocence-v1.2.0-windows-x64-portable.zip) | 桌面版，安装器尚未代码签名 |
+| Android 7.0+ | [本机离线 APK](https://github.com/2877905731/Innocence/releases/download/v1.2.0/Innocence-v1.2.0-android-offline.apk) | 正式发行签名；本次不开放登录与联网功能 |
+
+[发布说明](https://github.com/2877905731/Innocence/releases/tag/v1.2.0) · [SHA256 校验清单](https://github.com/2877905731/Innocence/releases/download/v1.2.0/SHA256SUMS.txt) · [更新日志](CHANGELOG.md)
+
+Android 首次进入时选择语言并确认使用本机离线模式，可使用短计划圆盘选时、专注、统计、备忘录与本机设置。资料仅存设备，卸载／清除数据会丢失；此前开发 Debug APK 与正式版签名不同，不能直接覆盖。实体手机、完整月／年计划手机体验与联网同步仍待后续验收。
+
 ## 当前状态
 
 - Windows 端采用 Large / Medium / Small 自适应画布与 Focus Orb。
-- Windows 应用、窗口和系统托盘已使用正式 Innocence Logo。
-- 支持纯白、侘寂、Mid-Century Modern 和 Glass 四套可切换主题。
+- Windows 应用、窗口和系统托盘，以及 Android 应用已使用正式 Innocence Logo。
+- Windows 保留简约白色、侘寂、Mid-Century Modern 和液态玻璃四套主题；Android 已接入简约白色与液态玻璃视觉及 Material 3 交互基础。
+- Android 提供正式签名的本机离线版，短计划按 24 小时圆盘选取当天时间段。
 - 已具备认证、资料、设置、备忘录、统计、通知、好友和团队等主要交互骨架。
 - 后端业务数据按当前登录用户隔离。
 

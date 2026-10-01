@@ -1,7 +1,10 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 import 'package:innocence_flutter/features/plans/domain/models/today_plan.dart';
+import 'package:innocence_flutter/features/plans/presentation/widgets/plan_clock_range_picker.dart';
 
 const _planPastelPalette = <Color>[
   Color(0xFFA7B5FF),
@@ -171,6 +174,36 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
     _pendingStartSlot = null;
     _activeBlock = block;
     _dirty = true;
+  }
+
+  void _handleClockTap(int boundary) {
+    setState(() {
+      _validationMessage = null;
+      final start = _pendingStartSlot;
+      if (start != null) {
+        // At the end of a day, the top of the clock means 24:00.
+        final end = boundary == 0 ? 48 : boundary;
+        if (end <= start) {
+          _validationMessage = _text(
+            '结束时间须晚于开始时间；短计划按当天 00:00–24:00 安排。',
+            'End must be after start, within the same day (00:00–24:00).',
+          );
+          return;
+        }
+        if (_hasOverlap(start, end)) {
+          _validationMessage = _text(
+            '该时间段与已有任务重叠。',
+            'This time range overlaps an existing block.',
+          );
+          return;
+        }
+        _appendBlock(start, end);
+        return;
+      }
+      final occupied = _blockAt(boundary);
+      _activeBlock = occupied;
+      _pendingStartSlot = occupied == null ? boundary : null;
+    });
   }
 
   int _nextPaletteIndex() {
@@ -354,7 +387,7 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
     }
     var enteredArchiveName = _pendingArchiveName ??
         (draft.planName == 'Today' ? '' : draft.planName);
-    final archiveName = await showDialog<String>(
+    final archiveName = await showThemedDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(_text('保存为任务存档', 'Save as task archive')),
@@ -493,7 +526,7 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
       Navigator.of(context).pop();
       return;
     }
-    final discard = await showDialog<bool>(
+    final discard = await showThemedDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(_text('有未保存更改', 'Unsaved changes')),
@@ -518,8 +551,231 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
     }
   }
 
+  Widget _buildAndroidEditor(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final media = MediaQuery.of(context);
+    final availableHeight = math.max(
+      0.0,
+      media.size.height - media.viewInsets.bottom - media.padding.vertical - 24,
+    );
+    final activeIndex =
+        _activeBlock == null ? null : _blocks.indexOf(_activeBlock!);
+    return PopScope(
+      canPop: !_dirty,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) _requestClose();
+      },
+      child: Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: SizedBox(
+            height: availableHeight,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Text(
+                    widget.archiveMode
+                        ? _text('任务存档编辑器', 'Task archive editor')
+                        : _text('短计划时间安排', 'Short plan scheduler'),
+                    style: textTheme.titleLarge,
+                  ),
+                ),
+                Expanded(
+                  child: AbsorbPointer(
+                    absorbing: _saving,
+                    child: ListView(
+                      key: const ValueKey('android-plan-editor-scroll'),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      children: [
+                        TextField(
+                          controller: _planNameController,
+                          enabled: !widget.lockPlanName && !_saving,
+                          decoration: InputDecoration(
+                            labelText: widget.archiveMode
+                                ? _text('存档名称', 'Archive name')
+                                : _text('计划名称', 'Plan name'),
+                            hintText: _text(
+                                '例如：晨间学习安排', 'For example: Morning study'),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        PlanClockRangePicker(
+                          blocks: _blocks
+                              .map((block) => PlanClockBlock(
+                                    startSlot: block.startSlot,
+                                    endSlot: block.endSlot,
+                                    color: _planSlotColor(
+                                        block.paletteIndex, 0, 1),
+                                  ))
+                              .toList(),
+                          activeIndex: activeIndex,
+                          pendingStartSlot: _pendingStartSlot,
+                          isChinese: _isChinese,
+                          enabled: !_saving,
+                          onTapBoundary: _handleClockTap,
+                          onStartNew: () => setState(() {
+                            _activeBlock = null;
+                            _pendingStartSlot = null;
+                            _validationMessage = null;
+                          }),
+                          onResize: (index, start, end) =>
+                              _resizeBlock(_blocks[index], start, end),
+                        ),
+                        if (_pendingStartSlot != null)
+                          TextButton(
+                            key: const ValueKey('plan-clock-clear-anchor'),
+                            onPressed: _saving
+                                ? null
+                                : () => setState(() {
+                                      _pendingStartSlot = null;
+                                      _validationMessage = null;
+                                    }),
+                            child:
+                                Text(_text('取消当前选点', 'Clear current anchor')),
+                          ),
+                        if (_validationMessage != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Semantics(
+                              liveRegion: true,
+                              child: Text(_validationMessage!,
+                                  style: textTheme.bodyMedium?.copyWith(
+                                      color:
+                                          Theme.of(context).colorScheme.error)),
+                            ),
+                          ),
+                        if (!widget.archiveMode &&
+                            widget.onSaveAsArchive != null)
+                          TextButton.icon(
+                            key: const ValueKey('today-plan-save-as-archive'),
+                            onPressed: _saving ? null : _saveAsArchive,
+                            icon: const Icon(Icons.inventory_2_outlined),
+                            label: Text(_text(
+                                '保存当前安排为任务存档', 'Save current plan as archive')),
+                          ),
+                        if (_archiveSavedMessage != null)
+                          Text(_archiveSavedMessage!,
+                              style: textTheme.bodySmall),
+                        const SizedBox(height: 20),
+                        _SectionTitle(
+                          title: _text('已安排时间段', 'Scheduled blocks'),
+                          subtitle: _text('选中时段后，在圆盘拖动或按半小时微调。',
+                              'Select a block to drag its handles or adjust in 30-minute steps.'),
+                        ),
+                        const SizedBox(height: 12),
+                        if (_blocks.isEmpty)
+                          _EmptyStateCard(
+                              message: _text('请在圆盘选择开始与结束时间。',
+                                  'Choose a start and end on the clock.')),
+                        ...List.generate(_blocks.length, (index) {
+                          final block = _blocks[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _ScheduledBlockCard(
+                              index: index,
+                              block: block,
+                              isChinese: _isChinese,
+                              onDelete: () => _removeBlock(index),
+                              onSelectTime: () => setState(() {
+                                _activeBlock = block;
+                                _pendingStartSlot = null;
+                                _validationMessage = null;
+                              }),
+                              onChanged: () => setState(() {
+                                _validationMessage = null;
+                                _dirty = true;
+                              }),
+                            ),
+                          );
+                        }),
+                        const SizedBox(height: 8),
+                        _SectionTitle(
+                          title: _text('灵活任务', 'Flexible tasks'),
+                          subtitle: _text('无需固定时间，也会计入今日进度。',
+                              'Tasks without fixed times also count toward today.'),
+                        ),
+                        const SizedBox(height: 12),
+                        ...List.generate(
+                            _flexibleTasks.length,
+                            (index) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: _FlexibleTaskCard(
+                                    index: index,
+                                    task: _flexibleTasks[index],
+                                    isChinese: _isChinese,
+                                    onDelete: () => _removeFlexibleTask(index),
+                                    onChanged: () => setState(() {
+                                      _validationMessage = null;
+                                      _dirty = true;
+                                    }),
+                                  ),
+                                )),
+                        OutlinedButton.icon(
+                          onPressed: _saving ? null : _addFlexibleTask,
+                          icon: const Icon(Icons.add_task_rounded),
+                          label: Text(_text('添加灵活任务', 'Add flexible task')),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (widget.onSave != null) ...[
+                        Text(
+                          _dirty
+                              ? _text('有未保存更改', 'Unsaved changes')
+                              : _savedAt == null
+                                  ? _text('尚未修改', 'No changes yet')
+                                  : _text('当天计划已保存', 'Daily plan saved'),
+                          style: textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 6),
+                      ],
+                      Row(children: [
+                        TextButton(
+                          onPressed: _saving ? null : _requestClose,
+                          child: Text(_text('关闭', 'Close')),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton(
+                            key: const ValueKey('today-plan-save'),
+                            onPressed: _saving || !_dirty ? null : _save,
+                            child: _saving
+                                ? const SizedBox.square(
+                                    dimension: 18,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2))
+                                : Text(widget.archiveMode
+                                    ? _text('保存任务存档', 'Save task archive')
+                                    : _text('保存当天计划', 'Save daily plan')),
+                          ),
+                        ),
+                      ]),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return _buildAndroidEditor(context);
+    }
     final textTheme = Theme.of(context).textTheme;
     final viewport = MediaQuery.sizeOf(context);
     final compactHeight = viewport.height < 700;
@@ -1199,6 +1455,7 @@ class _ScheduledBlockCard extends StatelessWidget {
     required this.isChinese,
     required this.onDelete,
     required this.onChanged,
+    this.onSelectTime,
   });
 
   final int index;
@@ -1206,6 +1463,7 @@ class _ScheduledBlockCard extends StatelessWidget {
   final bool isChinese;
   final VoidCallback onDelete;
   final VoidCallback onChanged;
+  final VoidCallback? onSelectTime;
 
   String _text(String zh, String en) => isChinese ? zh : en;
 
@@ -1257,6 +1515,12 @@ class _ScheduledBlockCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
+          if (onSelectTime != null)
+            TextButton.icon(
+              onPressed: onSelectTime,
+              icon: const Icon(Icons.schedule_rounded),
+              label: Text(_text('在圆盘调整时间', 'Adjust on clock')),
+            ),
           TextField(
             controller: block.titleController,
             onChanged: (_) => onChanged(),

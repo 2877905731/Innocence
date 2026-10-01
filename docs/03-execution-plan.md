@@ -9,6 +9,12 @@ baseline:
   current_phase: P01
   current_gate: G01
   evidence: "离线身份/SQLite/outbox/登录确认导入、柔彩主题、每日标语、任务存档与独立年度任务板及 Windows 八方向 sizing loop 已实现；首页今日完成率、本月超长任务分页、年度任务独立进度已补齐。年度任务 UI 将月份跨度外框与 0–100% 进度填充合为唯一七色脉冲充能组件，月份槽位共用坐标且刻度滚动吸顶。2026-09-26 发布 v1.1.1+4，修复玻璃态年度月份栏的近黑色条带、过亮月份槽和选中态对比；Flutter 63 项、analyze、Windows Release 与 Inno Setup 构建通过，GitHub 正式 Release 三项资产为 uploaded 且远端摘要与本地一致。安装器未签名；Large/Medium/Small 多 DPI 实机视觉矩阵与同步真实 HTTP 回放仍待验收"
+android_track:
+  status: in_progress
+  plan_path: docs/planning/Innocence-Android版本实施规划.md
+  current_step: "A0 导航与离线范围已确认，实体设备和 SDK 许可仍待补；A1 侧边栏 Shell、离线重启恢复已实现，简约白色与液态玻璃主题开始覆盖 Android 页面"
+  ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
+  note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 invariants:
   - id: INV-001-TRUTHFUL-SCOPE
     enabled: true
@@ -59,11 +65,11 @@ phases:
       - docs/planning/Innocence-UI设计规划.md（信息架构 + 双端布局 + 视觉令牌 + 组件）
       - docs/planning/Innocence-Windows自适应桌面体验.md（Large / Medium / Small / Focus Orb）
       - docs/planning/Innocence-Windows信息架构与组件体系.md（页面清单 + 导航地图 + 跨尺寸优先级 + Flutter 呈现接口）
-      - 四个主题设计（并存可切换，提示词由用户提供并先存档）
+      - Windows 四个主题设计（并存可切换，提示词由用户提供并先存档）；Android 首版另按 MD3 规划
       - 页面清单与导航地图（登录 → 主框架 → 首页 → 二级页）
     actions:
       - 四个主题提示词已存档；Windows 信息架构与组件接口已获用户确认
-      - 按「信息架构 → 双端布局 → 视觉令牌 → 主题 → 组件」顺序产出
+      - Windows 按「信息架构 → 桌面布局 → 视觉令牌 → 主题 → 组件」产出；Android A0 单独确定 MD3 手机布局与组件
       - 生成 Flutter 前端时优先将 `docs/design/templates/` 中对应 HTML 作为构图、信息层级和视觉令牌参考；若 AI 参考 HTML 不便或 HTML 到 Flutter 的转换效率较低，可忽略 HTML 代码，仅依据提示词、设计令牌和页面结构实现
       - Windows 页面按 Large / Medium / Small 三档自适应重排，Focus Orb 作为用户主动进入的最小状态；不得等比缩放完整页面
     gate:
@@ -98,7 +104,7 @@ phases:
       - 今日计划编辑器使用固定可见的48段昼夜时间轴，完整中英文覆盖，并保证选时后无需额外填写即可保存
       - 今日计划时段按计划使用循环浅色渐变；计划卡显示等量同色小时间条并联动动画；已有时段支持首尾拖动且不得越过相邻计划，新建仅允许从空白段开始
       - 计划层级按 2026-09-23 最新决策：短计划当前安排可保存为任务存档；长计划完整月历显式展示存档架、新建入口及批量套用；超长计划为独立年度任务板，七色高辨识的唯一脉冲充能框以用户编辑月份为完整外框、以持久化 0–100% 任务进度为内部填充，取消单独进度条；充能框与 12 月槽位共用坐标、月份刻度滚动吸顶，+10/−10、+5/−5、+1/−1 成对控制并可直接完成或减量回退，多子任务完成/编辑/删除独立保留；今日计划增加本月超长任务分页，首页今日完成率以当天完成比例计算；旧周视图只保留兼容辅助
-      - 首页 Hero 按主题 + 本地日期 + 语言稳定轮换文案，四主题使用独立艺术字构图，侘寂主题允许英文主标题
+      - Windows 首页 Hero 按主题 + 本地日期 + 语言稳定轮换文案，四主题使用独立艺术字构图，侘寂主题允许英文主标题；Android 首版按 MD3 首页呈现
       - 玻璃态通用主操作改用蓝紫主题色，绿色仅用于成功语义
     gate:
       id: G02
@@ -107,7 +113,7 @@ phases:
         - today_plan_editor_redesigned（48段时间轴和保存始终可见；选时后可直接保存）
         - today_plan_range_editing_verified（多计划颜色可区分；计划条数量与半小时格一致；首尾拖动防重叠；占用段不触发新建）
         - planning_horizons_operational（短计划保存后可编辑并归档；月历可前后月滑动、管理任务存档并批量套用；年度任务可按月筛选、编辑跨度和子任务、独立增量或直接完成、删除；今日页可浏览本月超长任务，首页今日完成率随勾选变化）
-        - theme_hero_rotation_verified（四主题文案池、同日稳定、跨午夜轮换、双语与专注态优先级通过）
+        - theme_hero_rotation_verified（Windows 四主题文案池、同日稳定、跨午夜轮换、双语与专注态优先级通过；Android 首版不以四主题 Hero 为门禁）
         - glass_action_palette_aligned（蓝紫主操作，绿色仅表达成功）
         - focus_timer_redesigned
   - id: P03
@@ -127,7 +133,7 @@ phases:
     actions:
       - 统计中心完善、举报处理、敏感词管理、公告与定向通知、后台管理
       - 按新 UI 重建：统计中心、后台页面
-      - 统计中心所有内层指标卡跟随四主题；顶部返回、刷新和窗口操作固定，正文独立滚动
+      - Windows 统计中心所有内层指标卡跟随四主题；顶部返回、刷新和窗口操作固定，正文独立滚动；Android 统计页按 MD3 独立设计
     gate:
       id: G04
       criteria:
@@ -153,12 +159,12 @@ phases:
         - resize_state_continuity_verified（拖拽跨断点不丢页面、草稿、滚动与计时状态）
         - resize_presets_and_cursors_working（大中小预设进入对应断点；Windows Release 在四边四角真实拖动后尺寸改变，方向光标、最小尺寸、最大化与 Focus Orb 行为正确）
         - cross_device_notify_working
-        - visual_consistent（四主题双端一致）
+        - visual_consistent（Windows 四主题跨尺寸一致；Android 首版另按 MD3 与共同业务语义验收）
   - id: P06
     name: mvp_acceptance
     actions:
       - 对照 MVP 完成标准 9 条逐条验收
-      - 四主题可切换验收 + 双端观感一致验收
+      - Windows 四主题可切换与跨尺寸观感验收；Android 首版 MD3 页面及双端业务语义一致性分别验收
       - Windows Large / Medium / Small / Focus Orb 在 100% / 125% / 150% DPI 与多屏场景验收
     gate:
       id: G06

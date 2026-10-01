@@ -71,7 +71,10 @@ class SessionController extends ChangeNotifier {
     SettingsApi? settingsApi,
     AdminReportApi? adminReportApi,
     OfflineSyncApi? offlineSyncApi,
+    bool? restoreOfflineOnStartup,
+    bool? offlineOnlyBuild,
   })  : _authApi = authApi,
+        isOfflineOnlyBuild = offlineOnlyBuild ?? AppConfig.offlineOnlyBuild,
         _localStorage = localStorage,
         _languageController = languageController,
         _offlineStore = offlineStore ?? OfflineStore(),
@@ -85,9 +88,12 @@ class SessionController extends ChangeNotifier {
         _notificationApi = notificationApi ?? NotificationApi(),
         _settingsApi = settingsApi ?? SettingsApi(),
         _adminReportApi = adminReportApi ?? AdminReportApi(),
-        _offlineSyncApi = offlineSyncApi ?? OfflineSyncApi();
+        _offlineSyncApi = offlineSyncApi ?? OfflineSyncApi(),
+        _restoreOfflineOnStartup =
+            restoreOfflineOnStartup ?? AppConfig.deviceType == 'android';
 
   final AuthApi _authApi;
+  final bool isOfflineOnlyBuild;
   final AuthLocalStorage _localStorage;
   final AppLanguageController _languageController;
   final OfflineStore _offlineStore;
@@ -102,6 +108,7 @@ class SessionController extends ChangeNotifier {
   final SettingsApi _settingsApi;
   final AdminReportApi _adminReportApi;
   final OfflineSyncApi _offlineSyncApi;
+  final bool _restoreOfflineOnStartup;
 
   SessionStatus _status = SessionStatus.initializing;
   AppSession? _session;
@@ -176,6 +183,40 @@ class SessionController extends ChangeNotifier {
       return;
     }
     _didInitialize = true;
+
+    if (_restoreOfflineOnStartup && _localStorage.offlineModeActive) {
+      _status = SessionStatus.initializing;
+      notifyListeners();
+      try {
+        final localProfile = await _offlineStore.readLocalProfile();
+        if (localProfile != null) {
+          await _loadOfflineProfile(localProfile);
+          _status = SessionStatus.offline;
+          _syncFocusTicker();
+          notifyListeners();
+          return;
+        }
+        await _localStorage.setOfflineModeActive(false);
+        _bannerMessage = _message(
+          '未找到上次的本机资料，请重新选择离线使用。',
+          'Previous local data was not found. Choose offline use again.',
+        );
+      } catch (_) {
+        _status = SessionStatus.unauthenticated;
+        _bannerMessage = _message(
+          '无法恢复本机离线资料，请检查设备存储后重试。',
+          'Could not restore local offline data. Check device storage and retry.',
+        );
+        notifyListeners();
+        return;
+      }
+    }
+
+    if (isOfflineOnlyBuild) {
+      _status = SessionStatus.unauthenticated;
+      notifyListeners();
+      return;
+    }
 
     final savedSession = _localStorage.readSession();
     if (savedSession == null) {
@@ -311,61 +352,10 @@ class SessionController extends ChangeNotifier {
     notifyListeners();
     try {
       final localProfile = await _offlineStore.getOrCreateLocalProfile();
-      final todayDate = _formatDate(DateTime.now());
-      final profile = localProfile.toUserProfile();
-      _localProfile = localProfile;
-      _session = null;
-      _profile = profile;
-      _focusSession =
-          await _offlineStore.loadActiveFocusSession(localProfile.ownerScope);
-      _todayPlan = await _offlineStore.loadDailyPlan(
-        localProfile.ownerScope,
-        todayDate,
-      );
-      _memoOverview =
-          await _offlineStore.loadMemoOverview(localProfile.ownerScope);
-      _checkInStatus = await _buildOfflineCheckInStatus(
-        localProfile.ownerScope,
-        _todayPlan,
-      );
-      _statsOverview = await _offlineStore.loadStatsOverview(
-        localProfile.ownerScope,
-        days: _statsRangeDays,
-      );
-      _teamOverview = TeamOverview.empty();
-      _teamChatOverview = TeamChatOverview.empty();
-      _friendOverview = FriendOverview.empty();
-      _notificationOverview = NotificationOverview.empty();
-      _weekPlanOverview = WeekPlanOverview.empty();
-      _monthPlanOverview = await _offlineStore.loadMonthOverview(
-        localProfile.ownerScope,
-        MonthPlanOverview.formatMonth(DateTime.now()),
-      );
-      _annualPlanOverview = await _offlineStore.loadAnnualOverview(
-        localProfile.ownerScope,
-        DateTime.now().year,
-      );
-      final localWidgetSetting =
-          await _offlineStore.loadLocalWidgetSetting(localProfile.ownerScope);
-      _settingOverview = SettingOverview.empty(
-        accountSetting: profile,
-      ).copyWith(widgetSetting: localWidgetSetting);
-      await _applyDesktopShellSettings(widgetSetting: localWidgetSetting);
-      _blacklist = const [];
-      _currentDeviceSession = null;
-      _weeklyTemplates =
-          await _offlineStore.loadDayTemplates(localProfile.ownerScope);
-      final pendingCount = await _offlineStore.pendingOutboxCount(
-        localProfile.ownerScope,
-      );
-      _bannerMessage = _message(
-        pendingCount == 0
-            ? '已进入离线模式，数据仅保存在此设备。'
-            : '已进入离线模式，有 $pendingCount 项本地变更将在登录并确认后同步。',
-        pendingCount == 0
-            ? 'Offline mode: data stays on this device.'
-            : 'Offline mode: $pendingCount local changes will sync after sign-in and confirmation.',
-      );
+      await _loadOfflineProfile(localProfile);
+      if (_restoreOfflineOnStartup) {
+        await _localStorage.setOfflineModeActive(true);
+      }
       _status = SessionStatus.offline;
       _syncFocusTicker();
     } catch (_) {
@@ -380,10 +370,82 @@ class SessionController extends ChangeNotifier {
     }
   }
 
+  Future<void> _loadOfflineProfile(LocalProfile localProfile) async {
+    final ownerScope = localProfile.ownerScope;
+    final now = DateTime.now();
+    final profile = localProfile.toUserProfile();
+    final focusSession = await _offlineStore.loadActiveFocusSession(ownerScope);
+    final todayPlan = await _offlineStore.loadDailyPlan(
+      ownerScope,
+      _formatDate(now),
+    );
+    final memoOverview = await _offlineStore.loadMemoOverview(ownerScope);
+    final checkInStatus = await _buildOfflineCheckInStatus(
+      ownerScope,
+      todayPlan,
+    );
+    final statsOverview = await _offlineStore.loadStatsOverview(
+      ownerScope,
+      days: _statsRangeDays,
+    );
+    final monthPlanOverview = await _offlineStore.loadMonthOverview(
+      ownerScope,
+      MonthPlanOverview.formatMonth(now),
+    );
+    final annualPlanOverview = await _offlineStore.loadAnnualOverview(
+      ownerScope,
+      now.year,
+    );
+    final localWidgetSetting =
+        await _offlineStore.loadLocalWidgetSetting(ownerScope);
+    final weeklyTemplates = await _offlineStore.loadDayTemplates(ownerScope);
+    final pendingCount = await _offlineStore.pendingOutboxCount(ownerScope);
+    await _applyDesktopShellSettings(widgetSetting: localWidgetSetting);
+
+    _localProfile = localProfile;
+    _session = null;
+    _profile = profile;
+    _focusSession = focusSession;
+    _todayPlan = todayPlan;
+    _memoOverview = memoOverview;
+    _checkInStatus = checkInStatus;
+    _statsOverview = statsOverview;
+    _teamOverview = TeamOverview.empty();
+    _teamChatOverview = TeamChatOverview.empty();
+    _friendOverview = FriendOverview.empty();
+    _notificationOverview = NotificationOverview.empty();
+    _weekPlanOverview = WeekPlanOverview.empty();
+    _monthPlanOverview = monthPlanOverview;
+    _annualPlanOverview = annualPlanOverview;
+    _settingOverview = SettingOverview.empty(
+      accountSetting: profile,
+    ).copyWith(widgetSetting: localWidgetSetting);
+    _blacklist = const [];
+    _currentDeviceSession = null;
+    _weeklyTemplates = weeklyTemplates;
+    _offlineImportPreview = null;
+    _bannerMessage = _message(
+      pendingCount == 0
+          ? '已进入离线模式，数据仅保存在此设备。'
+          : isOfflineOnlyBuild
+              ? '已恢复本机资料，$pendingCount 项变更仅保存在此设备。'
+              : '已进入离线模式，有 $pendingCount 项本地变更将在登录并确认后同步。',
+      pendingCount == 0
+          ? 'Offline mode: data stays on this device.'
+          : isOfflineOnlyBuild
+              ? 'Local profile restored. $pendingCount changes are stored only on this device.'
+              : 'Offline mode: $pendingCount local changes will sync after sign-in and confirmation.',
+    );
+  }
+
   void requireOnlineFeature(String featureName) {
     _bannerMessage = _message(
-      '“$featureName”需要登录并联网后使用；离线数据不会因此丢失。',
-      '$featureName requires sign-in and a network connection. Your offline data is safe.',
+      isOfflineOnlyBuild
+          ? '“$featureName”将在后续联网版本接入；当前数据仅保存在此设备。'
+          : '“$featureName”需要登录并联网后使用；离线数据不会因此丢失。',
+      isOfflineOnlyBuild
+          ? '$featureName will be available in a future online edition. Current data stays on this device.'
+          : '$featureName requires sign-in and a network connection. Your offline data is safe.',
     );
     notifyListeners();
   }
@@ -628,8 +690,10 @@ class SessionController extends ChangeNotifier {
           days: _statsRangeDays,
         );
         _bannerMessage = _message(
-          '计划已保存在本机，登录并确认后可同步。',
-          'Plan saved on this device. Sign in and confirm to sync it.',
+          isOfflineOnlyBuild ? '计划已保存在本机。' : '计划已保存在本机，登录并确认后可同步。',
+          isOfflineOnlyBuild
+              ? 'Plan saved on this device.'
+              : 'Plan saved on this device. Sign in and confirm to sync it.',
         );
       },
           fallbackMessage:

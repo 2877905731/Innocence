@@ -21,6 +21,8 @@ read_order:
       - docs/06-contract-inventory.md
       - docs/08-project-profile.md
       - docs/02-contract-and-compatibility-rules.md
+      - docs/planning/Innocence-Android版本实施规划.md
+      - docs/planning/Innocence-UI设计规划.md
       - docs/planning/Innocence-Windows自适应桌面体验.md
       - docs/planning/Innocence-Windows信息架构与组件体系.md
     purpose: task_specific_context
@@ -38,9 +40,9 @@ read_order:
 ## project_facts
 
 ```yaml
-project_summary: "Innocence 是面向学习、自律、陪伴和团队互助的双端产品（Flutter 手机端 + 桌面端），15 个产品模块已全部封板，第一版按 MVP 范围开发。前端 UI 全面重写，四个主题并存可切换；Windows 端采用大/中/小自适应画布 + 主动悬浮球，不再以固定挂件为中心。"
+project_summary: "Innocence 是面向学习、自律、陪伴和团队互助的双端产品（Flutter 手机端 + 桌面端），15 个产品模块已全部封板，第一版按 MVP 范围开发。前端 UI 全面重写；Windows 四主题并存可切换，采用大/中/小自适应画布 + 主动悬浮球；Android 保留 Material 3 交互组件，同时按用户新决定立即应用简约白色与液态玻璃两套视觉。"
 data_owner: "Innocence 自有数据；用户数据归用户，由 Innocence 服务托管"
-current_milestone: "P01 账户与基础：Windows 自适应 Shell、Focus Orb 与认证入口首批实现完成；继续资料、隐私、设置和 G01 负向验收"
+current_milestone: "P01/G01：Windows v1.1.1 已发布但实机视觉与真实同步回放待验收；Android 三点侧边栏和本机离线首发范围已确认，两主题客户端视觉及真机验收进行中"
 ```
 
 ## invariants
@@ -57,6 +59,7 @@ current_milestone: "P01 账户与基础：Windows 自适应 Shell、Focus Orb �
 | UI-REWRITE | enabled | 前端页面按新设计推翻重建，不沿用旧布局；功能逻辑与数据层保留 |
 | THEME-PROMPTS-ARCHIVED | enabled | 用户提供的主题提示词必须存档（docs/planning/Innocence-UI设计规划.md），后续生成以存档为准 |
 | DESKTOP-ADAPTIVE-CANVAS | enabled | Windows 端使用 Large/Medium/Small 自适应画布与主动 Focus Orb；不得把完整页面等比缩成挂件 |
+| ANDROID-MD3-FIRST | superseded | 2026-09-29 用户新指令覆盖四主题移动适配后置：Android 立即应用简约白色与液态玻璃；保留 Material 3 导航、表单和无障碍交互基础，其他两主题移动细节另行验收 |
 
 ## context_policy
 

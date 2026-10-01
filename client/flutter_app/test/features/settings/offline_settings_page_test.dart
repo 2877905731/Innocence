@@ -152,7 +152,7 @@ void main() {
       find.byKey(const ValueKey('settings-visual-theme-minimalism')),
       findsOneWidget,
     );
-    expect(find.text('Soft spectrum'), findsNWidgets(2));
+    expect(find.text('Citrus white'), findsNWidgets(2));
 
     await tester.tap(find.text('Desktop experience'));
     await tester.pump();

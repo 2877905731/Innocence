@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 import 'package:innocence_flutter/core/theme/app_colors.dart';
 import 'package:innocence_flutter/core/utils/localized_text.dart';
 import 'package:innocence_flutter/core/widgets/glass_panel.dart';
@@ -96,7 +97,7 @@ class _StatsPageState extends State<StatsPage> {
   }
 
   Future<void> _deleteFailureRecord(StatsFailureRecord failure) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showThemedDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(

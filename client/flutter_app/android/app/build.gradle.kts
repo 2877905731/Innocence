@@ -1,8 +1,28 @@
+import java.util.Base64
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+val signingVariables = listOf(
+    "INNOCENCE_ANDROID_KEYSTORE",
+    "INNOCENCE_ANDROID_STORE_PASSWORD",
+    "INNOCENCE_ANDROID_KEY_ALIAS",
+    "INNOCENCE_ANDROID_KEY_PASSWORD",
+)
+val hasReleaseSigning = signingVariables.all { !System.getenv(it).isNullOrBlank() }
+val requestedRelease = gradle.startParameter.taskNames.any {
+    it.contains("release", ignoreCase = true)
+}
+if (requestedRelease && !hasReleaseSigning) {
+    throw GradleException("Release signing requires the four INNOCENCE_ANDROID signing environment variables.")
+}
+val offlineEdition = (project.findProperty("dart-defines") as? String)
+    ?.split(",")
+    ?.any { String(Base64.getDecoder().decode(it)) == "INNOCENCE_OFFLINE_ONLY=true" }
+    ?: false
 
 android {
     namespace = "com.innocence.app.innocence_flutter"
@@ -25,11 +45,24 @@ android {
         versionName = flutter.versionName
     }
 
+    if (offlineEdition) {
+        sourceSets.getByName("release").manifest.srcFile("src/offline/AndroidManifest.xml")
+    }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(System.getenv("INNOCENCE_ANDROID_KEYSTORE"))
+                storePassword = System.getenv("INNOCENCE_ANDROID_STORE_PASSWORD")
+                keyAlias = System.getenv("INNOCENCE_ANDROID_KEY_ALIAS")
+                keyPassword = System.getenv("INNOCENCE_ANDROID_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 }

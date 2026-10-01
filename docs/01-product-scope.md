@@ -26,8 +26,8 @@ in_scope:
     capability: "后台管理（用户/团队/通知/举报/敏感词/公告，审计留痕）"
     done_when: "MVP 完成标准第 8 条验收通过"
   - id: SCOPE-008
-    capability: "UI 设计体系（信息架构、双端布局、视觉令牌、四个并存可切换主题、每日艺术标语、四主题季节图案、组件体系）"
-    done_when: "四主题切换生效、双端观感一致、登录到二级页全部按新设计落地"
+    capability: "UI 设计体系（信息架构、双端布局、Windows 四个并存可切换主题及每日艺术标语与季节图案、Android Material Design 3、组件体系）"
+    done_when: "Windows 四主题切换生效并跨尺寸一致；Android 首版按 MD3 完成登录到二级页，不以四主题移动适配为门禁；双端核心业务语义一致"
 out_of_scope:
   - id: OUT-001
     item: "陌生人私信、陌生人社交广场、推荐好友/团队"
@@ -43,7 +43,7 @@ definition_of_done:
   - scope_id: SCOPE-001
     evidence: "MVP 完成标准 9 条逐条验收记录（P06 阶段门禁）"
   - scope_id: SCOPE-008
-    evidence: "四主题在设置中可切换；页面按新设计重建完成（P00.5 门禁）"
+    evidence: "Windows 四主题在设置中可切换；Android MD3 页面按独立设计验收；两端页面重建证据分开记录"
 decision_entrypoint:
   checkpoint_type: DECISION
   source: progress/

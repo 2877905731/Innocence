@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 import 'package:innocence_flutter/app/team_workspace_snapshot.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
@@ -23,6 +24,7 @@ import 'package:innocence_flutter/features/focus/domain/models/focus_session.dar
 import 'package:innocence_flutter/features/friends/domain/models/friend_overview.dart';
 import 'package:innocence_flutter/features/friends/presentation/pages/friend_page.dart';
 import 'package:innocence_flutter/features/home/presentation/pages/adaptive_desktop_home.dart';
+import 'package:innocence_flutter/features/home/presentation/pages/android_home_shell.dart';
 import 'package:innocence_flutter/features/memos/domain/models/memo_overview.dart';
 import 'package:innocence_flutter/features/memos/presentation/pages/memo_page.dart';
 import 'package:innocence_flutter/features/notifications/domain/models/notification_overview.dart';
@@ -703,7 +705,7 @@ class HomePage extends StatelessWidget {
   final VoidCallback onClearBanner;
 
   Future<void> _openEditor(BuildContext context) async {
-    await showDialog<void>(
+    await showThemedDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) {
@@ -753,7 +755,7 @@ class HomePage extends StatelessWidget {
     required String hintText,
   }) async {
     var enteredArchiveName = '';
-    final result = await showDialog<String>(
+    final result = await showThemedDialog<String>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -788,7 +790,7 @@ class HomePage extends StatelessWidget {
   }
 
   Future<void> _openFocusSessionDialog(BuildContext context) async {
-    final result = await showDialog<_FocusSessionDraft>(
+    final result = await showThemedDialog<_FocusSessionDraft>(
       context: context,
       builder: (context) => const _StartFocusSessionDialog(),
     );
@@ -811,7 +813,7 @@ class HomePage extends StatelessWidget {
       return;
     }
 
-    await showDialog<void>(
+    await showThemedDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) {
@@ -1028,6 +1030,37 @@ class HomePage extends StatelessWidget {
     final currentVisualTheme =
         Theme.of(context).extension<AppVisualThemeMarker>()?.visualTheme ??
             visualTheme;
+
+    if (AppConfig.deviceType == 'android') {
+      return AndroidHomeShell(
+        language: appLanguage,
+        profile: profile,
+        todayPlan: todayPlan,
+        focusSession: focusSession,
+        checkInStatus: checkInStatus,
+        teamOverview: teamOverview,
+        friendOverview: friendOverview,
+        notificationOverview: notificationOverview,
+        isOfflineMode: isOfflineMode,
+        isBusy: isBusy,
+        bannerMessage: bannerMessage,
+        onClearBanner: onClearBanner,
+        onRefresh: onRefresh,
+        onLogout: onLogout,
+        onOpenPlanEditor: () => _openEditor(context),
+        onToggleTodayPlanItem: onToggleTodayPlanItem,
+        onStartFocus: () => _openFocusSessionDialog(context),
+        onToggleFocusPause: onToggleFocusPause,
+        onFinishFocus: onFinishFocusSession,
+        onSubmitCheckIn: onSubmitCheckIn,
+        onOpenFriends: () => _openFriendCenter(context),
+        onOpenTeam: () => _openTeamWorkspace(context),
+        onOpenNotifications: () => _openNotificationCenter(context),
+        onOpenMemos: () => _openMemoCenter(context),
+        onOpenStats: () => _openStatsCenter(context),
+        onOpenSettings: () => _openSettingsCenter(context),
+      );
+    }
 
     if (AppConfig.deviceType == 'windows') {
       return AdaptiveDesktopHome(
@@ -3787,7 +3820,7 @@ class _TeamPanelState extends State<_TeamPanel> {
 
   Future<void> _openCreateTeamDialog(BuildContext context) async {
     final controller = TextEditingController();
-    final result = await showDialog<String>(
+    final result = await showThemedDialog<String>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -3827,7 +3860,7 @@ class _TeamPanelState extends State<_TeamPanel> {
 
   Future<void> _openJoinTeamDialog(BuildContext context) async {
     final controller = TextEditingController();
-    final result = await showDialog<String>(
+    final result = await showThemedDialog<String>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -3885,7 +3918,7 @@ class _TeamPanelState extends State<_TeamPanel> {
       return;
     }
 
-    final targetUserId = await showDialog<int>(
+    final targetUserId = await showThemedDialog<int>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -3933,7 +3966,7 @@ class _TeamPanelState extends State<_TeamPanel> {
     BuildContext context,
     TeamMember member,
   ) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showThemedDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -3966,7 +3999,7 @@ class _TeamPanelState extends State<_TeamPanel> {
   }
 
   Future<void> _confirmDissolveTeam(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showThemedDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -4002,7 +4035,7 @@ class _TeamPanelState extends State<_TeamPanel> {
   }
 
   Future<void> _openTeamChatDialog(BuildContext context) async {
-    await showDialog<void>(
+    await showThemedDialog<void>(
       context: context,
       builder: (context) {
         return _TeamChatDialog(
@@ -4351,7 +4384,7 @@ class _TeamChatDialogState extends State<_TeamChatDialog> {
     if (item.ownMessage || item.deleted) {
       return;
     }
-    final result = await showDialog<_ChatReportDraft>(
+    final result = await showThemedDialog<_ChatReportDraft>(
       context: context,
       builder: (context) => const _ChatReportDialog(),
     );
@@ -4395,7 +4428,11 @@ class _TeamChatDialogState extends State<_TeamChatDialog> {
 
     return Dialog(
       insetPadding: const EdgeInsets.all(20),
-      backgroundColor: Colors.transparent,
+      backgroundColor:
+          Theme.of(context).extension<AppVisualThemeMarker>()?.visualTheme ==
+                  AppVisualTheme.glass
+              ? Theme.of(context).dialogTheme.backgroundColor
+              : Colors.transparent,
       child: GlassPanel(
         lightStyle: true,
         child: ConstrainedBox(
@@ -4661,7 +4698,11 @@ class _ChatReportDialogState extends State<_ChatReportDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Colors.transparent,
+      backgroundColor:
+          Theme.of(context).extension<AppVisualThemeMarker>()?.visualTheme ==
+                  AppVisualTheme.glass
+              ? Theme.of(context).dialogTheme.backgroundColor
+              : Colors.transparent,
       child: GlassPanel(
         lightStyle: true,
         child: ConstrainedBox(

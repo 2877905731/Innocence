@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/core/theme/app_colors.dart';
 import 'package:innocence_flutter/core/theme/surface_palette.dart';
 import 'package:innocence_flutter/core/utils/localized_text.dart';
@@ -275,7 +276,13 @@ class _NotificationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final accent = _accentColor(item.notificationType);
+    final colors = Theme.of(context).colorScheme;
+    final visualTheme =
+        Theme.of(context).extension<AppVisualThemeMarker>()?.visualTheme;
+    final redesigned = visualTheme == AppVisualTheme.glass ||
+        visualTheme == AppVisualTheme.minimalism;
+    final accent =
+        redesigned ? colors.primary : _accentColor(item.notificationType);
 
     return InkWell(
       borderRadius: BorderRadius.circular(24),
@@ -286,10 +293,12 @@ class _NotificationTile extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: item.read ? SurfacePalette.softSurface : Colors.white,
+            color: item.read ? colors.surfaceContainerLow : colors.surface,
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
-              color: accent.withValues(alpha: item.read ? 0.18 : 0.34),
+              color: redesigned
+                  ? colors.outlineVariant
+                  : accent.withValues(alpha: item.read ? 0.18 : 0.34),
             ),
           ),
           child: Column(
@@ -311,7 +320,9 @@ class _NotificationTile extends StatelessWidget {
                         height: 12,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: item.read ? SurfacePalette.subtle : accent,
+                          color: item.read
+                              ? colors.onSurface.withValues(alpha: .48)
+                              : accent,
                           boxShadow: item.read
                               ? const []
                               : [
@@ -338,7 +349,7 @@ class _NotificationTile extends StatelessWidget {
               Text(
                 item.title,
                 style: textTheme.titleMedium?.copyWith(
-                  color: SurfacePalette.ink,
+                  color: colors.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
@@ -463,19 +474,20 @@ class _UnreadPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: SurfacePalette.softSurface,
+        color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: SurfacePalette.border),
+        border: Border.all(color: colors.outlineVariant),
       ),
       child: Text(
         count > 0
             ? _text('$count 条未读', '$count unread')
             : _text('已全部查看', 'All caught up'),
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: SurfacePalette.ink,
+              color: colors.onSurface,
             ),
       ),
     );
@@ -489,17 +501,18 @@ class _MetaTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: SurfacePalette.softSurface,
+        color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: SurfacePalette.border),
+        border: Border.all(color: colors.outlineVariant),
       ),
       child: Text(
         label,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: SurfacePalette.ink,
+              color: colors.onSurface,
             ),
       ),
     );

@@ -38,8 +38,8 @@ project_specific_rules:
     verification: "页面重建对照 docs/planning/Innocence-UI设计规划.md 验收"
   - id: RULE-003
     enabled: true
-    rule: "四个主题并存可切换：主题只注入设计令牌值，不重写页面结构"
-    verification: "设置中切换主题即时生效，页面结构不变"
+    rule: "Windows 四个主题并存可切换：主题不改变业务结构；2026-09-29 用户要求 Android 立即接入简约白色与液态玻璃，两主题沿用移动端独立布局与 Material 3 交互基础"
+    verification: "Windows 与 Android 设置中切换两主题即时生效；Android 手机布局、触控、对比度、动画与真机单独验收"
   - id: RULE-004
     enabled: true
     rule: "用户提供的主题提示词必须原文存档到 docs/planning/Innocence-UI设计规划.md，后续生成以存档为准"
@@ -74,12 +74,16 @@ project_specific_rules:
     verification: "日/月/年视图、模板批量套用、年度月区间拖动与跨月/跨年边界验收（G02）"
   - id: RULE-012
     enabled: true
-    rule: "首页 Hero 按主题与本地日期稳定轮换；四主题分别使用符合自身气质的文案和艺术字构图，侘寂主题允许英文主标题"
-    verification: "四主题、双语、同日稳定、跨午夜切换与 Small Canvas 溢出验收（G02/G05）"
+    rule: "Windows 首页 Hero 按主题与本地日期稳定轮换；侘寂主题允许英文主标题；Android 首页保留移动信息架构并接入简约白色、液态玻璃主题视觉"
+    verification: "Windows 四主题、双语、同日稳定、跨午夜切换与 Small Canvas 溢出验收（G02/G05）；Android 两主题首页另做触控与窄屏验收"
   - id: RULE-013
     enabled: true
     rule: "Windows 无框窗口缩放采用 Flutter 八方向透明命中层触发原生 sizing loop，并保留顶层 WM_NCHITTEST 作为补充；必须真实拖动后尺寸发生变化才算通过"
     verification: "Windows Release 在 100%/125%/150% DPI 下完成四边四角真实拖动、最大化与 Focus Orb 负向验收（G05/G06）"
+  - id: RULE-014
+    enabled: true
+    rule: "Android 保留 Material Design 3 导航、表单与可访问性交互，但主题二简约白色和主题四液态玻璃立即覆盖全局令牌、入口、主 Shell 和业务页；仅开启 useMaterial3 或令牌接入不算页面验收"
+    verification: "Android A0–A5 按两主题手机导航、组件状态、动态效果、可访问性及真机页面矩阵验收；Windows 四主题范围保持原样"
 change_policy:
   source_of_truth: this_file
   rule_change_checkpoint: DECISION
@@ -91,6 +95,8 @@ change_policy:
     - docs/07-dataflow-and-module-map.md
     - docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md
     - docs/planning/Innocence-Windows自适应桌面体验.md
+    - docs/planning/Innocence-Android版本实施规划.md
+    - docs/planning/Innocence-UI设计规划.md
 ---
 
 # 项目画像说明
@@ -105,4 +111,5 @@ change_policy:
 - UI 规划与主题存档：`docs/planning/Innocence-UI设计规划.md`
 - Windows 自适应体验：`docs/planning/Innocence-Windows自适应桌面体验.md`
 - Windows 信息架构与组件接口：`docs/planning/Innocence-Windows信息架构与组件体系.md`（已确认）
-- 离线模式、主题标语、年月计划与窗口缩放：`docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md`（已确认，代码未开始）
+- Android 版本实施规划：`docs/planning/Innocence-Android版本实施规划.md`（MD3 首版基线、左上角三点按钮侧边栏导航及未登录本机离线首发范围已确认；模拟器离线冷启动子集已验证，实体设备与真实导入仍待验收）
+- 离线模式、主题标语、年月计划与窗口缩放：`docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md`（已实现主要链路；真实同步回放与完整 DPI 矩阵待验收）

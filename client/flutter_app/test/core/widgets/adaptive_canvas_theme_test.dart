@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
+import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/widgets/adaptive_canvas_shell.dart';
 import 'package:innocence_flutter/core/widgets/glass_motion_backdrop.dart';
 import 'package:innocence_flutter/core/widgets/glass_panel.dart';
@@ -39,9 +40,7 @@ void main() {
       final scaffold = tester.widget<Scaffold>(find.byType(Scaffold).last);
       expect(
         scaffold.backgroundColor,
-        visualTheme == AppVisualTheme.glass
-            ? const Color(0xFF173B91)
-            : tokens.canvas,
+        tokens.canvas,
       );
     }
   });
@@ -67,7 +66,7 @@ void main() {
     expect(find.byType(GlassMotionBackdrop), findsOneWidget);
   });
 
-  testWidgets('soft-spectrum canvas and secondary pages share the backdrop',
+  testWidgets('citrus-white canvas and secondary pages share the backdrop',
       (tester) async {
     const visualTheme = AppVisualTheme.minimalism;
     final tokens = AppVisualTokens.of(visualTheme);
@@ -130,7 +129,11 @@ void main() {
       find.byType(AnimatedContainer).first,
     );
     final decoration = panel.decoration! as BoxDecoration;
-    expect(decoration.color, const Color(0x3D101D3B));
+    expect(
+        decoration.color,
+        AppConfig.deviceType == 'windows'
+            ? const Color(0x0AFFFFFF)
+            : const Color(0x33000000));
     expect(decoration.color, isNot(Colors.white));
   });
 }

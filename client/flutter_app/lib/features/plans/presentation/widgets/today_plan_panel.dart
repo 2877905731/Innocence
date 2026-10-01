@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 import 'package:innocence_flutter/core/theme/app_colors.dart';
 import 'package:innocence_flutter/core/theme/surface_palette.dart';
 import 'package:innocence_flutter/features/plans/domain/models/today_plan.dart';
@@ -67,7 +68,7 @@ class TodayPlanPanel extends StatelessWidget {
       return;
     }
 
-    final selectedTemplateId = await showDialog<int>(
+    final selectedTemplateId = await showThemedDialog<int>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -116,7 +117,7 @@ class TodayPlanPanel extends StatelessWidget {
     var selectedTemplateId = weeklyTemplates.first.id;
     final selectedDates = <String>{};
 
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showThemedDialog<bool>(
       context: context,
       builder: (context) {
         return StatefulBuilder(
@@ -217,7 +218,7 @@ class TodayPlanPanel extends StatelessWidget {
       return;
     }
 
-    final selectedTargetDate = await showDialog<String>(
+    final selectedTargetDate = await showThemedDialog<String>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -268,7 +269,7 @@ class TodayPlanPanel extends StatelessWidget {
     }
 
     final selectedDates = <String>{};
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showThemedDialog<bool>(
       context: context,
       builder: (context) {
         return StatefulBuilder(
@@ -334,7 +335,7 @@ class TodayPlanPanel extends StatelessWidget {
     final selectedTemplateByDate = <String, int>{};
     final clearDates = <String>{};
 
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showThemedDialog<bool>(
       context: context,
       builder: (context) {
         return StatefulBuilder(
@@ -473,7 +474,7 @@ class TodayPlanPanel extends StatelessWidget {
       return;
     }
 
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showThemedDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -632,7 +633,7 @@ class TodayPlanPanel extends StatelessWidget {
           onApplyTemplate: onApplyTemplate,
           onDeleteTemplate: onDeleteTemplate,
           onPreviewTemplate: (template) async {
-            await showDialog<void>(
+            await showThemedDialog<void>(
               context: context,
               builder: (context) {
                 return AlertDialog(
@@ -1287,7 +1288,7 @@ class _WeeklyTemplateSection extends StatelessWidget {
                         onPressed: isBusy
                             ? null
                             : () async {
-                                final confirmed = await showDialog<bool>(
+                                final confirmed = await showThemedDialog<bool>(
                                   context: context,
                                   builder: (context) {
                                     return AlertDialog(

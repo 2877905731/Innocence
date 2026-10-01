@@ -264,89 +264,37 @@ class _ThemeBrandTitle extends StatelessWidget {
   }
 
   Widget _softSpectrumMark() {
-    final size = compact ? 48.0 : 68.0;
-    return Stack(
-      clipBehavior: Clip.none,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Positioned(
-          left: compact ? 78 : 104,
-          top: compact ? 1 : 2,
-          child: Transform.rotate(
-            angle: -0.055,
-            child: Container(
-              width: compact ? 142 : 188,
-              height: compact ? 72 : 98,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(compact ? 20 : 28),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    tokens.accent.withValues(alpha: 0.48),
-                    tokens.artTwo.withValues(alpha: 0.24),
-                  ],
-                ),
-              ),
-            ),
+        Text(
+          'Innocence',
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: tokens.ink,
+            fontSize: compact ? 44 : 56,
+            fontWeight: FontWeight.w400,
+            letterSpacing: -2.5,
           ),
         ),
-        Positioned(
-          left: compact ? 156 : 204,
-          top: compact ? 54 : 73,
-          child: Transform.rotate(
-            angle: 0.075,
-            child: Container(
-              width: compact ? 126 : 164,
-              height: compact ? 54 : 72,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(compact ? 18 : 25),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    tokens.artOne.withValues(alpha: 0.58),
-                    tokens.artOne.withValues(alpha: 0.12),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          left: 0,
-          top: compact ? 6 : 8,
-          child: RichText(
-            text: TextSpan(
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Container(width: 22, height: 3, color: tokens.accent),
+            const SizedBox(width: 9),
+            Text(
+              'FOCUS / EACH DAY',
               style: TextStyle(
-                color: tokens.ink,
-                fontFamily: 'Segoe UI Variable Display',
-                fontSize: size,
-                height: 0.84,
-                letterSpacing: compact ? -3.0 : -4.6,
-                fontWeight: FontWeight.w800,
+                color: tokens.muted,
+                fontSize: 9,
+                letterSpacing: 1.5,
+                fontWeight: FontWeight.w600,
               ),
-              children: [
-                const TextSpan(text: 'INNO\n'),
-                TextSpan(
-                  text: 'CENCE',
-                  style: TextStyle(color: tokens.accent),
-                ),
-              ],
             ),
-          ),
-        ),
-        Positioned(
-          left: compact ? 3 : 5,
-          bottom: compact ? -1 : 1,
-          child: Text(
-            'SOFT / SPECTRUM',
-            style: TextStyle(
-              color: tokens.muted,
-              fontSize: compact ? 8 : 9,
-              fontWeight: FontWeight.w800,
-              letterSpacing: compact ? 1.6 : 2.2,
-            ),
-          ),
+          ],
         ),
       ],
     );
@@ -520,71 +468,30 @@ class _ThemeBrandTitle extends StatelessWidget {
   }
 
   Widget _glassMark() {
-    final size = compact ? 51.0 : 70.0;
-    final baseStyle = TextStyle(
-      fontSize: size,
-      height: 0.84,
-      letterSpacing: compact ? -2.4 : -4,
-      fontWeight: FontWeight.w800,
-    );
-    return Stack(
-      clipBehavior: Clip.none,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Positioned(
-          left: 8,
-          top: 8,
-          child: Text(
-            'INNO\nCENCE',
-            style: baseStyle.copyWith(
-              color: tokens.artTwo.withValues(alpha: 0.5),
-              shadows: [
-                Shadow(
-                  color: tokens.artTwo.withValues(alpha: 0.55),
-                  blurRadius: 24,
-                ),
-              ],
-            ),
+        Text(
+          'Innocence',
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: tokens.ink,
+            fontSize: compact ? 44 : 56,
+            fontWeight: FontWeight.w300,
+            letterSpacing: -1.3,
           ),
         ),
-        Positioned(
-          left: 0,
-          top: 0,
-          child: Text(
-            'INNO\nCENCE',
-            style: baseStyle.copyWith(
-              color: tokens.ink,
-              shadows: [
-                Shadow(
-                  color: tokens.artOne.withValues(alpha: 0.75),
-                  blurRadius: 18,
-                ),
-              ],
-            ),
-          ),
-        ),
-        Positioned(
-          left: compact ? 170 : 230,
-          top: compact ? 70 : 100,
-          child: Transform.rotate(
-            angle: -0.16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-              decoration: BoxDecoration(
-                color: tokens.accent.withValues(alpha: 0.14),
-                border:
-                    Border.all(color: tokens.accent.withValues(alpha: 0.65)),
-                borderRadius: BorderRadius.circular(99),
-              ),
-              child: Text(
-                'FOCUS / 01',
-                style: TextStyle(
-                  color: tokens.accent,
-                  fontSize: 8,
-                  letterSpacing: 1.4,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+        const SizedBox(height: 4),
+        Text(
+          'FOCUS / EACH DAY',
+          style: TextStyle(
+            color: tokens.muted,
+            fontSize: 9,
+            letterSpacing: 1.5,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],
@@ -732,6 +639,17 @@ class _AuthArtworkPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (theme == AppVisualTheme.glass) {
+      return; // The animated light field behind the form supplies all color.
+    }
+    if (theme == AppVisualTheme.minimalism) {
+      canvas.drawCircle(
+        Offset(size.width * .03, size.height * .90),
+        108,
+        Paint()..color = tokens.accent.withValues(alpha: .72),
+      );
+      return;
+    }
     final linePaint = Paint()
       ..color = tokens.line
           .withValues(alpha: theme == AppVisualTheme.glass ? 0.28 : 0.48)

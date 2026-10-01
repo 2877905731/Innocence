@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 import 'package:innocence_flutter/core/theme/surface_palette.dart';
 import 'package:innocence_flutter/core/utils/localized_text.dart';
 import 'package:innocence_flutter/core/widgets/glass_panel.dart';
@@ -88,7 +89,7 @@ class _AdminTeamManagementPageState extends State<AdminTeamManagementPage> {
       return;
     }
 
-    final changed = await showDialog<bool>(
+    final changed = await showThemedDialog<bool>(
       context: context,
       builder: (context) {
         return _AdminTeamDetailDialog(

@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/app/session_controller.dart';
+import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/network/api_exception.dart';
 import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
 import 'package:innocence_flutter/features/auth/presentation/widgets/auth_experience.dart';
@@ -57,7 +59,9 @@ class _AuthPageState extends State<AuthPage> {
   @override
   void initState() {
     super.initState();
-    unawaited(DesktopWidgetBridge.setWindowMode('auth'));
+    if (AppConfig.deviceType == 'windows') {
+      unawaited(DesktopWidgetBridge.setWindowMode('auth'));
+    }
   }
 
   @override
@@ -111,15 +115,19 @@ class _AuthPageState extends State<AuthPage> {
 
   Future<void> _enterOfflineMode() async {
     FocusScope.of(context).unfocus();
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showThemedDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text(_language.isChinese ? '使用离线模式' : 'Use offline mode'),
           content: Text(
-            _language.isChinese
-                ? '计划、专注与备忘录会保存在此设备。好友、团队、通知、云端资料等联网功能暂不可用；登录后会先展示待导入摘要，只有你确认后才会上传。'
-                : 'Plans, focus sessions, and memos stay on this device. Friends, teams, notifications, and cloud profile features are unavailable. After sign-in, you will review an import summary before anything uploads.',
+            widget.sessionController.isOfflineOnlyBuild
+                ? (_language.isChinese
+                    ? '计划、专注、统计与备忘录保存在此设备。本版本不包含登录、好友、团队、通知和云同步；联网功能后续接入。'
+                    : 'Plans, focus sessions, statistics, and memos stay on this device. Sign-in, friends, teams, notifications, and cloud sync will be added in a later release.')
+                : (_language.isChinese
+                    ? '计划、专注与备忘录会保存在此设备。好友、团队、通知、云端资料等联网功能暂不可用；登录后会先展示待导入摘要，只有你确认后才会上传。'
+                    : 'Plans, focus sessions, and memos stay on this device. Friends, teams, notifications, and cloud profile features are unavailable. After sign-in, you will review an import summary before anything uploads.'),
           ),
           actions: [
             TextButton(
@@ -280,8 +288,262 @@ class _AuthPageState extends State<AuthPage> {
     return _language.sendLoginCodeLabel;
   }
 
+  Widget _buildAndroid(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isChinese = _language.isChinese;
+    return PopScope(
+      canPop: _mode != AuthMode.passwordReset,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _mode == AuthMode.passwordReset) {
+          _switchMode(AuthMode.passwordLogin);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Innocence')),
+        body: SafeArea(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 36),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 520),
+                child: AutofillGroup(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Icon(Icons.auto_stories_outlined,
+                          color: colors.primary, size: 40),
+                      const SizedBox(height: 24),
+                      if (_mode == AuthMode.passwordReset) ...[
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: () =>
+                                _switchMode(AuthMode.passwordLogin),
+                            icon: const Icon(Icons.arrow_back_rounded),
+                            label: Text(isChinese ? '返回登录' : 'Back to sign in'),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      Text(_modeTitle, style: theme.textTheme.headlineMedium),
+                      const SizedBox(height: 8),
+                      Text(_modeDescription, style: theme.textTheme.bodyLarge),
+                      const SizedBox(height: 28),
+                      if (_mode != AuthMode.passwordReset) ...[
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: SegmentedButton<AuthMode>(
+                            showSelectedIcon: false,
+                            segments: [
+                              ButtonSegment(
+                                value: AuthMode.passwordLogin,
+                                label: Text(isChinese ? '密码' : 'Password'),
+                              ),
+                              ButtonSegment(
+                                value: AuthMode.codeLogin,
+                                label: Text(isChinese ? '验证码' : 'Code'),
+                              ),
+                              ButtonSegment(
+                                value: AuthMode.register,
+                                label: Text(isChinese ? '注册' : 'Register'),
+                              ),
+                            ],
+                            selected: {_mode},
+                            onSelectionChanged: (selection) =>
+                                _switchMode(selection.first),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                      TextField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const [AutofillHints.email],
+                        onChanged: (_) =>
+                            widget.sessionController.clearBanner(),
+                        decoration: InputDecoration(
+                          labelText: isChinese ? '邮箱' : 'Email',
+                          hintText: 'name@example.com',
+                          prefixIcon: const Icon(Icons.alternate_email_rounded),
+                        ),
+                      ),
+                      if (_needsPassword) ...[
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          textInputAction: _needsCode
+                              ? TextInputAction.next
+                              : TextInputAction.done,
+                          autofillHints: _mode == AuthMode.passwordLogin
+                              ? const [AutofillHints.password]
+                              : const [AutofillHints.newPassword],
+                          onChanged: (_) =>
+                              widget.sessionController.clearBanner(),
+                          onSubmitted: (_) {
+                            if (!_needsCode) _submit();
+                          },
+                          decoration: InputDecoration(
+                            labelText: _mode == AuthMode.passwordReset
+                                ? (isChinese ? '新密码' : 'New password')
+                                : (isChinese ? '密码' : 'Password'),
+                            prefixIcon: const Icon(Icons.lock_outline_rounded),
+                            suffixIcon: IconButton(
+                              tooltip: _obscurePassword
+                                  ? (isChinese ? '显示密码' : 'Show password')
+                                  : (isChinese ? '隐藏密码' : 'Hide password'),
+                              onPressed: () => setState(
+                                  () => _obscurePassword = !_obscurePassword),
+                              icon: Icon(_obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined),
+                            ),
+                          ),
+                        ),
+                      ],
+                      if (_needsCode) ...[
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _codeController,
+                          keyboardType: TextInputType.number,
+                          textInputAction: TextInputAction.done,
+                          autofillHints: const [AutofillHints.oneTimeCode],
+                          onChanged: (_) =>
+                              widget.sessionController.clearBanner(),
+                          onSubmitted: (_) => _submit(),
+                          decoration: InputDecoration(
+                            labelText: isChinese ? '验证码' : 'Verification code',
+                            prefixIcon: const Icon(Icons.password_rounded),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton(
+                          onPressed: _sendingCode || _cooldownSeconds > 0
+                              ? null
+                              : _sendCode,
+                          child: _sendingCode
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : Text(_codeButtonLabel),
+                        ),
+                      ],
+                      if (_mode == AuthMode.passwordLogin)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () =>
+                                _switchMode(AuthMode.passwordReset),
+                            child:
+                                Text(isChinese ? '忘记密码？' : 'Forgot password?'),
+                          ),
+                        )
+                      else
+                        const SizedBox(height: 24),
+                      if (widget.sessionController.bannerMessage != null) ...[
+                        Semantics(
+                          liveRegion: true,
+                          child: Card(
+                            color: colors.surfaceContainerHighest,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child:
+                                  Text(widget.sessionController.bannerMessage!),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      FilledButton(
+                        onPressed:
+                            widget.sessionController.isBusy ? null : _submit,
+                        child: widget.sessionController.isBusy
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(_submitLabel),
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: widget.sessionController.isBusy
+                            ? null
+                            : _enterOfflineMode,
+                        icon: const Icon(Icons.offline_bolt_outlined),
+                        label: Text(isChinese ? '离线使用' : 'Continue offline'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (widget.sessionController.isOfflineOnlyBuild) {
+      final isChinese = _language.isChinese;
+      return Scaffold(
+        appBar: AppBar(title: const Text('Innocence')),
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.all(24),
+                children: [
+                  Icon(Icons.offline_bolt_outlined,
+                      size: 48, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(height: 24),
+                  Text(isChinese ? '本机离线版' : 'On-device edition',
+                      style: Theme.of(context).textTheme.headlineSmall),
+                  const SizedBox(height: 12),
+                  Text(isChinese
+                      ? '无需登录，即可安排短计划、开始专注、查看本机统计和记录备忘录。数据保存在当前设备。'
+                      : 'Plan your day, focus, view local statistics, and write memos without signing in. Data stays on this device.'),
+                  const SizedBox(height: 12),
+                  Text(isChinese
+                      ? '登录、好友、团队、收件箱和云同步将在后续版本接入。'
+                      : 'Sign-in, friends, teams, inbox, and cloud sync will be added in a later release.'),
+                  if (widget.sessionController.bannerMessage != null) ...[
+                    const SizedBox(height: 16),
+                    Semantics(
+                      liveRegion: true,
+                      child: Text(widget.sessionController.bannerMessage!),
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    key: const ValueKey('offline-release-enter'),
+                    onPressed: widget.sessionController.isBusy
+                        ? null
+                        : _enterOfflineMode,
+                    icon: const Icon(Icons.arrow_forward_rounded),
+                    label: Text(isChinese ? '离线使用' : 'Continue offline'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    if (AppConfig.deviceType == 'android') {
+      return _buildAndroid(context);
+    }
     final tokens = AppVisualTokens.of(widget.visualTheme);
     return AuthExperience(
       language: _language,

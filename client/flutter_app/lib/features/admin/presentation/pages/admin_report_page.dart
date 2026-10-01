@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 import 'package:innocence_flutter/core/theme/surface_palette.dart';
 import 'package:innocence_flutter/core/utils/localized_text.dart';
 import 'package:innocence_flutter/core/widgets/glass_panel.dart';
@@ -78,7 +79,7 @@ class _AdminReportPageState extends State<AdminReportPage> {
       return;
     }
 
-    final reviewed = await showDialog<bool>(
+    final reviewed = await showThemedDialog<bool>(
       context: context,
       builder: (context) => _AdminReportDetailDialog(
         detail: detail,
@@ -253,7 +254,7 @@ class _AdminReportDetailDialogState extends State<_AdminReportDetailDialog> {
       localizeAdminPunishmentType(context, value);
 
   Future<void> _review() async {
-    final draft = await showDialog<_ReviewDraft>(
+    final draft = await showThemedDialog<_ReviewDraft>(
       context: context,
       builder: (context) => _ReviewDialog(isChinese: widget.isChinese),
     );

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:innocence_flutter/core/config/app_config.dart';
 
 enum AppVisualTheme {
   minimalism,
@@ -40,10 +42,10 @@ extension AppVisualThemeX on AppVisualTheme {
       };
 
   String label({required bool isChinese}) => switch (this) {
-        AppVisualTheme.minimalism => isChinese ? '柔彩' : 'Soft spectrum',
+        AppVisualTheme.minimalism => isChinese ? '简约白色' : 'Citrus white',
         AppVisualTheme.wabiSabi => isChinese ? '侘寂' : 'Wabi-sabi',
         AppVisualTheme.midCentury => isChinese ? '中世纪' : 'Mid-century',
-        AppVisualTheme.glass => isChinese ? '玻璃态' : 'Glass',
+        AppVisualTheme.glass => isChinese ? '液态玻璃' : 'Liquid glass',
       };
 }
 
@@ -110,16 +112,16 @@ class AppVisualTokens {
 
   static AppVisualTokens of(AppVisualTheme theme) => switch (theme) {
         AppVisualTheme.minimalism => const AppVisualTokens(
-            canvas: Color(0xFFF4F4F7),
-            panel: Color(0xFFFCFCFE),
-            softPanel: Color(0xFFEEEAF9),
-            ink: Color(0xFF17181B),
-            muted: Color(0xFF686A72),
-            line: Color(0xFFDADAE2),
-            accent: Color(0xFF8E7DFF),
+            canvas: Color(0xFFEEEDE9),
+            panel: Color(0xFFFFFFFF),
+            softPanel: Color(0xFFF2F1ED),
+            ink: Color(0xFF242522),
+            muted: Color(0xFF76766F),
+            line: Color(0xFFE8E7E2),
+            accent: Color(0xFFED762C),
             onAccent: Colors.white,
-            artOne: Color(0xFFFF9CA9),
-            artTwo: Color(0xFFE7E2FF),
+            artOne: Color(0xFFF8BA79),
+            artTwo: Color(0xFFFFE0AB),
             isDark: false,
             isGlass: false,
           ),
@@ -151,17 +153,19 @@ class AppVisualTokens {
             isDark: false,
             isGlass: false,
           ),
-        AppVisualTheme.glass => const AppVisualTokens(
-            canvas: Color(0xFF08111F),
-            panel: Color(0x3D101D3B),
-            softPanel: Color(0x3014264A),
-            ink: Color(0xFFF5F8FF),
-            muted: Color(0xFFD2DDF0),
-            line: Color(0x5CBCD3F2),
-            accent: Color(0xFFA7B5FF),
-            onAccent: Color(0xFF11183A),
-            artOne: Color(0xFF789BFF),
-            artTwo: Color(0xFFD798FF),
+        AppVisualTheme.glass => AppVisualTokens(
+            canvas: const Color(0xFF03042C),
+            panel: AppConfig.deviceType == 'windows'
+                ? const Color(0x0AFFFFFF)
+                : const Color(0x33000000),
+            softPanel: const Color(0x22000000),
+            ink: const Color(0xFFF0F1F4),
+            muted: const Color(0xFFD4D6E0),
+            line: const Color(0x29FFFFFF),
+            accent: const Color(0xFFC2C9E0),
+            onAccent: const Color(0xFF202127),
+            artOne: const Color(0xFF2D2CFF),
+            artTwo: const Color(0xFFB629F5),
             isDark: true,
             isGlass: true,
           ),
@@ -169,11 +173,12 @@ class AppVisualTokens {
 
   ThemeData toThemeData(AppVisualTheme visualTheme) {
     final softSpectrum = visualTheme == AppVisualTheme.minimalism;
+    final windowsGlass = isGlass && AppConfig.deviceType == 'windows';
     final componentRadius = switch (visualTheme) {
-      AppVisualTheme.minimalism => 14.0,
+      AppVisualTheme.minimalism => 12.0,
       AppVisualTheme.wabiSabi => 4.0,
       AppVisualTheme.midCentury => 12.0,
-      AppVisualTheme.glass => 14.0,
+      AppVisualTheme.glass => 10.0,
     };
     final scheme = ColorScheme.fromSeed(
       seedColor: accent,
@@ -207,26 +212,27 @@ class AppVisualTokens {
       fontFamily: 'Segoe UI',
       dialogTheme: isGlass
           ? const DialogThemeData(
-              backgroundColor: Color(0xE6132146),
+              backgroundColor: Color(0xD1181A24),
+              barrierColor: Color(0x73000000),
               surfaceTintColor: Colors.transparent,
-              elevation: 28,
-              shadowColor: Color(0xCC071027),
+              elevation: 24,
+              shadowColor: Color(0x66000000),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(22)),
+                borderRadius: BorderRadius.all(Radius.circular(24)),
                 side: BorderSide(
-                  color: Color(0x78FFFFFF),
-                  width: 1.2,
+                  color: Color(0x52FFFFFF),
+                  width: 1,
                 ),
               ),
             )
           : softSpectrum
               ? DialogThemeData(
-                  backgroundColor: const Color(0xFFFCFCFE),
+                  backgroundColor: const Color(0xFFF9F9F6),
                   surfaceTintColor: Colors.transparent,
                   elevation: 20,
-                  shadowColor: const Color(0x26252635),
+                  shadowColor: const Color(0x1836372A),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(16),
                     side: const BorderSide(color: Color(0xBFFFFFFF)),
                   ),
                 )
@@ -283,8 +289,8 @@ class AppVisualTokens {
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(0, 52),
           elevation: 0,
-          backgroundColor: accent,
-          foregroundColor: onAccent,
+          backgroundColor: softSpectrum ? ink : accent,
+          foregroundColor: softSpectrum ? Colors.white : onAccent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(componentRadius),
           ),
@@ -294,6 +300,8 @@ class AppVisualTokens {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           minimumSize: const Size(0, 48),
+          backgroundColor: softSpectrum ? ink : accent,
+          foregroundColor: softSpectrum ? Colors.white : onAccent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(componentRadius),
           ),
@@ -307,20 +315,51 @@ class AppVisualTokens {
           ),
         ),
       ),
-      cardTheme: softSpectrum
+      cardTheme: softSpectrum || isGlass
           ? CardThemeData(
               elevation: 0,
               color: panel,
               surfaceTintColor: Colors.transparent,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: BorderSide(color: line.withValues(alpha: 0.72)),
+                borderRadius: BorderRadius.circular(isGlass ? 15 : 16),
+                side: BorderSide(color: line),
               ),
             )
           : const CardThemeData(),
+      appBarTheme: AppBarTheme(
+        elevation: 0,
+        backgroundColor: isGlass ? Colors.transparent : canvas,
+        foregroundColor: ink,
+        surfaceTintColor: Colors.transparent,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        ),
+      ),
+      navigationDrawerTheme: NavigationDrawerThemeData(
+        backgroundColor: isGlass
+            ? const Color(0x99000000)
+            : softSpectrum
+                ? const Color(0xFFF9F9F6)
+                : panel,
+        surfaceTintColor: Colors.transparent,
+        indicatorColor: isGlass
+            ? const Color(0x18FFFFFF)
+            : softSpectrum
+                ? const Color(0xFF292B26)
+                : softPanel,
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: ink,
-        contentTextStyle: TextStyle(color: canvas),
+        backgroundColor: windowsGlass
+            ? const Color(0x80121318)
+            : isGlass
+                ? const Color(0xB8000000)
+                : ink,
+        contentTextStyle: TextStyle(color: isGlass ? ink : canvas),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(componentRadius),
@@ -329,7 +368,7 @@ class AppVisualTokens {
       tooltipTheme: isGlass
           ? TooltipThemeData(
               decoration: BoxDecoration(
-                color: const Color(0xE6101D3B),
+                color: const Color(0xCC000000),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: const Color(0x5CFFFFFF)),
                 boxShadow: const [

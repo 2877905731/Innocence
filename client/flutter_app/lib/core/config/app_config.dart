@@ -3,10 +3,14 @@ import 'dart:io';
 class AppConfig {
   AppConfig._();
 
+  static const bool offlineOnlyBuild =
+      bool.fromEnvironment('INNOCENCE_OFFLINE_ONLY', defaultValue: false);
+
   static const String _overrideBaseUrl =
       String.fromEnvironment('INNOCENCE_API_BASE_URL', defaultValue: '');
 
   static String get apiBaseUrl {
+    if (offlineOnlyBuild) return '';
     if (_overrideBaseUrl.isNotEmpty) {
       return _normalizeBaseUrl(_overrideBaseUrl);
     }

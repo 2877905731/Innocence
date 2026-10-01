@@ -359,7 +359,7 @@ void main() {
           .style!
           .foregroundColor!
           .resolve({}),
-      const Color(0xFF08111F),
+      const Color(0xFF03042C),
     );
   });
 }

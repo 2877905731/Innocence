@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
 import 'package:innocence_flutter/core/local/offline_sync_models.dart';
+import 'package:innocence_flutter/features/auth/presentation/pages/android_language_selection_page.dart';
 import 'package:innocence_flutter/features/auth/presentation/pages/auth_page.dart';
 import 'package:innocence_flutter/features/auth/presentation/widgets/auth_experience.dart';
 import 'package:innocence_flutter/features/home/presentation/pages/home_page.dart';
@@ -48,11 +51,24 @@ class _InnocenceAppState extends State<InnocenceApp> {
         final language = widget.languageController.currentLanguage;
         final visualTheme = widget.visualThemeController.currentTheme;
         final visualTokens = AppVisualTokens.of(visualTheme);
+        final overlayStyle = SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness:
+              visualTokens.isDark ? Brightness.light : Brightness.dark,
+          statusBarBrightness:
+              visualTokens.isDark ? Brightness.dark : Brightness.light,
+          systemNavigationBarIconBrightness:
+              visualTokens.isDark ? Brightness.light : Brightness.dark,
+        );
         return MaterialApp(
           title: 'Innocence',
           debugShowCheckedModeBanner: false,
           theme: visualTokens.toThemeData(visualTheme),
           themeMode: visualTokens.isDark ? ThemeMode.dark : ThemeMode.light,
+          builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+            value: overlayStyle,
+            child: child ?? const SizedBox.shrink(),
+          ),
           locale: language.locale,
           supportedLocales: const [
             Locale('zh', 'CN'),
@@ -70,11 +86,19 @@ class _InnocenceAppState extends State<InnocenceApp> {
   }
 
   Widget _buildHome(AppLanguage language, AppVisualTheme visualTheme) {
+    final isAndroid = AppConfig.deviceType == 'android';
     if (!widget.languageController.initialized) {
-      return const _BootSplash();
+      return isAndroid
+          ? const Scaffold(body: Center(child: CircularProgressIndicator()))
+          : const _BootSplash();
     }
 
     if (!widget.languageController.startupConfirmed) {
+      if (isAndroid) {
+        return AndroidLanguageSelectionPage(
+          controller: widget.languageController,
+        );
+      }
       return _LanguageSelectionPage(
         controller: widget.languageController,
         visualTheme: visualTheme,
@@ -84,6 +108,9 @@ class _InnocenceAppState extends State<InnocenceApp> {
 
     switch (widget.sessionController.status) {
       case SessionStatus.initializing:
+        if (isAndroid) {
+          return _AndroidLaunchScreen(language: language);
+        }
         return _LaunchScreen(
           language: language,
           visualTheme: visualTheme,
@@ -274,6 +301,32 @@ class _InnocenceAppState extends State<InnocenceApp> {
           ),
         );
     }
+  }
+}
+
+class _AndroidLaunchScreen extends StatelessWidget {
+  const _AndroidLaunchScreen({required this.language});
+
+  final AppLanguage language;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Innocence')),
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 24),
+              Text(language.launchMessage,
+                  style: Theme.of(context).textTheme.bodyLarge),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

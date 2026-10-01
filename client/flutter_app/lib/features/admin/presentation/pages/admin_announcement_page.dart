@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 import 'package:innocence_flutter/core/theme/surface_palette.dart';
 import 'package:innocence_flutter/core/utils/localized_text.dart';
 import 'package:innocence_flutter/core/widgets/glass_panel.dart';
@@ -62,7 +63,7 @@ class _AdminAnnouncementPageState extends State<AdminAnnouncementPage> {
   }
 
   Future<void> _createAnnouncement() async {
-    final draft = await showDialog<_AnnouncementDraft>(
+    final draft = await showThemedDialog<_AnnouncementDraft>(
       context: context,
       builder: (context) => _CreateAnnouncementDialog(isChinese: _isChinese),
     );
@@ -97,7 +98,7 @@ class _AdminAnnouncementPageState extends State<AdminAnnouncementPage> {
   }
 
   Future<void> _deleteAnnouncement(AdminAnnouncementItem item) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showThemedDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(_text('删除公告', 'Delete announcement')),

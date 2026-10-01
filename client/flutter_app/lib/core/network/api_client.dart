@@ -10,11 +10,23 @@ class ApiClient {
   ApiClient({
     HttpClient? httpClient,
     String? baseUrl,
+    bool? offlineOnly,
   })  : _httpClient = httpClient ?? HttpClient(),
+        _offlineOnly = offlineOnly ?? AppConfig.offlineOnlyBuild,
         _baseUri = Uri.parse(baseUrl ?? AppConfig.apiBaseUrl);
 
   final HttpClient _httpClient;
   final Uri _baseUri;
+  final bool _offlineOnly;
+
+  void _requireNetworkEnabled() {
+    if (_offlineOnly) {
+      throw const ApiException(
+        '此版本仅支持本机离线使用，联网功能将在后续版本开放。',
+        statusCode: 403,
+      );
+    }
+  }
 
   Future<dynamic> get(
     String path, {
@@ -74,13 +86,13 @@ class ApiClient {
     required String contentType,
     Map<String, String> headers = const {},
   }) async {
+    _requireNetworkEnabled();
     try {
       final request = await _httpClient.postUrl(_baseUri.resolve(path));
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
       headers.forEach(request.headers.set);
 
-      final timestamp =
-          DateTime.now().microsecondsSinceEpoch.toRadixString(16);
+      final timestamp = DateTime.now().microsecondsSinceEpoch.toRadixString(16);
       final nonce = Random.secure().nextInt(1 << 32).toRadixString(16);
       final boundary = 'innocence-$timestamp-$nonce';
       final safeFieldName = _safeMultipartToken(fieldName, fallback: 'file');
@@ -119,6 +131,7 @@ class ApiClient {
     Map<String, dynamic>? body,
     Map<String, String> headers = const {},
   }) async {
+    _requireNetworkEnabled();
     try {
       final request = await _httpClient.openUrl(
         method,

@@ -70,9 +70,26 @@ pwsh -File windows/package_release.ps1
 
 - `Innocence-v<version>-windows-x64-setup.exe`：每用户安装器，支持开始菜单、可选桌面快捷方式和卸载
 - `Innocence-v<version>-windows-x64-portable.zip`：免安装便携包
-- `SHA256SUMS.txt`：两个发布资产的 SHA256 校验值
+- `SHA256SUMS.txt`：当前目录内 Windows 与 Android 发布资产的 SHA256 校验值；两个打包脚本不会删除另一平台产物
 
 安装器由 `windows/installer.iss` 定义，需要本机安装 Inno Setup 6。正式公开发布前还应使用可信代码签名证书签名；没有证书时必须在发布说明中明确安装器未签名。
+
+### 构建 Android 本机离线 Release
+
+v1.2.0 首次发行 Android 本机离线版。`INNOCENCE_OFFLINE_ONLY=true` 同时控制专用离线入口、禁止恢复在线会话、请求层拦截和 Manifest 移除 `INTERNET` 权限。普通开发及 Windows 构建保留现有联网路径。
+
+```powershell
+flutter pub get
+pwsh -File android/package_release.ps1
+```
+
+脚本执行 analyze、全部 Flutter 用例、离线编译开关专项及 Release APK 构建；随后用 `apksigner` 和 `aapt` 核对签名、版本、非调试状态和无联网权限，输出 `build/releases/v<version>/Innocence-v<version>-android-offline.apk`。双端验证在同一源码下已完成时可用 `-SkipVerification` 跳过重复检查，构建与产物校验仍执行。
+
+正式签名需要四个进程环境变量：`INNOCENCE_ANDROID_KEYSTORE`、`INNOCENCE_ANDROID_STORE_PASSWORD`、`INNOCENCE_ANDROID_KEY_ALIAS`、`INNOCENCE_ANDROID_KEY_PASSWORD`。不将密码写进命令行、仓库或日志。未提供变量时，脚本从当前 Windows 用户的 `%LOCALAPPDATA%/Innocence/release-signing/` 读取 `innocence-android-release.p12` 与 DPAPI 加密的 `signing-credentials.clixml`；可用 `-SigningDirectory` 指定受限目录。Gradle 缺少正式签名会拒绝 Release 构建，不回退到 Debug 密钥。
+
+同一 applicationId `com.innocence.app.innocence_flutter` 的后续升级必须沿用首次发行密钥，并递增 versionCode。签名材料应由项目所有者另行安全备份；DPAPI 文件只能由对应 Windows 用户解密，迁移构建机时须通过安全方式提供上述变量。开发版 Debug 签名不同，无法覆盖正式版；本机数据不能因验收而静默清除。
+
+本次 Android 仅开放本机能力；登录、陪伴、收件箱、云同步与推送后续接入。完整月／年计划手机页面、实体手机和长期运行验收仍有待办。
 
 ## 前端协作注意事项
 

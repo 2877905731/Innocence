@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/core/config/app_config.dart';
+import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 import 'package:innocence_flutter/core/utils/localized_text.dart';
 import 'package:innocence_flutter/core/widgets/glass_panel.dart';
 import 'package:innocence_flutter/core/widgets/secondary_page_scaffold.dart';
@@ -108,7 +110,7 @@ class _MemoPageState extends State<MemoPage> {
   }
 
   Future<void> _deleteMemo(MemoCardModel memo) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showThemedDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -145,7 +147,7 @@ class _MemoPageState extends State<MemoPage> {
   }
 
   Future<MemoCardModel?> _openEditor({MemoCardModel? initialMemo}) async {
-    return showDialog<MemoCardModel>(
+    return showThemedDialog<MemoCardModel>(
       context: context,
       builder: (context) {
         return _MemoEditorDialog(
@@ -191,10 +193,13 @@ class _MemoPageState extends State<MemoPage> {
     return SecondaryPageScaffold(
       backLabel: _text('返回', 'Back'),
       title: _text('备忘录中心', 'Memo center'),
-      description: _text(
-        '快速记录文字和清单，并在手机与桌面端保持同步显示。',
-        'Capture text and checklists quickly, then keep the same notes visible on both phone and desktop.',
-      ),
+      description: AppConfig.offlineOnlyBuild
+          ? _text('快速记录文字和清单，保存在当前设备。',
+              'Capture text and checklists and store them on this device.')
+          : _text(
+              '快速记录文字和清单，并在手机与桌面端保持同步显示。',
+              'Capture text and checklists quickly, then keep the same notes visible on both phone and desktop.',
+            ),
       headerActions: [
         FilledButton.icon(
           onPressed: _isLoading ? null : _createMemo,
@@ -287,7 +292,10 @@ class _MemoHeroCard extends StatelessWidget {
           children: [
             _MemoTag(label: _text('支持文字 + 清单', 'Text + checklist')),
             _MemoTag(label: _text('支持快速整理', 'Quick organization ready')),
-            _MemoTag(label: _text('桌面挂件摘要可见', 'Desktop widget summary ready')),
+            _MemoTag(
+                label: AppConfig.offlineOnlyBuild
+                    ? _text('仅保存在此设备', 'Stored only on this device')
+                    : _text('桌面挂件摘要可见', 'Desktop widget summary ready')),
           ],
         ),
       ],
@@ -520,7 +528,7 @@ class _MemoEditorDialogState extends State<_MemoEditorDialog> {
 
   Future<void> _addChecklistItem() async {
     final controller = TextEditingController();
-    final itemText = await showDialog<String>(
+    final itemText = await showThemedDialog<String>(
       context: context,
       builder: (context) {
         return AlertDialog(

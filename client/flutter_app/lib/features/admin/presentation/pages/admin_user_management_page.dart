@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 import 'package:innocence_flutter/core/theme/surface_palette.dart';
 import 'package:innocence_flutter/core/utils/localized_text.dart';
 import 'package:innocence_flutter/core/widgets/glass_panel.dart';
@@ -113,7 +114,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
       return;
     }
 
-    await showDialog<void>(
+    await showThemedDialog<void>(
       context: context,
       builder: (context) {
         return _AdminUserDetailDialog(

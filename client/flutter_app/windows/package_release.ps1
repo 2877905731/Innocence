@@ -67,13 +67,10 @@ if (-not (Test-Path -LiteralPath (Join-Path $releaseDirectory 'innocence_flutter
     throw 'Flutter Windows Release output is incomplete.'
 }
 
-if (Test-Path -LiteralPath $outputDirectory) {
-    Remove-Item -LiteralPath $outputDirectory -Recurse -Force
-}
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 
 $portablePath = Join-Path $outputDirectory "Innocence-v$versionName-windows-x64-portable.zip"
-Compress-Archive -Path (Join-Path $releaseDirectory '*') -DestinationPath $portablePath -CompressionLevel Optimal
+Compress-Archive -Path (Join-Path $releaseDirectory '*') -DestinationPath $portablePath -CompressionLevel Optimal -Force
 
 if ([string]::IsNullOrWhiteSpace($InnoSetupCompiler)) {
     $compilerCandidates = @(
@@ -104,7 +101,9 @@ if (-not (Test-Path -LiteralPath $installerPath -PathType Leaf)) {
     throw 'Inno Setup did not produce the expected installer.'
 }
 
-$artifacts = @($installerPath, $portablePath)
+$artifacts = @(Get-ChildItem -LiteralPath $outputDirectory -File |
+    Where-Object { $_.Extension -in @('.exe', '.zip', '.apk', '.aab') } |
+    Sort-Object Name | ForEach-Object { $_.FullName })
 $checksumLines = foreach ($artifact in $artifacts) {
     $hash = (Get-FileHash -LiteralPath $artifact -Algorithm SHA256).Hash.ToLowerInvariant()
     "$hash  $([System.IO.Path]::GetFileName($artifact))"

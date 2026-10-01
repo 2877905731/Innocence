@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 import 'package:flutter/services.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
+import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/layout/desktop_presentation.dart';
 import 'package:innocence_flutter/core/utils/localized_text.dart';
 import 'package:innocence_flutter/core/widgets/secondary_page_scaffold.dart';
@@ -308,7 +310,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _addBlacklist() async {
     final controller = TextEditingController();
-    final rawUserId = await showDialog<String>(
+    final rawUserId = await showThemedDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(_text('加入黑名单', 'Add to blacklist')),
@@ -377,7 +379,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _removeBlacklist(BlacklistItem item) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showThemedDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(_text('解除拉黑？', 'Remove from blacklist?')),
@@ -422,7 +424,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final current = _overview.accountSetting;
     final nicknameController = TextEditingController(text: current.nickname);
     final bioController = TextEditingController(text: current.bio);
-    final draft = await showDialog<_ProfileDraft>(
+    final draft = await showThemedDialog<_ProfileDraft>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -758,7 +760,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _cancelAccount() async {
     final profile = _overview.accountSetting;
-    final draft = await showDialog<_CancelAccountDraft>(
+    final draft = await showThemedDialog<_CancelAccountDraft>(
       context: context,
       builder: (context) => _CancelAccountDialog(
         userLabel: _accountDisplayName(profile),
@@ -878,7 +880,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final glass = visualTheme == AppVisualTheme.glass;
     final softSpectrum = visualTheme == AppVisualTheme.minimalism;
     final radius = switch (visualTheme) {
-      AppVisualTheme.minimalism => 20.0,
+      AppVisualTheme.minimalism => 16.0,
       AppVisualTheme.wabiSabi => 0.0,
       AppVisualTheme.midCentury => 16.0,
       AppVisualTheme.glass => 20.0,
@@ -1539,8 +1541,12 @@ class _SettingsPageState extends State<SettingsPage> {
             child: _SettingSection(
               title: _text('外观', 'Appearance'),
               subtitle: _text(
-                '切换完整视觉主题。选择保存在本机，下次启动和登录时会自动恢复。',
-                'Switch the complete visual theme. It is restored on the next launch and sign-in.',
+                AppConfig.offlineOnlyBuild
+                    ? '切换完整视觉主题。选择保存在本机，下次启动时会自动恢复。'
+                    : '切换完整视觉主题。选择保存在本机，下次启动和登录时会自动恢复。',
+                AppConfig.offlineOnlyBuild
+                    ? 'Switch the visual theme. Your choice is saved on this device and restored on the next launch.'
+                    : 'Switch the complete visual theme. It is restored on the next launch and sign-in.',
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1699,8 +1705,12 @@ class _SettingsPageState extends State<SettingsPage> {
           if (widget.isOfflineMode) ...[
             _OfflineSettingsNotice(
               message: _text(
-                '离线模式仅开放语言、当前设备资料、桌面体验、外观和本机操作；隐私、通知、设备会话、后台管理及账号注销需要登录联网。',
-                'Offline mode keeps language, local profile, desktop experience, appearance, and device actions available. Privacy, notifications, sessions, admin tools, and account cancellation require sign-in and a network connection.',
+                AppConfig.offlineOnlyBuild
+                    ? '当前版本使用本机资料与设置。登录、隐私、通知、设备会话及云同步将在后续联网版本接入。'
+                    : '离线模式仅开放语言、当前设备资料、桌面体验、外观和本机操作；隐私、通知、设备会话、后台管理及账号注销需要登录联网。',
+                AppConfig.offlineOnlyBuild
+                    ? 'This edition uses on-device data and settings. Sign-in, privacy, notifications, device sessions, and cloud sync will be added in a future online edition.'
+                    : 'Offline mode keeps language, local profile, desktop experience, appearance, and device actions available. Privacy, notifications, sessions, admin tools, and account cancellation require sign-in and a network connection.',
               ),
             ),
             const SizedBox(height: 16),
@@ -1797,7 +1807,7 @@ class _SettingsSurfaceState extends State<_SettingsSurface> {
       AppVisualTheme.minimalism => 20.0,
       AppVisualTheme.wabiSabi => 0.0,
       AppVisualTheme.midCentury => 18.0,
-      AppVisualTheme.glass => 22.0,
+      AppVisualTheme.glass => 15.0,
     };
     final glass = visualTheme == AppVisualTheme.glass;
     final softSpectrum = visualTheme == AppVisualTheme.minimalism;
@@ -1824,35 +1834,26 @@ class _SettingsSurfaceState extends State<_SettingsSurface> {
           ),
           padding: glass ? EdgeInsets.zero : widget.padding,
           decoration: BoxDecoration(
-            color: glass
-                ? (_hovered ? const Color(0x52172A55) : const Color(0x3D101D3B))
-                : tokens.panel,
+            color: tokens.panel,
             borderRadius: BorderRadius.circular(radius),
             border: Border.all(
-              color: glass
-                  ? (_hovered
-                      ? const Color(0x70FFFFFF)
-                      : const Color(0x3FFFFFFF))
-                  : tokens.line,
+              color: glass ? const Color(0x35FFFFFF) : tokens.line,
             ),
             boxShadow: glass
-                ? [
+                ? const [
                     BoxShadow(
-                      color: _hovered
-                          ? const Color(0x665F8CFF)
-                          : tokens.artOne.withValues(alpha: 0.18),
-                      blurRadius: _hovered ? 44 : 28,
-                      offset: Offset(0, _hovered ? 18 : 12),
-                    ),
+                        color: Color(0x16000000),
+                        blurRadius: 30,
+                        offset: Offset(0, 10)),
                   ]
                 : softSpectrum
                     ? [
                         BoxShadow(
-                          color: const Color(0xFF252635).withValues(
-                            alpha: _hovered ? 0.12 : 0.07,
+                          color: const Color(0xFF36372A).withValues(
+                            alpha: _hovered ? 0.065 : 0.025,
                           ),
-                          blurRadius: _hovered ? 32 : 22,
-                          offset: Offset(0, _hovered ? 14 : 9),
+                          blurRadius: _hovered ? 20 : 12,
+                          offset: Offset(0, _hovered ? 8 : 4),
                         ),
                       ]
                     : null,
@@ -1862,8 +1863,8 @@ class _SettingsSurfaceState extends State<_SettingsSurface> {
                   borderRadius: BorderRadius.circular(radius),
                   child: BackdropFilter(
                     filter: ImageFilter.blur(
-                      sigmaX: _hovered ? 24 : 18,
-                      sigmaY: _hovered ? 24 : 18,
+                      sigmaX: 26,
+                      sigmaY: 26,
                     ),
                     child: Padding(
                       padding: widget.padding,

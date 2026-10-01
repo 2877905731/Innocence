@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
+import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  test('visual theme defaults to the soft-spectrum editorial theme', () async {
+  test('visual theme defaults to citrus white without changing its storage id',
+      () async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
 
@@ -13,19 +15,19 @@ void main() {
     expect(controller.currentTheme, AppVisualTheme.minimalism);
     expect(
       AppVisualTokens.of(controller.currentTheme).canvas,
-      const Color(0xFFF4F4F7),
+      const Color(0xFFEEEDE9),
     );
     expect(
       AppVisualTokens.of(controller.currentTheme).accent,
-      const Color(0xFF8E7DFF),
+      const Color(0xFFED762C),
     );
     expect(
       controller.currentTheme.label(isChinese: true),
-      '柔彩',
+      '简约白色',
     );
     expect(
       controller.currentTheme.label(isChinese: false),
-      'Soft spectrum',
+      'Citrus white',
     );
   });
 
@@ -102,18 +104,38 @@ void main() {
     ).toThemeData(AppVisualTheme.glass);
     final shape = theme.dialogTheme.shape! as RoundedRectangleBorder;
 
-    expect(theme.dialogTheme.backgroundColor, const Color(0xE6132146));
+    expect(theme.dialogTheme.backgroundColor, const Color(0xD1181A24));
+    expect(theme.dialogTheme.barrierColor, const Color(0x73000000));
     expect(theme.dialogTheme.surfaceTintColor, Colors.transparent);
-    expect(theme.dialogTheme.elevation, 28);
-    expect(shape.borderRadius, BorderRadius.circular(22));
-    expect(shape.side.color, const Color(0x78FFFFFF));
-    expect(shape.side.width, 1.2);
+    expect(theme.dialogTheme.elevation, 24);
+    expect(shape.borderRadius, BorderRadius.circular(24));
+    expect(shape.side.color, const Color(0x52FFFFFF));
+    expect(shape.side.width, 1);
   });
 
-  test('glass primary actions stay in the blue-violet palette', () {
+  test('glass controls stay neutral so background light provides color', () {
     final tokens = AppVisualTokens.of(AppVisualTheme.glass);
 
-    expect(tokens.accent, const Color(0xFFA7B5FF));
-    expect(tokens.onAccent, const Color(0xFF11183A));
+    expect(tokens.accent, const Color(0xFFC2C9E0));
+    expect(tokens.onAccent, const Color(0xFF202127));
+    expect(
+        tokens.panel,
+        AppConfig.deviceType == 'windows'
+            ? const Color(0x0AFFFFFF)
+            : const Color(0x33000000));
+  });
+
+  test('Android status bar icons follow the selected theme brightness', () {
+    final white = AppVisualTokens.of(AppVisualTheme.minimalism)
+        .toThemeData(AppVisualTheme.minimalism);
+    final glass = AppVisualTokens.of(AppVisualTheme.glass)
+        .toThemeData(AppVisualTheme.glass);
+
+    expect(white.appBarTheme.systemOverlayStyle?.statusBarIconBrightness,
+        Brightness.dark);
+    expect(glass.appBarTheme.systemOverlayStyle?.statusBarIconBrightness,
+        Brightness.light);
+    expect(white.appBarTheme.systemOverlayStyle?.statusBarColor,
+        Colors.transparent);
   });
 }

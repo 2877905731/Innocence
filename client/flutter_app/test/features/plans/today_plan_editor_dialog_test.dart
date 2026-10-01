@@ -5,8 +5,14 @@ import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/features/plans/domain/models/today_plan.dart';
 import 'package:innocence_flutter/features/plans/presentation/widgets/today_plan_editor_dialog.dart';
 
+void _testDesktop(
+    String description, Future<void> Function(WidgetTester) callback) {
+  testWidgets(description, callback,
+      variant: TargetPlatformVariant.only(TargetPlatform.windows));
+}
+
 void main() {
-  testWidgets('a blank task archive can be created with a flexible task', (
+  _testDesktop('a blank task archive can be created with a flexible task', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1200, 900);
@@ -64,7 +70,8 @@ void main() {
     expect(find.text('任务存档编辑器'), findsNothing);
   });
 
-  testWidgets('the current unsaved arrangement can be archived in the editor', (
+  _testDesktop('the current unsaved arrangement can be archived in the editor',
+      (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1200, 900);
@@ -139,7 +146,7 @@ void main() {
     expect(find.text('当前安排已保存为任务存档。'), findsOneWidget);
   });
 
-  testWidgets('failed archive save keeps the archive editor open', (
+  _testDesktop('failed archive save keeps the archive editor open', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1200, 900);
@@ -188,7 +195,7 @@ void main() {
     expect(find.text('存档未保存，请重试。'), findsOneWidget);
   });
 
-  testWidgets(
+  _testDesktop(
     'Chinese 48-slot timeline saves a selected block without extra editing',
     (tester) async {
       tester.view.physicalSize = const Size(1200, 900);
@@ -266,7 +273,7 @@ void main() {
     },
   );
 
-  testWidgets('saving keeps the editor open and allows another edit', (
+  _testDesktop('saving keeps the editor open and allows another edit', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1200, 900);
@@ -329,7 +336,7 @@ void main() {
     expect(find.text('今日计划时间安排'), findsOneWidget);
   });
 
-  testWidgets('compact editor keeps all time slots and save action visible', (
+  _testDesktop('compact editor keeps all time slots and save action visible', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(480, 720);
@@ -380,7 +387,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
+  _testDesktop(
     'occupied blocks use distinct strips and resize stops at the next block',
     (tester) async {
       tester.view.physicalSize = const Size(1200, 900);

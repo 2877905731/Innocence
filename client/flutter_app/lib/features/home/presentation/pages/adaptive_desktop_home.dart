@@ -3,15 +3,19 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/core/layout/desktop_presentation.dart';
 import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
 import 'package:innocence_flutter/core/widgets/adaptive_canvas_shell.dart';
-import 'package:innocence_flutter/core/widgets/glass_motion_backdrop.dart';
+import 'package:innocence_flutter/core/widgets/citrus_focus_disc.dart';
+import 'package:innocence_flutter/core/widgets/citrus_white_hero.dart';
+import 'package:innocence_flutter/core/widgets/glass_refractive_surface.dart';
 import 'package:innocence_flutter/core/widgets/status_banner.dart';
 import 'package:innocence_flutter/core/widgets/wabi_sabi_paper.dart';
+import 'package:innocence_flutter/core/widgets/white_frosted_panel.dart';
 import 'package:innocence_flutter/features/account/domain/models/user_profile.dart';
 import 'package:innocence_flutter/features/checkin/domain/models/check_in_status.dart';
 import 'package:innocence_flutter/features/focus/domain/models/focus_session.dart';
@@ -283,7 +287,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
     var enteredArchiveName = widget.todayPlan.planName == 'Today'
         ? _text('今日安排存档', 'Today archive')
         : widget.todayPlan.planName;
-    final name = await showDialog<String>(
+    final name = await showThemedDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(_text('保存为任务存档', 'Save as task archive')),
@@ -320,7 +324,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
       planName: template?.templateName ?? '',
       items: template?.items ?? const [],
     );
-    await showDialog<void>(
+    await showThemedDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => TodayPlanEditorDialog(
@@ -336,7 +340,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
   }
 
   Future<void> _deleteArchive(WeeklyPlanTemplate template) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showThemedDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(_text('删除任务存档？', 'Delete task archive?')),
@@ -1377,7 +1381,7 @@ class _MonthPlanBoard extends StatelessWidget {
   ) async {
     var strategy = PlanApplyStrategy.overwrite;
     if (day.hasPlan) {
-      final selected = await showDialog<PlanApplyStrategy>(
+      final selected = await showThemedDialog<PlanApplyStrategy>(
         context: context,
         builder: (context) => AlertDialog(
           title: Text(isChinese ? '目标日期已有计划' : 'This day has a plan'),
@@ -1420,7 +1424,7 @@ class _MonthPlanBoard extends StatelessWidget {
     BuildContext context,
     WeeklyPlanTemplate template,
   ) async {
-    final result = await showDialog<_TemplateBatchSelection>(
+    final result = await showThemedDialog<_TemplateBatchSelection>(
       context: context,
       builder: (context) => _TemplateBatchApplyDialog(
         isChinese: isChinese,
@@ -1970,7 +1974,7 @@ class _AnnualPlanBoardState extends State<_AnnualPlanBoard> {
     int startMonth = 1,
     int endMonth = 1,
   }) async {
-    final result = await showDialog<AnnualPlanSegment>(
+    final result = await showThemedDialog<AnnualPlanSegment>(
       context: context,
       builder: (context) => _AnnualSegmentDialog(
         isChinese: widget.isChinese,
@@ -1989,7 +1993,7 @@ class _AnnualPlanBoardState extends State<_AnnualPlanBoard> {
     BuildContext context,
     AnnualPlanSegment segment,
   ) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showThemedDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
@@ -2048,7 +2052,7 @@ class _AnnualPlanBoardState extends State<_AnnualPlanBoard> {
     AnnualPlanSegment segment, {
     AnnualPlanSubtask? initial,
   }) async {
-    final result = await showDialog<AnnualPlanSubtask>(
+    final result = await showThemedDialog<AnnualPlanSubtask>(
       context: context,
       builder: (context) => _AnnualSubtaskDialog(
         isChinese: widget.isChinese,
@@ -2077,7 +2081,7 @@ class _AnnualPlanBoardState extends State<_AnnualPlanBoard> {
     AnnualPlanSegment segment,
     AnnualPlanSubtask subtask,
   ) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showThemedDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(widget.isChinese ? '删除子任务？' : 'Delete subtask?'),
@@ -2439,18 +2443,62 @@ class _AnnualStickyMonthHeader extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     final glass = palette.visualTheme == AppVisualTheme.glass;
+    if (glass) {
+      // Keep the same 12-column geometry, but confine the material to the
+      // content width instead of painting an unrelated purple rail edge to edge.
+      return Padding(
+        padding: EdgeInsets.fromLTRB(horizontal, 4, horizontal, 4),
+        child: Align(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: overlapsContent
+                    ? const [
+                        BoxShadow(
+                          color: Color(0x26000000),
+                          blurRadius: 14,
+                          offset: Offset(0, 5),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+                  child: Container(
+                    key: const ValueKey('annual-sticky-month-ruler'),
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0x701C1E29), Color(0x52131520)],
+                      ),
+                    ),
+                    foregroundDecoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: const Color(0x3DFFFFFF)),
+                    ),
+                    child: child,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     final header = Container(
       key: const ValueKey('annual-sticky-month-ruler'),
       decoration: BoxDecoration(
-        color: glass ? null : palette.background,
-        gradient: glass
-            ? const LinearGradient(
-                colors: [Color(0xBC253988), Color(0xBC5B318C)],
-              )
-            : null,
+        color: palette.background,
         border: Border(
           bottom: BorderSide(
-            color: glass ? const Color(0x58E0E8FF) : palette.rule,
+            color: palette.rule,
           ),
         ),
         boxShadow: overlapsContent
@@ -2472,14 +2520,7 @@ class _AnnualStickyMonthHeader extends SliverPersistentHeaderDelegate {
         ),
       ),
     );
-    return glass
-        ? ClipRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-              child: header,
-            ),
-          )
-        : header;
+    return header;
   }
 
   @override
@@ -3271,7 +3312,7 @@ class _AnnualSegmentDialogState extends State<_AnnualSegmentDialog> {
   }
 
   Future<void> _editSubtask({AnnualPlanSubtask? initial}) async {
-    final result = await showDialog<AnnualPlanSubtask>(
+    final result = await showThemedDialog<AnnualPlanSubtask>(
       context: context,
       builder: (context) => _AnnualSubtaskDialog(
         isChinese: widget.isChinese,
@@ -3921,14 +3962,7 @@ class _HeroStatementState extends State<_HeroStatement>
   }
 
   void _syncMotion() {
-    if (widget.palette.visualTheme == AppVisualTheme.minimalism &&
-        !MediaQuery.disableAnimationsOf(context)) {
-      if (!_motion.isAnimating) {
-        _motion.repeat(reverse: true);
-      }
-    } else {
-      _motion.stop();
-    }
+    _motion.stop();
   }
 
   @override
@@ -3977,36 +4011,17 @@ class _HeroStatementState extends State<_HeroStatement>
     String title,
     String description,
   ) {
-    final motion = Curves.easeInOutSine.transform(_motion.value);
-    final drift = (motion - 0.5) * 2;
+    if (palette.visualTheme == AppVisualTheme.minimalism) {
+      return CitrusWhiteHero(
+        eyebrow: eyebrow,
+        title: title,
+        description: description,
+        indexLabel: 'D/${dayIndex.toString().padLeft(2, '0')}',
+      );
+    }
     final decoration = switch (palette.visualTheme) {
-      AppVisualTheme.minimalism => BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment(-1 + drift * 0.52, -1 + drift * 0.22),
-            end: Alignment(1 - drift * 0.22, 1 - drift * 0.38),
-            colors: [
-              palette.surface,
-              Color.alphaBlend(
-                palette.artTwo.withValues(alpha: 0.57 + motion * 0.24),
-                palette.surface,
-              ),
-              Color.alphaBlend(
-                palette.artOne.withValues(alpha: 0.28 + motion * 0.28),
-                palette.surface,
-              ),
-            ],
-            stops: [0.0, 0.44 + motion * 0.22, 1.0],
-          ),
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.82)),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x18252635),
-              blurRadius: 34,
-              offset: Offset(0, 16),
-            ),
-          ],
-        ),
+      AppVisualTheme.minimalism =>
+        const BoxDecoration(color: Colors.transparent),
       AppVisualTheme.wabiSabi => BoxDecoration(
           color: palette.surface,
           border: Border(left: BorderSide(color: palette.accent, width: 3)),
@@ -4040,18 +4055,6 @@ class _HeroStatementState extends State<_HeroStatement>
         children: [
           if (palette.visualTheme == AppVisualTheme.midCentury)
             const Positioned(right: 4, top: 0, child: _MidCenturyOrnament()),
-          if (palette.visualTheme == AppVisualTheme.minimalism)
-            Positioned(
-              right: -18,
-              top: -22,
-              child: ExcludeSemantics(
-                child: _SoftSpectrumHeroOrnament(
-                  palette: palette,
-                  dayIndex: dayIndex,
-                  progress: motion,
-                ),
-              ),
-            ),
           if (palette.visualTheme == AppVisualTheme.wabiSabi)
             Positioned(
               right: 2,
@@ -4060,37 +4063,6 @@ class _HeroStatementState extends State<_HeroStatement>
                 child: CustomPaint(
                   size: const Size(92, 92),
                   painter: _WabiHeroSealPainter(palette.accent),
-                ),
-              ),
-            ),
-          if (palette.visualTheme == AppVisualTheme.glass)
-            Positioned(
-              right: 12,
-              top: 2,
-              child: Icon(Icons.blur_circular_rounded,
-                  size: 88, color: palette.accent.withValues(alpha: 0.22)),
-            ),
-          if (palette.visualTheme == AppVisualTheme.glass)
-            Positioned(
-              left: 34,
-              top: 54,
-              right: 0,
-              child: ExcludeSemantics(
-                child: Opacity(
-                  opacity: 0.08,
-                  child: Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.fade,
-                    style: TextStyle(
-                      color: palette.accent,
-                      fontFamily: 'Segoe UI Variable Display',
-                      fontSize: 54,
-                      height: 1.02,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1.4,
-                    ),
-                  ),
                 ),
               ),
             ),
@@ -4127,30 +4099,27 @@ class _HeroStatementState extends State<_HeroStatement>
                         _ => 'Segoe UI',
                       },
                       fontSize: switch (palette.visualTheme) {
-                        AppVisualTheme.minimalism => 46,
-                        AppVisualTheme.glass => 52,
+                        AppVisualTheme.minimalism => 34,
+                        AppVisualTheme.glass => 34,
                         _ => 34,
                       },
                       height: 1.08,
-                      fontWeight: palette.visualTheme == AppVisualTheme.wabiSabi
-                          ? FontWeight.w500
-                          : FontWeight.w800,
+                      fontWeight:
+                          palette.visualTheme == AppVisualTheme.wabiSabi ||
+                                  palette.visualTheme ==
+                                      AppVisualTheme.minimalism ||
+                                  palette.visualTheme == AppVisualTheme.glass
+                              ? FontWeight.w400
+                              : FontWeight.w800,
                       fontStyle: palette.visualTheme == AppVisualTheme.wabiSabi
                           ? FontStyle.italic
                           : FontStyle.normal,
                       letterSpacing: switch (palette.visualTheme) {
-                        AppVisualTheme.minimalism => -2.2,
+                        AppVisualTheme.minimalism => -1.0,
                         AppVisualTheme.wabiSabi => 0.3,
                         _ => -1.0,
                       },
-                      shadows: palette.visualTheme == AppVisualTheme.glass
-                          ? [
-                              Shadow(
-                                color: palette.accent.withValues(alpha: 0.38),
-                                blurRadius: 24,
-                              ),
-                            ]
-                          : null,
+                      shadows: null,
                     ),
                   ),
                 ),
@@ -4165,112 +4134,6 @@ class _HeroStatementState extends State<_HeroStatement>
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SoftSpectrumHeroOrnament extends StatelessWidget {
-  const _SoftSpectrumHeroOrnament({
-    required this.palette,
-    required this.dayIndex,
-    required this.progress,
-  });
-
-  final _HomePalette palette;
-  final int dayIndex;
-  final double progress;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 250,
-      height: 168,
-      child: Stack(
-        children: [
-          Positioned(
-            right: 26,
-            top: 0,
-            child: Transform.translate(
-              offset: Offset(-19 * progress, 17 * (1 - progress)),
-              child: Transform.rotate(
-                angle: -0.17 + progress * 0.20,
-                child: Container(
-                  width: 170,
-                  height: 108,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        palette.accent.withValues(alpha: 0.48),
-                        palette.artTwo.withValues(alpha: 0.16),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            right: -6,
-            bottom: 0,
-            child: Transform.translate(
-              offset: Offset(19 * (1 - progress), -18 * progress),
-              child: Transform.rotate(
-                angle: 0.11 - progress * 0.21,
-                child: Container(
-                  width: 146,
-                  height: 92,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        palette.artOne.withValues(alpha: 0.52),
-                        palette.artOne.withValues(alpha: 0.08),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            right: 72,
-            top: 50,
-            child: Container(
-              width: 76,
-              height: 76,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: palette.surface.withValues(alpha: 0.88),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: palette.ink.withValues(alpha: 0.16),
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x17252635),
-                    blurRadius: 18,
-                    offset: Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Text(
-                'D/${dayIndex.toString().padLeft(2, '0')}',
-                style: TextStyle(
-                  color: palette.ink,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.4,
-                ),
-              ),
-            ),
           ),
         ],
       ),
@@ -4333,85 +4196,99 @@ class _FocusPanel extends StatelessWidget {
     return _Panel(
       palette: palette,
       emphasized: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          _PanelTitle(
-            palette: palette,
-            title: _text('当前专注', 'Focus now'),
-            subtitle: session.active
-                ? session.paused
-                    ? _text('计时已暂停', 'Timer paused')
-                    : _text('结束于 ${session.endTimeLabel}',
-                        'Ends at ${session.endTimeLabel}')
-                : _text('设置结束时间后开始', 'Set an end time to begin'),
-          ),
-          SizedBox(height: expanded ? 34 : 24),
-          Text(
-            session.active ? session.remainingLabel : '00:00',
-            style: TextStyle(
-              color: palette.ink,
-              fontSize: expanded ? 64 : 48,
-              fontWeight: FontWeight.w800,
-              height: 0.95,
-              letterSpacing: -2.2,
-              fontFeatures: const [FontFeature.tabularFigures()],
+          if (palette.visualTheme == AppVisualTheme.minimalism)
+            const Positioned(
+              right: 0,
+              top: 54,
+              child: ExcludeSemantics(child: CitrusFocusDisc(size: 142)),
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            session.active
-                ? (session.taskName.trim().isEmpty
-                    ? _text('未命名学习时段', 'Untitled focus session')
-                    : session.taskName)
-                : _text('准备好时，从眼前最重要的任务开始。',
-                    'When ready, begin with the most important task.'),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: palette.muted,
-              fontSize: 14,
-              height: 1.45,
-            ),
-          ),
-          const SizedBox(height: 22),
-          if (session.active)
-            Row(
-              children: [
-                Expanded(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _PanelTitle(
+                palette: palette,
+                title: _text('当前专注', 'Focus now'),
+                subtitle: session.active
+                    ? session.paused
+                        ? _text('计时已暂停', 'Timer paused')
+                        : _text('结束于 ${session.endTimeLabel}',
+                            'Ends at ${session.endTimeLabel}')
+                    : _text('设置结束时间后开始', 'Set an end time to begin'),
+              ),
+              SizedBox(height: expanded ? 34 : 24),
+              Text(
+                session.active ? session.remainingLabel : '00:00',
+                style: TextStyle(
+                  color: palette.ink,
+                  fontSize: expanded ? 64 : 48,
+                  fontWeight:
+                      palette.visualTheme == AppVisualTheme.minimalism ||
+                              palette.visualTheme == AppVisualTheme.glass
+                          ? FontWeight.w300
+                          : FontWeight.w800,
+                  height: 0.95,
+                  letterSpacing: -2.2,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                session.active
+                    ? (session.taskName.trim().isEmpty
+                        ? _text('未命名学习时段', 'Untitled focus session')
+                        : session.taskName)
+                    : _text('准备好时，从眼前最重要的任务开始。',
+                        'When ready, begin with the most important task.'),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: palette.muted,
+                  fontSize: 14,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 22),
+              if (session.active)
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: isBusy ? null : () => unawaited(onToggle()),
+                        icon: Icon(
+                          session.paused
+                              ? Icons.play_arrow_rounded
+                              : Icons.pause_rounded,
+                        ),
+                        label: Text(
+                          session.paused
+                              ? _text('继续计时', 'Resume timer')
+                              : _text('暂停计时', 'Pause timer'),
+                        ),
+                        style: _primaryButtonStyle(),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    OutlinedButton.icon(
+                      onPressed: isBusy ? null : () => unawaited(onAction()),
+                      icon: const Icon(Icons.stop_rounded),
+                      label: Text(_text('结束', 'Finish')),
+                    ),
+                  ],
+                )
+              else
+                SizedBox(
+                  width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: isBusy ? null : () => unawaited(onToggle()),
-                    icon: Icon(
-                      session.paused
-                          ? Icons.play_arrow_rounded
-                          : Icons.pause_rounded,
-                    ),
-                    label: Text(
-                      session.paused
-                          ? _text('继续计时', 'Resume timer')
-                          : _text('暂停计时', 'Pause timer'),
-                    ),
+                    onPressed: isBusy ? null : () => unawaited(onAction()),
+                    icon: const Icon(Icons.play_arrow_rounded),
+                    label: Text(_text('开始专注', 'Start focus')),
                     style: _primaryButtonStyle(),
                   ),
                 ),
-                const SizedBox(width: 10),
-                OutlinedButton.icon(
-                  onPressed: isBusy ? null : () => unawaited(onAction()),
-                  icon: const Icon(Icons.stop_rounded),
-                  label: Text(_text('结束', 'Finish')),
-                ),
-              ],
-            )
-          else
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: isBusy ? null : () => unawaited(onAction()),
-                icon: const Icon(Icons.play_arrow_rounded),
-                label: Text(_text('开始专注', 'Start focus')),
-                style: _primaryButtonStyle(),
-              ),
-            ),
+            ],
+          ),
         ],
       ),
     );
@@ -4437,7 +4314,7 @@ class _FocusPanel extends StatelessWidget {
         borderRadius: BorderRadius.circular(
           palette.visualTheme == AppVisualTheme.glass ||
                   palette.visualTheme == AppVisualTheme.minimalism
-              ? 14
+              ? 8
               : 0,
         ),
       ),
@@ -4802,6 +4679,7 @@ class _CheckInPanel extends StatelessWidget {
             : _text('签到条件未满足', 'Check-in is not ready');
     return _Panel(
       palette: palette,
+      frosted: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -4914,19 +4792,37 @@ class _MetricTile extends StatelessWidget {
     return _HoverSurface(
       palette: palette,
       emphasized: false,
+      frosted: true,
       child: Container(
         constraints: const BoxConstraints(minHeight: 130),
         padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              metric.label,
-              style: TextStyle(
-                color: palette.muted,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    metric.label,
+                    style: TextStyle(
+                      color: palette.muted,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                if (palette.visualTheme == AppVisualTheme.minimalism)
+                  ExcludeSemantics(
+                    child: Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: palette.accent,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 18),
             Text(
@@ -4983,6 +4879,7 @@ class _SummaryPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return _Panel(
       palette: palette,
+      frosted: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -5154,17 +5051,20 @@ class _Panel extends StatelessWidget {
     required this.palette,
     required this.child,
     this.emphasized = false,
+    this.frosted = false,
   });
 
   final _HomePalette palette;
   final Widget child;
   final bool emphasized;
+  final bool frosted;
 
   @override
   Widget build(BuildContext context) {
     return _HoverSurface(
       palette: palette,
       emphasized: emphasized,
+      frosted: frosted,
       child: Padding(
         padding: const EdgeInsets.all(22),
         child: child,
@@ -5178,11 +5078,13 @@ class _HoverSurface extends StatefulWidget {
     required this.palette,
     required this.emphasized,
     required this.child,
+    this.frosted = false,
   });
 
   final _HomePalette palette;
   final bool emphasized;
   final Widget child;
+  final bool frosted;
 
   @override
   State<_HoverSurface> createState() => _HoverSurfaceState();
@@ -5217,24 +5119,22 @@ class _HoverSurfaceState extends State<_HoverSurface> {
         curve: Curves.easeOutCubic,
         transform: Matrix4.translationValues(0, lift, 0),
         transformAlignment: Alignment.center,
-        decoration: widget.palette.panelDecoration(
-          emphasized: widget.emphasized,
-          hovered: _hovered,
-        ),
+        decoration: softSpectrum && widget.frosted
+            ? null
+            : widget.palette.panelDecoration(
+                emphasized: widget.emphasized,
+                hovered: _hovered,
+              ),
         child: glass
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(
-                  widget.emphasized ? 22 : 16,
-                ),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX: _hovered ? 24 : 18,
-                    sigmaY: _hovered ? 24 : 18,
-                  ),
-                  child: widget.child,
-                ),
+            ? GlassRefractiveSurface(
+                child: widget.child,
               )
-            : widget.child,
+            : softSpectrum && widget.frosted
+                ? WhiteFrostedPanel(
+                    hovered: _hovered,
+                    child: widget.child,
+                  )
+                : widget.child,
       ),
     );
   }
@@ -5264,13 +5164,32 @@ class _PanelTitle extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: TextStyle(
-                  color: palette.ink,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                ),
+              Row(
+                children: [
+                  if (palette.visualTheme == AppVisualTheme.minimalism) ...[
+                    ExcludeSemantics(
+                      child: Container(
+                        width: 3,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          color: palette.accent,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        color: palette.ink,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               if (subtitle != null) ...[
                 const SizedBox(height: 3),
@@ -5394,7 +5313,7 @@ class _EmptyMessage extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: glass ? const Color(0x32101D3B) : palette.surface,
+        color: glass ? const Color(0x22000000) : palette.surface,
         borderRadius: BorderRadius.circular(
           glass
               ? 12
@@ -5403,7 +5322,7 @@ class _EmptyMessage extends StatelessWidget {
                   : 0,
         ),
         border: glass
-            ? Border.all(color: const Color(0x42FFFFFF))
+            ? Border.all(color: const Color(0x24FFFFFF))
             : softSpectrum
                 ? Border.all(color: palette.rule)
                 : null,
@@ -5462,37 +5381,17 @@ class _HomePalette {
   }) {
     return switch (visualTheme) {
       AppVisualTheme.minimalism => BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: emphasized
-                ? [
-                    surface,
-                    Color.alphaBlend(
-                      artTwo.withValues(alpha: hovered ? 0.52 : 0.34),
-                      surface,
-                    ),
-                  ]
-                : [
-                    surface,
-                    Color.alphaBlend(
-                      artOne.withValues(alpha: hovered ? 0.16 : 0.08),
-                      surface,
-                    ),
-                  ],
-          ),
-          borderRadius: BorderRadius.circular(emphasized ? 22 : 18),
+          color: surface,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: hovered
-                ? accent.withValues(alpha: 0.38)
-                : Colors.white.withValues(alpha: 0.80),
+            color: hovered ? rule : rule.withValues(alpha: 0.55),
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF252635)
-                  .withValues(alpha: hovered ? 0.12 : 0.065),
-              blurRadius: hovered ? 32 : 22,
-              offset: Offset(0, hovered ? 14 : 9),
+              color: const Color(0xFF36372A)
+                  .withValues(alpha: hovered ? 0.065 : 0.025),
+              blurRadius: hovered ? 20 : 12,
+              offset: Offset(0, hovered ? 8 : 4),
             ),
           ],
         ),
@@ -5512,29 +5411,16 @@ class _HomePalette {
           ],
         ),
       AppVisualTheme.glass => BoxDecoration(
-          color: hovered
-              ? const Color(0x52172A55)
-              : emphasized
-                  ? const Color(0x4214264A)
-                  : const Color(0x32101D3B),
-          borderRadius: BorderRadius.circular(emphasized ? 22 : 16),
+          color: surface,
+          borderRadius: BorderRadius.circular(15),
           border: Border.all(
-            color: hovered ? const Color(0x66FFFFFF) : const Color(0x32FFFFFF),
+            color: const Color(0x35FFFFFF),
           ),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-              color:
-                  hovered ? const Color(0x665F8CFF) : const Color(0x301F2687),
-              blurRadius: hovered ? 46 : (emphasized ? 32 : 22),
-              spreadRadius: hovered ? -2 : -7,
-              offset: Offset(0, hovered ? 14 : 8),
-            ),
-            if (hovered)
-              const BoxShadow(
-                color: Color(0x30FFFFFF),
-                blurRadius: 20,
-                spreadRadius: -8,
-              ),
+                color: Color(0x16000000),
+                blurRadius: 30,
+                offset: Offset(0, 10)),
           ],
         ),
     };
@@ -5548,11 +5434,11 @@ class _HomePalette {
     final glass = visualTheme == AppVisualTheme.glass;
     return _HomePalette(
       background: tokens.canvas,
-      surface: glass ? const Color(0x32101D3B) : tokens.panel,
-      surfaceStrong: glass ? const Color(0x4214264A) : tokens.softPanel,
+      surface: tokens.panel,
+      surfaceStrong: tokens.softPanel,
       ink: tokens.ink,
       muted: tokens.muted,
-      rule: glass ? const Color(0x32FFFFFF) : tokens.line,
+      rule: tokens.line,
       accent: tokens.accent,
       accentSoft: Color.alphaBlend(
         tokens.accent.withValues(alpha: tokens.isDark ? 0.24 : 0.18),
@@ -5589,7 +5475,7 @@ class _ThemedHomeBackdrop extends StatelessWidget {
       return WabiSabiPaper(color: palette.background, child: child);
     }
     if (visualTheme == AppVisualTheme.glass) {
-      return GlassMotionBackdrop(child: child);
+      return child;
     }
     if (visualTheme == AppVisualTheme.minimalism) {
       return child;

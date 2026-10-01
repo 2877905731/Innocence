@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:innocence_flutter/core/theme/surface_palette.dart';
+import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 import 'package:innocence_flutter/core/utils/localized_text.dart';
 import 'package:innocence_flutter/core/widgets/glass_panel.dart';
 import 'package:innocence_flutter/core/widgets/secondary_page_scaffold.dart';
@@ -66,7 +66,7 @@ class _FriendPageState extends State<FriendPage> {
 
   Future<void> _search() async {
     final controller = TextEditingController(text: _searchKeyword);
-    final keyword = await showDialog<String>(
+    final keyword = await showThemedDialog<String>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -122,7 +122,7 @@ class _FriendPageState extends State<FriendPage> {
 
   Future<void> _sendRequest(FriendSearchItemModel item) async {
     final controller = TextEditingController();
-    final message = await showDialog<String>(
+    final message = await showThemedDialog<String>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -198,7 +198,7 @@ class _FriendPageState extends State<FriendPage> {
 
   Future<void> _createGroup() async {
     final controller = TextEditingController();
-    final groupName = await showDialog<String>(
+    final groupName = await showThemedDialog<String>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -240,7 +240,7 @@ class _FriendPageState extends State<FriendPage> {
   }
 
   Future<void> _moveFriend(FriendItemModel friend) async {
-    final nextGroupId = await showDialog<int>(
+    final nextGroupId = await showThemedDialog<int>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -282,7 +282,7 @@ class _FriendPageState extends State<FriendPage> {
   }
 
   Future<void> _deleteFriend(FriendItemModel friend) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showThemedDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -540,9 +540,10 @@ class _SearchResultCard extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: SurfacePalette.softSurface,
+                  color: Theme.of(context).colorScheme.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: SurfacePalette.border),
+                  border: Border.all(
+                      color: Theme.of(context).colorScheme.outlineVariant),
                 ),
                 child: Wrap(
                   alignment: WrapAlignment.spaceBetween,
@@ -556,7 +557,7 @@ class _SearchResultCard extends StatelessWidget {
                         Text(
                           _displayName(item),
                           style: textTheme.titleMedium?.copyWith(
-                            color: SurfacePalette.ink,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -737,7 +738,7 @@ class _FriendGroupCard extends StatelessWidget {
                       Text(
                         group.groupName,
                         style: textTheme.titleMedium?.copyWith(
-                          color: SurfacePalette.ink,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       _FriendTag(
@@ -762,9 +763,14 @@ class _FriendGroupCard extends StatelessWidget {
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: SurfacePalette.softSurface,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerLow,
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: SurfacePalette.border),
+                            border: Border.all(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .outlineVariant),
                           ),
                           child: Wrap(
                             alignment: WrapAlignment.spaceBetween,
@@ -781,7 +787,9 @@ class _FriendGroupCard extends StatelessWidget {
                                     Text(
                                       _displayName(friend),
                                       style: textTheme.titleMedium?.copyWith(
-                                        color: SurfacePalette.ink,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
                                       ),
                                     ),
                                     const SizedBox(height: 6),
@@ -879,9 +887,9 @@ class _RequestTile extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: SurfacePalette.softSurface,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: SurfacePalette.border),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Wrap(
         alignment: WrapAlignment.spaceBetween,
@@ -895,7 +903,7 @@ class _RequestTile extends StatelessWidget {
               Text(
                 _displayName(request),
                 style: textTheme.titleMedium?.copyWith(
-                  color: SurfacePalette.ink,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 6),
@@ -941,14 +949,14 @@ class _FriendTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: SurfacePalette.softSurface,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: SurfacePalette.border),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Text(
         label,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: SurfacePalette.ink,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
       ),
     );

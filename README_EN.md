@@ -21,11 +21,23 @@
 
 Innocence is built with Flutter and Spring Boot and currently targets Windows desktop and mobile devices.
 
+## Download v1.2.0
+
+| Platform | Download | Scope |
+|---|---|---|
+| Windows x64 | [Installer](https://github.com/2877905731/Innocence/releases/download/v1.2.0/Innocence-v1.2.0-windows-x64-setup.exe) · [Portable ZIP](https://github.com/2877905731/Innocence/releases/download/v1.2.0/Innocence-v1.2.0-windows-x64-portable.zip) | Desktop edition; installer has no Authenticode signature |
+| Android 7.0+ | [Offline APK](https://github.com/2877905731/Innocence/releases/download/v1.2.0/Innocence-v1.2.0-android-offline.apk) | Dedicated release signature; online features are deferred |
+
+[Release notes](https://github.com/2877905731/Innocence/releases/tag/v1.2.0) · [SHA256 checksums](https://github.com/2877905731/Innocence/releases/download/v1.2.0/SHA256SUMS.txt) · [Changelog](CHANGELOG.md)
+
+Choose a language and explicitly enter offline mode on first launch. Android supports daily plans with a 24-hour clock picker, focus, statistics, memos, and local settings. Data stays on the device and is removed by uninstalling or clearing app data. Earlier development APKs use a different signature and cannot be upgraded directly. Physical-device checks, complete mobile month/year planning, and online synchronization remain in progress.
+
 ## Current Status
 
 - Adaptive Large, Medium, and Small Windows canvases with a Focus Orb.
-- The official Innocence logo is used by the Windows executable, window, installer, and system tray.
-- Four switchable visual themes: Pure White, Wabi-Sabi, Mid-Century Modern, and Glass.
+- The official Innocence logo is used by Windows and Android.
+- Windows retains Minimal White, Wabi-Sabi, Mid-Century Modern, and Liquid Glass themes. Android includes Minimal White and Liquid Glass visuals with Material 3 interaction components.
+- A signed Android offline edition is available, including daily time ranges selected on a 24-hour clock.
 - Core interaction foundations for authentication, profiles, settings, memos, statistics, notifications, friends, and teams.
 - Backend business data is isolated by the currently authenticated user.
 

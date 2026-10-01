@@ -15,6 +15,14 @@ class AuthLocalStorage {
   static const String _deviceTypeKey = 'auth.deviceType';
   static const String _deviceSlotKey = 'auth.deviceSlot';
   static const String _deviceIdKey = 'auth.deviceId';
+  static const String _offlineModeActiveKey = 'auth.offlineModeActive';
+
+  bool get offlineModeActive =>
+      _preferences.getBool(_offlineModeActiveKey) ?? false;
+
+  Future<void> setOfflineModeActive(bool active) async {
+    await _preferences.setBool(_offlineModeActiveKey, active);
+  }
 
   AppSession? readSession() {
     final accessToken = _preferences.getString(_accessTokenKey);
@@ -51,6 +59,7 @@ class AuthLocalStorage {
     await _preferences.setString(_deviceTypeKey, session.deviceType);
     await _preferences.setString(_deviceSlotKey, session.deviceSlot);
     await _preferences.setString(_deviceIdKey, session.deviceId);
+    await setOfflineModeActive(false);
   }
 
   Future<void> clearSession() async {
@@ -60,6 +69,7 @@ class AuthLocalStorage {
     await _preferences.remove(_deviceTypeKey);
     await _preferences.remove(_deviceSlotKey);
     await _preferences.remove(_deviceIdKey);
+    await setOfflineModeActive(false);
   }
 
   Future<String> readOrCreateDeviceId(String deviceType) async {

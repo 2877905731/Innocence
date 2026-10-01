@@ -6,6 +6,8 @@ import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/theme/surface_palette.dart';
 
 import '../theme/app_colors.dart';
+import 'glass_refractive_surface.dart';
+import 'white_frosted_panel.dart';
 
 class GlassPanel extends StatelessWidget {
   const GlassPanel({
@@ -14,12 +16,14 @@ class GlassPanel extends StatelessWidget {
     this.padding = const EdgeInsets.all(18),
     this.desktopTransparent = false,
     this.lightStyle = false,
+    this.frosted = false,
   });
 
   final Widget child;
   final EdgeInsets padding;
   final bool desktopTransparent;
   final bool lightStyle;
+  final bool frosted;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +33,7 @@ class GlassPanel extends StatelessWidget {
       return _ThemeAwarePanel(
         visualTheme: visualTheme,
         padding: padding,
+        frosted: frosted,
         child: child,
       );
     }
@@ -83,11 +88,13 @@ class _ThemeAwarePanel extends StatefulWidget {
     required this.visualTheme,
     required this.padding,
     required this.child,
+    required this.frosted,
   });
 
   final AppVisualTheme visualTheme;
   final EdgeInsets padding;
   final Widget child;
+  final bool frosted;
 
   @override
   State<_ThemeAwarePanel> createState() => _ThemeAwarePanelState();
@@ -103,36 +110,37 @@ class _ThemeAwarePanelState extends State<_ThemeAwarePanel> {
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     final radius = switch (widget.visualTheme) {
-      AppVisualTheme.minimalism => 20.0,
+      AppVisualTheme.minimalism => 16.0,
       AppVisualTheme.wabiSabi => 0.0,
       AppVisualTheme.midCentury => 18.0,
-      AppVisualTheme.glass => 22.0,
+      AppVisualTheme.glass => 15.0,
     };
+    if (widget.visualTheme == AppVisualTheme.minimalism && widget.frosted) {
+      return MouseRegion(
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: WhiteFrostedPanel(
+          hovered: _hovered,
+          padding: widget.padding,
+          child: widget.child,
+        ),
+      );
+    }
     final decoration = switch (widget.visualTheme) {
       AppVisualTheme.minimalism => BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              tokens.panel,
-              Color.alphaBlend(
-                tokens.artTwo.withValues(alpha: _hovered ? 0.34 : 0.18),
-                tokens.panel,
-              ),
-            ],
-          ),
+          color: tokens.panel,
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(
             color: _hovered
-                ? tokens.accent.withValues(alpha: 0.42)
-                : Colors.white.withValues(alpha: 0.78),
+                ? tokens.line.withValues(alpha: 0.95)
+                : tokens.line.withValues(alpha: 0.55),
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF252635)
-                  .withValues(alpha: _hovered ? 0.12 : 0.07),
-              blurRadius: _hovered ? 32 : 22,
-              offset: Offset(0, _hovered ? 14 : 9),
+              color: const Color(0xFF36372A)
+                  .withValues(alpha: _hovered ? 0.07 : 0.035),
+              blurRadius: _hovered ? 22 : 14,
+              offset: Offset(0, _hovered ? 9 : 5),
             ),
           ],
         ),
@@ -153,34 +161,25 @@ class _ThemeAwarePanelState extends State<_ThemeAwarePanel> {
           ],
         ),
       AppVisualTheme.glass => BoxDecoration(
-          color: _hovered ? const Color(0x52172A55) : const Color(0x3D101D3B),
+          color: tokens.panel,
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(
-            color: _hovered ? const Color(0x78FFFFFF) : const Color(0x48FFFFFF),
+            color: const Color(0x35FFFFFF),
           ),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-              color:
-                  _hovered ? const Color(0x665F8CFF) : const Color(0x351F2687),
-              blurRadius: _hovered ? 44 : 28,
-              spreadRadius: -5,
-              offset: Offset(0, _hovered ? 16 : 10),
-            ),
+                color: Color(0x16000000),
+                blurRadius: 30,
+                offset: Offset(0, 10)),
           ],
         ),
     };
 
     final softSpectrum = widget.visualTheme == AppVisualTheme.minimalism;
     final content = glass
-        ? ClipRRect(
-            borderRadius: BorderRadius.circular(radius),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: _hovered ? 24 : 18,
-                sigmaY: _hovered ? 24 : 18,
-              ),
-              child: Padding(padding: widget.padding, child: widget.child),
-            ),
+        ? GlassRefractiveSurface(
+            radius: radius,
+            child: Padding(padding: widget.padding, child: widget.child),
           )
         : ClipRRect(
             borderRadius: BorderRadius.circular(radius),

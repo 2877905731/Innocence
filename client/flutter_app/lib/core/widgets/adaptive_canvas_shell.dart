@@ -5,6 +5,7 @@ import 'package:innocence_flutter/core/layout/desktop_presentation.dart';
 import 'package:innocence_flutter/core/widgets/desktop_close_button.dart';
 import 'package:innocence_flutter/core/widgets/desktop_drag_region.dart';
 import 'package:innocence_flutter/core/widgets/desktop_resize_frame.dart';
+import 'package:innocence_flutter/core/widgets/glass_motion_backdrop.dart';
 import 'package:innocence_flutter/core/widgets/soft_spectrum_backdrop.dart';
 import 'package:innocence_flutter/core/widgets/wabi_sabi_paper.dart';
 
@@ -108,20 +109,7 @@ class AdaptiveCanvasShell extends StatelessWidget {
           AppVisualTheme.minimalism => SoftSpectrumBackdrop(child: content),
           AppVisualTheme.wabiSabi =>
             WabiSabiPaper(color: palette.background, child: content),
-          AppVisualTheme.glass => DecoratedBox(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF173B91),
-                    Color(0xFF5424B6),
-                    Color(0xFFBE4D9B),
-                  ],
-                ),
-              ),
-              child: content,
-            ),
+          AppVisualTheme.glass => GlassMotionBackdrop(child: content),
           _ => content,
         };
         return Scaffold(
@@ -554,21 +542,14 @@ class _UserMark extends StatelessWidget {
         height: size,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: softSpectrum ? null : palette.accentSoft,
-          gradient: softSpectrum
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [palette.accent, const Color(0xFFFF9CA9)],
-                )
-              : null,
+          color: softSpectrum ? palette.surface : palette.accentSoft,
           border: Border.all(color: palette.rule),
           borderRadius: BorderRadius.circular(softSpectrum ? size / 2 : 0),
         ),
         child: Text(
           initial.toUpperCase(),
           style: TextStyle(
-            color: softSpectrum ? Colors.white : palette.ink,
+            color: softSpectrum ? palette.accent : palette.ink,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -804,12 +785,16 @@ class _CanvasPalette {
     final colors = Theme.of(context).colorScheme;
     final glass = visualTheme == AppVisualTheme.glass;
     return _CanvasPalette(
-      background: glass ? const Color(0xFF173B91) : tokens.canvas,
-      navigation: glass ? const Color(0x42101B38) : tokens.softPanel,
-      surface: glass ? const Color(0x32101D3B) : tokens.panel,
+      background: tokens.canvas,
+      navigation: glass
+          ? const Color(0x22000000)
+          : visualTheme == AppVisualTheme.minimalism
+              ? const Color(0xFFF8F8F5)
+              : tokens.softPanel,
+      surface: tokens.panel,
       ink: tokens.ink,
       muted: tokens.muted,
-      rule: glass ? const Color(0x32FFFFFF) : tokens.line,
+      rule: glass ? const Color(0x24FFFFFF) : tokens.line,
       accent: tokens.accent,
       accentSoft: Color.alphaBlend(
         tokens.accent.withValues(alpha: tokens.isDark ? 0.24 : 0.18),
