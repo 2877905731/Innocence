@@ -3,13 +3,14 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-02"
-latest_checkpoint: "0084"
-next_sequence: "0085"
+latest_checkpoint: "0085"
+next_sequence: "0086"
 current_phase: P01
 current_gate: G01
-state: android_glass_and_clock_gestures_corrected_daily_slogans_local_build_verified_physical_device_pending
-current_goal: "2026-10-02 UI纠正（0084）已完成本地源码与验证：GLES旧版离屏纹理纵向翻转补偿、圆盘手柄36dp触控半径与按下接管拖动、Android每日标语及Windows专注中持续标语/恢复刷新。用户取消歌词收录。analyze无问题、99项全量/8项离线专项通过；API36 GLES像素探针green=[30,70,100]，正式签名本机离线修正版安装/双主题首页/06:00到05:30外缘垂直短拖与固定几何/保存/冷启动覆盖保留核对。Windows Release与Android Release构建成功，独立本地文件在build/verification/20261002-fixes；版本仍1.2.0+5，未改公开Release或远端Git。实体手机/Vulkan与Windows多DPI运行画面仍待验收，P01/G01不自动通过。"
+state: android_adaptive_launcher_icon_fill_corrected_local_package_verified
+current_goal: "2026-10-02 Android图标填充纠正（0085）完成：自适应前景四边-20%比例inset，绘制宽高放大1.4倍，原图和品牌元素不改。正式签名Release43.5秒构建成功，编译XML的有符号fraction=-0.200000047683716，API36覆盖安装/应用列表与系统信息页圆形蒙版完整字标/冷启动恢复本机资料核对。最新本地APK为build/verification/20261002-fixes/Innocence-20261002-icon-fix-android-offline.apk，包含0084玻璃/圆盘/每日标语纠正；版本仍1.2.0+5，同发行证书，未改公开Release或远端Git。实体手机/OEM蒙版/Vulkan与Windows多DPI仍待验收，P01/G01不自动通过。"
 current_baseline:
+  - "2026-10-02 Android图标填充（0085）：自适应前景-20%比例inset/1.4倍绘制范围；母版与前景PNG摘要不变。签名Release43.5秒、编译fraction检查、API36覆盖安装与两种图标尺寸圆形蒙版/冷启动本机恢复核对成功。最新本地离线APK62476992 bytes，SHA256 8473d9f0d412156fd3359203252f584c2a7d7eb38f9996e1ec76f67763015622；OEM与实体设备待验收。"
   - "2026-10-02 双端UI纠正（0084）：Android玻璃补偿Flutter3.44.4 GLES离屏纹理上下反转（兼容3.47+）；圆盘手柄72dp触控目标、按下立即接管/其他区域可滚动；双端同池每日标语与专注中持续显示、恢复刷新。99项全量/8项离线专项和analyze通过；API36 GLES像素探针/签名Release双主题/垂直短拖05:30–09:00保存与冷启动覆盖保留通过。本地修正版独立输出，未覆盖v1.2.0正式发布资产；实体手机/Vulkan/Windows运行矩阵待验收。"
   - "2026-10-01 v1.2.0 双端正式发布（0083）：源码8cb34fe/注释标签已推送，Release400708565公开/latest；Windows安装器/便携包、Android离线签名APK及清单4/4摘要匹配/下载HEAD200。analyze无问题、93项全量/8项离线专项通过，API36飞行模式安装/冷启动/覆盖保留两段计划与备忘录、专注起停/两主题通过。APK正式证书SHA256 c39218092db96b3c4085b0853bb781399b7d4fe1747a9d1032844b8154c05837，后续不可丢失/更换密钥；Windows未签名、实体手机和真实联网待补。"
   - "2026-10-01 Android 短计划圆盘（0081）：24小时/48半小时刻度、凌晨月亮、明确00:00与24:00、点选起止/已有段激活/首尾拖动/带语义半小时微调；输入非整点或半点明确拒绝，不静默舍入。邻接防重叠、最短半小时及盘顶连续角度钳制验证通过。Android纵向内容与固定保存可应对320dp、1.5倍字体、键盘280dp和英文横屏；analyze无问题、18项专项与89项全量通过，Debug APK212.5秒构建成功，两主题宿主渲染图目视核对；安装后触控与实体设备未验收。"
@@ -88,6 +89,9 @@ unfinished:
     item: "Android A0尚未通过：v1.2.0本机离线APK正式签名/发行及API36安装/核心流程/覆盖保留已完成子集；仍须连接实体设备、处理SDK license警告，补月/年与二级手机页、键盘/大字体/前后台性能。联网会话保护、真实同步、WebSocket/推送后续接入，不重复列发行签名为未完成。"
     gate: Android-A0
 next_actions:
+  - id: NEXT-0085-ICON-PHYSICAL-DEVICE
+    action: "在用户实体手机覆盖安装最新同发行签名icon-fix本地APK，核对桌面图标和系统应用信息页的大小、OEM轮廓与完整字标；并复验0084玻璃与圆盘纠正。未授权远端发布；另行发行时须递增版本并保留签名。"
+    inputs: ["client/flutter_app/build/verification/20261002-fixes/Innocence-20261002-icon-fix-android-offline.apk", "progress/0085__20261002__P01__CORRECTION__android-adaptive-launcher-icon-fill.md"]
   - id: NEXT-0084-PHYSICAL-DEVICE
     action: "在用户实体手机覆盖安装同发行签名的20261002本地修正版（版本仍1.2.0+5），复验玻璃光场定位/滚动与手柄外缘垂直短拖；Vulkan设备与Windows多DPI另验。本轮未授权远端发布；若另行发布，须递增版本号及versionCode并保留同一签名。"
     inputs: ["client/flutter_app/build/verification/20261002-fixes/", "progress/0084__20261002__P01__CORRECTION__android-glass-clock-and-daily-slogans.md"]
@@ -146,5 +150,6 @@ history:
   checkpoint_0082: progress/0082__20261001__P01__DECISION__v1.2.0-android-offline-release-scope.md
   checkpoint_0083: progress/0083__20261001__P01__DONE__v1.2.0-windows-and-android-offline-release.md
   checkpoint_0084: progress/0084__20261002__P01__CORRECTION__android-glass-clock-and-daily-slogans.md
+  checkpoint_0085: progress/0085__20261002__P01__CORRECTION__android-adaptive-launcher-icon-fill.md
 workspace_note: "工作区另有未跟踪的 0052__20260926__P04__DONE__admin-web-local-foundation.md，与已跟踪的 0052 序号重复；其余未跟踪报告产物和 admin_web/.vite 属于现有工作区内容，本次未改动。"
 ---

@@ -32,6 +32,13 @@
 - 小尺寸策略：`16–48` 使用同源放大的 `I + 圆点 + 环线` 构图；`64–256` 保留完整字标
 - SHA-256：`46DE2330866E91725B85318DAA9EAC917FAA1B95AD1AEEA0C16CB2C0D8C32220`
 
+### Android 自适应启动图标（2026-10-02 填充纠正）
+
+- 资源：[ic_launcher.xml](../../../client/flutter_app/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml)，Android API26+ 使用同源前景图与暖白背景。
+- 前景 PNG 已有透明留白；四边 `android:inset="-20%"` 将前景绘制宽高放大到 `1.4` 倍，补偿自适应图标外层预留区，避免出现系统轮廓里再套一个小底板的观感。比例值让桌面和系统信息页的不同图标尺寸保持相同构图。
+- 品牌元素与颜色保持原图；前景 PNG 的 SHA-256 仍为 `67161FCF77B25FC4B55AB50957BAFFECB9EDBDF0C85B0D89C49D8CD1AE03E2A8`，正式抠图母版、旧版密度 PNG 与 Windows ICO 未改动。
+- API36 Pixel Launcher 圆形蒙版及系统应用信息页已目视核对：主体扩大、完整字标与短横仍可见。其他 OEM 蒙版及实体设备仍待验收；构建/签名/覆盖安装证据见 `progress/0085__20261002__P01__CORRECTION__android-adaptive-launcher-icon-fill.md`。
+
 ## 历史候选稿
 
 状态：已被用户选定稿替代，仅留作设计过程记录，不再用于正式资源。

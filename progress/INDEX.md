@@ -601,3 +601,10 @@ checkpoints:
     status: complete
     path: progress/0084__20261002__P01__CORRECTION__android-glass-clock-and-daily-slogans.md
     title: "Android玻璃纹理方向、圆盘手柄误滚动与双端每日标语纠正"
+  - sequence: "0085"
+    created_at: "2026-10-02T21:05:53+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0085__20261002__P01__CORRECTION__android-adaptive-launcher-icon-fill.md
+    title: "Android自适应启动图标留白与填充比例纠正"

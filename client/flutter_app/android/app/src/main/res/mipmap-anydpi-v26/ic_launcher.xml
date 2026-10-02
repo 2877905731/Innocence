@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_background" />
-    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <foreground>
+        <!-- The artwork already contains padding around its white plate.
+             Compensate here so the plate fills the launcher's mask instead
+             of appearing as a second, smaller rounded tile inside it.
+             Use a fraction to keep the fill consistent at every icon size. -->
+        <inset android:inset="-20%" android:drawable="@drawable/ic_launcher_foreground" />
+    </foreground>
 </adaptive-icon>
