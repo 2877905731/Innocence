@@ -250,6 +250,81 @@ void main() {
   });
 
   _testAndroid(
+      'expanded handle wins a short vertical drag over editor scrolling',
+      (tester) async {
+    TodayPlan? saved;
+    await _open(tester,
+        items: [_item(12, 18)], onSave: (plan) async => saved = plan);
+    await _tap(tester, 15);
+    await tester.ensureVisible(find.byKey(_faceKey));
+    await tester.pumpAndSettle();
+    final scrollable = tester.state<ScrollableState>(find
+        .descendant(
+          of: find.byKey(const ValueKey('android-plan-editor-scroll')),
+          matching: find.byType(Scrollable),
+        )
+        .first);
+    final before = scrollable.position.pixels;
+    // 24dp outside the visual circle, still inside the face bounds but
+    // beyond the old annular hit region at the right side of the clock.
+    final down = _point(tester, 12, radiusOffset: 34);
+    final gesture = await tester.startGesture(down);
+    await gesture.moveBy(const Offset(0, -24));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(scrollable.position.pixels, before);
+    expect(find.text('05:30\n09:00'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('today-plan-save')));
+    await tester.pumpAndSettle();
+    expect(saved!.items.single.startSlot, 11);
+    expect(saved!.items.single.endSlot, 18);
+  });
+
+  _testAndroid('handle accepts a finger 32dp from its center without scrolling',
+      (tester) async {
+    await _open(tester, items: [_item(12, 18)]);
+    await _tap(tester, 15);
+    await tester.ensureVisible(find.byKey(_faceKey));
+    await tester.pumpAndSettle();
+    final scrollable = tester.state<ScrollableState>(find
+        .descendant(
+          of: find.byKey(const ValueKey('android-plan-editor-scroll')),
+          matching: find.byType(Scrollable),
+        )
+        .first);
+    final before = scrollable.position.pixels;
+    final down = _point(tester, 12, radiusOffset: 10) - const Offset(32, 0);
+    final gesture = await tester.startGesture(down);
+    await gesture.moveBy(const Offset(0, -14));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(scrollable.position.pixels, before);
+    expect(find.text('05:30\n09:00'), findsOneWidget);
+  });
+
+  _testAndroid('clock non-handle vertical gestures keep the editor scrollable',
+      (tester) async {
+    await _open(tester, items: [_item(12, 18)]);
+    await _tap(tester, 15);
+    await tester.ensureVisible(find.byKey(_faceKey));
+    await tester.pumpAndSettle();
+    final scrollable = tester.state<ScrollableState>(find
+        .descendant(
+          of: find.byKey(const ValueKey('android-plan-editor-scroll')),
+          matching: find.byType(Scrollable),
+        )
+        .first);
+    final before = scrollable.position.pixels;
+    await tester.dragFrom(_point(tester, 36), const Offset(0, -64));
+    await tester.pumpAndSettle();
+    expect(scrollable.position.pixels, greaterThan(before));
+    expect(find.text('06:00\n09:00'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  _testAndroid(
       'dragging dawn through midnight clamps to 00:00 instead of wrapping',
       (tester) async {
     TodayPlan? saved;

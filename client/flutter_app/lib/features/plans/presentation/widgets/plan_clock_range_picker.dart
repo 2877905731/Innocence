@@ -66,6 +66,18 @@ class _PlanClockRangePickerState extends State<PlanClockRangePicker> {
         48;
   }
 
+  bool _canDrag(Offset point, double diameter) {
+    final active = _active;
+    if (!widget.enabled || active == null) return false;
+    final radius = _clockRadius(diameter);
+    return math.min(
+          (point - _clockPoint(diameter, radius + 10, active.startSlot))
+              .distance,
+          (point - _clockPoint(diameter, radius - 10, active.endSlot)).distance,
+        ) <=
+        _handleHitRadius;
+  }
+
   void _beginDrag(Offset point, double diameter) {
     _dragStart = null;
     _dragIndex = null;
@@ -76,7 +88,7 @@ class _PlanClockRangePickerState extends State<PlanClockRangePicker> {
     final endPoint = _clockPoint(diameter, radius - 10, active.endSlot);
     final startDistance = (point - startPoint).distance;
     final endDistance = (point - endPoint).distance;
-    if (math.min(startDistance, endDistance) > 28) return;
+    if (math.min(startDistance, endDistance) > _handleHitRadius) return;
     _dragStart = startDistance <= endDistance;
     _dragIndex = widget.activeIndex;
     _originalStart = active.startSlot;
@@ -170,42 +182,46 @@ class _PlanClockRangePickerState extends State<PlanClockRangePicker> {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: MediaQuery(
-                      data: MediaQuery.of(context).copyWith(
-                        gestureSettings:
-                            const DeviceGestureSettings(touchSlop: 6),
-                      ),
-                      child: GestureDetector(
-                        key: const ValueKey('today-plan-clock-face'),
-                        onTapUp: !widget.enabled
-                            ? null
-                            : (details) => widget.onTapBoundary(
-                                _position(details.localPosition, diameter)
-                                        .round() %
-                                    48),
-                        onPanDown: active == null || !widget.enabled
-                            ? null
-                            : (details) =>
-                                _beginDrag(details.localPosition, diameter),
-                        onPanUpdate: active == null || !widget.enabled
-                            ? null
-                            : (details) =>
-                                _updateDrag(details.localPosition, diameter),
-                        onPanEnd: (_) => _endDrag(),
-                        onPanCancel: _endDrag,
-                        child: CustomPaint(
-                          painter: _ClockPainter(
-                            diameter: diameter,
-                            blocks: widget.blocks,
-                            activeIndex: widget.activeIndex,
-                            pending: pending,
-                            scheme: scheme,
-                            textDirection: Directionality.of(context),
-                            fontFamily: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.fontFamily,
+                    child: RawGestureDetector(
+                      key: const ValueKey('today-plan-clock-face'),
+                      gestures: {
+                        if (widget.enabled)
+                          TapGestureRecognizer:
+                              GestureRecognizerFactoryWithHandlers<
+                                  TapGestureRecognizer>(
+                            TapGestureRecognizer.new,
+                            (recognizer) => recognizer.onTapUp = (details) =>
+                                widget.onTapBoundary(
+                                    _position(details.localPosition, diameter)
+                                            .round() %
+                                        48),
                           ),
+                        if (active != null && widget.enabled)
+                          _ClockHandleDragRecognizer:
+                              GestureRecognizerFactoryWithHandlers<
+                                  _ClockHandleDragRecognizer>(
+                            _ClockHandleDragRecognizer.new,
+                            (recognizer) {
+                              recognizer.canStart =
+                                  (point) => _canDrag(point, diameter);
+                              recognizer.onStart =
+                                  (point) => _beginDrag(point, diameter);
+                              recognizer.onUpdate =
+                                  (point) => _updateDrag(point, diameter);
+                              recognizer.onEnd = _endDrag;
+                            },
+                          ),
+                      },
+                      child: CustomPaint(
+                        painter: _ClockPainter(
+                          diameter: diameter,
+                          blocks: widget.blocks,
+                          activeIndex: widget.activeIndex,
+                          pending: pending,
+                          scheme: scheme,
+                          textDirection: Directionality.of(context),
+                          fontFamily:
+                              Theme.of(context).textTheme.bodySmall?.fontFamily,
                         ),
                       ),
                     ),
@@ -328,6 +344,49 @@ class _PlanClockRangePickerState extends State<PlanClockRangePicker> {
 
 double _clockRadius(double diameter) => diameter / 2 - 36;
 
+const _handleHitRadius = 36.0;
+
+/// Claim a handle at pointer-down so even vertical and very short adjustments
+/// stay on the clock. All other starts remain available to the parent scroll.
+class _ClockHandleDragRecognizer extends OneSequenceGestureRecognizer {
+  bool Function(Offset)? canStart;
+  ValueChanged<Offset>? onStart;
+  ValueChanged<Offset>? onUpdate;
+  VoidCallback? onEnd;
+  int? _pointer;
+
+  @override
+  bool isPointerAllowed(PointerDownEvent event) =>
+      _pointer == null &&
+      (canStart?.call(event.localPosition) ?? false) &&
+      super.isPointerAllowed(event);
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    _pointer = event.pointer;
+    startTrackingPointer(event.pointer, event.transform);
+    onStart?.call(event.localPosition);
+    resolve(GestureDisposition.accepted);
+  }
+
+  @override
+  void handleEvent(PointerEvent event) {
+    if (event.pointer != _pointer) return;
+    if (event is PointerMoveEvent) onUpdate?.call(event.localPosition);
+    if (event is PointerUpEvent || event is PointerCancelEvent) {
+      onEnd?.call();
+      _pointer = null;
+      stopTrackingPointer(event.pointer);
+    }
+  }
+
+  @override
+  void didStopTrackingLastPointer(int pointer) {}
+
+  @override
+  String get debugDescription => 'clock handle drag';
+}
+
 Offset _clockPoint(double diameter, double radius, num slot) {
   final angle = slot / 48 * 2 * math.pi - math.pi / 2;
   return Offset(diameter / 2 + math.cos(angle) * radius,
@@ -357,6 +416,17 @@ class _ClockPainter extends CustomPainter {
   bool hitTest(Offset position) {
     final distance = (position - Offset(diameter / 2, diameter / 2)).distance;
     final radius = _clockRadius(diameter);
+    if (activeIndex != null) {
+      final active = blocks[activeIndex!];
+      if ((position - _clockPoint(diameter, radius + 10, active.startSlot))
+                  .distance <=
+              _handleHitRadius ||
+          (position - _clockPoint(diameter, radius - 10, active.endSlot))
+                  .distance <=
+              _handleHitRadius) {
+        return true;
+      }
+    }
     return distance >= radius - 28 && distance <= radius + 24;
   }
 
@@ -412,10 +482,12 @@ class _ClockPainter extends CustomPainter {
       for (final start in [true, false]) {
         final point = _clockPoint(diameter, radius + (start ? 10 : -10),
             start ? active.startSlot : active.endSlot);
-        canvas.drawCircle(point, 10, Paint()..color = scheme.surface);
+        canvas.drawCircle(
+            point, 18, Paint()..color = scheme.primary.withValues(alpha: 0.12));
+        canvas.drawCircle(point, 12, Paint()..color = scheme.surface);
         canvas.drawCircle(
             point,
-            10,
+            12,
             Paint()
               ..color = scheme.primary
               ..style = PaintingStyle.stroke

@@ -2,14 +2,15 @@
 schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
-updated_at: "2026-10-01"
-latest_checkpoint: "0083"
-next_sequence: "0084"
+updated_at: "2026-10-02"
+latest_checkpoint: "0084"
+next_sequence: "0085"
 current_phase: P01
 current_gate: G01
-state: v1.2.0_windows_and_android_offline_release_published_device_and_visual_acceptance_pending
-current_goal: "2026-10-01 用户小版本发布请求已完成：v1.2.0+5源码8cb34fe与标签已推送，GitHub正式Release400708565为latest/draft=false/prerelease=false；Windows安装器/便携包、Android本机离线签名APK和SHA256清单四项公开，摘要逐项一致，四个下载HEAD200且长度匹配。最终analyze无问题、93项全量/8项离线编译恢复专项通过；API36断网安装、凌晨/午夜圆盘/短拖、计划/专注/备忘录、冷启动/覆盖保留与两主题核对，最终PID错误筛选0。Android联网后续接入；Windows仍未AuthentiCode签名，实体手机、完整手机页、Windows视觉矩阵与真实同步仍待验收，P01/G01不自动通过。"
+state: android_glass_and_clock_gestures_corrected_daily_slogans_local_build_verified_physical_device_pending
+current_goal: "2026-10-02 UI纠正（0084）已完成本地源码与验证：GLES旧版离屏纹理纵向翻转补偿、圆盘手柄36dp触控半径与按下接管拖动、Android每日标语及Windows专注中持续标语/恢复刷新。用户取消歌词收录。analyze无问题、99项全量/8项离线专项通过；API36 GLES像素探针green=[30,70,100]，正式签名本机离线修正版安装/双主题首页/06:00到05:30外缘垂直短拖与固定几何/保存/冷启动覆盖保留核对。Windows Release与Android Release构建成功，独立本地文件在build/verification/20261002-fixes；版本仍1.2.0+5，未改公开Release或远端Git。实体手机/Vulkan与Windows多DPI运行画面仍待验收，P01/G01不自动通过。"
 current_baseline:
+  - "2026-10-02 双端UI纠正（0084）：Android玻璃补偿Flutter3.44.4 GLES离屏纹理上下反转（兼容3.47+）；圆盘手柄72dp触控目标、按下立即接管/其他区域可滚动；双端同池每日标语与专注中持续显示、恢复刷新。99项全量/8项离线专项和analyze通过；API36 GLES像素探针/签名Release双主题/垂直短拖05:30–09:00保存与冷启动覆盖保留通过。本地修正版独立输出，未覆盖v1.2.0正式发布资产；实体手机/Vulkan/Windows运行矩阵待验收。"
   - "2026-10-01 v1.2.0 双端正式发布（0083）：源码8cb34fe/注释标签已推送，Release400708565公开/latest；Windows安装器/便携包、Android离线签名APK及清单4/4摘要匹配/下载HEAD200。analyze无问题、93项全量/8项离线专项通过，API36飞行模式安装/冷启动/覆盖保留两段计划与备忘录、专注起停/两主题通过。APK正式证书SHA256 c39218092db96b3c4085b0853bb781399b7d4fe1747a9d1032844b8154c05837，后续不可丢失/更换密钥；Windows未签名、实体手机和真实联网待补。"
   - "2026-10-01 Android 短计划圆盘（0081）：24小时/48半小时刻度、凌晨月亮、明确00:00与24:00、点选起止/已有段激活/首尾拖动/带语义半小时微调；输入非整点或半点明确拒绝，不静默舍入。邻接防重叠、最短半小时及盘顶连续角度钳制验证通过。Android纵向内容与固定保存可应对320dp、1.5倍字体、键盘280dp和英文横屏；analyze无问题、18项专项与89项全量通过，Debug APK212.5秒构建成功，两主题宿主渲染图目视核对；安装后触控与实体设备未验收。"
   - "2026-09-30 玻璃月份栏/二级浮层（0080）：月份栏收回内容宽度并采用中性圆角/22px磨砂，移除旧蓝紫实色带，12月几何与进度回归通过。13个文件的弹层调用统一入口，玻璃弹层18px虚化底层页面、约82%中性主体、45%遮罩、24px圆角及清晰输入/菜单底；保留Material路由、焦点、取消和返回语义。analyze无问题、78项全量回归及最终嵌套草稿回归通过，Windows Release/Android Debug构建成功；Windows年度编辑实际画面及API36专注弹窗核对，未由助手提交业务数据。吸顶滚动/DPI/性能仍待验收。"
@@ -37,6 +38,7 @@ current_baseline:
   - "后端使用 Bearer 会话，android 映射到 mobile 槽位；离线 ownerScope、outbox 和导入确认已在 Windows 链路实现，真实跨设备回放仍待补。"
   - "2026-09-26 压缩审查：0001–0057 共 57 份检查点原名归档，索引逐项标记 archived；压缩前 RESUME 与 INDEX 快照保存在 progress/archive/。"
 active_decisions:
+  - "DEC-0047：2026-10-02 修正Android面板光场与圆盘误滚动，双端显示每日标语；Windows专注中也保留标语。用户后续‘没版权的话就算了’取消本轮歌词收录，保持现有原创主题池；UI规划2026-10-02章节与0084记录。"
   - "DEC-0046：2026-10-01 用户授权双端小版本发布；Android v1.2.0 首次正式发行仅本机离线，联网后续接入。正式签名沿用当前 applicationId，后续更新必须保留发行密钥；不据此宣布 Android A0–A5 全面通过（0082）。"
   - "DEC-0045：2026-10-01 Android 短计划时间段使用圆盘时钟；Windows昼夜时间条继续有效。句末‘在凌晨时间’尚未补充，当前实现当天凌晨可选，不据此自行增加跨日日期/同步语义（0081；UI规划2.35）。"
   - "DEC-0044：2026-09-30 用户要求两套网页参考立即覆盖程序 UI 并用于 Android；原‘仅参考稿’与 DEC-0040 的移动端主题适配后置部分失效，MD3 导航/表单/无障碍基础继续使用（0075）。"
@@ -86,6 +88,9 @@ unfinished:
     item: "Android A0尚未通过：v1.2.0本机离线APK正式签名/发行及API36安装/核心流程/覆盖保留已完成子集；仍须连接实体设备、处理SDK license警告，补月/年与二级手机页、键盘/大字体/前后台性能。联网会话保护、真实同步、WebSocket/推送后续接入，不重复列发行签名为未完成。"
     gate: Android-A0
 next_actions:
+  - id: NEXT-0084-PHYSICAL-DEVICE
+    action: "在用户实体手机覆盖安装同发行签名的20261002本地修正版（版本仍1.2.0+5），复验玻璃光场定位/滚动与手柄外缘垂直短拖；Vulkan设备与Windows多DPI另验。本轮未授权远端发布；若另行发布，须递增版本号及versionCode并保留同一签名。"
+    inputs: ["client/flutter_app/build/verification/20261002-fixes/", "progress/0084__20261002__P01__CORRECTION__android-glass-clock-and-daily-slogans.md"]
   - id: NEXT-V1-2-0-DEVICE-ACCEPTANCE
     action: "双端发布已完成；后续连接实体Android设备核对正式离线APK的圆盘邻接/键盘/返回、大字体/两主题与长时间恢复，并继续手机月/年及二级页面验收；保留发行密钥安全备份。"
     inputs: ["https://github.com/2877905731/Innocence/releases/tag/v1.2.0", "progress/0083__20261001__P01__DONE__v1.2.0-windows-and-android-offline-release.md"]
@@ -140,5 +145,6 @@ history:
   checkpoint_0081: progress/0081__20261001__P01__DECISION__android-short-plan-clock.md
   checkpoint_0082: progress/0082__20261001__P01__DECISION__v1.2.0-android-offline-release-scope.md
   checkpoint_0083: progress/0083__20261001__P01__DONE__v1.2.0-windows-and-android-offline-release.md
+  checkpoint_0084: progress/0084__20261002__P01__CORRECTION__android-glass-clock-and-daily-slogans.md
 workspace_note: "工作区另有未跟踪的 0052__20260926__P04__DONE__admin-web-local-foundation.md，与已跟踪的 0052 序号重复；其余未跟踪报告产物和 admin_web/.vite 属于现有工作区内容，本次未改动。"
 ---

@@ -3,7 +3,7 @@ schema_version: 1
 document_type: ui_design_plan
 project_name: "Innocence"
 created_at: "2026-08-07"
-updated_at: "2026-10-01"
+updated_at: "2026-10-02"
 information_architecture_status: approved
 windows_shell_implementation_status: p01_foundation_implemented
 themes:
@@ -30,6 +30,23 @@ themes:
 ---
 
 # Innocence UI 设计规划
+
+## 2026-10-02 Android 玻璃采样、圆盘手柄与双端每日标语纠正
+
+用户原文（附 `Screenshot_20261001_213958_com.innocence.app.inn.jpg`，原图保留在用户 Downloads，不复制到仓库）：
+
+> 安卓版的面板反射明显有问题，然后在短计划里面的时间段选取时，通过圆盘调整面板的时间段的圆形按钮识别范围太小了经常会出发上下滑动，然后win版的每日标语也做进去。
+> 然后双端的标语我希望能够加上艾薇儿和sum41的歌词，直接用原版英文，挑选励志、努力、学习、进步符合软件主题的
+
+助手说明原版歌词需用户提供具体片段后，用户回复原文：
+
+> 没版权的话就算了
+
+- 本轮取消歌词收录，保留现有原创主题文案池，不加入歌手歌词或伪造歌词归属。
+- Android OpenGL ES 在项目 Flutter 3.44.4 上把 `Picture.toImageSync` 离屏纹理存为纵向反转方向；Canvas 自动补偿，而片段着色器直接采样不会补偿。为 GLES 添加纵坐标翻转，并用 `IMPELLER_OPENGLES_UNFLIPPED_DEPRECATED` 条件排除 Flutter 3.47+ 的新规则；Skia、Vulkan 与 Metal 不翻转。参考 [Flutter 官方迁移说明](https://docs.flutter.dev/release/breaking-changes/opengles-render-to-texture-top-down)。面板继续只折射装饰光场，文字和业务内容不进入纹理。
+- 圆盘首尾圆点保持清晰可见，触控判定半径扩为36dp；绘制命中与拖动命中一致。仅从手柄附近按下时立即接管手势，纵向和短距离微调不交给父级滚动；其他区域仍可滚动表单。保留最近首尾选择、半小时精度、最短时长、防重叠与00:00/24:00钳制。
+- Android 首页新增主题化每日标语卡片；Windows 首页标明“每日标语”，专注期间也显示当日文案，专注任务仍由专注卡片表达。本节覆盖旧“专注状态优先替换标语”的呈现规则，复用同一日期/主题/语言文案池；跨午夜及前后台恢复时刷新。
+- 命令、结果与设备范围记录到0084；API36 GLES运行验证不替代用户实体手机、Vulkan设备、Windows多DPI和长时间性能验收。
 
 ## 2026-09-30 液态玻璃月份吸顶栏与二级弹层可读性
 

@@ -594,3 +594,10 @@ checkpoints:
     status: complete
     path: progress/0083__20261001__P01__DONE__v1.2.0-windows-and-android-offline-release.md
     title: "v1.2.0 双端正式发布与 Android 本机离线安装验证"
+  - sequence: "0084"
+    created_at: "2026-10-02T20:54:00+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0084__20261002__P01__CORRECTION__android-glass-clock-and-daily-slogans.md
+    title: "Android玻璃纹理方向、圆盘手柄误滚动与双端每日标语纠正"

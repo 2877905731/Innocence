@@ -10,7 +10,14 @@ uniform sampler2D uScene;
 out vec4 fragColor;
 
 vec3 lightAt(vec2 point) {
-  return texture(uScene, clamp(point / uSceneSize, vec2(0.0), vec2(1.0))).rgb;
+  vec2 uv = clamp(point / uSceneSize, vec2(0.0), vec2(1.0));
+  // Picture.toImageSync is a render-target texture. Older Impeller GLES
+  // stores it bottom-up; Canvas drawing compensates, raw texture() does not.
+  // Flutter 3.47+ stores it top-down and defines this migration macro.
+#if defined(IMPELLER_TARGET_OPENGLES) && !defined(IMPELLER_OPENGLES_UNFLIPPED_DEPRECATED)
+  uv.y = 1.0 - uv.y;
+#endif
+  return texture(uScene, uv).rgb;
 }
 
 void main() {

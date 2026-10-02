@@ -145,7 +145,8 @@ class AdaptiveDesktopHome extends StatefulWidget {
   State<AdaptiveDesktopHome> createState() => _AdaptiveDesktopHomeState();
 }
 
-class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
+class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome>
+    with WidgetsBindingObserver {
   static const _primaryIds = <String>[
     'home',
     'plans',
@@ -168,6 +169,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     DesktopWidgetBridge.setWindowModeListener(_handleWindowModeChanged);
     DesktopWidgetBridge.setTrayCommandListener(_handleTrayCommand);
     unawaited(_syncTrayState());
@@ -187,6 +189,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
   @override
   void dispose() {
     _sloganRefreshTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     DesktopWidgetBridge.setWindowModeListener(null);
     DesktopWidgetBridge.setTrayCommandListener(null);
     unawaited(
@@ -237,6 +240,16 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
         _scheduleSloganRefresh();
       }
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {});
+      _scheduleSloganRefresh();
+    } else {
+      _sloganRefreshTimer?.cancel();
+    }
   }
 
   void _selectPlanHorizon(_PlanHorizon value) {
@@ -593,20 +606,9 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome> {
         _HeroStatement(
           palette: palette,
           dayIndex: dailySlogan.dayIndex,
-          eyebrow:
-              _text('INNOCENCE · DAILY CANVAS', 'INNOCENCE · DAILY CANVAS'),
-          title: widget.focusSession.active
-              ? _text('此刻，保持专注。', 'Stay with this moment.')
-              : dailySlogan.title(isChinese: _isChinese),
-          description: widget.focusSession.active
-              ? (widget.focusSession.taskName.trim().isEmpty
-                  ? (widget.isOfflineMode
-                      ? _text('当前专注记录仅保存在本机。',
-                          'This focus session is stored on this device.')
-                      : _text('当前学习状态正在双端同步。',
-                          'Your current focus state is syncing across devices.'))
-                  : widget.focusSession.taskName)
-              : dailySlogan.subtitle(isChinese: _isChinese),
+          eyebrow: _text('INNOCENCE · 每日标语', 'INNOCENCE · DAILY INSPIRATION'),
+          title: dailySlogan.title(isChinese: _isChinese),
+          description: dailySlogan.subtitle(isChinese: _isChinese),
         ),
         const SizedBox(height: 20),
         _ResponsivePair(

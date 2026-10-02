@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:innocence_flutter/features/account/domain/models/user_profile.da
 import 'package:innocence_flutter/features/checkin/domain/models/check_in_status.dart';
 import 'package:innocence_flutter/features/focus/domain/models/focus_session.dart';
 import 'package:innocence_flutter/features/friends/domain/models/friend_overview.dart';
+import 'package:innocence_flutter/features/home/domain/theme_daily_slogan.dart';
 import 'package:innocence_flutter/features/notifications/domain/models/notification_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/today_plan.dart';
 import 'package:innocence_flutter/features/team/domain/models/team_overview.dart';
@@ -81,10 +83,47 @@ class AndroidHomeShell extends StatefulWidget {
   State<AndroidHomeShell> createState() => _AndroidHomeShellState();
 }
 
-class _AndroidHomeShellState extends State<AndroidHomeShell> {
+class _AndroidHomeShellState extends State<AndroidHomeShell>
+    with WidgetsBindingObserver {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   AndroidHomeDestination _destination = AndroidHomeDestination.home;
   bool _drawerOpen = false;
+  Timer? _sloganRefreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _scheduleSloganRefresh();
+  }
+
+  void _scheduleSloganRefresh() {
+    _sloganRefreshTimer?.cancel();
+    final now = DateTime.now();
+    final midnight = DateTime(now.year, now.month, now.day + 1);
+    _sloganRefreshTimer = Timer(midnight.difference(now), () {
+      if (!mounted) return;
+      setState(() {});
+      _scheduleSloganRefresh();
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {});
+      _scheduleSloganRefresh();
+    } else {
+      _sloganRefreshTimer?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _sloganRefreshTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   bool get _zh => widget.language.isChinese;
 
@@ -276,10 +315,11 @@ class _AndroidHomeShellState extends State<AndroidHomeShell> {
   }
 
   Widget _themedCard(Widget content,
-      {EdgeInsets padding = EdgeInsets.zero, bool frosted = false}) {
+      {Key? key, EdgeInsets padding = EdgeInsets.zero, bool frosted = false}) {
     if (_visualTheme == AppVisualTheme.glass ||
         _visualTheme == AppVisualTheme.minimalism) {
       return Padding(
+        key: key,
         padding: const EdgeInsets.only(bottom: 10),
         child: GlassPanel(
           frosted: frosted,
@@ -289,6 +329,7 @@ class _AndroidHomeShellState extends State<AndroidHomeShell> {
       );
     }
     return Card(
+      key: key,
       child: Padding(padding: padding, child: content),
     );
   }
@@ -297,6 +338,10 @@ class _AndroidHomeShellState extends State<AndroidHomeShell> {
     final plan = widget.todayPlan;
     final focus = widget.focusSession;
     final checkIn = widget.checkInStatus;
+    final slogan = ThemeDailySlogans.resolve(
+      theme: _visualTheme,
+      localDate: DateTime.now(),
+    );
     return [
       if (_visualTheme == AppVisualTheme.minimalism)
         _citrusWelcome()
@@ -318,6 +363,27 @@ class _AndroidHomeShellState extends State<AndroidHomeShell> {
         ),
       ],
       const SizedBox(height: 20),
+      _themedCard(
+        key: const ValueKey('android-daily-slogan'),
+        frosted: true,
+        padding: const EdgeInsets.all(20),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(_text('每日标语', 'Daily inspiration'),
+                style: Theme.of(context)
+                    .textTheme
+                    .labelLarge
+                    ?.copyWith(color: Theme.of(context).colorScheme.primary)),
+            const SizedBox(height: 10),
+            Text(slogan.title(isChinese: _zh),
+                style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 8),
+            Text(slogan.subtitle(isChinese: _zh),
+                style: Theme.of(context).textTheme.bodyMedium),
+          ],
+        ),
+      ),
       _sectionCard(
         title: _text('今日计划', 'Today’s plan'),
         body: _text('已完成 ${plan.completedCount}/${plan.totalCount} 项',

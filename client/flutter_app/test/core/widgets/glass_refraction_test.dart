@@ -17,12 +17,20 @@ void main() {
       final canvas = Canvas(recorder);
       for (var x = 0; x < 256; x++) {
         canvas.drawRect(Rect.fromLTWH(x.toDouble(), 0, 1, 160),
-            Paint()..color = Color.fromARGB(255, x, (x * 3) % 256, 255 - x));
+            Paint()..color = Color.fromARGB(255, x, 0, 255 - x));
+      }
+      for (var y = 0; y < 160; y++) {
+        canvas.drawRect(
+            Rect.fromLTWH(0, y.toDouble(), 256, 1),
+            Paint()
+              ..color = Color.fromARGB(255, 0, y, 0)
+              ..blendMode = BlendMode.plus);
       }
       final picture = recorder.endRecording();
-      final texture = await picture.toImage(256, 160);
+      final texture = picture.toImageSync(256, 160);
       picture.dispose();
-      Future<Uint8List> render(double strength, double origin) async {
+      Future<Uint8List> render(double strength, double origin,
+          {double originY = 20}) async {
         final shader = program.fragmentShader();
         final uniforms = [
           120.0,
@@ -30,7 +38,7 @@ void main() {
           256.0,
           160.0,
           origin,
-          20.0,
+          originY,
           15.0,
           strength
         ];
@@ -53,10 +61,14 @@ void main() {
       final plain = await render(0, 40);
       final refracted = await render(1, 40);
       final moved = await render(0, 70);
+      final movedDown = await render(0, 40, originY: 40);
       int red(Uint8List bytes, int x, int y) => bytes[(y * 120 + x) * 4];
+      int green(Uint8List bytes, int x, int y) => bytes[(y * 120 + x) * 4 + 1];
       // Zero strength samples the actual scene, including its global origin.
       expect(red(plain, 60, 50), closeTo(100, 2));
       expect(red(moved, 60, 50) - red(plain, 60, 50), closeTo(30, 2));
+      expect(green(plain, 60, 50), closeTo(70, 2));
+      expect(green(movedDown, 60, 50) - green(plain, 60, 50), closeTo(20, 2));
       var changed = 0;
       for (var i = 0; i < plain.length; i += 4) {
         if ((plain[i] - refracted[i]).abs() > 3) changed++;

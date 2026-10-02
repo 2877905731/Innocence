@@ -8,6 +8,7 @@ import 'package:innocence_flutter/features/account/domain/models/user_profile.da
 import 'package:innocence_flutter/features/checkin/domain/models/check_in_status.dart';
 import 'package:innocence_flutter/features/focus/domain/models/focus_session.dart';
 import 'package:innocence_flutter/features/friends/domain/models/friend_overview.dart';
+import 'package:innocence_flutter/features/home/domain/theme_daily_slogan.dart';
 import 'package:innocence_flutter/features/home/presentation/pages/android_home_shell.dart';
 import 'package:innocence_flutter/features/notifications/domain/models/notification_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/today_plan.dart';
@@ -17,19 +18,21 @@ Widget _app({
   bool offline = false,
   AppVisualTheme visualTheme = AppVisualTheme.minimalism,
   TodayPlan? todayPlan,
+  FocusSession? focusSession,
+  AppLanguage language = AppLanguage.simplifiedChinese,
   Future<void> Function(int, bool)? onToggleTodayPlanItem,
 }) {
   return MaterialApp(
     theme: AppVisualTokens.of(visualTheme).toThemeData(visualTheme),
     home: AndroidHomeShell(
-      language: AppLanguage.simplifiedChinese,
+      language: language,
       profile: UserProfile.local(
         localProfileId: 'synthetic-profile',
         nickname: '测试用户',
         timezone: 'Asia/Shanghai',
       ),
       todayPlan: todayPlan ?? TodayPlan.empty(),
-      focusSession: FocusSession.empty(),
+      focusSession: focusSession ?? FocusSession.empty(),
       checkInStatus: CheckInStatus.empty(),
       teamOverview: TeamOverview.empty(),
       friendOverview: FriendOverview.fromJson(const {'friendCount': 9}),
@@ -58,6 +61,47 @@ Widget _app({
 }
 
 void main() {
+  testWidgets('Android daily slogan follows theme and language during focus',
+      (tester) async {
+    tester.view.physicalSize = const Size(320, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    for (final theme in [AppVisualTheme.minimalism, AppVisualTheme.glass]) {
+      for (final language in AppLanguage.values) {
+        final slogan =
+            ThemeDailySlogans.resolve(theme: theme, localDate: DateTime.now());
+        await tester.pumpWidget(_app(
+          visualTheme: theme,
+          language: language,
+          focusSession: FocusSession.fromJson(const {
+            'active': true,
+            'remainingSeconds': 1800,
+            'taskName': 'Synthetic focus',
+          }),
+        ));
+        await tester.pump(const Duration(milliseconds: 350));
+        final card = find.byKey(const ValueKey('android-daily-slogan'));
+        await tester.ensureVisible(card);
+        await tester.pump();
+        expect(
+            find.descendant(
+                of: card,
+                matching:
+                    find.text(slogan.title(isChinese: language.isChinese))),
+            findsOneWidget);
+        expect(
+            find.descendant(
+                of: card,
+                matching:
+                    find.text(slogan.subtitle(isChinese: language.isChinese))),
+            findsOneWidget);
+        expect(tester.takeException(), isNull);
+      }
+    }
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('Android home renders both reference styles with live data',
       (tester) async {
     await tester.pumpWidget(_app());
