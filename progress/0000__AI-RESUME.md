@@ -7,8 +7,8 @@ latest_checkpoint: "0085"
 next_sequence: "0086"
 current_phase: P01
 current_gate: G01
-state: android_adaptive_launcher_icon_fill_corrected_local_package_verified
-current_goal: "2026-10-02 Android图标填充纠正（0085）完成：自适应前景四边-20%比例inset，绘制宽高放大1.4倍，原图和品牌元素不改。正式签名Release43.5秒构建成功，编译XML的有符号fraction=-0.200000047683716，API36覆盖安装/应用列表与系统信息页圆形蒙版完整字标/冷启动恢复本机资料核对。最新本地APK为build/verification/20261002-fixes/Innocence-20261002-icon-fix-android-offline.apk，包含0084玻璃/圆盘/每日标语纠正；版本仍1.2.0+5，同发行证书，未改公开Release或远端Git。实体手机/OEM蒙版/Vulkan与Windows多DPI仍待验收，P01/G01不自动通过。"
+state: v1_2_1_patch_release_preparation_in_progress
+current_goal: "2026-10-02 用户明确要求‘更新一个新的小版本’，按既有双端发布流程准备v1.2.1+6：包含0084玻璃采样/圆盘触控/每日标语与0085图标填充纠正，重新验证并构建Windows安装器/便携包和同发行签名Android离线APK，核对升级保留后发布origin Git标签与GitHub Release；不覆盖v1.2.0资产。实体手机/OEM/Vulkan/Windows多DPI与真实同步仍待验收。"
 current_baseline:
   - "2026-10-02 Android图标填充（0085）：自适应前景-20%比例inset/1.4倍绘制范围；母版与前景PNG摘要不变。签名Release43.5秒、编译fraction检查、API36覆盖安装与两种图标尺寸圆形蒙版/冷启动本机恢复核对成功。最新本地离线APK62476992 bytes，SHA256 8473d9f0d412156fd3359203252f584c2a7d7eb38f9996e1ec76f67763015622；OEM与实体设备待验收。"
   - "2026-10-02 双端UI纠正（0084）：Android玻璃补偿Flutter3.44.4 GLES离屏纹理上下反转（兼容3.47+）；圆盘手柄72dp触控目标、按下立即接管/其他区域可滚动；双端同池每日标语与专注中持续显示、恢复刷新。99项全量/8项离线专项和analyze通过；API36 GLES像素探针/签名Release双主题/垂直短拖05:30–09:00保存与冷启动覆盖保留通过。本地修正版独立输出，未覆盖v1.2.0正式发布资产；实体手机/Vulkan/Windows运行矩阵待验收。"
@@ -39,6 +39,7 @@ current_baseline:
   - "后端使用 Bearer 会话，android 映射到 mobile 槽位；离线 ownerScope、outbox 和导入确认已在 Windows 链路实现，真实跨设备回放仍待补。"
   - "2026-09-26 压缩审查：0001–0057 共 57 份检查点原名归档，索引逐项标记 archived；压缩前 RESUME 与 INDEX 快照保存在 progress/archive/。"
 active_decisions:
+  - "DEC-0048：2026-10-02 用户要求‘更新一个新的小版本’，授权本轮按既有流程双端发行v1.2.1+6并推送origin/发布GitHub Release；Android本机离线范围与发行密钥保持，整合0084/0085纠正。"
   - "DEC-0047：2026-10-02 修正Android面板光场与圆盘误滚动，双端显示每日标语；Windows专注中也保留标语。用户后续‘没版权的话就算了’取消本轮歌词收录，保持现有原创主题池；UI规划2026-10-02章节与0084记录。"
   - "DEC-0046：2026-10-01 用户授权双端小版本发布；Android v1.2.0 首次正式发行仅本机离线，联网后续接入。正式签名沿用当前 applicationId，后续更新必须保留发行密钥；不据此宣布 Android A0–A5 全面通过（0082）。"
   - "DEC-0045：2026-10-01 Android 短计划时间段使用圆盘时钟；Windows昼夜时间条继续有效。句末‘在凌晨时间’尚未补充，当前实现当天凌晨可选，不据此自行增加跨日日期/同步语义（0081；UI规划2.35）。"

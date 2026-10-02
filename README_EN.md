@@ -21,14 +21,16 @@
 
 Innocence is built with Flutter and Spring Boot and currently targets Windows desktop and mobile devices.
 
-## Download v1.2.0
+## Download v1.2.1
 
 | Platform | Download | Scope |
 |---|---|---|
-| Windows x64 | [Installer](https://github.com/2877905731/Innocence/releases/download/v1.2.0/Innocence-v1.2.0-windows-x64-setup.exe) · [Portable ZIP](https://github.com/2877905731/Innocence/releases/download/v1.2.0/Innocence-v1.2.0-windows-x64-portable.zip) | Desktop edition; installer has no Authenticode signature |
-| Android 7.0+ | [Offline APK](https://github.com/2877905731/Innocence/releases/download/v1.2.0/Innocence-v1.2.0-android-offline.apk) | Dedicated release signature; online features are deferred |
+| Windows x64 | [Installer](https://github.com/2877905731/Innocence/releases/download/v1.2.1/Innocence-v1.2.1-windows-x64-setup.exe) · [Portable ZIP](https://github.com/2877905731/Innocence/releases/download/v1.2.1/Innocence-v1.2.1-windows-x64-portable.zip) | Desktop edition; installer has no Authenticode signature |
+| Android 7.0+ | [Offline APK](https://github.com/2877905731/Innocence/releases/download/v1.2.1/Innocence-v1.2.1-android-offline.apk) | Dedicated release signature; online features are deferred |
 
-[Release notes](https://github.com/2877905731/Innocence/releases/tag/v1.2.0) · [SHA256 checksums](https://github.com/2877905731/Innocence/releases/download/v1.2.0/SHA256SUMS.txt) · [Changelog](CHANGELOG.md)
+[Release notes](https://github.com/2877905731/Innocence/releases/tag/v1.2.1) · [SHA256 checksums](https://github.com/2877905731/Innocence/releases/download/v1.2.1/SHA256SUMS.txt) · [Changelog](CHANGELOG.md)
+
+v1.2.1 fixes Android glass reflections, clock-handle gestures, and launcher icon sizing, and adds daily slogans across both platforms. Android retains the v1.2.0 release signature and supports an in-place upgrade that preserves local data.
 
 Choose a language and explicitly enter offline mode on first launch. Android supports daily plans with a 24-hour clock picker, focus, statistics, memos, and local settings. Data stays on the device and is removed by uninstalling or clearing app data. Earlier development APKs use a different signature and cannot be upgraded directly. Physical-device checks, complete mobile month/year planning, and online synchronization remain in progress.
 
