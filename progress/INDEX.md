@@ -622,3 +622,10 @@ checkpoints:
     status: complete
     path: progress/0087__20261003__P01__DONE__android-month-year-mobile-plans.md
     title: "Android月计划与年度任务独立手机页及离线保存恢复验证"
+  - sequence: "0088"
+    created_at: "2026-10-04T01:20:34+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0088__20261004__P01__DONE__v1.2.2-patch-release.md
+    title: "v1.2.2双端离线小版本正式发布、资产下载与升级核验"
