@@ -1,3 +1,6 @@
+import 'package:innocence_flutter/features/plans/presentation/pages/android_plans_view.dart';
+import 'package:innocence_flutter/features/plans/domain/models/month_plan_overview.dart';
+import 'package:innocence_flutter/features/plans/domain/models/annual_plan_overview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:innocence_flutter/app/app_language.dart';
@@ -32,6 +35,20 @@ Widget _app({
         timezone: 'Asia/Shanghai',
       ),
       todayPlan: todayPlan ?? TodayPlan.empty(),
+      monthPlanOverview: MonthPlanOverview.empty(),
+      annualPlanOverview: AnnualPlanOverview.empty(),
+      planArchives: const [],
+      planActions: AndroidPlanActions(
+        loadMonth: (_) async {},
+        loadYear: (_) async {},
+        loadDate: (date) async => TodayPlan.empty(date),
+        saveDate: (_) async => true,
+        saveArchive: (_, __) async => true,
+        deleteArchive: (_) async {},
+        applyArchive: (_, __, {required strategy}) async {},
+        saveAnnual: (_) async => true,
+        deleteAnnual: (_) async {},
+      ),
       focusSession: focusSession ?? FocusSession.empty(),
       checkInStatus: CheckInStatus.empty(),
       teamOverview: TeamOverview.empty(),

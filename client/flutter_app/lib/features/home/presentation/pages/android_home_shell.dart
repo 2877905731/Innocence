@@ -1,6 +1,10 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:innocence_flutter/features/plans/presentation/pages/android_plans_view.dart';
+import 'package:innocence_flutter/features/plans/domain/models/month_plan_overview.dart';
+import 'package:innocence_flutter/features/plans/domain/models/annual_plan_overview.dart';
+import 'package:innocence_flutter/features/plans/domain/models/weekly_plan_template.dart';
 import 'package:flutter/material.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
@@ -27,6 +31,10 @@ class AndroidHomeShell extends StatefulWidget {
     required this.language,
     required this.profile,
     required this.todayPlan,
+    required this.monthPlanOverview,
+    required this.annualPlanOverview,
+    required this.planArchives,
+    required this.planActions,
     required this.focusSession,
     required this.checkInStatus,
     required this.teamOverview,
@@ -55,6 +63,10 @@ class AndroidHomeShell extends StatefulWidget {
   final AppLanguage language;
   final UserProfile profile;
   final TodayPlan todayPlan;
+  final MonthPlanOverview monthPlanOverview;
+  final AnnualPlanOverview annualPlanOverview;
+  final List<WeeklyPlanTemplate> planArchives;
+  final AndroidPlanActions planActions;
   final FocusSession focusSession;
   final CheckInStatus checkInStatus;
   final TeamOverview teamOverview;
@@ -486,12 +498,6 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
                   : _text('弹性任务', 'Flexible task')),
             ),
           ),
-      const SizedBox(height: 8),
-      Text(
-        _text('月计划和年度任务的独立手机页面仍在重建。',
-            'Dedicated mobile month and year views are still being rebuilt.'),
-        style: Theme.of(context).textTheme.bodySmall,
-      ),
     ];
   }
 
@@ -703,7 +709,20 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.refresh_rounded),
-              onPressed: widget.isBusy ? null : widget.onRefresh,
+              onPressed: widget.isBusy
+                  ? null
+                  : () async {
+                      final month = widget.monthPlanOverview.month;
+                      final year = widget.annualPlanOverview.year;
+                      await widget.onRefresh();
+                      if (!mounted ||
+                          _destination != AndroidHomeDestination.plans) {
+                        return;
+                      }
+                      await widget.planActions.loadMonth(month);
+                      if (!mounted) return;
+                      await widget.planActions.loadYear(year);
+                    },
             ),
           ],
         ),
@@ -711,26 +730,42 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 640),
-              child: ListView(
-                key: ValueKey('android-${_destination.name}-content'),
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
-                children: [
-                  if (widget.bannerMessage != null) ...[
-                    _themedCard(
-                      ListTile(
-                        title: Text(widget.bannerMessage!),
-                        trailing: IconButton(
-                          tooltip: _text('关闭提示', 'Dismiss notice'),
-                          icon: const Icon(Icons.close_rounded),
-                          onPressed: widget.onClearBanner,
-                        ),
-                      ),
+              child: _destination == AndroidHomeDestination.plans
+                  ? AndroidPlansView(
+                      key: ValueKey(
+                          'plans-${widget.profile.localProfileId}-${widget.profile.userNo}'),
+                      language: widget.language,
+                      month: widget.monthPlanOverview,
+                      annual: widget.annualPlanOverview,
+                      archives: widget.planArchives,
+                      todayPlan: widget.todayPlan,
+                      actions: widget.planActions,
+                      isBusy: widget.isBusy,
+                      isOffline: widget.isOfflineMode,
+                      dayContent: _plansContent,
+                      bannerMessage: widget.bannerMessage,
+                      onClearBanner: widget.onClearBanner,
+                    )
+                  : ListView(
+                      key: ValueKey('android-${_destination.name}-content'),
+                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+                      children: [
+                        if (widget.bannerMessage != null) ...[
+                          _themedCard(
+                            ListTile(
+                              title: Text(widget.bannerMessage!),
+                              trailing: IconButton(
+                                tooltip: _text('关闭提示', 'Dismiss notice'),
+                                icon: const Icon(Icons.close_rounded),
+                                onPressed: widget.onClearBanner,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                        ..._destinationContent(),
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                  ],
-                  ..._destinationContent(),
-                ],
-              ),
             ),
           ),
         ),

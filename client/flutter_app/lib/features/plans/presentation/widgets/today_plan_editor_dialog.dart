@@ -28,6 +28,7 @@ class TodayPlanEditorDialog extends StatefulWidget {
     super.key,
     required this.initialPlan,
     this.onSave,
+    this.onSaveResult,
     this.onSaveArchive,
     this.onSaveAsArchive,
     this.archiveMode = false,
@@ -36,6 +37,7 @@ class TodayPlanEditorDialog extends StatefulWidget {
 
   final TodayPlan initialPlan;
   final Future<void> Function(TodayPlan plan)? onSave;
+  final Future<bool> Function(TodayPlan plan)? onSaveResult;
   final Future<bool> Function(TodayPlan plan)? onSaveArchive;
   final Future<bool> Function(String archiveName, TodayPlan plan)?
       onSaveAsArchive;
@@ -501,12 +503,36 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
       }
       return;
     }
-    if (onSave == null) {
+    if (onSave == null && widget.onSaveResult == null) {
       Navigator.of(context).pop(result);
       return;
     }
     setState(() => _saving = true);
-    await onSave(result);
+    try {
+      var saved = true;
+      if (widget.onSaveResult != null) {
+        saved = await widget.onSaveResult!(result);
+      } else {
+        await onSave!(result);
+      }
+      if (!mounted) return;
+      if (!saved) {
+        setState(() {
+          _saving = false;
+          _validationMessage = _text('计划未保存，草稿已保留，请重试。',
+              'Plan not saved. Your draft is kept; please retry.');
+        });
+        return;
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _saving = false;
+        _validationMessage = _text('计划未保存，草稿已保留，请重试。',
+            'Plan not saved. Your draft is kept; please retry.');
+      });
+      return;
+    }
     if (!mounted) {
       return;
     }
@@ -518,6 +544,7 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
       _saving = false;
       _dirty = false;
       _savedAt = DateTime.now();
+      _validationMessage = null;
     });
   }
 
@@ -728,7 +755,8 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (widget.onSave != null) ...[
+                      if ((widget.onSave != null ||
+                          widget.onSaveResult != null)) ...[
                         Text(
                           _dirty
                               ? _text('有未保存更改', 'Unsaved changes')
@@ -970,7 +998,8 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
                   const SizedBox(height: 14),
                   Row(
                     children: [
-                      if (widget.onSave != null)
+                      if ((widget.onSave != null ||
+                          widget.onSaveResult != null))
                         Text(
                           _dirty
                               ? _text('有未保存更改', 'Unsaved changes')
@@ -982,7 +1011,9 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
                                     ),
                           style: textTheme.bodySmall,
                         ),
-                      if (widget.onSave != null) const SizedBox(width: 12),
+                      if ((widget.onSave != null ||
+                          widget.onSaveResult != null))
+                        const SizedBox(width: 12),
                       TextButton(
                         onPressed: _pendingStartSlot == null
                             ? null

@@ -665,10 +665,10 @@ class SessionController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> saveTodayPlan(TodayPlan plan) async {
+  Future<bool> saveTodayPlan(TodayPlan plan) async {
     final ownerScope = localOwnerScope;
     if (isOffline && ownerScope != null) {
-      await _runBusyAction(() async {
+      return _runBusyAction(() async {
         final savedPlan = await _offlineStore.saveDailyPlan(ownerScope, plan);
         if (savedPlan.planDate == _todayPlan.planDate) {
           _todayPlan = savedPlan;
@@ -698,14 +698,13 @@ class SessionController extends ChangeNotifier {
       },
           fallbackMessage:
               _message('本地计划保存失败。', 'Failed to save the local plan.'));
-      return;
     }
     final currentSession = _session;
     if (currentSession == null) {
-      return;
+      return false;
     }
 
-    await _runBusyAction(() async {
+    return _runBusyAction(() async {
       final savedPlan = await _studyPlanApi.saveTodayPlan(currentSession, plan);
       final checkInStatus = await _checkInApi.getTodayStatus(currentSession);
       final statsOverview = await _statsApi.getOverview(
@@ -3532,10 +3531,10 @@ class SessionController extends ChangeNotifier {
   Future<void> loadNextYear() =>
       loadAnnualOverview(_annualPlanOverview.year + 1);
 
-  Future<void> saveAnnualSegment(AnnualPlanSegment segment) async {
+  Future<bool> saveAnnualSegment(AnnualPlanSegment segment) async {
     final ownerScope = localOwnerScope;
     if (isOffline && ownerScope != null) {
-      await _runBusyAction(() async {
+      return _runBusyAction(() async {
         _annualPlanOverview =
             await _offlineStore.saveAnnualSegment(ownerScope, segment);
         _bannerMessage = _message(
@@ -3545,13 +3544,12 @@ class SessionController extends ChangeNotifier {
       },
           fallbackMessage:
               _message('保存本机年度任务失败。', 'Failed to save the local annual task.'));
-      return;
     }
     final currentSession = _session;
     if (currentSession == null) {
-      return;
+      return false;
     }
-    await _runBusyAction(() async {
+    return _runBusyAction(() async {
       _annualPlanOverview =
           await _studyPlanApi.saveAnnualSegment(currentSession, segment);
       _bannerMessage = _message('年度任务已保存。', 'Annual task saved.');
@@ -3664,7 +3662,7 @@ class SessionController extends ChangeNotifier {
     );
   }
 
-  Future<void> _runBusyAction(
+  Future<bool> _runBusyAction(
     Future<void> Function() action, {
     String fallbackMessage = '',
   }) async {
@@ -3676,10 +3674,13 @@ class SessionController extends ChangeNotifier {
 
     try {
       await action();
+      return true;
     } on ApiException catch (error) {
       _bannerMessage = error.message;
+      return false;
     } catch (_) {
       _bannerMessage = resolvedFallbackMessage;
+      return false;
     } finally {
       _isBusy = false;
       notifyListeners();

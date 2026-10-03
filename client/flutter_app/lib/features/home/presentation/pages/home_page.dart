@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:innocence_flutter/features/plans/presentation/pages/android_plans_view.dart';
 import 'package:flutter/material.dart';
 import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 import 'package:innocence_flutter/app/team_workspace_snapshot.dart';
@@ -651,7 +652,7 @@ class HomePage extends StatelessWidget {
     String description,
   }) onReportTeamChatMessage;
   final Future<TeamWorkspaceSnapshot?> Function() onLoadTeamWorkspaceSnapshot;
-  final Future<void> Function(TodayPlan plan) onSaveTodayPlan;
+  final Future<bool> Function(TodayPlan plan) onSaveTodayPlan;
   final Future<TodayPlan?> Function(String planDate) onLoadPlanByDate;
   final WeekPlanOverview weekPlanOverview;
   final MonthPlanOverview monthPlanOverview;
@@ -678,7 +679,7 @@ class HomePage extends StatelessWidget {
     List<String> planDates, {
     required PlanApplyStrategy strategy,
   }) onApplyDayTemplateToDates;
-  final Future<void> Function(AnnualPlanSegment segment) onSaveAnnualSegment;
+  final Future<bool> Function(AnnualPlanSegment segment) onSaveAnnualSegment;
   final Future<void> Function(AnnualPlanSegment segment) onDeleteAnnualSegment;
   final Future<bool> Function(String templateName, TodayPlan sourcePlan)
       onSavePlanAsWeeklyTemplate;
@@ -711,7 +712,7 @@ class HomePage extends StatelessWidget {
       builder: (context) {
         return TodayPlanEditorDialog(
           initialPlan: todayPlan,
-          onSave: onSaveTodayPlan,
+          onSaveResult: onSaveTodayPlan,
           onSaveAsArchive: onSavePlanAsWeeklyTemplate,
         );
       },
@@ -819,7 +820,7 @@ class HomePage extends StatelessWidget {
       builder: (context) {
         return TodayPlanEditorDialog(
           initialPlan: plan,
-          onSave: onSaveTodayPlan,
+          onSaveResult: onSaveTodayPlan,
           onSaveAsArchive: onSavePlanAsWeeklyTemplate,
         );
       },
@@ -1048,6 +1049,20 @@ class HomePage extends StatelessWidget {
         onRefresh: onRefresh,
         onLogout: onLogout,
         onOpenPlanEditor: () => _openEditor(context),
+        monthPlanOverview: monthPlanOverview,
+        annualPlanOverview: annualPlanOverview,
+        planArchives: weeklyTemplates,
+        planActions: AndroidPlanActions(
+          loadMonth: onLoadMonthOverview,
+          loadYear: onLoadAnnualOverview,
+          loadDate: onLoadPlanByDate,
+          saveDate: onSaveTodayPlan,
+          saveArchive: onSavePlanAsWeeklyTemplate,
+          deleteArchive: onDeleteWeeklyTemplate,
+          applyArchive: onApplyDayTemplateToDates,
+          saveAnnual: onSaveAnnualSegment,
+          deleteAnnual: onDeleteAnnualSegment,
+        ),
         onToggleTodayPlanItem: onToggleTodayPlanItem,
         onStartFocus: () => _openFocusSessionDialog(context),
         onToggleFocusPause: onToggleFocusPause,

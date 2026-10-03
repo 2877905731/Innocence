@@ -12,7 +12,7 @@ baseline:
 android_track:
   status: in_progress
   plan_path: docs/planning/Innocence-Android版本实施规划.md
-  current_step: "v1.2.1本机离线修正发行完成，同发行签名/无联网权限/API36从正式v1.2.0升级保留有证据；实体设备/OEM/Vulkan、SDK许可、完整手机详情与长时间恢复仍待补，A0–A5不自动通过"
+  current_step: "正式发行仍为v1.2.1；0087已补独立Android月/年手机页，108项全量与9项最终专项/analyze/Debug离线构建通过，API36双主题/键盘/多日套用/年度进度/吸顶横滑及冷启动SQLite保留核对成功；尚未进入正式更新包。实体设备/OEM/Vulkan、SDK许可、其余手机详情与长期恢复待补，A0–A5不自动通过"
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 invariants:
