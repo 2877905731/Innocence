@@ -8,11 +8,11 @@ baseline:
   runtime: "Flutter + Java 21 + Spring Boot 3.3.2 + MyBatis + MySQL 8 + Redis"
   current_phase: P01
   current_gate: G01
-  evidence: "2026-10-02 正式发布v1.2.1+6，2026-10-03核对公开/latest及四项下载（0086）：整合0084玻璃采样/圆盘触控/每日标语和0085图标填充纠正，Windows安装器/便携包及同发行签名Android本机离线APK均公开，4/4摘要匹配且下载HEAD200。analyze无问题、99项全量/8项离线专项通过；API36飞行模式下从正式v1.2.0覆盖升级/冷启动，本机资料与05:30–09:00计划保留，标语/玻璃首页/图标核对。v1.2.0核心离线基线继续有效；Windows未签名，多DPI/实体手机/OEM/Vulkan与真实同步待验收，P01/G01未因此通过"
+  evidence: "2026-10-04 发布v1.2.2+7（0088）：Android月计划/年度任务进入正式离线包，Windows安装器/便携包同源更新；Flutter analyze无问题，108项全量与4项离线专项通过。三项资产SHA256重算一致；APK v2签名证书与前版相同、versionCode7/versionName1.2.2、minSDK24/target36、三ABI、无INTERNET权限。API36飞行模式从正式v1.2.1升级并冷启动，同本机资料及QA每日计划保留，新月历显示旧计划，年度页可打开。实体设备/OEM/Vulkan、Windows多DPI和真实同步仍待验收，P01/G01未因此通过"
 android_track:
   status: in_progress
   plan_path: docs/planning/Innocence-Android版本实施规划.md
-  current_step: "正式发行仍为v1.2.1；0087已补独立Android月/年手机页，108项全量与9项最终专项/analyze/Debug离线构建通过，API36双主题/键盘/多日套用/年度进度/吸顶横滑及冷启动SQLite保留核对成功；尚未进入正式更新包。实体设备/OEM/Vulkan、SDK许可、其余手机详情与长期恢复待补，A0–A5不自动通过"
+  current_step: "v1.2.2+7双端更新已发行，Android月/年独立手机页正式随包提供。0088记录108项全量、4项离线专项/analyze、双端发布构建、签名/权限/摘要及API36正式1.2.1覆盖升级冷启动保留；此前0087的月年功能与SQLite验证继续有效。实体设备/OEM/Vulkan、其他手机详情、真实同步与长期恢复待补，A0–A5不自动通过"
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 invariants:

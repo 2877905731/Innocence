@@ -42,7 +42,7 @@ read_order:
 ```yaml
 project_summary: "Innocence 是面向学习、自律、陪伴和团队互助的双端产品（Flutter 手机端 + 桌面端），15 个产品模块已全部封板，第一版按 MVP 范围开发。前端 UI 全面重写；Windows 四主题并存可切换，采用大/中/小自适应画布 + 主动悬浮球；Android 保留 Material 3 交互组件，同时按用户新决定立即应用简约白色与液态玻璃两套视觉。"
 data_owner: "Innocence 自有数据；用户数据归用户，由 Innocence 服务托管"
-current_milestone: "P01/G01：v1.2.1+6 双端修正小版本已正式发布，含 Windows 安装器/便携包与同发行签名 Android 本机离线 APK；整合玻璃采样、圆盘触控、每日标语和图标填充纠正，API36从v1.2.0升级/冷启动保留核对，四项公开下载与摘要通过；Windows视觉矩阵、Android实体设备/OEM/Vulkan与真实联网同步仍待验收"
+current_milestone: "P01/G01：v1.2.2+7 双端更新已正式发布，新增 Android 月计划与年度任务独立手机页，含 Windows 安装器/便携包及同发行签名 Android 本机离线 APK；108项全量、4项离线专项、摘要/签名/权限核对通过，API36从v1.2.1正式版覆盖升级并冷启动保留本机资料；Windows视觉矩阵、Android实体设备/OEM/Vulkan与真实联网同步仍待验收"
 ```
 
 ## invariants

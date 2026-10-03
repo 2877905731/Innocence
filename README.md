@@ -21,18 +21,18 @@
 
 Innocence 当前以 Flutter + Spring Boot 为主线，覆盖 Windows 桌面端与移动端。
 
-## 下载 v1.2.1
+## 下载 v1.2.2
 
 | 平台 | 下载 | 范围 |
 |---|---|---|
-| Windows x64 | [安装器](https://github.com/2877905731/Innocence/releases/download/v1.2.1/Innocence-v1.2.1-windows-x64-setup.exe) · [便携 ZIP](https://github.com/2877905731/Innocence/releases/download/v1.2.1/Innocence-v1.2.1-windows-x64-portable.zip) | 桌面版，安装器尚未代码签名 |
-| Android 7.0+ | [本机离线 APK](https://github.com/2877905731/Innocence/releases/download/v1.2.1/Innocence-v1.2.1-android-offline.apk) | 正式发行签名；本次不开放登录与联网功能 |
+| Windows x64 | [安装器](https://github.com/2877905731/Innocence/releases/download/v1.2.2/Innocence-v1.2.2-windows-x64-setup.exe) · [便携 ZIP](https://github.com/2877905731/Innocence/releases/download/v1.2.2/Innocence-v1.2.2-windows-x64-portable.zip) | 桌面版，安装器尚未代码签名 |
+| Android 7.0+ | [本机离线 APK](https://github.com/2877905731/Innocence/releases/download/v1.2.2/Innocence-v1.2.2-android-offline.apk) | 正式发行签名；含月计划与年度任务，本次不开放联网功能 |
 
-[发布说明](https://github.com/2877905731/Innocence/releases/tag/v1.2.1) · [SHA256 校验清单](https://github.com/2877905731/Innocence/releases/download/v1.2.1/SHA256SUMS.txt) · [更新日志](CHANGELOG.md)
+[发布说明](https://github.com/2877905731/Innocence/releases/tag/v1.2.2) · [SHA256 校验清单](https://github.com/2877905731/Innocence/releases/download/v1.2.2/SHA256SUMS.txt) · [更新日志](CHANGELOG.md)
 
-v1.2.1 修正 Android 玻璃反射、圆盘手柄误滚动和图标大小，补齐双端每日标语；Android 沿用 v1.2.0 发行签名，可直接覆盖正式版保留本机资料。
+v1.2.2 为 Android 补齐独立月计划与年度任务页面，沿用 v1.2.1 正式发行签名，可直接覆盖正式版保留本机资料。
 
-Android 首次进入时选择语言并确认使用本机离线模式，可使用短计划圆盘选时、专注、统计、备忘录与本机设置。资料仅存设备，卸载／清除数据会丢失；此前开发 Debug APK 与正式版签名不同，不能直接覆盖。实体手机、完整月／年计划手机体验与联网同步仍待后续验收。
+Android 首次进入时选择语言并确认使用本机离线模式，可使用短计划圆盘选时、月历和多日套用、年度任务与子任务、专注、统计、备忘录及本机设置。资料仅存设备，卸载／清除数据会丢失；此前开发 Debug APK 与正式版签名不同，不能直接覆盖。实体手机/OEM/Vulkan和联网同步仍待后续验收。
 
 ## 当前状态
 

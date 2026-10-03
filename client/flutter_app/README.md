@@ -78,7 +78,7 @@ pwsh -File windows/package_release.ps1
 
 v1.2.0 首次发行 Android 本机离线版。`INNOCENCE_OFFLINE_ONLY=true` 同时控制专用离线入口、禁止恢复在线会话、请求层拦截和 Manifest 移除 `INTERNET` 权限。普通开发及 Windows 构建保留现有联网路径。
 
-v1.2.1+6 延续该发行范围与签名，修正玻璃纹理、圆盘触控和启动图标，并补齐双端每日标语；同签名覆盖 v1.2.0 正式版保留本机资料。
+v1.2.2+7 延续该发行范围与签名，为 Android 补齐独立月计划与年度任务手机页；同签名覆盖此前正式版保留本机资料。
 
 ```powershell
 flutter pub get
@@ -91,7 +91,7 @@ pwsh -File android/package_release.ps1
 
 同一 applicationId `com.innocence.app.innocence_flutter` 的后续升级必须沿用首次发行密钥，并递增 versionCode。签名材料应由项目所有者另行安全备份；DPAPI 文件只能由对应 Windows 用户解密，迁移构建机时须通过安全方式提供上述变量。开发版 Debug 签名不同，无法覆盖正式版；本机数据不能因验收而静默清除。
 
-本次 Android 仅开放本机能力；登录、陪伴、收件箱、云同步与推送后续接入。完整月／年计划手机页面、实体手机和长期运行验收仍有待办。
+本次 Android 仅开放本机能力；登录、陪伴、收件箱、云同步与推送后续接入。月／年计划独立手机页已有离线实现；实体手机/OEM/Vulkan、其他详情页和长期运行验收仍有待办。
 
 ## 前端协作注意事项
 
