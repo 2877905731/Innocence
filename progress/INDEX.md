@@ -608,3 +608,10 @@ checkpoints:
     status: complete
     path: progress/0085__20261002__P01__CORRECTION__android-adaptive-launcher-icon-fill.md
     title: "Android自适应启动图标留白与填充比例纠正"
+  - sequence: "0086"
+    created_at: "2026-10-03T16:20:38+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0086__20261003__P01__DONE__v1.2.1-patch-release.md
+    title: "v1.2.1双端修正小版本正式发布与升级下载核对"

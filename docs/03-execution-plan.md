@@ -8,11 +8,11 @@ baseline:
   runtime: "Flutter + Java 21 + Spring Boot 3.3.2 + MyBatis + MySQL 8 + Redis"
   current_phase: P01
   current_gate: G01
-  evidence: "2026-10-01 正式发布 v1.2.0+5（0083）：两主题双端覆盖、玻璃折射/弹层、Android三点侧栏与短计划圆盘；Windows安装器/便携包及独立签名Android本机离线APK已公开，四项资产摘要全匹配、下载HEAD200。analyze无问题、93项全量/8项离线编译恢复专项通过；API36断网安装、计划/专注/备忘录、冷启动/覆盖保留与两主题运行子集通过。既有离线身份/SQLite/outbox、任务存档/独立年度板和Windows自适应/托盘逻辑保留。Windows安装器未签名；多尺寸/多DPI、Android实体手机与真实同步HTTP仍待验收，项目P01/G01未因此通过"
+  evidence: "2026-10-02 正式发布v1.2.1+6，2026-10-03核对公开/latest及四项下载（0086）：整合0084玻璃采样/圆盘触控/每日标语和0085图标填充纠正，Windows安装器/便携包及同发行签名Android本机离线APK均公开，4/4摘要匹配且下载HEAD200。analyze无问题、99项全量/8项离线专项通过；API36飞行模式下从正式v1.2.0覆盖升级/冷启动，本机资料与05:30–09:00计划保留，标语/玻璃首页/图标核对。v1.2.0核心离线基线继续有效；Windows未签名，多DPI/实体手机/OEM/Vulkan与真实同步待验收，P01/G01未因此通过"
 android_track:
   status: in_progress
   plan_path: docs/planning/Innocence-Android版本实施规划.md
-  current_step: "v1.2.0本机离线发行子集完成，正式签名/无联网权限/独立API36核心流程及覆盖保留有证据；实体设备/SDK许可、完整手机详情与长时间恢复仍待补，A0–A5不自动通过"
+  current_step: "v1.2.1本机离线修正发行完成，同发行签名/无联网权限/API36从正式v1.2.0升级保留有证据；实体设备/OEM/Vulkan、SDK许可、完整手机详情与长时间恢复仍待补，A0–A5不自动通过"
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 invariants:
