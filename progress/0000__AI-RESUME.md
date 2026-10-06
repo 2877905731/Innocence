@@ -3,14 +3,15 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-07"
-last_resumed_at: "2026-10-07T00:44:54+08:00"
-latest_checkpoint: "0105"
-next_sequence: "0106"
+last_resumed_at: "2026-10-07T00:54:24+08:00"
+latest_checkpoint: "0106"
+next_sequence: "0107"
 current_phase: P01
 current_gate: G01
-state: "harmonyos_preview_build_and_publication_in_progress"
-current_goal: "用户追问鸿蒙为何未发布，纠正仅沿双端正式流程的范围理解：补发 v1.2.3-harmonyos-preview.1 独立预览，重建 ARM64/x64 未签名 Debug HAP、核对包/原生启动并上传说明及摘要；不冒称可直接安装到真实平板。0105已记录正式双端 v1.2.3。真机 Profile/签名、输入法/业务恢复与 H5/G01 继续待。"
+state: "harmonyos_preview_published_physical_signing_and_recovery_pending"
+current_goal: "0106已补发鸿蒙 v1.2.3-harmonyos-preview.1 独立未签名Debug预览：Release#404950703公开/预发布，ARM64/x64+说明+SHA256四资产摘要与匿名下载通过；源码/注释标签同步，新x64原生安装启动/进程冷启动与PC全屏通过。实体平板不可直接安装，用户USB/授权后需设备Profile与签名。输入法错误2条/玻璃编辑及业务保存恢复、HUKS/槽位/联网和H5/G01仍待；Windows/Android正式latest=v1.2.3。"
 current_baseline:
+  - "2026-10-07 鸿蒙预览已公开（0106）：v1.2.3-harmonyos-preview.1/Release#404950703，2未签名Debug HAP+说明+SHA256共4资产摘要及匿名HEAD200；源码0152a77/注释标签09e8dee精确同步，正式latest仍v1.2.3。原生ARM64/x64重建104.7/118.5秒，CRC/版本8/API/ELF/各113Dart一致性、10平板配置回归通过；新x64模拟器安装/进程冷启动/2800×1840 PC白色首页有原生证据。输入法12800008/9仍2条；真实平板Profile/签名、输入/业务恢复和完整H5/G01待，不可直接安装ARM64下载包。"
   - "2026-10-07 v1.2.3+8已正式发布（0105）：源码f7922f6/注释标签39b50dd，GitHub官方接口Git对象SHA精确保留/非force快进；Release#404930678公开/latest，4项摘要/正文及匿名下载200。188 Flutter/4平台条件跳过、19离线/73后端/4 DPAPI与正式双端产物通过；API36正式v1.2.2升级COLD1742ms，合成备忘录标题/正文/时间及本机身份恢复，错误筛选0。Android原发行证书/无INTERNET；鸿蒙调试源码同步，不发行HAP，原验收门禁仍待。"
   - "2026-10-07 v1.2.3+8发行准备：188 Flutter通过/4鸿蒙配置专属跳过，lib/test静态分析无问题，19离线专项/73后端/4原生DPAPI通过；Windows64.7秒/Inno11.984秒、Android121.8秒正式包构建，原发行证书/版本8/无INTERNET/三ABI和CRC/摘要核对通过。API36正式版覆盖与推送/公开资产仍在核验。鸿蒙仅源码同步版本、不发布未签名HAP，整体门禁仍待。"
   - "2026-10-06 鸿蒙原生运行（0104）：DevEco日志明确后台等y/N，独立工具读C盘许可而IDE已在F盘确认；仅工具Emulator26.0目录经检查移存旧47字节状态并建F盘Junction，CLI默认识别F盘实例，系统与HDC连接成功。x64最新版HAP安装成功/EntryAbility启动，API26/x86_64；PC全屏root2800×1840/四主题/玻璃进程冷启动恢复有原生证据。SQLite初始v6/17表/integrity ok，计划/任务行0，未宣称业务写入恢复。简约白原生输入QA_NATIVE/QA_TASK草稿；小艺输入法协议隐私页需用户亲自处理，未保存。玻璃编辑黑屏/12800008/9待复验，真机Profile/签名/HUKS/槽位/联网仍待。"
@@ -83,7 +84,7 @@ active_decisions:
 unfinished:
   - id: TODO-HARMONYOS-TABLET
     priority: P1
-    item: "0104已在官方API26/x64平板模拟器安装启动未签名HAP，PC全屏/四主题/Preferences冷启动和SQLite初始schema有证据。先由用户处理小艺输入法首次协议隐私页，再保存QA_NATIVE/QA_TASK并验证冷启动/SQL业务值；玻璃编辑黑屏及输入法12800008/9仍待复验。用户USB真机连接/调试Profile/签名、完整触控软键盘/恢复、HUKS/槽位/联网/发行仍待，整体H0-H5/G01未封板。"
+    item: "0106已公开1.2.3+8未签名ARM64/x64预览并复验新版模拟器安装/启动/进程冷启动和PC全屏；0104四主题/Preferences及SQLite初始证据保留。先由用户处理小艺输入法首次协议隐私页，再保存QA_NATIVE/QA_TASK并验证冷启动/SQL业务值；玻璃编辑黑屏及输入法12800008/9仍待复验。用户USB真机连接/调试Profile/签名、完整触控软键盘/恢复、HUKS/槽位/联网/发行仍待，整体H0-H5/G01未封板。"
     gate: HarmonyOS-H0-H5
   - id: TODO-AI-CHAT-LIVE-VERIFICATION
     priority: P1

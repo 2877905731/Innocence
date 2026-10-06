@@ -748,3 +748,10 @@ checkpoints:
     status: complete
     path: progress/0105__20261007__P01__DONE__v1.2.3-patch-release.md
     title: "v1.2.3双端小版本正式发布与覆盖升级核对"
+  - sequence: "0106"
+    created_at: "2026-10-07T00:54:24+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0106__20261007__P01__DONE__harmonyos-unsigned-preview-release.md
+    title: "鸿蒙平板1.2.3未签名开发预览独立发布，真机签名仍待"

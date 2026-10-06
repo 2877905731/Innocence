@@ -16,13 +16,13 @@ android_track:
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 harmonyos_tablet_track:
-  status: emulator_pc_shell_running_input_method_and_device_pending
+  status: unsigned_preview_published_physical_signing_and_recovery_pending
   plan_path: docs/planning/Innocence-鸿蒙平板版本实施规划.md
-  checkpoint: "0104"
+  checkpoint: "0106"
   user_scope: "Air系列平板/HarmonyOS 7，全屏复用PC页面；不做Windows窗口尺寸调整。0098先规划、0099恢复核对，用户随后明确开始制作；0100首批实现"
   order: [H0_toolchain_and_minimal_hap, H1_fullscreen_pc_shell, H2_offline_storage, H3_page_and_touch_parity, H4_online_contract_and_assistant, H5_device_and_release]
-  pending_decisions: "具体年款/型号与方向策略在H0核实；平板会话槽位在H4前确认；正式包联网范围与分发方式在H5前确认"
-  evidence_boundary: "0102：用户提供官方Windows26.0.0.851 ZIP，DevEco/SDK26.0.0.105/API26与缓存配置到F盘；HarmonyOS doctor项通过，四插件注册和ArkTS/原生ARM64完整编译通过，build -Unsigned exit0生成115144159字节Debug HAP，ZIP CRC/ARM64 ELF/元数据及摘要核对通过。0100宿主25双端/10平板离线回归仍有效。用户已完成DevEco登录，真实调试签名仍缺连接设备的Profile；0103核对API26/SP8镜像并创建F盘MatePad Air12预设/x64/2800×1840/360dpi。0104通过仅工具许可目录F盘重定向解决后台y/N等待，系统连接/x64 HAP安装启动、全屏PC与四主题、玻璃进程冷启动、SQLite初始v6/17表/integrity ok有证据。当前小艺输入法协议隐私页待用户、QA草稿未保存；业务恢复、真实平板调试签名及H0-H5/G01整体仍待；Debug声明INTERNET，不计正式离线发行包"
+  pending_decisions: "具体真实型号与方向策略继续核实；平板槽位在H4前确认；GitHub未签名开发预览已按用户授权分发，正式联网包范围及H5分发仍待实际签名和设备证据"
+  evidence_boundary: "0106独立鸿蒙开发预览Release#404950703公开，4资产摘要/匿名下载通过；两架构1.2.3+8未签名Debug完整编译、CRC/API/ELF/源码一致性和10宿主回归通过。新x64在API26模拟器安装/启动/进程冷启动、PC全屏2800×1840简约白首页有证据；旧0104四主题/Preferences/SQLite初始证据保留。输入法12800008/9仍2条，真实平板Profile/签名、输入与业务恢复、HUKS/槽位/联网及H5/G01仍待；Debug声明INTERNET，不计可直接安装的正式离线包"
 assistant_track:
   decision: "DEC-0050/0090采用B；DEC-0051/0092修正为自填API Key的全局聊天助手；DEC-0052/0093地址与密钥发现模型"
   status: byok_chat_discovery_implemented_fixture_verified_live_provider_and_device_pending
@@ -202,3 +202,7 @@ next_actions:
     inputs:
       - docs/planning/Innocence-Windows自适应桌面体验.md
 ---
+
+## 2026-10-07 鸿蒙预览已分发（0106）
+
+`v1.2.3-harmonyos-preview.1` / Release#404950703 已公开，4项资产摘要与匿名下载通过；两架构原生编译、10平板配置回归及新版x64安装/进程冷启动/PC全屏子项通过。当前为未签名Debug，实体平板仍需设备Profile/签名；输入法错误2条、玻璃编辑/业务恢复及H5/G01仍待。正式Windows/Android latest继续v1.2.3。
