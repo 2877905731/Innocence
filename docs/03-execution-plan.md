@@ -8,11 +8,11 @@ baseline:
   runtime: "Flutter + Java 21 + Spring Boot 3.3.2 + MyBatis + MySQL 8 + Redis"
   current_phase: P01
   current_gate: G01
-  evidence: "2026-10-07 v1.2.3+8正式发行准备：188 Flutter/4平台条件跳过、19离线专项、73后端及4 DPAPI通过；Windows安装器/便携包和Android同证书离线APK构建、版本/权限/CRC/SHA256核对通过，API36覆盖与公开发布待本轮记录。共享简约白/专注/Windows BYOK与鸿蒙调试源码随版本整合；鸿蒙未签名HAP不发布，G01及真实模型/HTTP/实体设备仍待"
+  evidence: "2026-10-07 v1.2.3+8正式发布（0105）：188 Flutter/4配置跳过、19离线/73后端/4 DPAPI，Windows/Android正式包版本/签名/权限/CRC/摘要通过；API36正式v1.2.2覆盖冷启动COLD1742ms，合成备忘录保留/错误筛选0；四项公开下载200。鸿蒙仅源码同步，G01及真实模型/HTTP/设备仍待"
 android_track:
   status: in_progress
   plan_path: docs/planning/Innocence-Android版本实施规划.md
-  current_step: "v1.2.3+8正式包已构建，沿用发行证书且无INTERNET；188 Flutter/19离线专项/73后端与摘要核对通过，当前补正式覆盖升级和公开下载。旧0088的v1.2.2证据按历史保留，实体设备/OEM/Vulkan/同步及A0–A5继续待"
+  current_step: "v1.2.3+8正式离线APK已发行，同证书/无INTERNET；0105记录正式v1.2.2覆盖升级冷启动备忘录保留与公开下载。实体设备/OEM/Vulkan/长期恢复/同步及A0–A5继续待"
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 harmonyos_tablet_track:

@@ -108,6 +108,10 @@ change_policy:
     - docs/planning/Innocence-AI智能助手B方案实施与契约.md
 ---
 
+## 2026-10-07 v1.2.3正式发行（0105）
+
+v1.2.3+8已公开（Release#404930678），Windows安装器/便携包及Android原证书离线APK和校验清单均可下载。188客户端（4配置跳过）/19离线/73后端/4 DPAPI与包结构摘要通过；API36正式v1.2.2覆盖COLD1742ms，合成备忘录三字段及数量保留。Windows BYOK为已实现但真实供应商待验功能；Android继续无INTERNET，鸿蒙只同步调试源码，输入/业务恢复/真机签名待。发行不关闭整体G01与设备/同步门禁。
+
 # 项目画像说明
 
 本文为 Innocence 项目特有规则的权威来源。产品细节以 `docs/planning/` 为详稿，治理规则以本文为准。

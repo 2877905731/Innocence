@@ -741,3 +741,10 @@ checkpoints:
     status: complete
     path: progress/0104__20261006__P01__DONE__harmonyos-emulator-install-and-pc-shell.md
     title: "鸿蒙模拟器HAP安装与全屏PC页面启动，四主题及原生存储初始化有证据"
+  - sequence: "0105"
+    created_at: "2026-10-07T00:38:13+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0105__20261007__P01__DONE__v1.2.3-patch-release.md
+    title: "v1.2.3双端小版本正式发布与覆盖升级核对"

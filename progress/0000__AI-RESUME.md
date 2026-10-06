@@ -3,14 +3,15 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-07"
-last_resumed_at: "2026-10-07T00:07:24+08:00"
-latest_checkpoint: "0104"
-next_sequence: "0105"
+last_resumed_at: "2026-10-07T00:38:13+08:00"
+latest_checkpoint: "0105"
+next_sequence: "0106"
 current_phase: P01
 current_gate: G01
-state: "v1_2_3_artifacts_verified_upgrade_and_publication_pending"
-current_goal: "用户授权推送并发布小版本：准备v1.2.3+8，整合0091–0104共享源码与文档，发行Windows安装器/便携包和沿用证书的Android本机离线APK；鸿蒙仅推送已核验子集的源码与调试状态，不上传未签名HAP。完成全量客户端/后端、离线门禁、正式产物/摘要/签名/覆盖升级与公开下载核对后发布。鸿蒙输入法/业务写入恢复/真机Profile与签名仍待用户，整体G01与真实模型/HTTP验收继续待，不因小版本发行完成而关闭。"
+state: "v1_2_3_published_harmonyos_and_live_verification_pending"
+current_goal: "0105已完成用户授权的小版本：v1.2.3+8源码与注释标签同步，Release#404930678公开/latest，四项匿名下载200/长度和资产摘要通过；188 Flutter/4配置跳过、19离线/73后端/4 DPAPI及API36正式v1.2.2覆盖冷启动合成备忘录保留。鸿蒙仅源码同步、不发布未签名HAP；原输入法/业务恢复/真机Profile与签名、真实模型/HTTP/同步及整体G01继续待。"
 current_baseline:
+  - "2026-10-07 v1.2.3+8已正式发布（0105）：源码f7922f6/注释标签39b50dd，GitHub官方接口Git对象SHA精确保留/非force快进；Release#404930678公开/latest，4项摘要/正文及匿名下载200。188 Flutter/4平台条件跳过、19离线/73后端/4 DPAPI与正式双端产物通过；API36正式v1.2.2升级COLD1742ms，合成备忘录标题/正文/时间及本机身份恢复，错误筛选0。Android原发行证书/无INTERNET；鸿蒙调试源码同步，不发行HAP，原验收门禁仍待。"
   - "2026-10-07 v1.2.3+8发行准备：188 Flutter通过/4鸿蒙配置专属跳过，lib/test静态分析无问题，19离线专项/73后端/4原生DPAPI通过；Windows64.7秒/Inno11.984秒、Android121.8秒正式包构建，原发行证书/版本8/无INTERNET/三ABI和CRC/摘要核对通过。API36正式版覆盖与推送/公开资产仍在核验。鸿蒙仅源码同步版本、不发布未签名HAP，整体门禁仍待。"
   - "2026-10-06 鸿蒙原生运行（0104）：DevEco日志明确后台等y/N，独立工具读C盘许可而IDE已在F盘确认；仅工具Emulator26.0目录经检查移存旧47字节状态并建F盘Junction，CLI默认识别F盘实例，系统与HDC连接成功。x64最新版HAP安装成功/EntryAbility启动，API26/x86_64；PC全屏root2800×1840/四主题/玻璃进程冷启动恢复有原生证据。SQLite初始v6/17表/integrity ok，计划/任务行0，未宣称业务写入恢复。简约白原生输入QA_NATIVE/QA_TASK草稿；小艺输入法协议隐私页需用户亲自处理，未保存。玻璃编辑黑屏/12800008/9待复验，真机Profile/签名/HUKS/槽位/联网仍待。"
   - "2026-10-06 鸿蒙镜像与设备准备（0103）：官方镜像7.0.0.107/SP8/API26，六主要镜像文件大小及F盘实例配置核对PASS。新建MatePad Air12预设/x64/2800×1840/360dpi/4GB RAM/6GB ROM，镜像和实例均位于F盘task-home。GUI启动进程无窗口，HDC目标0；CLI-start exit1提示服务协议，logZip失败，电脑HypervisorPresent=True但不能据此判断模拟器完整配置。computer-use launch_app未返回可操作窗口，已请求用户手动启动。未执行HAP安装/启动，H0/G01仍待；CLI诊断发现Windows用户目录47字节许可状态，未声称工具全部元数据均在F盘。"
