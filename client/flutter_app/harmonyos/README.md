@@ -1,6 +1,6 @@
 # Innocence 鸿蒙平板开发工程
 
-2026-10-07：v1.2.3+8 仅同步鸿蒙源码版本并随仓库推送；0104 运行证据对应先前 1.2.2+7 Debug HAP。此次正式下载资产只有 Windows 与 Android，不发布未签名 HAP，原输入法/业务恢复/真机签名待办继续保留。
+2026-10-07：[v1.2.3 鸿蒙平板开发预览 1](https://github.com/2877905731/Innocence/releases/tag/v1.2.3-harmonyos-preview.1) 单独提供 ARM64 平板与 x64 模拟器未签名 Debug HAP，应用版本 `1.2.3+8`；实体平板必须配置设备 Profile 并签名，输入法/业务恢复/真机验收仍待。Windows/Android 正式版为 v1.2.3；0104 的历史运行证据仍对应此前 1.2.2+7。详细范围与当前运行结果见[本次发布说明](../../../docs/releases/v1.2.3-harmonyos-preview.1.md)。
 
 用户于 2026-10-05 要求开始制作。平板复用 PC 工作台和四主题；当前原生宿主按横屏/反向横屏、沉浸式全屏配置，关闭 Windows 窗口控制、拖边、托盘和 Focus Orb。首轮构建强制本机模式，账号接口和 BYOK 请求不启用，等待设备槽位契约及原生密钥保险库接入。
 
@@ -67,14 +67,16 @@ flutter test --no-pub --dart-define=INNOCENCE_TARGET_PLATFORM=harmonyos `
 
 0102记录的2026-10-06首次x64模拟器包 `build -Unsigned -Architecture x64` exit 0/Hvigor156.6秒，现保留在 `build/harmonyos-h0/archive/0102/x64-unsigned.hap`，116763248 字节，SHA-256 `23bb2b3b6af57f23ce72da76014ec14f6bd5d66c4c04b8cff1527312a811b928`。ZIP CRC 与两份 x86_64 ELF 核对通过，ARM64 包单独保留。此结果仍是编译证据，不证明模拟器启动成功。
 
-2026-10-06随后补正式启动图标：源资源逐字节复用 `docs/design/logo/innocence-logo-v1-cutout.png`，DevEco生成512×512包内PNG，四份图标（两架构各app/entry）一致并已目视核对。两架构重建exit0：ARM64/Hvigor28.4秒/115600935字节/SHA-256 `6d686fccced019542e78a46f1732b0c90666ea6f14d579c9b9514ec701a4387e`；x64/Hvigor23.0秒/117220024字节/SHA-256 `06ff364610cae8b66ec8e9f2cf428af1d71c4e2c60225d60bd96f2573df17fdc`。最新输出仍为各自 `app` / `app-x64` 下的 `build/ohos/hap/entry-default-unsigned.hap`，清单文件更新，CRC/两架构原生库/各113共享Dart一致性通过；旧0102包及清单保留。
+2026-10-06随后补正式启动图标：源资源逐字节复用 `docs/design/logo/innocence-logo-v1-cutout.png`，DevEco生成512×512包内PNG，四份图标（两架构各app/entry）一致并已目视核对。两架构重建exit0：ARM64/Hvigor28.4秒/115600935字节/SHA-256 `6d686fccced019542e78a46f1732b0c90666ea6f14d579c9b9514ec701a4387e`；x64/Hvigor23.0秒/117220024字节/SHA-256 `06ff364610cae8b66ec8e9f2cf428af1d71c4e2c60225d60bd96f2573df17fdc`。该时点输出为各自 `app` / `app-x64` 下的 `build/ohos/hap/entry-default-unsigned.hap`，清单文件更新，CRC/两架构原生库/各113共享Dart一致性通过；旧0102包及清单保留。
 
 用户已完成 DevEco 登录。自动签名提示缺少设备 Profile；模拟器可跳过签名，真机需连接后生成调试 Profile。0103已核对下载好的HarmonyOS7.0.0.107/SP8/API26镜像，并创建官方MatePad Air12预设（2800×1840/360dpi/x64/4GB RAM/6GB ROM）；此预设不代表已确认用户真实平板型号。镜像位置为F盘`task-home/AppData/Local/Huawei/Sdk`，设备实例为`task-home/AppData/Local/Huawei/Emulator/deployed/MatePad Air 12`。
 
-下一步：用户处理当前小艺输入法首次协议/隐私页后，保存已有QA_NATIVE/QA_TASK草稿并验证SQLite业务写入/进程冷启动；复验玻璃编辑黑屏/输入法服务错误，再连接用户平板完成Profile与签名。后续完成触控矩阵、HUKS、设备槽位及联网契约。发行需经过 H5，当前没有发布授权。
+下一步：用户处理当前小艺输入法首次协议/隐私页后，保存已有QA_NATIVE/QA_TASK草稿并验证SQLite业务写入/进程冷启动；复验玻璃编辑黑屏/输入法服务错误，再连接用户平板完成Profile与签名。后续完成触控矩阵、HUKS、设备槽位及联网契约。用户已授权推送与小版本发布；当前仅分发明确标注未签名的开发预览。正式签名及真机验收继续经过 H5。
 
 0103启动诊断：设备管理器及直接GUI启动只有后台进程，没有可操作窗口；`hdc list targets` exit0/目标0，尚未执行HAP安装。官方`Emulator -start ... -bootMode coldboot` exit1并提示独立服务协议，`-logZip`提示日志收集失败；`HypervisorPresent=True`不能代替完整模拟器环境核验。computer-use桌面启动也未返回窗口，已请求用户手动点击设备管理器启动并提供状态或错误文字。当前原因未确定，不记H0运行通过。镜像与设备配置核验清单位于`build/harmonyos-h0/tablet-emulator-manifest.json`；两架构现有HAP的CRC/摘要/原生库和113共享Dart再次核对PASS。
 
 0104解决0103启动等待：IDE日志明确原生工具等`y/N`；原生工具默认读Windows用户许可目录，IDE已确认的同版本配置在F盘。检查C盘目录仅有本轮诊断生成的47字节状态后，保留旧目录并建立指向F盘的Junction，没有修改既有许可或隐私选择。模拟器随后启动并连接，`param get const.ohos.apiversion`为26、`uname -m`为x86_64；最新版x64 HAP安装成功，`aa start -b com.innocence.tablet.innocence_flutter -a EntryAbility`返回启动成功。原生App root为2800×1840全显示区域，首页、计划、设置及四主题有画面，液态玻璃经`aa force-stop/start`恢复。
 
 原生SQLite初始文件通过只读核对：user_version6、17表、integrity_check=ok，计划与任务行均为0，不能据此记为业务保存恢复完成。简约白通过鸿蒙`uitest uiInput inputText`输入QA_NATIVE/QA_TASK并添加灵活任务；草稿尚未保存，小艺输入法首次协议/隐私页已打开，待用户亲自选择。先前玻璃编辑出现黑屏与Flutter输入法12800008/12800009错误，需在输入法初始化完成后复验。原生画面在`build/qa/harmony-native`；运行清单`build/harmonyos-h0/harmony-runtime-manifest.json`明确业务恢复与真机签名为false。
+
+2026-10-07 两架构已按当前 `1.2.3+8` 源码重新构建，预览资产与清单位于忽略目录 `build/releases/v1.2.3-harmonyos-preview.1`；此前 0104 使用的两份图标更新 HAP 已原样保存在 `build/harmonyos-h0/archive/0104`，0102 旧包继续保留。新版本运行子项及剩余签名/业务门禁以本次发布说明和最新检查点为准。

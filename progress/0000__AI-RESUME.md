@@ -3,13 +3,13 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-07"
-last_resumed_at: "2026-10-07T00:38:13+08:00"
+last_resumed_at: "2026-10-07T00:44:54+08:00"
 latest_checkpoint: "0105"
 next_sequence: "0106"
 current_phase: P01
 current_gate: G01
-state: "v1_2_3_published_harmonyos_and_live_verification_pending"
-current_goal: "0105已完成用户授权的小版本：v1.2.3+8源码与注释标签同步，Release#404930678公开/latest，四项匿名下载200/长度和资产摘要通过；188 Flutter/4配置跳过、19离线/73后端/4 DPAPI及API36正式v1.2.2覆盖冷启动合成备忘录保留。鸿蒙仅源码同步、不发布未签名HAP；原输入法/业务恢复/真机Profile与签名、真实模型/HTTP/同步及整体G01继续待。"
+state: "harmonyos_preview_build_and_publication_in_progress"
+current_goal: "用户追问鸿蒙为何未发布，纠正仅沿双端正式流程的范围理解：补发 v1.2.3-harmonyos-preview.1 独立预览，重建 ARM64/x64 未签名 Debug HAP、核对包/原生启动并上传说明及摘要；不冒称可直接安装到真实平板。0105已记录正式双端 v1.2.3。真机 Profile/签名、输入法/业务恢复与 H5/G01 继续待。"
 current_baseline:
   - "2026-10-07 v1.2.3+8已正式发布（0105）：源码f7922f6/注释标签39b50dd，GitHub官方接口Git对象SHA精确保留/非force快进；Release#404930678公开/latest，4项摘要/正文及匿名下载200。188 Flutter/4平台条件跳过、19离线/73后端/4 DPAPI与正式双端产物通过；API36正式v1.2.2升级COLD1742ms，合成备忘录标题/正文/时间及本机身份恢复，错误筛选0。Android原发行证书/无INTERNET；鸿蒙调试源码同步，不发行HAP，原验收门禁仍待。"
   - "2026-10-07 v1.2.3+8发行准备：188 Flutter通过/4鸿蒙配置专属跳过，lib/test静态分析无问题，19离线专项/73后端/4原生DPAPI通过；Windows64.7秒/Inno11.984秒、Android121.8秒正式包构建，原发行证书/版本8/无INTERNET/三ABI和CRC/摘要核对通过。API36正式版覆盖与推送/公开资产仍在核验。鸿蒙仅源码同步版本、不发布未签名HAP，整体门禁仍待。"

@@ -27,6 +27,7 @@ Innocence is built with Flutter and Spring Boot and currently targets Windows de
 |---|---|---|
 | Windows x64 | [Installer](https://github.com/2877905731/Innocence/releases/download/v1.2.3/Innocence-v1.2.3-windows-x64-setup.exe) · [Portable ZIP](https://github.com/2877905731/Innocence/releases/download/v1.2.3/Innocence-v1.2.3-windows-x64-portable.zip) | Desktop edition; installer has no Authenticode signature |
 | Android 7.0+ | [Offline APK](https://github.com/2877905731/Innocence/releases/download/v1.2.3/Innocence-v1.2.3-android-offline.apk) | Dedicated release signature; improved focus layout; remains offline |
+| HarmonyOS tablet preview | [ARM64 tablet / x64 emulator HAPs](https://github.com/2877905731/Innocence/releases/tag/v1.2.3-harmonyos-preview.1) | Unsigned Debug; physical devices require a matching device profile and signing |
 
 [Release notes](https://github.com/2877905731/Innocence/releases/tag/v1.2.3) · [SHA256 checksums](https://github.com/2877905731/Innocence/releases/download/v1.2.3/SHA256SUMS.txt) · [Changelog](CHANGELOG.md)
 
@@ -43,7 +44,7 @@ Choose a language and explicitly enter offline mode on first launch. Android sup
 - Core interaction foundations for authentication, profiles, settings, memos, statistics, notifications, friends, and teams.
 - Backend business data is isolated by the currently authenticated user.
 - Windows chat supports model discovery from an address and key, plus confirmed local actions. Live-provider and complete device checks remain pending.
-- HarmonyOS tablet source shares the full-screen PC layout. Physical-device signing, input, and business-data recovery are pending; no production HAP is published.
+- HarmonyOS tablets have an [unsigned development preview](https://github.com/2877905731/Innocence/releases/tag/v1.2.3-harmonyos-preview.1) with the full-screen PC layout. Physical-device signing, input, and business-data recovery remain pending.
 
 ## Repository Layout
 

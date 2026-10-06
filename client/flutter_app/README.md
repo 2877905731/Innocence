@@ -108,3 +108,7 @@ pwsh -File android/package_release.ps1
 - 优先保证 Windows 桌面端体验可用
 - 再逐步补齐 Android 端适配
 - 在界面统一基础上继续推进真实功能联调
+
+## 鸿蒙平板开发预览
+
+[v1.2.3 开发预览 1](https://github.com/2877905731/Innocence/releases/tag/v1.2.3-harmonyos-preview.1) 提供 ARM64 平板和 x64 模拟器的未签名 Debug HAP。实体平板需设备 Profile 和签名，不能直接安装下载包；PC 全屏页面与四主题共用共享源码，原生工具链与流程见 [鸿蒙 README](harmonyos/README.md)。真机、输入法和业务恢复仍待验收。
