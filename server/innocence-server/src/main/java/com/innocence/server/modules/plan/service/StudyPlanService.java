@@ -61,11 +61,11 @@ public class StudyPlanService {
     public TodayPlanResponse getTodayPlan(Long userId, LocalDate planDate) {
         LocalDate normalizedPlanDate = normalizePlanDate(planDate);
         DailyPlan plan = studyPlanMapper.findDailyPlanByUserIdAndDate(userId, normalizedPlanDate);
-        if (plan == null) {
-            return emptyPlan(normalizedPlanDate);
-        }
-        List<DailyPlanItem> items = studyPlanMapper.findDailyPlanItemsByPlanId(plan.getId());
-        return buildPlanResponse(plan, items);
+        TodayPlanResponse response = plan == null ? emptyPlan(normalizedPlanDate)
+                : buildPlanResponse(plan, studyPlanMapper.findDailyPlanItemsByPlanId(plan.getId()));
+        Long revision = studyPlanMapper.findDayRevision(userId, normalizedPlanDate);
+        response.setDayRevision(revision == null ? 0 : revision);
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -229,6 +229,8 @@ public class StudyPlanService {
         List<TodayPlanItemRequest> requestItems = request.getItems() == null ? new ArrayList<>() : request.getItems();
         validateShortPlanItems(requestItems);
 
+        lockDay(userId, normalizedPlanDate);
+
         DailyPlan existingPlan = studyPlanMapper.findDailyPlanByUserIdAndDate(userId, normalizedPlanDate);
         boolean shouldClearPlan = requestItems.isEmpty() && (request.getPlanName() == null || request.getPlanName().isBlank());
 
@@ -237,7 +239,8 @@ public class StudyPlanService {
                 studyPlanMapper.deleteDailyPlanItemsByPlanId(existingPlan.getId());
                 studyPlanMapper.deleteDailyPlanById(existingPlan.getId());
             }
-            return emptyPlan(normalizedPlanDate);
+            studyPlanMapper.advanceDayRevision(userId, normalizedPlanDate);
+            return getTodayPlan(userId, normalizedPlanDate);
         }
 
         DailyPlan targetPlan = existingPlan;
@@ -270,6 +273,7 @@ public class StudyPlanService {
             studyPlanMapper.insertDailyPlanItem(item);
         }
 
+        studyPlanMapper.advanceDayRevision(userId, normalizedPlanDate);
         TodayPlanResponse response = getTodayPlan(userId, normalizedPlanDate);
         notificationService.createPlanCompletionNotifications(
                 userId,
@@ -279,6 +283,70 @@ public class StudyPlanService {
                 response.getTotalCount()
         );
         return response;
+    }
+
+    /** Common lock order: owner first, then date, including legacy saves and template imports. */
+    public long lockDay(Long userId, LocalDate date) {
+        studyPlanMapper.lockPlanningOwner(userId);
+        studyPlanMapper.ensureDayRevision(userId, date);
+        Long revision = studyPlanMapper.lockDayRevision(userId, date);
+        return revision == null ? 0 : revision;
+    }
+
+    public record AssistantAddition(TodayPlanResponse plan, List<DailyPlanItem> added, boolean createdPlan) {}
+
+    @Transactional
+    public AssistantAddition appendAssistantTasks(Long userId, LocalDate date, long expectedRevision,
+                                                  List<TodayPlanItemRequest> additions) {
+        long current = lockDay(userId, date);
+        if (current != expectedRevision) throw new BusinessException(4101, "日计划已变化，请重新生成或校验。");
+        DailyPlan plan = studyPlanMapper.findDailyPlanByUserIdAndDate(userId, date);
+        List<DailyPlanItem> existing = plan == null ? List.of() : studyPlanMapper.findDailyPlanItemsByPlanId(plan.getId());
+        List<TodayPlanItemRequest> combined = new ArrayList<>();
+        for (DailyPlanItem item : existing) {
+            TodayPlanItemRequest value = new TodayPlanItemRequest();
+            value.setTitle(item.getTitle()); value.setPlannedMinutes(item.getPlannedMinutes());
+            value.setStartSlot(item.getStartSlot()); value.setEndSlot(item.getEndSlot()); combined.add(value);
+        }
+        combined.addAll(additions); validateShortPlanItems(combined);
+        if (additions.isEmpty()) return new AssistantAddition(getTodayPlan(userId, date), List.of(), false);
+        boolean created = plan == null;
+        if (created) {
+            plan = new DailyPlan(); plan.setUserId(userId); plan.setPlanDate(date);
+            plan.setPlanName("Today"); plan.setPlanType("manual"); studyPlanMapper.insertDailyPlan(plan);
+        }
+        int order = existing.stream().mapToInt(DailyPlanItem::getSortOrder).max().orElse(-1) + 1;
+        List<DailyPlanItem> added = new ArrayList<>();
+        for (TodayPlanItemRequest request : additions) {
+            DailyPlanItem item = new DailyPlanItem(); item.setUserId(userId); item.setPlanId(plan.getId());
+            item.setTitle(request.getTitle().trim()); item.setStatus(0); item.setActualMinutes(0);
+            item.setStartSlot(request.getStartSlot()); item.setEndSlot(request.getEndSlot());
+            item.setPlannedMinutes((request.getEndSlot() - request.getStartSlot()) * 30);
+            item.setSortOrder(order++); studyPlanMapper.insertDailyPlanItem(item); added.add(item);
+        }
+        studyPlanMapper.advanceDayRevision(userId, date);
+        return new AssistantAddition(getTodayPlan(userId, date), List.copyOf(added), created);
+    }
+
+    @Transactional
+    public TodayPlanResponse undoAssistantTasks(Long userId, LocalDate date, long expectedRevision,
+                                               List<Long> itemIds, boolean createdPlan) {
+        if (lockDay(userId, date) != expectedRevision)
+            throw new BusinessException(4101, "日计划已变化，不能覆盖新修改撤销。");
+        DailyPlan plan = studyPlanMapper.findDailyPlanByUserIdAndDate(userId, date);
+        if (itemIds.isEmpty()) return getTodayPlan(userId, date);
+        if (plan == null) throw new BusinessException(4101, "待撤销任务已变化。");
+        List<DailyPlanItem> items = studyPlanMapper.findDailyPlanItemsByPlanId(plan.getId());
+        for (Long id : itemIds) {
+            DailyPlanItem item = items.stream().filter(value -> id.equals(value.getId())).findFirst()
+                    .orElseThrow(() -> new BusinessException(4101, "待撤销任务已变化。"));
+            if (item.getStatus() != 0 || item.getActualMinutes() > 0)
+                throw new BusinessException(4101, "任务已有完成或学习记录，无法直接撤销。");
+        }
+        for (Long id : itemIds) studyPlanMapper.deleteAssistantItem(userId, plan.getId(), id);
+        if (createdPlan && items.size() == itemIds.size()) studyPlanMapper.deleteDailyPlanById(plan.getId());
+        studyPlanMapper.advanceDayRevision(userId, date);
+        return getTodayPlan(userId, date);
     }
 
     @Transactional(readOnly = true)

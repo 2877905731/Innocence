@@ -7,6 +7,7 @@ class TodayPlan {
     required this.totalPlannedMinutes,
     required this.completedPlannedMinutes,
     required this.items,
+    this.dayRevision = 0,
   });
 
   final String planDate;
@@ -16,6 +17,7 @@ class TodayPlan {
   final int totalPlannedMinutes;
   final int completedPlannedMinutes;
   final List<TodayPlanItem> items;
+  final int dayRevision;
 
   factory TodayPlan.empty([String? planDate]) {
     return TodayPlan(
@@ -39,7 +41,8 @@ class TodayPlan {
     return TodayPlan(
       planDate: '${json['planDate'] ?? _todayDateString()}',
       planName: '${json['planName'] ?? 'Today'}',
-      completedCount: _toInt(json['completedCount'], fallback: _completedCount(items)),
+      completedCount:
+          _toInt(json['completedCount'], fallback: _completedCount(items)),
       totalCount: _toInt(json['totalCount'], fallback: items.length),
       totalPlannedMinutes: _toInt(
         json['totalPlannedMinutes'],
@@ -52,6 +55,7 @@ class TodayPlan {
             .fold(0, (sum, item) => sum + item.plannedMinutes),
       ),
       items: items,
+      dayRevision: _toInt(json['dayRevision']),
     );
   }
 
@@ -59,17 +63,16 @@ class TodayPlan {
 
   bool get hasScheduledItems => items.any((item) => item.hasSchedule);
 
-  List<TodayPlanItem> get scheduledItems => items
-      .where((item) => item.hasSchedule)
-      .toList()
-    ..sort((left, right) {
-      final startCompare = (left.startSlot ?? 999)
-          .compareTo(right.startSlot ?? 999);
-      if (startCompare != 0) {
-        return startCompare;
-      }
-      return left.sortOrder.compareTo(right.sortOrder);
-    });
+  List<TodayPlanItem> get scheduledItems =>
+      items.where((item) => item.hasSchedule).toList()
+        ..sort((left, right) {
+          final startCompare =
+              (left.startSlot ?? 999).compareTo(right.startSlot ?? 999);
+          if (startCompare != 0) {
+            return startCompare;
+          }
+          return left.sortOrder.compareTo(right.sortOrder);
+        });
 
   double get completionRatio {
     if (totalCount <= 0) {
@@ -112,6 +115,7 @@ class TodayPlan {
     String? planDate,
     String? planName,
     List<TodayPlanItem>? items,
+    int? dayRevision,
   }) {
     final nextItems = items ?? this.items;
     final nextCompletedCount = _completedCount(nextItems);
@@ -129,6 +133,7 @@ class TodayPlan {
       totalPlannedMinutes: nextTotalPlannedMinutes,
       completedPlannedMinutes: nextCompletedPlannedMinutes,
       items: nextItems,
+      dayRevision: dayRevision ?? this.dayRevision,
     );
   }
 

@@ -1,5 +1,11 @@
 # Innocence 数据库表结构草案
 
+## 2026-10-04 智能助手B扩展模型指针
+
+用户采用B。新增待实施模型：assistant_request、assistant_proposal、assistant_validation、assistant_execution、daily_plan_revision及ownerScope隔离的本机对等对象。唯一约束、修订/事务、幂等/撤销、保留与删除规则见`Innocence-AI智能助手B方案实施与契约.md`第7–8节。
+
+这是一组开发模型，不代表schema.sql或本地SQLite迁移已经完成。所有旧日计划写入口必须参与共享修订；执行数据与业务变更同事务。原业务任务不因清除聊天而删除，助手内容不写入日志。C调度与规则表不在本次扩展中。
+
 ## 1. 文档说明
 
 - 数据库类型：MySQL 8.x

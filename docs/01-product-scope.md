@@ -28,6 +28,11 @@ in_scope:
   - id: SCOPE-008
     capability: "UI 设计体系（信息架构、双端布局、Windows 四个并存可切换主题及每日艺术标语与季节图案、Android Material Design 3、组件体系）"
     done_when: "Windows 四主题切换生效并跨尺寸一致；Android 首版按 MD3 完成登录到二级页，不以四主题移动适配为门禁；双端核心业务语义一致"
+  - id: SCOPE-009
+    capability: "智能助手B：自填API Key/端点/模型的多轮聊天；通过白名单工具规划、查询和操作当前软件，变更确认后接原业务层，原本地排程保留为次级工具"
+    status: byok_chat_implemented_fixture_verified_live_provider_and_device_pending
+    specification: docs/planning/Innocence-AI智能助手B方案实施与契约.md
+    done_when: "B1/B2/B3各批完成真实生成、身份/权限/缺字段/生成失败、写入/幂等/撤销/同步及双端运行证据；不包含C持续自动化"
 out_of_scope:
   - id: OUT-001
     item: "陌生人私信、陌生人社交广场、推荐好友/团队"
@@ -39,6 +44,8 @@ out_of_scope:
     item: "多手机/多电脑并发、任意字段级三方同步合并、复杂排行榜、勋章成就体系；按实体的基础冲突规则仍属于范围"
   - id: OUT-005
     item: "AI 内容审核、多层级管理员权限体系"
+  - id: OUT-006
+    item: "智能助手C持续规则、后台自动重排、自动签到/进度推断、通用电脑控制；采用B不改变当前Android离线正式包"
 definition_of_done:
   - scope_id: SCOPE-001
     evidence: "MVP 完成标准 9 条逐条验收记录（P06 阶段门禁）"
@@ -53,9 +60,10 @@ decision_entrypoint:
 
 本文为治理层范围指针，详细产品规格见：
 
-- 产品规划与模块结论：`docs/planning/Innocence-项目计划书.md`（15 模块全部封板）
+- 产品规划与模块结论：`docs/planning/Innocence-项目计划书.md`（原15模块封板；第16智能助手B范围确认、实现待完成）
 - 第一版范围边界：`docs/planning/Innocence-MVP第一版功能范围.md`
 - UI 规划与主题存档：`docs/planning/Innocence-UI设计规划.md`（已建立并持续按用户决策更新）
 - 离线模式、主题标语、年月计划与窗口缩放：`docs/planning/Innocence-离线模式主题标语与年月计划实施规划.md`
+- 智能助手B增量范围：`docs/planning/Innocence-AI智能助手B方案实施与契约.md`（DEC-0050/0090；B1日计划闭环优先）
 
 范围变更须通过 DECISION 检查点记录。

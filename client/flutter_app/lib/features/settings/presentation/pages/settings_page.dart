@@ -196,15 +196,19 @@ class _SettingsPageState extends State<SettingsPage> {
   _SettingsSectionId _selectedSection = _SettingsSectionId.account;
   bool _smallDetailOpen = false;
 
-  List<_SettingsSectionId> get _availableSections => widget.isOfflineMode
-      ? const [
-          _SettingsSectionId.language,
-          _SettingsSectionId.account,
-          _SettingsSectionId.desktop,
-          _SettingsSectionId.appearance,
-          _SettingsSectionId.quickActions,
-        ]
-      : _SettingsSectionId.values;
+  List<_SettingsSectionId> get _availableSections => (widget.isOfflineMode
+          ? const [
+              _SettingsSectionId.language,
+              _SettingsSectionId.account,
+              _SettingsSectionId.desktop,
+              _SettingsSectionId.appearance,
+              _SettingsSectionId.quickActions,
+            ]
+          : _SettingsSectionId.values)
+      .where((section) =>
+          section != _SettingsSectionId.desktop ||
+          AppConfig.capabilities.supportsDesktopWindow)
+      .toList(growable: false);
 
   String _text(String zh, String en) {
     return localizedText(context, zh, en);

@@ -48,6 +48,7 @@ public class FocusSessionService {
 
     @Transactional
     public FocusSessionResponse startSession(Long userId, StartFocusSessionRequest request) {
+        focusSessionMapper.lockPlanningOwner(userId);
         StudyTimerRecord currentRecord = focusSessionMapper.findCurrentSessionByUserId(userId);
         if (currentRecord != null) {
             LocalDateTime now = LocalDateTime.now();
@@ -89,6 +90,11 @@ public class FocusSessionService {
         }
 
         StudyTimerRecord record = new StudyTimerRecord();
+        // A task that entered focus must never be removed by an older assistant undo,
+        // even after that focus session has finished. The revision is a conservative day guard.
+        focusSessionMapper.ensureDayRevision(userId, now.toLocalDate());
+        focusSessionMapper.advanceDayRevision(userId, now.toLocalDate());
+        focusSessionMapper.invalidateAssistantUndo(userId);
         record.setUserId(userId);
         record.setTaskName(normalizeTaskName(request.getTaskName()));
         record.setPlannedEndTime(endTime);

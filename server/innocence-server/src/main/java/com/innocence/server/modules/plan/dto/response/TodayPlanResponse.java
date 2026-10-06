@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TodayPlanResponse {
+    private long dayRevision;
+    public long getDayRevision() { return dayRevision; }
+    public void setDayRevision(long dayRevision) { this.dayRevision = dayRevision; }
 
     private String planDate;
     private String planName;

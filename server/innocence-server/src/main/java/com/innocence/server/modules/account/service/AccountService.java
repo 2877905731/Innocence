@@ -243,6 +243,8 @@ public class AccountService {
             emailCodeService.validateCode(userAuth.getAuthAccount(), "reset", request.getEmailCode());
         }
 
+        userMapper.lockPlanningOwner(user.getId());
+        userMapper.deleteAssistantDocuments(user.getId());
         userMapper.cancelSessions(user.getId(), LocalDateTime.now());
         userMapper.cancelAccount(user.getId());
     }

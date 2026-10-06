@@ -1,0 +1,46 @@
+# Only copied into the isolated Harmony build project by tool/harmonyos.ps1.
+# Windows/Android retain their original pubspec and lockfile.
+dependency_overrides:
+  # FFI is only used on Windows/Linux, but must resolve on OH Dart 3.11.5.
+  sqflite_common_ffi: 2.4.0+3
+  sqlite3: 3.1.6
+  shared_preferences:
+    git:
+      url: https://atomgit.com/CPF-Flutter/flutter_packages.git
+      ref: 19bd50ff6d5eaa96f18c63796c51e1b4e78a7480
+      path: packages/shared_preferences/shared_preferences
+  shared_preferences_ohos:
+    git:
+      url: https://atomgit.com/CPF-Flutter/flutter_packages.git
+      ref: 19bd50ff6d5eaa96f18c63796c51e1b4e78a7480
+      path: packages/shared_preferences/shared_preferences_ohos
+  path_provider:
+    git:
+      url: https://atomgit.com/CPF-Flutter/flutter_packages.git
+      ref: 7cc9f4cfbd464943096dc7c87288252c543df5cb
+      path: packages/path_provider/path_provider
+  path_provider_ohos:
+    git:
+      url: https://atomgit.com/CPF-Flutter/flutter_packages.git
+      ref: 7cc9f4cfbd464943096dc7c87288252c543df5cb
+      path: packages/path_provider/path_provider_ohos
+  file_selector:
+    git:
+      url: https://atomgit.com/CPF-Flutter/flutter_packages.git
+      ref: 05111855c6772411f39d10aac43c8a276251c1d3
+      path: packages/file_selector/file_selector
+  file_selector_ohos:
+    git:
+      url: https://atomgit.com/CPF-Flutter/flutter_packages.git
+      ref: 05111855c6772411f39d10aac43c8a276251c1d3
+      path: packages/file_selector/file_selector_ohos
+  sqflite:
+    git:
+      url: https://atomgit.com/CPF-Flutter/flutter_sqflite.git
+      ref: 5ef0761001378455e872e46d1c0620d39dcc1002
+      path: sqflite
+  sqflite_ohos:
+    git:
+      url: https://atomgit.com/CPF-Flutter/flutter_sqflite.git
+      ref: 5ef0761001378455e872e46d1c0620d39dcc1002
+      path: sqflite_ohos

@@ -328,6 +328,26 @@ CREATE TABLE IF NOT EXISTS punishment_record
     KEY idx_punishment_report (report_id)
 );
 
+CREATE TABLE IF NOT EXISTS daily_plan_revision
+(
+    user_id BIGINT NOT NULL,
+    plan_date DATE NOT NULL,
+    revision BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY(user_id, plan_date)
+);
+
+CREATE TABLE IF NOT EXISTS assistant_document
+(
+    user_id BIGINT NOT NULL,
+    kind VARCHAR(24) NOT NULL,
+    document_id CHAR(36) NOT NULL,
+    payload_json MEDIUMTEXT NOT NULL,
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(user_id, kind, document_id),
+    KEY idx_assistant_created(kind, create_time)
+);
+
 CREATE TABLE IF NOT EXISTS daily_plan
 (
     id          BIGINT PRIMARY KEY AUTO_INCREMENT,

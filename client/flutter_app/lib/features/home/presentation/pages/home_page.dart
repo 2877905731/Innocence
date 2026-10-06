@@ -474,8 +474,12 @@ class HomePage extends StatelessWidget {
     required this.isBusy,
     required this.onClearBanner,
     this.bannerMessage,
+    this.onOpenAssistant,
+    this.assistantNavigation,
   });
 
+  final Future<void> Function()? onOpenAssistant;
+  final ValueNotifier<String?>? assistantNavigation;
   final AppLanguage appLanguage;
   final Future<void> Function(
     AppLanguage language, {
@@ -1034,6 +1038,7 @@ class HomePage extends StatelessWidget {
 
     if (AppConfig.deviceType == 'android') {
       return AndroidHomeShell(
+        assistantNavigation: assistantNavigation,
         language: appLanguage,
         profile: profile,
         todayPlan: todayPlan,
@@ -1071,14 +1076,16 @@ class HomePage extends StatelessWidget {
         onOpenFriends: () => _openFriendCenter(context),
         onOpenTeam: () => _openTeamWorkspace(context),
         onOpenNotifications: () => _openNotificationCenter(context),
+        onOpenAssistant: onOpenAssistant,
         onOpenMemos: () => _openMemoCenter(context),
         onOpenStats: () => _openStatsCenter(context),
         onOpenSettings: () => _openSettingsCenter(context),
       );
     }
 
-    if (AppConfig.deviceType == 'windows') {
+    if (AppConfig.capabilities.usesPcLayout) {
       return AdaptiveDesktopHome(
+        assistantNavigation: assistantNavigation,
         appLanguage: appLanguage,
         visualTheme: currentVisualTheme,
         profile: profile,
@@ -1102,6 +1109,7 @@ class HomePage extends StatelessWidget {
         onOpenStats: () => _openStatsCenter(context),
         onOpenNotifications: () => _openNotificationCenter(context),
         onOpenFriends: () => _openFriendCenter(context),
+        onOpenAssistant: onOpenAssistant,
         onOpenMemos: () => _openMemoCenter(context),
         onOpenSettings: () => _openSettingsCenter(context),
         onOpenTeamWorkspace: () => _openTeamWorkspace(context),

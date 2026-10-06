@@ -143,7 +143,7 @@ double _lerp(double a, double b, double t) => a + (b - a) * t;
 void _paintLights(Canvas canvas, Size size, int elapsed) {
   final w = size.width;
   final h = size.height;
-  final desktop = AppConfig.deviceType == 'windows';
+  final desktop = AppConfig.capabilities.usesPcLayout;
   canvas.drawColor(const Color(0xFF03042C), BlendMode.src);
   canvas.save();
   canvas.translate(w * .8, h * .18);

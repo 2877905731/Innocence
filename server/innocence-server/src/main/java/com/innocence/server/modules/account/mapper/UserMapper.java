@@ -8,11 +8,17 @@ import com.innocence.server.modules.account.domain.UserProfile;
 import com.innocence.server.modules.account.domain.UserSession;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
 @Mapper
 public interface UserMapper {
+    @Select("SELECT id FROM app_user WHERE id=#{userId} FOR UPDATE")
+    Long lockPlanningOwner(@Param("userId") Long userId);
+    @Delete("DELETE FROM assistant_document WHERE user_id=#{userId}")
+    void deleteAssistantDocuments(@Param("userId") Long userId);
 
     UserAuth findAuthByEmail(@Param("email") String email);
 

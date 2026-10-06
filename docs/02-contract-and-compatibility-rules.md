@@ -47,7 +47,11 @@ api:
     - offline_replayable_write
     - batch_template_apply
     - annual_segment_write
+    - assistant_generation_request
+    - assistant_execution_and_undo
 authentication_and_tenancy:
+  assistant_contract: docs/planning/Innocence-AI智能助手B方案实施与契约.md
+  assistant_execution: "程序校验授权与身份；共享单日修订/事务/幂等；模型不得提升权限；本机资料不绑定服务端身份。DEC-0051允许用户通过BYOK对话按需发送当前资料给指定模型服务；变更先确认，跨用户资源统一不可见"
   local_test_identity_allowed: true
   production_profile_in_local_tests: forbidden
   cross_user_negative_tests_before_cutover: true
@@ -62,6 +66,8 @@ sensitive_data:
     - request_id
   samples_must_be_redacted_or_synthetic: true
   secrets_storage: env_or_untracked_local_config
+  assistant_byok_storage: "DEC-0051/0092：按当前账号/本机owner分区，完整配置经Windows用户级DPAPI或Android Keystore AES-GCM加密后保存；无明文兜底，不上传Innocence服务端/同步，不进日志或聊天"
+  assistant_model_boundary: "ChatProvider专门适配Chat Completions/Responses；仅HTTPS或本机loopback HTTP端点，不重定向；当前对话及按需读取的软件资料直接发送至用户指定服务。工具严格白名单与字段/身份/修订校验，软件操作结果来自业务层"
   sync_logs_forbid:
     - token
     - email_address

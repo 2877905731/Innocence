@@ -8,13 +8,33 @@ baseline:
   runtime: "Flutter + Java 21 + Spring Boot 3.3.2 + MyBatis + MySQL 8 + Redis"
   current_phase: P01
   current_gate: G01
-  evidence: "2026-10-04 发布v1.2.2+7（0088）：Android月计划/年度任务进入正式离线包，Windows安装器/便携包同源更新；Flutter analyze无问题，108项全量与4项离线专项通过。三项资产SHA256重算一致；APK v2签名证书与前版相同、versionCode7/versionName1.2.2、minSDK24/target36、三ABI、无INTERNET权限。API36飞行模式从正式v1.2.1升级并冷启动，同本机资料及QA每日计划保留，新月历显示旧计划，年度页可打开。实体设备/OEM/Vulkan、Windows多DPI和真实同步仍待验收，P01/G01未因此通过"
+  evidence: "2026-10-07 v1.2.3+8正式发行准备：188 Flutter/4平台条件跳过、19离线专项、73后端及4 DPAPI通过；Windows安装器/便携包和Android同证书离线APK构建、版本/权限/CRC/SHA256核对通过，API36覆盖与公开发布待本轮记录。共享简约白/专注/Windows BYOK与鸿蒙调试源码随版本整合；鸿蒙未签名HAP不发布，G01及真实模型/HTTP/实体设备仍待"
 android_track:
   status: in_progress
   plan_path: docs/planning/Innocence-Android版本实施规划.md
-  current_step: "v1.2.2+7双端更新已发行，Android月/年独立手机页正式随包提供。0088记录108项全量、4项离线专项/analyze、双端发布构建、签名/权限/摘要及API36正式1.2.1覆盖升级冷启动保留；此前0087的月年功能与SQLite验证继续有效。实体设备/OEM/Vulkan、其他手机详情、真实同步与长期恢复待补，A0–A5不自动通过"
+  current_step: "v1.2.3+8正式包已构建，沿用发行证书且无INTERNET；188 Flutter/19离线专项/73后端与摘要核对通过，当前补正式覆盖升级和公开下载。旧0088的v1.2.2证据按历史保留，实体设备/OEM/Vulkan/同步及A0–A5继续待"
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
+harmonyos_tablet_track:
+  status: emulator_pc_shell_running_input_method_and_device_pending
+  plan_path: docs/planning/Innocence-鸿蒙平板版本实施规划.md
+  checkpoint: "0104"
+  user_scope: "Air系列平板/HarmonyOS 7，全屏复用PC页面；不做Windows窗口尺寸调整。0098先规划、0099恢复核对，用户随后明确开始制作；0100首批实现"
+  order: [H0_toolchain_and_minimal_hap, H1_fullscreen_pc_shell, H2_offline_storage, H3_page_and_touch_parity, H4_online_contract_and_assistant, H5_device_and_release]
+  pending_decisions: "具体年款/型号与方向策略在H0核实；平板会话槽位在H4前确认；正式包联网范围与分发方式在H5前确认"
+  evidence_boundary: "0102：用户提供官方Windows26.0.0.851 ZIP，DevEco/SDK26.0.0.105/API26与缓存配置到F盘；HarmonyOS doctor项通过，四插件注册和ArkTS/原生ARM64完整编译通过，build -Unsigned exit0生成115144159字节Debug HAP，ZIP CRC/ARM64 ELF/元数据及摘要核对通过。0100宿主25双端/10平板离线回归仍有效。用户已完成DevEco登录，真实调试签名仍缺连接设备的Profile；0103核对API26/SP8镜像并创建F盘MatePad Air12预设/x64/2800×1840/360dpi。0104通过仅工具许可目录F盘重定向解决后台y/N等待，系统连接/x64 HAP安装启动、全屏PC与四主题、玻璃进程冷启动、SQLite初始v6/17表/integrity ok有证据。当前小艺输入法协议隐私页待用户、QA草稿未保存；业务恢复、真实平板调试签名及H0-H5/G01整体仍待；Debug声明INTERNET，不计正式离线发行包"
+assistant_track:
+  decision: "DEC-0050/0090采用B；DEC-0051/0092修正为自填API Key的全局聊天助手；DEC-0052/0093地址与密钥发现模型"
+  status: byok_chat_discovery_implemented_fixture_verified_live_provider_and_device_pending
+  plan_path: docs/planning/Innocence-AI智能助手B方案实施与契约.md
+  order: [byok_multiturn_chat, app_tool_registry, live_provider_and_device_verification, remaining_plan_and_template_tools]
+  next_step: "聊天主入口与14项工具、地址与密钥获取模型/自动协议验证已实现；用户在软件填真实服务地址和Key、选择返回模型并保存连接，核对实际发现/生成与函数调用，再补完整登录HTTP/同步/未接工具与设备矩阵"
+  evidence_boundary: "七项端点、真实SQL/SQLite、双协议loopback fixture、原生Windows DPAPI与双端开发构建有证据；真实模型/完整登录HTTP/Android Keystore设备及Windows运行画面未验；C持续规则不包含，正式离线发行与原G01门禁保持"
+home_visual_refinement:
+  decision: "DEC-0054/0095覆盖DEC-0053视觉：用户要求包括橙色阶梯图形在内按最早minimalism.html重做简约白，当前方案归为废案；面板与背景明确区分"
+  implementation: "MinimalWhiteHero与MinimalWhiteBackdrop重建黑白灰排版和中性画布，WhiteSurfacePanel实色白/1px边界/直角/无阴影；窗口/侧栏/计划页签/共享表面同步。FocusTimerDial继续读取现有计时源；业务/四主题存储/Focus Orb行为及正式发行保持"
+  evidence_path: docs/development/简约白最早基准重建与验收.md
+  remaining: "Windows原生L/M/S多DPI、实体Android/输入法与长期性能仍待验"
 invariants:
   - id: INV-001-TRUTHFUL-SCOPE
     enabled: true

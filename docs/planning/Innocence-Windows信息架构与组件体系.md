@@ -4,7 +4,7 @@ document_type: windows_information_architecture_and_component_system
 project_name: "Innocence"
 status: approved
 implementation_status: p01_shell_foundation_implemented
-updated_at: "2026-09-08"
+updated_at: "2026-10-04"
 approved_at: "2026-08-10T09:22:16+08:00"
 owner: "Innocence UI"
 depends_on:
@@ -15,6 +15,16 @@ depends_on:
 ---
 
 # Innocence Windows 信息架构与组件体系
+
+## 2026-10-04 简约白最早基准重建（DEC-0054）
+
+简约白以 `minimalism.html` 的黑白灰、细线、直角和大号轻字重排版重建。画布 `#F2F2F2`、实色白面板及 `#D6D6D6` 1px边界保持区分；无阴影、暖色光晕、上浮或阶梯插画。首页标题与说明按宽度左右/上下重排，计划入口改无外层面板的细线文字页签，专注动作以分隔线组织。侧栏/窗口控件与共享弹层同步新材质；L/M/S、Focus Orb行为及原业务回调继续保留。下节0094的计时行为继续适用，几何/暖灰/柔影视觉作为废案归档。唯一当前视觉规则见UI规划DEC-0054。
+
+## 2026-10-04 首页视觉组件修正（DEC-0053/0094）
+
+首页专注卡右侧改为读取现有FocusSession的计时表盘，外圈按计划时长表示已用进度，分/秒指针与数字计时共用一秒刷新；暂停冻结、提前结束保留实际进度，重新开始归零。保持Large/Medium/Small重排，大字体时上下排，不将整页等比缩放。Focus Orb不受此改造影响。
+
+简约白顶部及共用欢迎卡改完整黑橙阶梯几何图形，删除半遮挡圆球/磨砂分界。实色白面板、中性边线和柔影与暖灰背景区分；其它主题保留材质。双端中英文标语标签删除而正文保留。用户原文与覆盖依据见`Innocence-UI设计规划.md`最新DEC-0053节；验收见`../development/简约白表盘与首页视觉验收.md`。
 
 ## 1. 文档职责
 
@@ -59,6 +69,7 @@ depends_on:
 | 导航 ID | 名称 | 入口规则 |
 |---|---|---|
 | `memos` | 备忘录 | Large / Medium 导航轨底部；Small 从首页摘要或顶部菜单进入 |
+| `assistant` | 智能助手聊天（代码/fixture完成，真实模型待验） | 工具及首页/计划入口；多轮对话/模型设置/具体动作确认、响应式聊天页，本地排程为次级入口；DEC-0051/0092 |
 | `settings` | 设置 | Large / Medium 导航轨底部；Small 从头像菜单进入 |
 | `admin` | 管理后台 | 仅管理员显示；进入独立 Admin Shell，不混入普通用户页面层级 |
 
@@ -449,6 +460,8 @@ OrbWindow
 | 用户确认 | 已确认；文档状态为 `approved` |
 
 ## 11. 后续实施顺序
+
+2026-10-04用户修正智能助手B为类似Codex Chat的BYOK多轮对话。当前实现自填协议/端点/模型/密钥、原生加密存储、14项软件工具、具体写操作确认/真实结果；打开页面会切到目标页面，对话保留供再次进入。聊天与原排程共用当前Session但独立控制状态；窗口重排保留草稿，Focus Orb行为保持。范围/契约见`Innocence-AI智能助手B方案实施与契约.md`第12节；真实模型/原生画面矩阵未验，C规则不包含。
 
 1. P01 首批已实现认证入口、语义导航、自适应主 Shell 与 Focus Orb；继续资料、隐私和设置页面；
 2. P01-P04 每重建一个页面，同时实现 `full / comfortable / compact`，不得留到 P05 补响应式；

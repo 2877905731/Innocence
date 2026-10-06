@@ -23,7 +23,18 @@ management:
       exposure:
         include: health,info
 
+logging:
+  level:
+    com.innocence.server.modules.assistant.mapper: WARN
+    com.innocence.server.modules.plan.mapper: WARN
+    com.innocence.server.modules.focus.mapper: WARN
+
 innocence:
+  assistant:
+    enabled: ${INNOCENCE_ASSISTANT_ENABLED:false}
+    endpoint: ${INNOCENCE_ASSISTANT_ENDPOINT:}
+    api-key: ${INNOCENCE_ASSISTANT_API_KEY:}
+    model: ${INNOCENCE_ASSISTANT_MODEL:}
   avatar:
     storage-dir: ./data/uploads/avatars
     public-path: /uploads/avatars

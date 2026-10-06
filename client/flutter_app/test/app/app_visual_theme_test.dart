@@ -5,7 +5,7 @@ import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  test('visual theme defaults to citrus white without changing its storage id',
+  test('visual theme defaults to minimal white without changing its storage id',
       () async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
@@ -15,11 +15,11 @@ void main() {
     expect(controller.currentTheme, AppVisualTheme.minimalism);
     expect(
       AppVisualTokens.of(controller.currentTheme).canvas,
-      const Color(0xFFEEEDE9),
+      const Color(0xFFF2F2F2),
     );
     expect(
       AppVisualTokens.of(controller.currentTheme).accent,
-      const Color(0xFFED762C),
+      const Color(0xFF000000),
     );
     expect(
       controller.currentTheme.label(isChinese: true),
@@ -27,7 +27,7 @@ void main() {
     );
     expect(
       controller.currentTheme.label(isChinese: false),
-      'Citrus white',
+      'Minimal white',
     );
   });
 

@@ -1,3 +1,5 @@
+import '../features/assistant/presentation/assistant_page.dart';
+import '../features/assistant/presentation/assistant_chat_page.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -32,11 +34,43 @@ class InnocenceApp extends StatefulWidget {
 }
 
 class _InnocenceAppState extends State<InnocenceApp> {
+  final _navigatorKey = GlobalKey<NavigatorState>();
+  final _assistantNavigation = ValueNotifier<String?>(null);
   @override
   void initState() {
     super.initState();
+    widget.sessionController.assistantTools
+      ..navigate = (page) async {
+        final navigator = _navigatorKey.currentState;
+        if (navigator == null) {
+          throw const FormatException('当前导航窗口不可用。');
+        }
+        navigator.popUntil((route) => route.isFirst);
+        _assistantNavigation.value = null;
+        _assistantNavigation.value = page;
+      }
+      ..setTheme = (value) async {
+        if (AppConfig.deviceType == 'android' &&
+            !['minimalism', 'glass'].contains(value)) {
+          throw const FormatException('Android当前支持简约白色和液态玻璃。');
+        }
+        await widget.visualThemeController
+            .updateTheme(appVisualThemeFromStorage(value));
+      }
+      ..setLanguage = (value) => widget.languageController.updateLanguage(
+          value == 'zh' ? AppLanguage.simplifiedChinese : AppLanguage.english);
     widget.languageController.initialize();
     widget.sessionController.initialize();
+  }
+
+  @override
+  void dispose() {
+    widget.sessionController.assistantTools
+      ..navigate = null
+      ..setTheme = null
+      ..setLanguage = null;
+    _assistantNavigation.dispose();
+    super.dispose();
   }
 
   @override
@@ -61,6 +95,7 @@ class _InnocenceAppState extends State<InnocenceApp> {
               visualTokens.isDark ? Brightness.light : Brightness.dark,
         );
         return MaterialApp(
+          navigatorKey: _navigatorKey,
           title: 'Innocence',
           debugShowCheckedModeBanner: false,
           theme: visualTokens.toThemeData(visualTheme),
@@ -130,6 +165,36 @@ class _InnocenceAppState extends State<InnocenceApp> {
           child: Stack(
             children: [
               HomePage(
+                assistantNavigation: _assistantNavigation,
+                onOpenAssistant: () async {
+                  await _navigatorKey.currentState!.push(
+                      MaterialPageRoute<void>(
+                          builder: (context) => AnimatedBuilder(
+                              animation: Listenable.merge([
+                                widget.languageController,
+                                widget.visualThemeController
+                              ]),
+                              builder: (_, __) => AssistantChatPage(
+                                  controller: widget.sessionController.chat,
+                                  language:
+                                      widget.languageController.currentLanguage,
+                                  visualTheme:
+                                      widget.visualThemeController.currentTheme,
+                                  onOpenPlanner: () async {
+                                    await _navigatorKey.currentState!.push(
+                                        MaterialPageRoute<void>(
+                                            builder: (_) => AssistantPage(
+                                                controller: widget
+                                                    .sessionController
+                                                    .assistant,
+                                                language: widget
+                                                    .languageController
+                                                    .currentLanguage,
+                                                visualTheme: widget
+                                                    .visualThemeController
+                                                    .currentTheme)));
+                                  }))));
+                },
                 appLanguage: language,
                 onChangeLanguage: widget.languageController.updateLanguage,
                 visualTheme: visualTheme,

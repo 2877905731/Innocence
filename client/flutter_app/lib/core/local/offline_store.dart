@@ -16,6 +16,9 @@ import '../../features/settings/domain/models/widget_setting.dart';
 import '../../features/stats/domain/models/stats_overview.dart';
 import 'local_profile.dart';
 import 'offline_sync_models.dart';
+import '../../features/assistant/domain/assistant_models.dart';
+
+part 'offline_assistant_store.dart';
 
 typedef OfflineDatabasePathProvider = Future<String> Function();
 
@@ -30,6 +33,36 @@ class OfflineStore {
   final OfflineDatabasePathProvider? _databasePathProvider;
   Database? _database;
 
+  Future<Map<String, dynamic>?> loadAssistantRecovery(String owner) =>
+      _loadAssistantRecovery(owner);
+  Future<void> saveAssistantRecovery(String owner, Map<String, dynamic> data) =>
+      _saveAssistantRecovery(owner, data);
+  Future<void> saveAssistantProposal(
+          String owner, AssistantProposal proposal) =>
+      _saveAssistantProposal(owner, proposal);
+  Future<AssistantValidation> validateAssistant(
+          String owner, String id, int revision, String candidateId,
+          {List<AssistantTask>? edited}) =>
+      _validateAssistant(owner, id, revision, candidateId, edited: edited);
+  Future<AssistantExecution?> assistantExecution(String owner, String id) =>
+      _assistantExecution(owner, id);
+  Future<AssistantExecution> applyAssistant(
+          String owner,
+          String proposalId,
+          int revision,
+          String candidateId,
+          String validationId,
+          String operationId) =>
+      _applyAssistant(
+          owner, proposalId, revision, candidateId, validationId, operationId);
+  Future<AssistantExecution> undoAssistant(String owner, String originalId,
+          int afterRevision, String operationId) =>
+      _undoAssistant(owner, originalId, afterRevision, operationId);
+  Future<void> clearAssistantOwner(String owner) async {
+    await (await _readyDatabase()).delete('local_assistant_document',
+        where: 'owner_scope=?', whereArgs: [owner]);
+  }
+
   Future<void> initialize() async {
     if (_database != null) {
       return;
@@ -41,12 +74,13 @@ class OfflineStore {
     _database = await factory.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 5,
+        version: 6,
         onConfigure: (database) async {
           await database.execute('PRAGMA foreign_keys = ON');
         },
         onCreate: (database, version) => _createSchema(database),
         onUpgrade: (database, oldVersion, newVersion) async {
+          if (oldVersion < 6) await _createAssistantTables(database);
           if (oldVersion < 2) {
             await _createLocalWidgetSettingTable(database);
           }
@@ -317,39 +351,7 @@ class OfflineStore {
     String planDate,
   ) async {
     final database = await _readyDatabase();
-    final planRows = await database.query(
-      'local_daily_plan',
-      where: 'owner_scope = ? AND plan_date = ?',
-      whereArgs: [ownerScope, planDate],
-      limit: 1,
-    );
-    if (planRows.isEmpty) {
-      return TodayPlan.empty(planDate);
-    }
-    final itemRows = await database.query(
-      'local_daily_plan_item',
-      where: 'owner_scope = ? AND plan_date = ?',
-      whereArgs: [ownerScope, planDate],
-      orderBy: 'sort_order ASC, item_id ASC',
-    );
-    return TodayPlan.fromJson({
-      'planDate': planDate,
-      'planName': planRows.first['plan_name'],
-      'items': itemRows
-          .map(
-            (row) => {
-              'id': row['item_id'],
-              'title': row['title'],
-              'completed': row['completed'],
-              'plannedMinutes': row['planned_minutes'],
-              'actualMinutes': row['actual_minutes'],
-              'startSlot': row['start_slot'],
-              'endSlot': row['end_slot'],
-              'sortOrder': row['sort_order'],
-            },
-          )
-          .toList(),
-    });
+    return _assistantPlan(database, ownerScope, planDate);
   }
 
   Future<TodayPlan> saveDailyPlan(
@@ -360,6 +362,13 @@ class OfflineStore {
     final database = await _readyDatabase();
     final now = DateTime.now().toUtc().toIso8601String();
     await database.transaction((transaction) async {
+      await _assistantAdvance(transaction, ownerScope, plan.planDate);
+      final retainedIds =
+          plan.items.where((i) => i.id > 0).map((i) => i.id).toSet();
+      if (retainedIds.length != plan.items.where((i) => i.id > 0).length) {
+        throw const FormatException('任务标识重复 / Duplicate task identifiers.');
+      }
+      var nextItemId = retainedIds.fold(0, max);
       await transaction.insert(
         'local_daily_plan',
         {
@@ -382,7 +391,7 @@ class OfflineStore {
         await transaction.insert('local_daily_plan_item', {
           'owner_scope': ownerScope,
           'plan_date': plan.planDate,
-          'item_id': item.id > 0 ? item.id : index + 1,
+          'item_id': item.id > 0 ? item.id : ++nextItemId,
           'title': item.title,
           'completed': item.completed ? 1 : 0,
           'planned_minutes': item.plannedMinutes,
@@ -1085,6 +1094,11 @@ class OfflineStore {
     final sessionId = await _nextFocusSessionId(database, ownerScope);
     final nowText = now.toIso8601String();
     await database.transaction((transaction) async {
+      await _assistantAdvance(
+          transaction, ownerScope, nowText.substring(0, 10));
+      await transaction.rawUpdate(
+          r"UPDATE local_assistant_document SET payload=json_set(payload,'$.execution.undoEligibility',json('false')) WHERE owner_scope=? AND kind='execution' AND json_extract(payload,'$.execution.undoEligibility')=1",
+          [ownerScope]);
       await transaction.update(
         'local_focus_session',
         {'active': 0, 'actual_end_time': nowText},
@@ -1426,7 +1440,10 @@ class OfflineStore {
       sqfliteFfiInit();
       return databaseFactoryFfi;
     }
-    if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
+    if (Platform.isAndroid ||
+        Platform.isIOS ||
+        Platform.isMacOS ||
+        Platform.operatingSystem == 'ohos') {
       return mobile_sqlite.databaseFactory;
     }
     throw UnsupportedError(
@@ -1444,6 +1461,7 @@ class OfflineStore {
   }
 
   static Future<void> _createSchema(Database database) async {
+    await _createAssistantTables(database);
     final statements = <String>[
       '''CREATE TABLE local_profile (
         local_profile_id TEXT PRIMARY KEY,

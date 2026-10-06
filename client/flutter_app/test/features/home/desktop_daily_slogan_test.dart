@@ -17,10 +17,21 @@ import 'package:innocence_flutter/features/stats/domain/models/stats_overview.da
 import 'package:innocence_flutter/features/team/domain/models/team_chat_overview.dart';
 import 'package:innocence_flutter/features/team/domain/models/team_overview.dart';
 
-Widget _app(AppVisualTheme theme, AppLanguage language) => MaterialApp(
-      theme: AppVisualTokens.of(theme).toThemeData(theme),
+Widget desktopSloganFixture(AppVisualTheme theme, AppLanguage language,
+        {FocusSession? focusSession,
+        TodayPlan? todayPlan,
+        double textScale = 1,
+        String? fontFamily}) =>
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: AppVisualTokens.of(theme).toThemeData(theme).copyWith(
+          textTheme: AppVisualTokens.of(theme)
+              .toThemeData(theme)
+              .textTheme
+              .apply(fontFamily: fontFamily)),
       home: MediaQuery(
-        data: const MediaQueryData(disableAnimations: true),
+        data: MediaQueryData(
+            disableAnimations: true, textScaler: TextScaler.linear(textScale)),
         child: AdaptiveDesktopHome(
           appLanguage: language,
           visualTheme: theme,
@@ -28,11 +39,12 @@ Widget _app(AppVisualTheme theme, AppLanguage language) => MaterialApp(
               localProfileId: 'synthetic',
               nickname: 'Tester',
               timezone: 'Asia/Shanghai'),
-          focusSession: FocusSession.fromJson(const {
-            'active': true,
-            'remainingSeconds': 1800,
-            'taskName': 'Synthetic focus'
-          }),
+          focusSession: focusSession ??
+              FocusSession.fromJson(const {
+                'active': true,
+                'remainingSeconds': 1800,
+                'taskName': 'Synthetic focus'
+              }),
           checkInStatus: CheckInStatus.empty(),
           statsOverview: StatsOverview.empty(),
           teamOverview: TeamOverview.empty(),
@@ -40,7 +52,7 @@ Widget _app(AppVisualTheme theme, AppLanguage language) => MaterialApp(
           friendOverview: FriendOverview.empty(),
           memoOverview: MemoOverview.empty(),
           notificationOverview: NotificationOverview.empty(),
-          todayPlan: TodayPlan.empty(),
+          todayPlan: todayPlan ?? TodayPlan.empty(),
           monthPlanOverview: MonthPlanOverview.empty(),
           annualPlanOverview: AnnualPlanOverview.empty(),
           weeklyTemplates: const [],
@@ -89,7 +101,7 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       for (final theme in AppVisualTheme.values) {
         for (final language in AppLanguage.values) {
-          await tester.pumpWidget(_app(theme, language));
+          await tester.pumpWidget(desktopSloganFixture(theme, language));
           await tester.pump(const Duration(milliseconds: 350));
           final slogan = ThemeDailySlogans.resolve(
               theme: theme, localDate: DateTime.now());
@@ -97,11 +109,9 @@ void main() {
               findsOneWidget);
           expect(find.text(slogan.subtitle(isChinese: language.isChinese)),
               findsOneWidget);
-          expect(
-              find.text(language.isChinese
-                  ? 'INNOCENCE · 每日标语'
-                  : 'INNOCENCE · DAILY INSPIRATION'),
-              findsOneWidget);
+          expect(find.text('INNOCENCE'), findsOneWidget);
+          expect(find.textContaining('每日标语'), findsNothing);
+          expect(find.textContaining('DAILY INSPIRATION'), findsNothing);
           expect(find.text('Synthetic focus'), findsWidgets);
           expect(tester.takeException(), isNull);
         }

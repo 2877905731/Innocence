@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
+import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/features/account/domain/models/user_profile.dart';
 import 'package:innocence_flutter/features/settings/domain/models/setting_overview.dart';
 import 'package:innocence_flutter/features/settings/domain/models/widget_setting.dart';
 import 'package:innocence_flutter/features/settings/presentation/pages/settings_page.dart';
-import 'package:innocence_flutter/core/widgets/soft_spectrum_backdrop.dart';
+import 'package:innocence_flutter/core/widgets/minimal_white_backdrop.dart';
 
 void main() {
   testWidgets('offline mode exposes only device-safe settings', (tester) async {
@@ -135,7 +136,11 @@ void main() {
     );
     expect(find.text('Language'), findsOneWidget);
     expect(find.text('Account profile'), findsOneWidget);
-    expect(find.text('Desktop experience'), findsOneWidget);
+    expect(
+        find.text('Desktop experience'),
+        AppConfig.capabilities.supportsDesktopWindow
+            ? findsOneWidget
+            : findsNothing);
     expect(find.text('Appearance'), findsOneWidget);
     expect(find.text('About & maintenance'), findsOneWidget);
     expect(find.text('Privacy & blacklist'), findsNothing);
@@ -144,7 +149,7 @@ void main() {
     expect(find.text('Admin tools'), findsNothing);
     expect(find.text('Cancel account'), findsNothing);
     expect(find.text('Refresh'), findsNothing);
-    expect(find.byType(SoftSpectrumBackdrop), findsOneWidget);
+    expect(find.byType(MinimalWhiteBackdrop), findsOneWidget);
 
     await tester.tap(find.text('Appearance'));
     await tester.pump();
@@ -152,8 +157,9 @@ void main() {
       find.byKey(const ValueKey('settings-visual-theme-minimalism')),
       findsOneWidget,
     );
-    expect(find.text('Citrus white'), findsNWidgets(2));
+    expect(find.text('Minimal white'), findsNWidgets(2));
 
+    if (!AppConfig.capabilities.supportsDesktopWindow) return;
     await tester.tap(find.text('Desktop experience'));
     await tester.pump();
     final memoSwitch = find.widgetWithText(

@@ -1,0 +1,10 @@
+{
+  "app": {
+    "bundleName": "com.innocence.tablet.innocence_flutter",
+    "vendor": "Innocence",
+    "versionCode": 8,
+    "versionName": "1.2.3",
+    "icon": "$media:app_icon",
+    "label": "$string:app_name"
+  }
+}

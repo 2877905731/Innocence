@@ -12,7 +12,7 @@ class DesktopDragRegion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (AppConfig.deviceType != 'windows') {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
       return child ?? const SizedBox.shrink();
     }
 

@@ -629,3 +629,115 @@ checkpoints:
     status: complete
     path: progress/0088__20261004__P01__DONE__v1.2.2-patch-release.md
     title: "v1.2.2双端离线小版本正式发布、资产下载与升级核验"
+  - sequence: "0089"
+    created_at: "2026-10-04T15:12:58+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0089__20261004__P01__DONE__ai-assistant-options-review-draft.md
+    title: "AI智能助手三套方案评审稿，新增模块范围待用户选择"
+  - sequence: "0090"
+    created_at: "2026-10-04T15:31:58+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0090__20261004__P01__DECISION__ai-assistant-b-adopted.md
+    title: "用户采用智能助手B，模块范围及首批开发契约落档"
+  - sequence: "0091"
+    created_at: "2026-10-04T17:22:41+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0091__20261004__P01__DONE__ai-assistant-b1-implementation.md
+    title: "B1智能助手首批实现、真实存储回归与双端本机构建"
+  - sequence: "0092"
+    created_at: "2026-10-04T21:16:32+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0092__20261004__P01__CORRECTION__byok-chat-assistant.md
+    title: "按用户修正实现自填密钥的聊天助手、软件工具与新版启动"
+  - sequence: "0093"
+    created_at: "2026-10-04T22:14:27+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0093__20261004__P01__DONE__model-discovery-and-simple-connection.md
+    title: "地址与密钥自动获取模型、协议验证及新版启动"
+  - sequence: "0094"
+    created_at: "2026-10-04T22:40:09+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0094__20261004__P01__CORRECTION__white-home-timer-dial-and-surfaces.md
+    title: "双端同步专注表盘、白色面板和几何图形及标语标签修正"
+  - sequence: "0095"
+    created_at: "2026-10-04T23:22:44+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0095__20261004__P01__CORRECTION__original-minimal-white-rebuild.md
+    title: "按最早简约白重建双端黑白排版、字体标识和进度细节"
+  - sequence: "0096"
+    created_at: "2026-10-04T23:48:16+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0096__20261004__P01__DONE__android-startup-and-centered-emulator.md
+    title: "Android API36覆盖安装、冷启动核对与模拟器窗口居中"
+  - sequence: "0097"
+    created_at: "2026-10-05T00:10:02+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0097__20261005__P01__DONE__android-focus-card-layout.md
+    title: "Android专注数字与表盘布局修正、回归和实际新版启动"
+  - sequence: "0098"
+    created_at: "2026-10-05T20:07:14+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0098__20261005__P01__DECISION__harmonyos-tablet-pc-layout-plan.md
+    title: "鸿蒙Air平板全屏复用PC页面的实施规划，用户要求先做计划"
+  - sequence: "0099"
+    created_at: "2026-10-05T20:19:40+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0099__20261005__P01__CORRECTION__tablet-trial-rollback-source-recovery.md
+    title: "更正平板试改首次撤回证据，完整恢复原源码并通过静态分析"
+  - sequence: "0100"
+    created_at: "2026-10-05T21:13:25+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0100__20261005__P01__DONE__harmonyos-scaffold-and-dart-kernel.md
+    title: "鸿蒙原生宿主与PC平板能力首批实现，ARM64 Dart kernel通过，原生SDK待接"
+  - sequence: "0101"
+    created_at: "2026-10-05T21:33:32+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0101__20261005__P01__DECISION__harmonyos-f-drive-storage.md
+    title: "用户指定鸿蒙文件全放F盘，构建临时目录与缓存落实，官方下载控制仍受阻"
+  - sequence: "0102"
+    created_at: "2026-10-06T18:05:39+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0102__20261006__P01__DONE__harmonyos-sdk-and-unsigned-hap.md
+    title: "F盘官方鸿蒙SDK与ARM64/x64未签名原生HAP通过，签名及设备运行待验"
+  - sequence: "0103"
+    created_at: "2026-10-06T22:51:59+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0103__20261006__P01__DONE__harmonyos-tablet-image-and-device.md
+    title: "鸿蒙7平板镜像与F盘设备实例就绪，模拟器启动未形成窗口或连接"
+  - sequence: "0104"
+    created_at: "2026-10-06T23:36:13+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0104__20261006__P01__DONE__harmonyos-emulator-install-and-pc-shell.md
+    title: "鸿蒙模拟器HAP安装与全屏PC页面启动，四主题及原生存储初始化有证据"

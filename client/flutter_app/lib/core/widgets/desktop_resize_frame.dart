@@ -32,7 +32,7 @@ class DesktopResizeFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!enabled || AppConfig.deviceType != 'windows') {
+    if (!enabled || !AppConfig.capabilities.supportsDesktopWindow) {
       return child;
     }
 

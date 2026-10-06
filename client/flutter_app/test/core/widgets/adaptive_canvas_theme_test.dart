@@ -6,7 +6,7 @@ import 'package:innocence_flutter/core/widgets/adaptive_canvas_shell.dart';
 import 'package:innocence_flutter/core/widgets/glass_motion_backdrop.dart';
 import 'package:innocence_flutter/core/widgets/glass_panel.dart';
 import 'package:innocence_flutter/core/widgets/secondary_page_scaffold.dart';
-import 'package:innocence_flutter/core/widgets/soft_spectrum_backdrop.dart';
+import 'package:innocence_flutter/core/widgets/minimal_white_backdrop.dart';
 
 void main() {
   testWidgets('canvas shell uses every visual theme token set', (tester) async {
@@ -66,7 +66,7 @@ void main() {
     expect(find.byType(GlassMotionBackdrop), findsOneWidget);
   });
 
-  testWidgets('citrus-white canvas and secondary pages share the backdrop',
+  testWidgets('minimal white canvas and secondary pages share the backdrop',
       (tester) async {
     const visualTheme = AppVisualTheme.minimalism;
     final tokens = AppVisualTokens.of(visualTheme);
@@ -91,7 +91,7 @@ void main() {
         ),
       ),
     );
-    expect(find.byType(SoftSpectrumBackdrop), findsOneWidget);
+    expect(find.byType(MinimalWhiteBackdrop), findsOneWidget);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -105,7 +105,7 @@ void main() {
         ),
       ),
     );
-    expect(find.byType(SoftSpectrumBackdrop), findsOneWidget);
+    expect(find.byType(MinimalWhiteBackdrop), findsOneWidget);
   });
 
   testWidgets('light-style panels still follow the active glass theme',

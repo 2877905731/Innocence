@@ -39,6 +39,14 @@
 - 品牌元素与颜色保持原图；前景 PNG 的 SHA-256 仍为 `67161FCF77B25FC4B55AB50957BAFFECB9EDBDF0C85B0D89C49D8CD1AE03E2A8`，正式抠图母版、旧版密度 PNG 与 Windows ICO 未改动。
 - API36 Pixel Launcher 圆形蒙版及系统应用信息页已目视核对：主体扩大、完整字标与短横仍可见。其他 OEM 蒙版及实体设备仍待验收；构建/签名/覆盖安装证据见 `progress/0085__20261002__P01__CORRECTION__android-adaptive-launcher-icon-fill.md`。
 
+### 鸿蒙平板启动图标（2026-10-06）
+
+- 鸿蒙 AppScope 的 `app_icon.png` 与 entry 的 `icon.png` 直接复用正式抠图母版 V1，替换原 Flutter 模板图标。
+- 两份资源与母版逐字节一致，SHA-256 均为 `1DB3D73496A8A396A9C8CD7D08F09AEAB3A7B1393D958B4067A436FE6F3988DD`；保留透明边缘及完整品牌内容，不重新裁切或调色。
+- 应用名称保持 `Innocence`；原生资源打包与桌面实际显示分别核验，尚不能仅以复制资源视为安装或视觉验收通过。
+- DevEco 资源编译器将图标生成 512×512 PNG。从 ARM64/x64 两份 HAP 提取的 app/entry 四份图标一致，SHA-256 为 `45BA83A9DE391532BC3AF9ED49D4DB90B9137B9C4FEDB8396ECE8E940AB35BEB`；已目视核对包内图标保留完整字标及透明外边缘，设备桌面蒙版仍待验。
+- 0102 的模板图标与原未签名包保存在 F 盘忽略目录 `client/flutter_app/build/harmonyos-h0/archive/0102`，历史证据不覆盖。
+
 ## 历史候选稿
 
 状态：已被用户选定稿替代，仅留作设计过程记录，不再用于正式资源。

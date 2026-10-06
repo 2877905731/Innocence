@@ -78,7 +78,7 @@ pwsh -File windows/package_release.ps1
 
 v1.2.0 首次发行 Android 本机离线版。`INNOCENCE_OFFLINE_ONLY=true` 同时控制专用离线入口、禁止恢复在线会话、请求层拦截和 Manifest 移除 `INTERNET` 权限。普通开发及 Windows 构建保留现有联网路径。
 
-v1.2.2+7 延续该发行范围与签名，为 Android 补齐独立月计划与年度任务手机页；同签名覆盖此前正式版保留本机资料。
+v1.2.3+8 延续本机离线范围与正式发行签名，改进简约白及专注布局；可覆盖 v1.2.2 保留本机资料。Windows 开放自带 Key 的聊天助手，Android 离线包仍关闭模型联网调用。鸿蒙源码版本同步，但未提供正式签名 HAP。
 
 ```powershell
 flutter pub get

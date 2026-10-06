@@ -54,6 +54,7 @@ class AndroidPlansView extends StatefulWidget {
     required this.dayContent,
     required this.bannerMessage,
     required this.onClearBanner,
+    this.onOpenAssistant,
   });
 
   final AppLanguage language;
@@ -67,6 +68,7 @@ class AndroidPlansView extends StatefulWidget {
   final List<Widget> Function() dayContent;
   final String? bannerMessage;
   final VoidCallback onClearBanner;
+  final Future<void> Function()? onOpenAssistant;
 
   @override
   State<AndroidPlansView> createState() => _AndroidPlansViewState();
@@ -735,6 +737,13 @@ class _AndroidPlansViewState extends State<AndroidPlansView> {
           SliverPadding(
               padding: const EdgeInsets.only(top: 12, bottom: 32),
               sliver: SliverList.list(children: [
+                if (widget.onOpenAssistant != null)
+                  Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                          onPressed: widget.onOpenAssistant,
+                          icon: const Icon(Icons.auto_awesome_outlined),
+                          label: Text(_t('规划一天', 'Plan a day')))),
                 if (widget.bannerMessage != null)
                   _panel(ListTile(
                       contentPadding: EdgeInsets.zero,

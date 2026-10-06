@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "Innocence tablet workspace"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "Innocence tablet workspace"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "Innocence"
+    }
+  ]
+}

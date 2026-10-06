@@ -3,11 +3,78 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Innocence 简约白色重设计参考页。局部磨砂、协调主题色与轻量交互，使用示例数据。">
-  <title>Innocence · 简约白色参考</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='10' fill='%23ed762c'/%3E%3Cpath d='M10 23V9m12 14V9M10 9l12 14' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="ui-redesign-preview.css">
-  <script src="ui-redesign-preview.js" defer></script>
+  <title>Innocence · 简约白重建参考</title>
+  <meta name="description" content="以最早极简模板为基准：黑白灰、排版、直角白面板与独立灰色画布。示例数据仅用于设计参考。">
+  <style>
+    * { box-sizing: border-box; }
+    :root { color-scheme: light; font-family: Inter, 'Segoe UI', 'Microsoft YaHei', sans-serif; color: #1a1a1a; background: #f2f2f2; }
+    body { margin: 0; }
+    .shell { display: grid; grid-template-columns: 80px 1fr; min-height: 100vh; }
+    nav { background: #fff; border-right: 1px solid #d6d6d6; padding: 24px 12px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+    .brand { display: grid; place-items: center; width: 40px; height: 40px; background: #1a1a1a; color: #fff; font-weight: 700; }
+    nav span { width: 48px; padding: 14px 0; text-align: center; font-size: 12px; color: #666; }
+    nav .active { background: #1a1a1a; color: #fff; }
+    header { padding: 24px 32px; border-bottom: 1px solid #d6d6d6; }
+    h1 { margin: 0; font-size: 26px; font-weight: 500; }
+    p { color: #666; line-height: 1.7; }
+    header p { margin: 8px 0 0; font-size: 13px; }
+    main { padding: 32px; max-width: 1600px; margin: auto; }
+    .panel { background: #fff; border: 1px solid #d6d6d6; padding: 24px; }
+    .meta { display: flex; justify-content: space-between; gap: 16px; font-size: 11px; color: #666; letter-spacing: 2px; padding-bottom: 16px; border-bottom: 1px solid #d6d6d6; }
+    .hero-copy { display: grid; grid-template-columns: 6fr 4fr; align-items: end; gap: 48px; padding: 32px 0 16px; }
+    .wordmark { font-size: clamp(40px, 6vw, 80px); font-weight: 900; line-height: 1; letter-spacing: -.065em; color: #1a1a1a; }
+    .motto { font-size: 10px; letter-spacing: 1.2px; font-weight: 800; margin-top: 12px; }
+    h2 { margin: 0 0 16px; font-size: 30px; font-weight: 300; line-height: 1.2; letter-spacing: -1px; }
+    .hero-copy p { margin: 0; font-size: 14px; }
+    .workspace { display: grid; grid-template-columns: 6fr 5fr; align-items: start; gap: 24px; margin-top: 24px; }
+    h3 { margin: 0; font-size: 17px; font-weight: 500; }
+    .section-code { font-size: 10px; letter-spacing: 1.5px; color: #666; margin-bottom: 12px; }
+    .hint { font-size: 12px; margin: 6px 0 0; }
+    .timer { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 32px 0; }
+    .time { font-size: 64px; font-weight: 300; letter-spacing: -3px; font-variant-numeric: tabular-nums; }
+    .timer p { margin: 12px 0 0; font-size: 13px; }
+    .dial { flex: 0 0 136px; height: 136px; border: 2px solid #d6d6d6; border-radius: 50%; position: relative; display: grid; place-items: center; font-size: 10px; color: #666; }
+    .dial:before { content: ''; position: absolute; top: 20px; left: 50%; height: 50px; width: 1px; background: #000; }
+    .dial:after { content: ''; position: absolute; top: 66px; left: 50%; height: 3px; width: 34px; background: #1a1a1a; transform: rotate(-25deg); transform-origin: left; }
+    .action { border-top: 1px solid #d6d6d6; padding-top: 20px; }
+    .button { display: block; background: #1a1a1a; color: white; text-align: center; padding: 16px; font-size: 14px; }
+    .tabs { display: flex; gap: 24px; padding-bottom: 16px; font-size: 14px; }
+    .tabs span { padding-bottom: 8px; color: #666; }
+    .tabs .selected { color: #1a1a1a; border-bottom: 1px solid #000; }
+    .plan-heading { display: flex; justify-content: space-between; align-items: start; }
+    .edit { font-size: 13px; border-bottom: 1px solid #1a1a1a; }
+    .progress { height: 2px; background: #d6d6d6; margin: 24px 0 16px; }
+    .progress span { display: block; width: 50%; background: #000; height: 100%; }
+    .ticks { display: flex; justify-content: space-between; margin-top: -11px; padding-bottom: 16px; }
+    .ticks i { height: 4px; width: 1px; background: #d6d6d6; }
+    .ticks i:nth-child(5n+1) { height: 7px; }
+    .ticks i:nth-child(-n+11) { background: #1a1a1a; }
+    .task { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid #eee; }
+    .task:last-child { border-bottom: 0; }
+    .check { width: 18px; height: 18px; border: 1px solid #666; flex-shrink: 0; }
+    .done .check { background: #000; color: #fff; text-align: center; font-size: 13px; }
+    .task p { margin: 4px 0 0; font-size: 12px; }
+    .done strong { color: #666; text-decoration: line-through; }
+    .task strong { font-size: 14px; font-weight: 500; }
+    footer { color: #666; font-size: 11px; margin-top: 24px; }
+    @media (max-width: 900px) { .hero-copy, .workspace { grid-template-columns: 1fr; gap: 24px; } }
+    @media (max-width: 600px) { .shell { grid-template-columns: 1fr; } nav { flex-direction: row; border-right: 0; border-bottom: 1px solid #d6d6d6; padding: 12px 16px; gap: 8px; } nav span { width: auto; padding: 10px; } nav span:last-child { display: none; } header, main { padding: 24px 16px; } .timer { flex-wrap: wrap; } .time { font-size: 56px; } }
+  </style>
 </head>
-<body data-theme="white"><div id="preview"></div><noscript>请启用 JavaScript 以查看交互参考页。</noscript></body>
+<body>
+  <div class="shell">
+    <nav aria-label="导航示意"><div class="brand">I</div><span class="active">首页</span><span>计划</span><span>专注</span><span>陪伴</span></nav>
+    <div>
+      <header><h1>今天</h1><p>先看最重要的，再开始行动</p></header>
+      <main>
+        <section class="panel"><div class="meta"><span>INNOCENCE</span><span>D/04</span></div><div class="hero-copy"><div><div class="wordmark">INN/CNCE</div><div class="motto">LESS NOISE. MORE PROGRESS.</div></div><div><h2>向前一点，就是今日亮点。</h2><p>删去干扰，保留计划、时间与行动。让每一步都有清晰的位置。</p></div></div></section>
+        <div class="workspace">
+          <section class="panel"><div class="section-code">01 / FOCUS</div><h3>当前专注</h3><p class="hint">设置结束时间后开始</p><div class="timer"><div><div class="time">00:00</div><p>准备好时，从眼前最重要的任务开始。</p></div><div class="dial" aria-label="表盘视觉示意">待开始</div></div><div class="action"><span class="button">开始专注</span></div></section>
+          <div><div class="tabs"><span class="selected">今日计划</span><span>本月超长任务</span></div><section class="panel"><div class="section-code">02 / PLAN</div><div class="plan-heading"><div><h3>今日计划</h3><p class="hint">1/2 已完成</p></div><span class="edit">编辑</span></div><div class="progress"><span></span></div><div class="ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="task done"><span class="check">✓</span><div><strong>整理学习笔记</strong><p>09:00 – 10:00 · 1 h</p></div></div><div class="task"><span class="check"></span><div><strong>阅读与章节札记</strong><p>14:00 – 15:30 · 1 h 30 min</p></div></div></section></div>
+        </div>
+        <footer>示例数据 · 静态视觉参考 · 原始基准 minimalism.html · DEC-0054</footer>
+      </main>
+    </div>
+  </div>
+</body>
 </html>

@@ -22,7 +22,50 @@ common_request_context:
   base_url: "http://localhost:8080（本地；生产未定）"
   authentication_method: "Authorization: Bearer {accessToken}"
   user_context_header: "X-User-Id（仅服务端从 token 解析，不作为请求入参）"
+external_model_discovery:
+  specification: "docs/planning/Innocence-AI智能助手B方案实施与契约.md 第13节；DEC-0052/0093"
+  request: "客户端直连用户指定服务GET {apiBase}/models，Bearer模型Key；同origin有限/v1回退，不新增Innocence业务接口"
+  response: "data数组中的严格id及可选name，经ChatModelCatalog映射；空列表/缺id拒绝，真实供应商待验"
+  connection: "选择模型后无工具/业务数据的简短Chat Completions或Responses验证；成功才保存最终协议/端点至原加密仓储"
+  evidence: "168项Flutter全量含loopback HTTP与布局负向用例；身份/取消/失败不保存覆盖，真实服务及工具能力单独核验"
 endpoints:
+  - id: UAI-01
+    method: POST
+    path: "/api/app/v1/assistant/proposals"
+    specification: "docs/planning/Innocence-AI智能助手B方案实施与契约.md 第6节"
+    source_behavior: "生成提案；clientRequestId幂等；不写业务计划"
+    evidence_status: implemented_mysql_and_protocol_fixture_verified_live_model_pending
+  - id: UAI-02
+    method: GET
+    path: "/api/app/v1/assistant/requests/{clientRequestId}"
+    specification: "B专档第6节；仅当前账号；生成超时后查询结果"
+    evidence_status: implemented_mysql_and_protocol_fixture_verified_live_model_pending
+  - id: UAI-03
+    method: POST
+    path: "/api/app/v1/assistant/proposals/{proposalId}/validate"
+    specification: "B专档第6节；修改产生新修订；返回冲突与可执行差异"
+    evidence_status: implemented_mysql_and_protocol_fixture_verified_live_model_pending
+  - id: UAI-04
+    method: POST
+    path: "/api/app/v1/assistant/proposals/{proposalId}/execute"
+    specification: "B专档第6–7节；operationId为executionId；身份/授权/单日修订/幂等/原子事务"
+    evidence_status: implemented_mysql_and_protocol_fixture_verified_live_model_pending
+  - id: UAI-05
+    method: GET
+    path: "/api/app/v1/assistant/executions/{executionId}"
+    specification: "B专档第6节；返回真实执行记录，结果不明时查询，不重新写入"
+    evidence_status: implemented_mysql_and_protocol_fixture_verified_live_model_pending
+  - id: UAI-06
+    method: POST
+    path: "/api/app/v1/assistant/executions/{executionId}/undo"
+    specification: "B专档第6–7节；版本一致与未开始专注时补偿；撤销产生新修订，不覆盖后续修改"
+    evidence_status: implemented_mysql_and_protocol_fixture_verified_live_model_pending
+  - id: UAI-07
+    method: POST
+    path: "/api/app/v1/assistant/client-proposals"
+    specification: "B专档第12节；客户端模型提案经严格字段/日期/半小时/共享单日修订校验；当前Bearer身份；不得传owner或完成状态"
+    source_behavior: "只存提案，不调用模型或写业务；同clientRequestId同载荷复用、异载荷409；后续validate/execute用preview_apply"
+    evidence_status: implemented_mysql_and_protocol_fixture_verified_full_login_http_pending
   - id: U01
     method: POST
     path: "/api/app/v1/auth/email/register"

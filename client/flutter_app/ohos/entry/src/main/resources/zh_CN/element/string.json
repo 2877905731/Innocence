@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "Innocence 平板工作台"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "Innocence 平板工作台"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "Innocence"
+    }
+  ]
+}

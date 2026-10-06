@@ -4,7 +4,7 @@ import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/widgets/desktop_close_button.dart';
 import 'package:innocence_flutter/core/widgets/glass_motion_backdrop.dart';
 import 'package:innocence_flutter/core/widgets/material_localization_scope.dart';
-import 'package:innocence_flutter/core/widgets/soft_spectrum_backdrop.dart';
+import 'package:innocence_flutter/core/widgets/minimal_white_backdrop.dart';
 import 'package:innocence_flutter/core/widgets/wabi_sabi_paper.dart';
 
 class SecondaryPageScaffold extends StatelessWidget {
@@ -18,6 +18,7 @@ class SecondaryPageScaffold extends StatelessWidget {
     this.headerActions = const <Widget>[],
     this.padding = const EdgeInsets.all(20),
     this.pinHeader = false,
+    this.resizeToAvoidBottomInset = true,
   });
 
   final String backLabel;
@@ -28,6 +29,7 @@ class SecondaryPageScaffold extends StatelessWidget {
   final List<Widget> children;
   final EdgeInsets padding;
   final bool pinHeader;
+  final bool resizeToAvoidBottomInset;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,7 @@ class SecondaryPageScaffold extends StatelessWidget {
         AppVisualTheme.minimalism;
     final trailingActions = <Widget>[
       ...headerActions,
-      if (AppConfig.deviceType == 'windows')
+      if (AppConfig.capabilities.supportsDesktopWindow)
         const DesktopWindowControls(compact: true),
     ];
     final tokens = AppVisualTokens.of(resolvedVisualTheme);
@@ -76,9 +78,10 @@ class SecondaryPageScaffold extends StatelessWidget {
 
     return MaterialLocalizationScope(
       child: Scaffold(
+        resizeToAvoidBottomInset: resizeToAvoidBottomInset,
         backgroundColor: tokens.canvas,
         body: switch (resolvedVisualTheme) {
-          AppVisualTheme.minimalism => SoftSpectrumBackdrop(child: content),
+          AppVisualTheme.minimalism => MinimalWhiteBackdrop(child: content),
           AppVisualTheme.wabiSabi =>
             WabiSabiPaper(color: tokens.canvas, child: content),
           AppVisualTheme.glass => GlassMotionBackdrop(child: content),
@@ -111,17 +114,20 @@ class _SecondaryPageHeader extends StatelessWidget {
       runSpacing: 12,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             OutlinedButton.icon(
               onPressed: () => Navigator.of(context).maybePop(),
               icon: const Icon(Icons.arrow_back_rounded),
               label: Text(backLabel),
             ),
-            const SizedBox(width: 12),
             ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 560),
+              constraints: BoxConstraints(
+                  maxWidth:
+                      (MediaQuery.sizeOf(context).width - 40).clamp(1, 560)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

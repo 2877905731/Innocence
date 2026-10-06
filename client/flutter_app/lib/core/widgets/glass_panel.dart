@@ -7,7 +7,7 @@ import 'package:innocence_flutter/core/theme/surface_palette.dart';
 
 import '../theme/app_colors.dart';
 import 'glass_refractive_surface.dart';
-import 'white_frosted_panel.dart';
+import 'white_surface_panel.dart';
 
 class GlassPanel extends StatelessWidget {
   const GlassPanel({
@@ -47,7 +47,7 @@ class GlassPanel extends StatelessWidget {
     }
 
     final useDesktopGlass =
-        desktopTransparent || AppConfig.deviceType == 'windows';
+        desktopTransparent || AppConfig.capabilities.usesPcLayout;
     if (useDesktopGlass) {
       return _DesktopGlassPanel(
         padding: padding,
@@ -110,16 +110,16 @@ class _ThemeAwarePanelState extends State<_ThemeAwarePanel> {
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     final radius = switch (widget.visualTheme) {
-      AppVisualTheme.minimalism => 16.0,
+      AppVisualTheme.minimalism => 0.0,
       AppVisualTheme.wabiSabi => 0.0,
       AppVisualTheme.midCentury => 18.0,
       AppVisualTheme.glass => 15.0,
     };
-    if (widget.visualTheme == AppVisualTheme.minimalism && widget.frosted) {
+    if (widget.visualTheme == AppVisualTheme.minimalism) {
       return MouseRegion(
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
-        child: WhiteFrostedPanel(
+        child: WhiteSurfacePanel(
           hovered: _hovered,
           padding: widget.padding,
           child: widget.child,
@@ -129,20 +129,9 @@ class _ThemeAwarePanelState extends State<_ThemeAwarePanel> {
     final decoration = switch (widget.visualTheme) {
       AppVisualTheme.minimalism => BoxDecoration(
           color: tokens.panel,
-          borderRadius: BorderRadius.circular(radius),
           border: Border.all(
-            color: _hovered
-                ? tokens.line.withValues(alpha: 0.95)
-                : tokens.line.withValues(alpha: 0.55),
+            color: _hovered ? tokens.muted : tokens.line,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF36372A)
-                  .withValues(alpha: _hovered ? 0.07 : 0.035),
-              blurRadius: _hovered ? 22 : 14,
-              offset: Offset(0, _hovered ? 9 : 5),
-            ),
-          ],
         ),
       AppVisualTheme.wabiSabi => BoxDecoration(color: tokens.panel),
       AppVisualTheme.midCentury => BoxDecoration(

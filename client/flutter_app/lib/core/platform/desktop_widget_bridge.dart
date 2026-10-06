@@ -13,7 +13,7 @@ class DesktopWidgetBridge {
   static Future<void> Function(String command)? _trayCommandListener;
 
   static void setWindowModeListener(void Function(String mode)? listener) {
-    if (AppConfig.deviceType != 'windows') {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
       return;
     }
     _ensureNativeHandler();
@@ -23,7 +23,7 @@ class DesktopWidgetBridge {
   static void setTrayCommandListener(
     Future<void> Function(String command)? listener,
   ) {
-    if (AppConfig.deviceType != 'windows') {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
       return;
     }
     _ensureNativeHandler();
@@ -67,7 +67,7 @@ class DesktopWidgetBridge {
     required bool focusPaused,
     required bool isChinese,
   }) async {
-    if (AppConfig.deviceType != 'windows') {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
       return;
     }
 
@@ -91,7 +91,7 @@ class DesktopWidgetBridge {
   static Future<void> applySettings({
     required WidgetSetting widgetSetting,
   }) async {
-    if (AppConfig.deviceType != 'windows') {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
       return;
     }
 
@@ -116,7 +116,7 @@ class DesktopWidgetBridge {
   }
 
   static Future<void> updateWindowHeight(double logicalHeight) async {
-    if (AppConfig.deviceType != 'windows') {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
       return;
     }
 
@@ -135,7 +135,7 @@ class DesktopWidgetBridge {
   }
 
   static Future<void> setWindowMode(String mode) async {
-    if (AppConfig.deviceType != 'windows') {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
       return;
     }
 
@@ -154,7 +154,7 @@ class DesktopWidgetBridge {
   }
 
   static Future<void> setCanvasSizePreset(String preset) async {
-    if (AppConfig.deviceType != 'windows') {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
       return;
     }
 
@@ -171,7 +171,7 @@ class DesktopWidgetBridge {
   }
 
   static Future<void> startWindowDrag() async {
-    if (AppConfig.deviceType != 'windows') {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
       return;
     }
 
@@ -185,7 +185,7 @@ class DesktopWidgetBridge {
   }
 
   static Future<void> startWindowResize(String edge) async {
-    if (AppConfig.deviceType != 'windows') {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
       return;
     }
 
@@ -202,7 +202,7 @@ class DesktopWidgetBridge {
   }
 
   static Future<void> resetWindowPosition() async {
-    if (AppConfig.deviceType != 'windows') {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
       return;
     }
 
@@ -216,7 +216,7 @@ class DesktopWidgetBridge {
   }
 
   static Future<void> closeWindow() async {
-    if (AppConfig.deviceType != 'windows') {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
       return;
     }
 
@@ -230,7 +230,7 @@ class DesktopWidgetBridge {
   }
 
   static Future<void> hideWindow() async {
-    if (AppConfig.deviceType != 'windows') {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
       return;
     }
 
@@ -248,7 +248,7 @@ class DesktopWidgetBridge {
   }
 
   static Future<void> minimizeWindow() async {
-    if (AppConfig.deviceType != 'windows') {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
       return;
     }
 

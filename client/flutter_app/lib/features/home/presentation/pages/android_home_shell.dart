@@ -9,10 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
-import 'package:innocence_flutter/core/widgets/citrus_white_hero.dart';
+import 'package:innocence_flutter/core/widgets/minimal_white_hero.dart';
+import 'package:innocence_flutter/core/widgets/minimal_progress_rule.dart';
+import 'package:innocence_flutter/core/widgets/focus_timer_dial.dart';
 import 'package:innocence_flutter/core/widgets/glass_motion_backdrop.dart';
 import 'package:innocence_flutter/core/widgets/glass_panel.dart';
-import 'package:innocence_flutter/core/widgets/soft_spectrum_backdrop.dart';
+import 'package:innocence_flutter/core/widgets/minimal_white_backdrop.dart';
 import 'package:innocence_flutter/features/account/domain/models/user_profile.dart';
 import 'package:innocence_flutter/features/checkin/domain/models/check_in_status.dart';
 import 'package:innocence_flutter/features/focus/domain/models/focus_session.dart';
@@ -55,12 +57,15 @@ class AndroidHomeShell extends StatefulWidget {
     required this.onOpenFriends,
     required this.onOpenTeam,
     required this.onOpenNotifications,
+    this.onOpenAssistant,
+    this.assistantNavigation,
     required this.onOpenMemos,
     required this.onOpenStats,
     required this.onOpenSettings,
   });
 
   final AppLanguage language;
+  final ValueNotifier<String?>? assistantNavigation;
   final UserProfile profile;
   final TodayPlan todayPlan;
   final MonthPlanOverview monthPlanOverview;
@@ -87,6 +92,7 @@ class AndroidHomeShell extends StatefulWidget {
   final Future<void> Function() onOpenFriends;
   final Future<void> Function() onOpenTeam;
   final Future<void> Function() onOpenNotifications;
+  final Future<void> Function()? onOpenAssistant;
   final Future<void> Function() onOpenMemos;
   final Future<void> Function() onOpenStats;
   final Future<void> Function() onOpenSettings;
@@ -106,6 +112,7 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    widget.assistantNavigation?.addListener(_assistantNavigate);
     _scheduleSloganRefresh();
   }
 
@@ -132,6 +139,7 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
 
   @override
   void dispose() {
+    widget.assistantNavigation?.removeListener(_assistantNavigate);
     _sloganRefreshTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -163,6 +171,28 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
   void _select(AndroidHomeDestination destination) {
     _scaffoldKey.currentState?.closeDrawer();
     setState(() => _destination = destination);
+  }
+
+  void _assistantNavigate() {
+    final page = widget.assistantNavigation?.value;
+    if (!mounted || page == null) return;
+    switch (page) {
+      case 'memos':
+        unawaited(widget.onOpenMemos());
+        return;
+      case 'settings':
+        unawaited(widget.onOpenSettings());
+        return;
+      case 'stats':
+        unawaited(widget.onOpenStats());
+        return;
+      default:
+        final name = page == 'companions' ? 'companion' : page;
+        final destination = AndroidHomeDestination.values
+            .where((d) => d.name == name)
+            .firstOrNull;
+        if (destination != null) _select(destination);
+    }
   }
 
   Future<void> _openSecondary(Future<void> Function() open) async {
@@ -213,7 +243,7 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
     return NavigationDrawer(
       backgroundColor: switch (_visualTheme) {
         AppVisualTheme.glass => const Color(0x99000000),
-        AppVisualTheme.minimalism => const Color(0xEAF9F8F5),
+        AppVisualTheme.minimalism => Colors.white,
         _ => null,
       },
       selectedIndex: _destination.index,
@@ -247,6 +277,11 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
         _drawerDestination(AndroidHomeDestination.inbox, Icons.inbox_outlined,
             Icons.inbox_rounded),
         const Divider(indent: 28, endIndent: 28),
+        if (widget.onOpenAssistant != null)
+          ListTile(
+              leading: const Icon(Icons.auto_awesome_outlined),
+              title: Text(_text('智能助手', 'Planning assistant')),
+              onTap: () => _openSecondary(widget.onOpenAssistant!)),
         ListTile(
           leading: const Icon(Icons.query_stats_outlined),
           title: Text(_text('统计', 'Statistics')),
@@ -283,33 +318,7 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            if (icon != null) ...[
-              if (_visualTheme == AppVisualTheme.minimalism)
-                Container(
-                  width: 34,
-                  height: 34,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withValues(alpha: .09),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, size: 19, color: const Color(0xFFAF511B)),
-                )
-              else
-                Icon(icon, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(width: 12),
-            ],
-            Expanded(
-              child:
-                  Text(title, style: Theme.of(context).textTheme.titleMedium),
-            ),
-          ],
-        ),
+        _cardHeading(title, icon),
         const SizedBox(height: 10),
         Text(body, style: Theme.of(context).textTheme.bodyMedium),
         if (extra != null) ...[const SizedBox(height: 14), extra],
@@ -324,6 +333,180 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
     );
     return _themedCard(content,
         padding: const EdgeInsets.all(20), frosted: frosted);
+  }
+
+  Widget _cardHeading(String title, IconData? icon) => Row(
+        children: [
+          if (icon != null) ...[
+            if (_visualTheme == AppVisualTheme.minimalism)
+              Container(
+                width: 34,
+                height: 34,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: .09),
+                  border:
+                      Border.all(color: Theme.of(context).colorScheme.outline),
+                ),
+                child: Icon(icon,
+                    size: 19, color: Theme.of(context).colorScheme.onSurface),
+              )
+            else
+              Icon(icon, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(width: 12),
+          ],
+          Expanded(
+            child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+          ),
+        ],
+      );
+
+  Widget _focusTimerOverview({required bool detailed}) {
+    final focus = widget.focusSession;
+    final timeLabel = focus.active ? focus.remainingLabel : '00:00';
+    final timeStyle = Theme.of(context).textTheme.headlineLarge?.copyWith(
+      fontSize: detailed ? 48 : 40,
+      fontWeight: FontWeight.w600,
+      height: 1.1,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+    final dialSize = detailed ? 144.0 : 104.0;
+    final hint = focus.active
+        ? (focus.taskName.isEmpty
+            ? _text('当前专注时段', 'Current focus session')
+            : focus.taskName)
+        : _text('设置结束时间后开始', 'Choose an end time to begin.');
+    return LayoutBuilder(builder: (context, constraints) {
+      // Measure hours as well as minutes at the user's font scale. Reflow the
+      // group first; only limit the digits if the full duration still cannot fit.
+      final measure = TextPainter(
+        text: TextSpan(text: timeLabel, style: timeStyle),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+      )..layout();
+      final horizontal = constraints.maxWidth >= measure.width + dialSize + 16;
+      final fittedTimeStyle = measure.width > constraints.maxWidth
+          ? timeStyle?.copyWith(
+              fontSize: (timeStyle.fontSize ?? (detailed ? 48 : 40)) *
+                  (constraints.maxWidth - 2) /
+                  measure.width,
+            )
+          : timeStyle;
+      measure.dispose();
+      final numbers = Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment:
+            horizontal ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        children: [
+          Text(
+            focus.active
+                ? _text('剩余时间', 'Remaining')
+                : _text('准备开始', 'Ready to focus'),
+            textAlign: horizontal ? TextAlign.start : TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 6),
+          Text(timeLabel,
+              key: const ValueKey('android-focus-time'),
+              softWrap: false,
+              style: fittedTimeStyle),
+          const SizedBox(height: 8),
+          Text(hint,
+              textAlign: horizontal ? TextAlign.start : TextAlign.center,
+              maxLines: detailed ? null : 2,
+              overflow: detailed ? null : TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodyMedium),
+        ],
+      );
+      final dial =
+          FocusTimerDial(session: focus, isChinese: _zh, size: dialSize);
+      return horizontal
+          ? Row(
+              children: [
+                Expanded(child: numbers),
+                const SizedBox(width: 16),
+                dial,
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                numbers,
+                const SizedBox(height: 16),
+                Center(child: dial),
+              ],
+            );
+    });
+  }
+
+  Widget _focusCard({bool detailed = false}) {
+    final focus = widget.focusSession;
+    return _themedCard(
+      key: ValueKey(
+          detailed ? 'android-focus-session' : 'android-focus-summary'),
+      frosted: true,
+      padding: const EdgeInsets.all(20),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _cardHeading(_text('专注', 'Focus'), Icons.timer_outlined),
+          const SizedBox(height: 14),
+          _focusTimerOverview(detailed: detailed),
+          const SizedBox(height: 18),
+          if (!detailed)
+            FilledButton.icon(
+              key: const ValueKey('android-focus-open'),
+              style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
+              onPressed: () => _select(AndroidHomeDestination.focus),
+              icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+              label: Text(_text('进入专注', 'Open focus')),
+            )
+          else if (!focus.active)
+            FilledButton.icon(
+              key: const ValueKey('android-focus-start'),
+              style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
+              onPressed: widget.isBusy ? null : widget.onStartFocus,
+              icon: const Icon(Icons.play_arrow_rounded),
+              label: Text(_text('开始专注', 'Start focus')),
+            )
+          else
+            LayoutBuilder(builder: (context, constraints) {
+              final pause = FilledButton.icon(
+                key: const ValueKey('android-focus-toggle'),
+                style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
+                onPressed: widget.isBusy ? null : widget.onToggleFocusPause,
+                icon: Icon(focus.paused
+                    ? Icons.play_arrow_rounded
+                    : Icons.pause_rounded),
+                label: Text(focus.paused
+                    ? _text('继续', 'Resume')
+                    : _text('暂停', 'Pause')),
+              );
+              final finish = OutlinedButton.icon(
+                key: const ValueKey('android-focus-finish'),
+                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
+                onPressed: widget.isBusy ? null : widget.onFinishFocus,
+                icon: const Icon(Icons.stop_rounded),
+                label: Text(_text('结束', 'Finish')),
+              );
+              return constraints.maxWidth < 320 &&
+                      MediaQuery.textScalerOf(context).scale(14) > 18
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [pause, const SizedBox(height: 10), finish],
+                    )
+                  : Row(children: [
+                      Expanded(child: pause),
+                      const SizedBox(width: 12),
+                      Expanded(child: finish),
+                    ]);
+            }),
+        ],
+      ),
+    );
   }
 
   Widget _themedCard(Widget content,
@@ -348,7 +531,6 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
 
   List<Widget> _homeContent() {
     final plan = widget.todayPlan;
-    final focus = widget.focusSession;
     final checkIn = widget.checkInStatus;
     final slogan = ThemeDailySlogans.resolve(
       theme: _visualTheme,
@@ -356,7 +538,7 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
     );
     return [
       if (_visualTheme == AppVisualTheme.minimalism)
-        _citrusWelcome()
+        _minimalWelcome()
       else ...[
         Text(
           _text('你好，${widget.profile.displayName}',
@@ -374,6 +556,14 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
           style: Theme.of(context).textTheme.bodyLarge,
         ),
       ],
+      if (widget.onOpenAssistant != null)
+        Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+                onPressed: widget.onOpenAssistant,
+                icon: const Icon(Icons.auto_awesome_outlined),
+                label:
+                    Text(_text('让助手规划一天', 'Plan a day with the assistant')))),
       const SizedBox(height: 20),
       _themedCard(
         key: const ValueKey('android-daily-slogan'),
@@ -382,12 +572,6 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(_text('每日标语', 'Daily inspiration'),
-                style: Theme.of(context)
-                    .textTheme
-                    .labelLarge
-                    ?.copyWith(color: Theme.of(context).colorScheme.primary)),
-            const SizedBox(height: 10),
             Text(slogan.title(isChinese: _zh),
                 style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
@@ -401,21 +585,13 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
         body: _text('已完成 ${plan.completedCount}/${plan.totalCount} 项',
             '${plan.completedCount} of ${plan.totalCount} complete'),
         icon: Icons.calendar_today_outlined,
-        extra: LinearProgressIndicator(value: plan.completionRatio.clamp(0, 1)),
+        extra: _visualTheme == AppVisualTheme.minimalism
+            ? MinimalProgressRule(value: plan.completionRatio)
+            : LinearProgressIndicator(value: plan.completionRatio.clamp(0, 1)),
         actionLabel: _text('查看计划', 'View plans'),
         onAction: () => _select(AndroidHomeDestination.plans),
       ),
-      _sectionCard(
-        title: _text('专注', 'Focus'),
-        frosted: true,
-        body: focus.active
-            ? _text('剩余 ${focus.remainingLabel}${focus.paused ? ' · 已暂停' : ''}',
-                '${focus.remainingLabel} remaining${focus.paused ? ' · paused' : ''}')
-            : _text('当前没有进行中的专注', 'No active focus session'),
-        icon: Icons.timer_outlined,
-        actionLabel: _text('进入专注', 'Open focus'),
-        onAction: () => _select(AndroidHomeDestination.focus),
-      ),
+      _focusCard(),
       _sectionCard(
         title: _text('签到', 'Check-in'),
         frosted: true,
@@ -447,9 +623,9 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
     ];
   }
 
-  Widget _citrusWelcome() {
+  Widget _minimalWelcome() {
     final now = DateTime.now();
-    return CitrusWhiteHero(
+    return MinimalWhiteHero(
       eyebrow: _text('TODAY / 今日', 'TODAY'),
       title: _text('你好，${widget.profile.displayName}',
           'Hello, ${widget.profile.displayName}'),
@@ -502,46 +678,12 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
   }
 
   List<Widget> _focusContent() {
-    final focus = widget.focusSession;
     final checkIn = widget.checkInStatus;
     return [
       Text(_text('专注时段', 'Focus session'),
           style: Theme.of(context).textTheme.headlineSmall),
       const SizedBox(height: 16),
-      _sectionCard(
-        title: focus.active
-            ? (focus.taskName.isEmpty
-                ? _text('进行中', 'In progress')
-                : focus.taskName)
-            : _text('准备开始', 'Ready to focus'),
-        body: focus.active
-            ? _text('剩余 ${focus.remainingLabel}${focus.paused ? ' · 已暂停' : ''}',
-                '${focus.remainingLabel} remaining${focus.paused ? ' · paused' : ''}')
-            : _text('选择结束时间，开始一个专注时段。',
-                'Choose an end time to start a focus session.'),
-        icon: Icons.timer_outlined,
-        extra: focus.active
-            ? Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilledButton(
-                    onPressed: widget.isBusy ? null : widget.onToggleFocusPause,
-                    child: Text(focus.paused
-                        ? _text('继续', 'Resume')
-                        : _text('暂停', 'Pause')),
-                  ),
-                  OutlinedButton(
-                    onPressed: widget.isBusy ? null : widget.onFinishFocus,
-                    child: Text(_text('结束', 'Finish')),
-                  ),
-                ],
-              )
-            : FilledButton(
-                onPressed: widget.isBusy ? null : widget.onStartFocus,
-                child: Text(_text('开始专注', 'Start focus')),
-              ),
-      ),
+      _focusCard(detailed: true),
       _sectionCard(
         title: _text('今日签到', 'Today’s check-in'),
         body: checkIn.checkedInToday
@@ -734,6 +876,7 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
                   ? AndroidPlansView(
                       key: ValueKey(
                           'plans-${widget.profile.localProfileId}-${widget.profile.userNo}'),
+                      onOpenAssistant: widget.onOpenAssistant,
                       language: widget.language,
                       month: widget.monthPlanOverview,
                       annual: widget.annualPlanOverview,
@@ -773,7 +916,7 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
     );
     return switch (visualTheme) {
       AppVisualTheme.glass => GlassMotionBackdrop(child: shell),
-      AppVisualTheme.minimalism => SoftSpectrumBackdrop(child: shell),
+      AppVisualTheme.minimalism => MinimalWhiteBackdrop(child: shell),
       _ => shell,
     };
   }

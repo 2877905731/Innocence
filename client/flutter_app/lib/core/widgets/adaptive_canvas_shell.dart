@@ -6,7 +6,7 @@ import 'package:innocence_flutter/core/widgets/desktop_close_button.dart';
 import 'package:innocence_flutter/core/widgets/desktop_drag_region.dart';
 import 'package:innocence_flutter/core/widgets/desktop_resize_frame.dart';
 import 'package:innocence_flutter/core/widgets/glass_motion_backdrop.dart';
-import 'package:innocence_flutter/core/widgets/soft_spectrum_backdrop.dart';
+import 'package:innocence_flutter/core/widgets/minimal_white_backdrop.dart';
 import 'package:innocence_flutter/core/widgets/wabi_sabi_paper.dart';
 
 @immutable
@@ -106,7 +106,7 @@ class AdaptiveCanvasShell extends StatelessWidget {
         );
 
         final themedContent = switch (visualTheme) {
-          AppVisualTheme.minimalism => SoftSpectrumBackdrop(child: content),
+          AppVisualTheme.minimalism => MinimalWhiteBackdrop(child: content),
           AppVisualTheme.wabiSabi =>
             WabiSabiPaper(color: palette.background, child: content),
           AppVisualTheme.glass => GlassMotionBackdrop(child: content),
@@ -162,7 +162,12 @@ class _RailCanvas extends StatelessWidget {
       children: [
         Container(
           width: large ? 80 : 68,
-          color: palette.navigation,
+          decoration: BoxDecoration(
+            color: palette.navigation,
+            border: palette.isSoftSpectrum
+                ? Border(right: BorderSide(color: palette.rule))
+                : null,
+          ),
           child: Column(
             children: [
               const SizedBox(height: 14),
@@ -483,11 +488,7 @@ class _BrandMark extends StatelessWidget {
       height: 42,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: palette.isGlass
-            ? const Color(0x24FFFFFF)
-            : softSpectrum
-                ? palette.surface
-                : palette.ink,
+        color: palette.isGlass ? const Color(0x24FFFFFF) : palette.ink,
         border: Border.all(
           color: palette.isGlass
               ? const Color(0x52FFFFFF)
@@ -499,16 +500,14 @@ class _BrandMark extends StatelessWidget {
           palette.isGlass
               ? 12
               : softSpectrum
-                  ? 21
+                  ? 0
                   : 0,
         ),
       ),
       child: Text(
         'I',
         style: TextStyle(
-          color: palette.isGlass || softSpectrum
-              ? palette.ink
-              : palette.navigation,
+          color: palette.isGlass ? palette.ink : palette.navigation,
           fontSize: 20,
           fontWeight: FontWeight.w900,
           height: 1,
@@ -544,7 +543,7 @@ class _UserMark extends StatelessWidget {
         decoration: BoxDecoration(
           color: softSpectrum ? palette.surface : palette.accentSoft,
           border: Border.all(color: palette.rule),
-          borderRadius: BorderRadius.circular(softSpectrum ? size / 2 : 0),
+          borderRadius: BorderRadius.zero,
         ),
         child: Text(
           initial.toUpperCase(),
@@ -572,7 +571,7 @@ class _SyncStatus extends StatelessWidget {
         color: palette.surface,
         border: Border.all(color: palette.rule),
         borderRadius: BorderRadius.circular(
-          palette.isSoftSpectrum || palette.isGlass ? 12 : 0,
+          palette.isGlass ? 12 : 0,
         ),
       ),
       child: Row(
@@ -625,7 +624,7 @@ class _RailButton extends StatelessWidget {
         child: InkWell(
           onTap: onPressed,
           borderRadius: BorderRadius.circular(
-            palette.isSoftSpectrum ? 15 : 0,
+            0,
           ),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
@@ -635,22 +634,13 @@ class _RailButton extends StatelessWidget {
                   ? palette.ink
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(
-                palette.isSoftSpectrum ? 15 : 0,
+                0,
               ),
-              boxShadow: selected && palette.isSoftSpectrum
-                  ? const [
-                      BoxShadow(
-                        color: Color(0x2417181B),
-                        blurRadius: 18,
-                        offset: Offset(0, 8),
-                      ),
-                    ]
-                  : null,
             ),
             child: Stack(
               alignment: Alignment.center,
               children: [
-                if (selected)
+                if (selected && !palette.isSoftSpectrum)
                   Positioned(
                     left: palette.isSoftSpectrum ? null : 0,
                     right: palette.isSoftSpectrum ? -10 : null,
@@ -789,7 +779,7 @@ class _CanvasPalette {
       navigation: glass
           ? const Color(0x22000000)
           : visualTheme == AppVisualTheme.minimalism
-              ? const Color(0xFFF8F8F5)
+              ? Colors.white
               : tokens.softPanel,
       surface: tokens.panel,
       ink: tokens.ink,

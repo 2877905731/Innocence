@@ -2,14 +2,32 @@
 schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
-updated_at: "2026-10-04"
-latest_checkpoint: "0088"
-next_sequence: "0089"
+updated_at: "2026-10-07"
+last_resumed_at: "2026-10-07T00:07:24+08:00"
+latest_checkpoint: "0104"
+next_sequence: "0105"
 current_phase: P01
 current_gate: G01
-state: android_month_year_mobile_v1_2_2_published_api36_upgrade_verified
-current_goal: "用户要求发布1.2.2。v1.2.2+7已于2026-10-04正式公开并成为GitHub latest（Release 402610030）；双端源码、标签与四项资产推送成功，公开下载HEAD 4/4为200且长度匹配。108项全量、4项离线专项、analyze通过；Android正式APK保留原证书、无INTERNET权限。API36飞行模式从正式v1.2.1覆盖升级，冷启动Status ok/COLD/1298ms，同本机离线资料和计划在月历中恢复；年度页可打开，进程错误筛选0。当前版本已正式包含月/年手机页；Android实体设备/OEM/Vulkan、其他手机详情、Windows多DPI和真实同步仍待验收，P01/G01及A0–A5不自动通过。"
+state: "v1_2_3_artifacts_verified_upgrade_and_publication_pending"
+current_goal: "用户授权推送并发布小版本：准备v1.2.3+8，整合0091–0104共享源码与文档，发行Windows安装器/便携包和沿用证书的Android本机离线APK；鸿蒙仅推送已核验子集的源码与调试状态，不上传未签名HAP。完成全量客户端/后端、离线门禁、正式产物/摘要/签名/覆盖升级与公开下载核对后发布。鸿蒙输入法/业务写入恢复/真机Profile与签名仍待用户，整体G01与真实模型/HTTP验收继续待，不因小版本发行完成而关闭。"
 current_baseline:
+  - "2026-10-07 v1.2.3+8发行准备：188 Flutter通过/4鸿蒙配置专属跳过，lib/test静态分析无问题，19离线专项/73后端/4原生DPAPI通过；Windows64.7秒/Inno11.984秒、Android121.8秒正式包构建，原发行证书/版本8/无INTERNET/三ABI和CRC/摘要核对通过。API36正式版覆盖与推送/公开资产仍在核验。鸿蒙仅源码同步版本、不发布未签名HAP，整体门禁仍待。"
+  - "2026-10-06 鸿蒙原生运行（0104）：DevEco日志明确后台等y/N，独立工具读C盘许可而IDE已在F盘确认；仅工具Emulator26.0目录经检查移存旧47字节状态并建F盘Junction，CLI默认识别F盘实例，系统与HDC连接成功。x64最新版HAP安装成功/EntryAbility启动，API26/x86_64；PC全屏root2800×1840/四主题/玻璃进程冷启动恢复有原生证据。SQLite初始v6/17表/integrity ok，计划/任务行0，未宣称业务写入恢复。简约白原生输入QA_NATIVE/QA_TASK草稿；小艺输入法协议隐私页需用户亲自处理，未保存。玻璃编辑黑屏/12800008/9待复验，真机Profile/签名/HUKS/槽位/联网仍待。"
+  - "2026-10-06 鸿蒙镜像与设备准备（0103）：官方镜像7.0.0.107/SP8/API26，六主要镜像文件大小及F盘实例配置核对PASS。新建MatePad Air12预设/x64/2800×1840/360dpi/4GB RAM/6GB ROM，镜像和实例均位于F盘task-home。GUI启动进程无窗口，HDC目标0；CLI-start exit1提示服务协议，logZip失败，电脑HypervisorPresent=True但不能据此判断模拟器完整配置。computer-use launch_app未返回可操作窗口，已请求用户手动启动。未执行HAP安装/启动，H0/G01仍待；CLI诊断发现Windows用户目录47字节许可状态，未声称工具全部元数据均在F盘。"
+  - "2026-10-06 SDK与原生HAP（0102）：用户官方ZIP本机SHA256及CRC、安装器Authenticode Valid/Huawei；F盘DevEco26.0.0.851/SDK26.0.0.105 API26/Node24.14.1/ohpm26.0.0.630/Hvigor6.26.8。四插件注册，ARM64完整编译exit0/115144159字节/f10e480b…（上一轮18.7秒）；本轮独立x64 exit0/156.6秒/116763248字节/23bb2b3b…；两包CRC与ELF通过，113共享Dart/5原生配置字节一致。Unsigned显式门禁、Architecture分工程、Path去重/进程用户缓存/IDE配置F盘，15环境恢复PASS。用户IDE登录成功，实际Profile缺设备，HDC目标0；首次模拟器协议与隐私待用户处理。未签名/未运行/未发布，Debug有INTERNET权限；SQLite设备恢复/触控/四主题/HUKS与槽位仍待。"
+  - "2026-10-05 用户指定鸿蒙相关文件全部放F盘（0101）：统一根client/flutter_app/build/harmonyos-h0，已有Flutter OH/pub-cache/app/kernel，新增downloads/tools/temp/npm-cache目录。脚本拒绝非F盘SDK/DevEco并设置进程TEMP/TMP/npm缓存，修复原本缺失环境变量恢复为空字符串的问题；kernel exit0、4项环境恢复及非F路径拒绝PASS。用户报告官网已登录；截图可见Windows26.0.0.851/3.1GB，页面按钮/DOM控制持续超时，没有发起下载。官方SDK、ohpm/Hvigor缓存、模拟器/签名/HAP仍待。"
+  - "2026-10-05 鸿蒙首批实现（0100）：维护仓库SDK固定adaf911c35/Dart3.11.5，引擎3fb08d34；原生tablet/横屏全屏宿主、PC四主题、窗口能力隔离、键盘保留工作台、本机资料恢复与首轮离线门禁；独立依赖解析4个OH插件，FFI降至兼容版只在暂存工程。标准/OH源码分析无问题，25双端相关/10平板离线回归通过，8张宿主图；ARM64 kernel exit0/59006184字节。原生HAP exit1缺官方HarmonyOS SDK，ArkTS/SQLite/签名/真机未验；模板图标/测试不计产品完成。工具/缓存/build在忽略目录，源码备份15文件字节保留；未改原锁/发布。"
+  - "2026-10-05 撤回证据更正（0099）：首次PowerShell单对替换数组被展开，4个原脏文件的A误替换为p；0098的9清洁文件diff和新增标记0匹配不足以证明全部恢复。从最近bdabe863473e01aff111102642eb3f01/app.dill内完整UTF8源码提取，仅候选全文经已知A→p变换与撤回字段后逐字符等价才恢复；四文件摘要记录0099。最终误替换/试改标记0、9清洁文件diff0、Dart SDK analyze exit0/No issues found；Flutter启动检查未结束后主动终止，未构建/启动应用。不改旧0098，新增CORRECTION，不把源码恢复计为鸿蒙实现。"
+  - "2026-10-05 鸿蒙平板实施规划（0098）：用户原文布局/airpaid鸿蒙os7/先做计划已归档，暂按MatePad Air系列理解，不猜年款/尺寸。规划复用PC四主题完整页面并移除窗口能力，软键盘/安全区/触控仍验；鸿蒙兼容Flutter工具链先最小HAP，再离线/完整页面/联网和真机发行。源码核对发现设备类型未知回落Windows、SQLite无鸿蒙工厂、助手密钥通道无鸿蒙实现、后端不接受harmonyos；平板槽位须独立固化，不能凭PC布局改会话政策。仅规划，试改已撤回；未定位常用目录下DevEco/SDK，HAP/原生兼容未验证。"
+  - "2026-10-05 Android专注卡布局修正（0097）：用户首页截图显示表盘偏右/大片空白；独立数字计时+表盘同组与通栏动作，窄屏/大字体居中、小时数单行；首页和详情复用并保留原FocusSession/回调/忙禁用。最终24项相关回归12秒、analyze37.1秒、APK19秒；四主题/双语/3状态/3尺寸及动作子集、8张合成PNG核对。新APK SHA25653468169747a90c1901cd4c61d04983568d4f3e73edecc86d47e4392f1727756覆盖API36安装Success，原复古主题/本机资料恢复，实际首页/详情可见；最终COLD3381ms/PID3451，00:10:02日志三个筛选0。模拟器关后重新启动，窗口ini备份只改显示位置/0.32比例，sky居中，未wipe/写真实专注或任务/发布。"
+  - "2026-10-04 Android实际启动与模拟器居中（0096）：用户授权启动Android并把桌面界面放中间；现有API36 Pixel7 AVD无wipe启动、install -r Success保留本机资料，冷启动3368ms/进程4472，23:47:14前台及三个错误模式计数0。sky原生观察可见简约白INN/CNCE、浅灰画布/白面板/细边线；拖标题栏后main原点967,59、toolbar1511,104，2560×1440/150%桌面工作区整体中心误差约2px。运行日志/当前截图在build/qa/android-minimal-runtime/；不改源码或正式资产、不发送业务内容，不将启动子集当真机/完整交互验收。"
+  - "2026-10-04 简约白最早基准重建（0095/DEC-0054）：用户否定柑橘方案并补充字体logo。MinimalWhiteHero/Backdrop、直角白面板与浅灰画布/细边界重建，大号900重字INN/CNCE与LESS NOISE. MORE PROGRESS.、01/FOCUS和02/PLAN、20等分真实进度刻度；共享材质/侧栏/窗口控件/文字页签覆盖双端，Android保留MD3及4px原生小圆角。174项全量41秒/analyze13.3秒、6项尺寸专项4秒；Windows Release63.6秒和Android联网Debug18秒通过，10张宿主PNG核对。23:21:31启动PID30696，23:22:44响应正常且日志0字节；旧源码与网页归档docs/archive/minimal-white-citrus-20261004，原minimalism.html保留。未改业务/后端/正式发行、未安装Android/提交/推送；原生UI/DPI/设备与真实HTTP待验。"
+  - "2026-10-04 白色首页修正（0094/DEC-0053）：FocusTimerDial复用现有FocusSession/ticker，黑分针/橙秒针及按计划时长的进度，暂停冻结/继续/正常及提前结束/重启归零；桌面首页/专注和手机摘要/专注接入。CitrusStepArtwork完整黑橙阶梯替换顶部与手机欢迎卡圆球，WhiteSurfacePanel实色白/边线/柔影与暖灰画布区分；移除旧CitrusFocusDisc/WhiteFrostedPanel，双端中英文每日标语标签删除而正文保留。最终174 Flutter（新增6）/analyze11.2秒、Windows55秒/Android联网Debug19秒通过，8张宿主PNG核对；22:38:44 PID30704新版窗口有响应，原生UI/多DPI/实体设备仍待验。未改业务/后端/Focus Orb或正式发行、未安装Android/提交/推送。"
+  - "2026-10-04 简化模型接入（0093/DEC-0052）：ChatServiceAddress/ChatModelCatalog独立适配器，GET同origin /models及有限/v1回退；列表保留真实id、严格校验/去重，主UI地址+Key/获取/选择/保存并连接，高级手动模型/协议。验证成功才原生加密保存，失败保留旧配置；地址/Key变化清列表，换域名不复用Key，取消/身份变化不保存。DeepSeek Chat当前上下文保留reasoning_content但不存可见历史，普通聊天拒绝未开放工具。最终168 Flutter（新增15）/analyze5.4秒、Windows Release30.8秒与Android联网Debug12秒通过，设置页两主题窄屏/键盘宿主PNG核对。22:13:14启动PID12676，窗口Innocence有响应；真实服务/原生页面/设备未验，未使用真实Key、未发布/推送。"
+  - "2026-10-04 BYOK聊天方向纠正与实现（0092）：主入口改多轮聊天，自填完整端点/模型/Key，支持Chat Completions/Responses；Windows用户级DPAPI、Android Keystore AES-GCM按owner加密配置。14工具接日计划新增/查询/撤销、存档、备忘录、年度任务/新子任务、专注、主题/语言/导航，变更确认后确定性校验，停止/身份切换取消后续动作。UAI-07客户端提案接原事务链路；153 Flutter（22新增）/73后端（4新增）、analyze、实际DPAPI4检查通过。Windows最终32.7秒/Android联网Debug12秒成功；21:12:52启动PID19476，21:16:32复核窗口Innocence有响应、stdout/stderr均0字节。真实模型/登录HTTP/同步/设备与未接工具待验；没有发布、部署或推送。"
+  - "2026-10-04 B1首批实现（0091）：Spring强类型六端点/可配置模型，旧日计划写入口共享修订、稳定新增/幂等/事务/撤销；SQLite5→6、outbox/失败回滚/冷启动与待确认操作恢复，手动新条目不撞ID；双端工具/首页/计划入口、L/M/S与独立手机详情、键盘上方动作。Flutter131项（23专项）/analyze、后端69项（21专项）、Windows Release27.8秒、Android Debug最终9秒通过；Android跨盘Kotlin缓存用一次性非增量/in-process恢复。真实模型、完整会话HTTP/同步与实体设备仍待验；未发布，B2/B3/C边界保持。"
+  - "2026-10-04 用户采用智能助手B（0090）：新增Innocence-AI智能助手B方案实施与契约.md，11节覆盖方向/批次/授权/内部模型、UAI-01–06、错误/超时/幂等、日计划共享修订、原子保存/撤销和数据/UI/验收。18份范围/产品/接口/双端文档UTF8字节回转、指针、6接口未实现状态、五类负向标记和11节结构校验PASS，git diff --check通过。代码核对发现旧日计划无dayRevision且保存替换条目，纳入必须改造项。原15模块封板记录保留，第16范围确认、实现待完成；C未采用，Android离线发行与原门禁保持。"
+  - "2026-10-04 AI智能助手评审稿（0089）：docs/planning/Innocence-AI智能助手与自动化系统方案评审.md新增三套产品方案，推荐B先实现日计划生成/校验/应用/撤销，再扩展月历/年度与持续规则；保留半小时、ownerScope、年度独立进度、手动签到及离线边界。319行/16节、严格UTF8字节回转/关键范围检查通过，git diff --check通过；未接模型、未改业务代码或正式契约、未联网发布。用户尚未选方案，新增模块未封板。"
   - "2026-10-04 v1.2.2+7 双端离线修正小版本正式发布（0088）：发行源码ccdb873，注释标签对象7d9a2f2；origin/main与v1.2.2标签已原子推送。GitHub Release #402610030 已公开并为latest，4项资产ID 608195959/608197147/608197323/608197612；公开下载HEAD 4/4 HTTP200及长度匹配。Android证书SHA256 c39218092db96b3c4085b0853bb781399b7d4fe1747a9d1032844b8154c05837沿用不变；versionCode7/target36/无INTERNET。analyze、108项全量、4项离线专项通过；API36飞行模式从正式v1.2.1覆盖安装/冷启动，QA每日计划与同本机离线资料保留，月历显示原计划、年度页可打开，PID错误筛选0。三项二进制摘要见docs/releases/v1.2.2.md；实体设备等门禁继续待验。"
   - "2026-10-03 Android月/年独立手机页（0087）：完整月历/日期编辑/存档增改删与批量跳过或覆盖、七色年度跨度充能/±10/5/1/完成回退及独立子任务接入当前SessionController/ownerScope。108项全量、9项最终专项和analyze通过；Debug离线APK35.2秒构建成功。API36两主题/键盘/冷启动/2日套用/14%年度与子任务保留、SQLite实际值及吸顶横滑核对，当前PID错误筛选0。未改正式版本号/发行签名或发布资产；真机和真实HTTP仍待补。"
   - "v1.2.1+6正式发布（0086）：源码9ae1b30/注释标签846f1766，Release401851379公开/latest；4/4远端摘要匹配、公开下载HEAD200/长度匹配、说明文本精确一致。99项全量/8项离线专项与analyze通过；Windows安装器/便携包和同发行签名Android离线APK成功，API36从v1.2.0升级保留计划和本机资料。最新包在build/releases/v1.2.1/及GitHub Release；实体设备/OEM/Vulkan/Windows矩阵与真实同步待验收。"
@@ -42,6 +60,11 @@ current_baseline:
   - "后端使用 Bearer 会话，android 映射到 mobile 槽位；离线 ownerScope、outbox 和导入确认已在 Windows 链路实现，真实跨设备回放仍待补。"
   - "2026-09-26 压缩审查：0001–0057 共 57 份检查点原名归档，索引逐项标记 archived；压缩前 RESUME 与 INDEX 快照保存在 progress/archive/。"
 active_decisions:
+  - "DEC-0054：用户要求最早minimalism.html重做简约白，当前方案含箭头橙色阶梯作为废案，并补充大号黑色实心字体logo/小设计。覆盖DEC-0053柑橘/黑橙阶梯/暖灰柔影及此前柔彩视觉，采用黑白灰、INN/CNCE字体标识/原网页短句、细编号与真实刻度；浅灰画布/实色白面板/清晰边线分开，无渐变/阴影/上浮。表盘原ticker、原创正文/标签删除、MD3交互、主题存储/年度业务七色/Focus Orb行为及业务保持。沿此前授权编译后替换开发窗口，不自动发布。"
+  - "DEC-0053：用户箭头截图要求同步计时表盘、替换半遮挡圆球、区分面板背景并删双端每日标语标签；覆盖0079局部磨砂/半遮挡方案及0084显式标语标签，保留正文和原计时源。其他主题材质/Focus Orb与业务不变，授权沿此前偏好编译后替换开发窗口，不自动发布。"
+  - "DEC-0052：用户要求类似zcode的接入，只给链接+Key发现模型。覆盖DEC-0051的手动完整端点/模型/协议主流程；兼容原加密格式，高级设置保留手动选择，连接成功才保存。列表不代表工具权限，不猜模型或跨origin探测，不自动发布。"
+  - "DEC-0051：用户澄清主交互应类似Codex Chat，自填API Key，通过对话规划和操控软件；覆盖DEC-0050的服务端专用密钥/固定三候选主入口/本机资料禁止模型读取，原排程为次级工具。BYOK当前对话及按需资料直接发往指定模型；配置按owner原生加密，业务操作白名单与具体确认，账号/管理/社交发送/代签到未开放。用户已授权‘编译好后启动新版，替换旧窗口’，本轮最终Windows已启动；未授权发布或C持续调度（0092）。"
+  - "DEC-0050：2026-10-04用户‘采用b方案’，确认第16模块智能助手采用B指令式计划执行方案；按日计划生成/校验/应用/撤销→月历存档与重排→独立年度任务拆解推进。默认预览，明确新增指令可在授权范围执行；程序校验身份/权限/版本/幂等，撤销检查后续修改。C持续规则未采用，供应商/费用/凭据和发行版本不随本次选择决定；Android现行离线包与原门禁保持（0090）。主交互与模型连接方式已由DEC-0051覆盖。"
   - "DEC-0049：2026-10-04 用户明确要求‘发布1.2.2’，授权沿用既有双端离线正式发行流程：versionName1.2.2/build7、保留Android正式签名、推送main与v1.2.2并公开GitHub Release；没有扩大Android联网范围或项目验收门禁（0088）。"
   - "DEC-0048：2026-10-02 用户要求‘更新一个新的小版本’，授权本轮按既有流程双端发行v1.2.1+6并推送origin/发布GitHub Release；Android本机离线范围与发行密钥保持，整合0084/0085纠正。2026-10-03用户‘继续’后核对公开发行与下载并记录0086。"
   - "DEC-0047：2026-10-02 修正Android面板光场与圆盘误滚动，双端显示每日标语；Windows专注中也保留标语。用户后续‘没版权的话就算了’取消本轮歌词收录，保持现有原创主题池；UI规划2026-10-02章节与0084记录。"
@@ -57,6 +80,14 @@ active_decisions:
   - "DEC-0041：Android 主导航采用左上角三点按钮展开 MD3 侧边栏，五个主功能收纳其中；不使用原拟底栏。"
   - "DEC-0042：Android 首发保留未登录本机离线入口，显式进入后可恢复同一本机资料；账号缓存和导入边界不变。"
 unfinished:
+  - id: TODO-HARMONYOS-TABLET
+    priority: P1
+    item: "0104已在官方API26/x64平板模拟器安装启动未签名HAP，PC全屏/四主题/Preferences冷启动和SQLite初始schema有证据。先由用户处理小艺输入法首次协议隐私页，再保存QA_NATIVE/QA_TASK并验证冷启动/SQL业务值；玻璃编辑黑屏及输入法12800008/9仍待复验。用户USB真机连接/调试Profile/签名、完整触控软键盘/恢复、HUKS/槽位/联网/发行仍待，整体H0-H5/G01未封板。"
+    gate: HarmonyOS-H0-H5
+  - id: TODO-AI-CHAT-LIVE-VERIFICATION
+    priority: P1
+    item: "0093已有地址+Key发现模型/自动协议验证、168 Flutter/analyze与双端开发构建；0092的73后端/4 DPAPI证据继续有效。用户在软件中配置真实服务后核对列表/连接/生成/函数调用/费用，补完整登录HTTP/同步/Android Keystore设备和Windows运行矩阵。原日任务编辑/删除/重排、存档批量套用与已有年度子任务编辑尚未接工具，不将整个B或总门禁标为通过。"
+    gate: assistant-B1
   - id: TODO-ANDROID-PLAN-CLOCK-RUNTIME
     priority: P0
     item: "Android 圆盘11项部件用例与7项桌面回归已通过；v1.2.0正式签名APK在独立API36模拟器补齐00:00–02:00、23:00–24:00点选、午夜短距离拖动/钳制、半小时按钮、保存及冷启动/覆盖安装恢复。实体手机、软键盘/返回、大字体和完整邻接矩阵仍须验收；跨日仍需先确认日期及同步语义。"
@@ -67,7 +98,7 @@ unfinished:
     gate: G01/G05
   - id: TODO-WHITE-HOME-RUNTIME
     priority: P0
-    item: "0079简约白首页浮窗代码与Android默认/窄屏放大字体画面已验证；Windows首页标语顶部、Small重排、多DPI及宽画布圆盘跨磨砂分界仍须实际查看。Windows窗口恢复报foreground window did not report a process id，不能复用旧窗口坐标或将Android画面当Windows验收。"
+    item: "0095/DEC-0054覆盖0094柑橘视觉，0096原生白色首页子集及0097 Android专注布局/复古主题首页进入详情子集通过。24相关回归、静态分析、API36覆盖恢复及错误筛选0，窗口居中。Windows原生首页/Small、多DPI、全状态实际表盘交互及实体手机仍须验收；宿主图片/模拟器子集不是完整矩阵。"
     gate: G01/G05
   - id: TODO-TWO-THEME-DETAILS
     priority: P0
@@ -94,6 +125,12 @@ unfinished:
     item: "Android A0尚未通过：正式离线签名/发行与API36核心流程有0083/0086/0088证据，月/年手机页已进入v1.2.2正式包且通过API36正式版覆盖升级子集；仍须实体设备、SDK license、其余二级手机页、真实设备键盘/大字体和前后台性能。联网会话保护、真实同步、WebSocket/推送后续接入，不重复列发行签名或月年源码为未完成。"
     gate: Android-A0
 next_actions:
+  - id: NEXT-HARMONYOS-TABLET-RUNTIME
+    action: "接0104：模拟器与PC页面已运行，保持当前小艺输入法首次协议/隐私页让用户自行选择，不自动同意或取消，也不改隐私标记。处理后回简约白QA_NATIVE计划编辑器，保存已有QA_TASK草稿、进程冷启动/本机SQLite业务值与owner关联核对；复验输入法12800008/9和玻璃编辑黑屏。用户确认USB平板连接/授权后只选其设备生成调试Profile、构建ARM64签名包并实际安装；HUKS/槽位/联网后续契约。"
+    inputs: ["client/flutter_app/harmonyos/README.md", "client/flutter_app/tool/harmonyos.ps1", "docs/planning/Innocence-鸿蒙平板版本实施规划.md", "progress/0104__20261006__P01__DONE__harmonyos-emulator-install-and-pc-shell.md"]
+  - id: NEXT-AI-CHAT-LIVE
+    action: "0093简化接入及新版启动已完成。用户在软件填服务根地址或API前缀+Key，获取模型/选择/保存并连接；未提供/models时用高级设置手动模型/协议。不读取真实密钥或要求在聊天/仓库粘贴。补真实列表/生成/工具能力/费用与完整登录HTTP/同步、Keystore/设备/Windows矩阵；未接原任务编辑/月历批量工具沿现有校验确认扩展，不自动发布或接C。"
+    inputs: ["docs/development/AI对话助手配置与验收.md", "docs/planning/Innocence-AI智能助手B方案实施与契约.md", "client/flutter_app/lib/features/assistant/data/chat_discovery.dart", "client/flutter_app/lib/features/assistant/data/chat_provider.dart"]
   - id: NEXT-ANDROID-MONTH-YEAR-DEVICE
     action: "月/年手机页面已随v1.2.2正式发行并通过API36 v1.2.1→v1.2.2离线覆盖升级。下一步在实体手机核对两主题、软键盘/返回、大字体、年度刻度拖动及长期恢复；真实HTTP/跨租户回放另验。"
     inputs: ["progress/0087__20261003__P01__DONE__android-month-year-mobile-plans.md", "client/flutter_app/lib/features/plans/presentation/pages/android_plans_view.dart", "client/flutter_app/build/qa/android-month-year/"]
@@ -107,8 +144,8 @@ next_actions:
     action: "在可正常定位Windows窗口且不会干扰用户草稿时核对新Release月份栏的滚动吸顶、12月左右对齐、窄画布和100%/125%/150%DPI；补年度弹层内的下拉/子任务嵌套、长表单与键盘视觉。所有业务保存仍按当前用户操作，不用验收写入假任务。"
     inputs: ["client/flutter_app/lib/core/widgets/themed_dialog.dart", "client/flutter_app/lib/features/home/presentation/pages/adaptive_desktop_home.dart", "progress/0080__20260930__P01__CORRECTION__glass-frosted-dialog-and-month-ruler.md"]
   - id: NEXT-WHITE-HOME-RUNTIME
-    action: "在Windows窗口可正常定位时核对新Release简约白首页顶部和Small重排、100%/125%/150%DPI，检查标语可读性与跨磨砂分界圆盘；重新选择返回的窗口，不复用0079失效窗口/截图/坐标。Android实体手机及其余详情页仍需验收。"
-    inputs: ["client/flutter_app/lib/core/widgets/citrus_white_hero.dart", "client/flutter_app/lib/core/widgets/white_frosted_panel.dart", "progress/0079__20260930__P01__CORRECTION__minimal-white-frosted-home.md"]
+    action: "0095重建、0096启动和0097 Android专注卡修正/原生首页进详情完成；模拟器留专注详情供用户操作，不再重启当前浏览。继续Windows原生L/M/S/100%125%150%DPI、字标/刻度与表盘；Android实体设备/键盘/长任务大字体与全状态实际交互另验，不恢复废案/旧坐标。"
+    inputs: ["client/flutter_app/lib/core/widgets/minimal_white_hero.dart", "client/flutter_app/lib/core/widgets/minimal_progress_rule.dart", "client/flutter_app/lib/core/widgets/white_surface_panel.dart", "docs/development/简约白最早基准重建与验收.md", "progress/0095__20261004__P01__CORRECTION__original-minimal-white-rebuild.md"]
   - id: NEXT-GLASS-REFRACTION-RUNTIME
     action: "用户重新授权继续UI核对后，查看最终Windows Release首页/二级页和Android API36本轮APK，补滚动、悬停、旋转/窗口缩放和光束过边界证据；实体设备、多DPI与持续帧率/耗电仍须单独验收。computer-use已在0078被用户Escape停止，不自动继续上次UI输入。"
     inputs: ["client/flutter_app/lib/core/widgets/glass_refractive_surface.dart", "client/flutter_app/shaders/glass_refraction.frag", "progress/0078__20260930__P01__CORRECTION__glass-panel-light-refraction.md"]
@@ -156,5 +193,85 @@ history:
   checkpoint_0086: progress/0086__20261003__P01__DONE__v1.2.1-patch-release.md
   checkpoint_0087: progress/0087__20261003__P01__DONE__android-month-year-mobile-plans.md
   checkpoint_0088: progress/0088__20261004__P01__DONE__v1.2.2-patch-release.md
+  checkpoint_0089: progress/0089__20261004__P01__DONE__ai-assistant-options-review-draft.md
+  checkpoint_0090: progress/0090__20261004__P01__DECISION__ai-assistant-b-adopted.md
+  checkpoint_0091: progress/0091__20261004__P01__DONE__ai-assistant-b1-implementation.md
+  checkpoint_0092: progress/0092__20261004__P01__CORRECTION__byok-chat-assistant.md
+  checkpoint_0093: progress/0093__20261004__P01__DONE__model-discovery-and-simple-connection.md
+  checkpoint_0094: progress/0094__20261004__P01__CORRECTION__white-home-timer-dial-and-surfaces.md
+  checkpoint_0095: progress/0095__20261004__P01__CORRECTION__original-minimal-white-rebuild.md
+  checkpoint_0096: progress/0096__20261004__P01__DONE__android-startup-and-centered-emulator.md
+  checkpoint_0097: progress/0097__20261005__P01__DONE__android-focus-card-layout.md
+  checkpoint_0098: progress/0098__20261005__P01__DECISION__harmonyos-tablet-pc-layout-plan.md
+  checkpoint_0099: progress/0099__20261005__P01__CORRECTION__tablet-trial-rollback-source-recovery.md
+  checkpoint_0100: progress/0100__20261005__P01__DONE__harmonyos-scaffold-and-dart-kernel.md
+  checkpoint_0102: progress/0102__20261006__P01__DONE__harmonyos-sdk-and-unsigned-hap.md
+  checkpoint_0103: progress/0103__20261006__P01__DONE__harmonyos-tablet-image-and-device.md
+  checkpoint_0104: progress/0104__20261006__P01__DONE__harmonyos-emulator-install-and-pc-shell.md
+latest_android_run:
+  requested_action: "专注的布局不太合理，你修改一下（附Android首页截图）"
+  avd: Innocence_API36_Pixel7
+  serial: emulator-5554
+  package: com.innocence.app.innocence_flutter
+  apk: client/flutter_app/build/app/outputs/flutter-apk/app-debug.apk
+  apk_sha256: 53468169747a90c1901cd4c61d04983568d4f3e73edecc86d47e4392f1727756
+  build_result: "24相关回归12秒、analyze37.1秒、Gradle assembleDebug19秒/207 tasks；不重跑无关全量或Windows构建。"
+  result: "install -r Success；最终COLD/Status ok/TotalTime3381ms/WaitTime3384ms。00:10:02进程3451、MainActivity前台，FATAL/FlutterError或Unhandled/RenderFlex overflow均0；原复古主题和本机资料恢复，实际首页/进入详情核对，未开启专注或写任务。"
+  centering: "模拟器原先已关闭；新窗口自动尺寸落屏外，备份emulator-user.ini仅改window.x/y/scale，比例0.32恢复完整可见，随后sky拖标题栏居中。主图348×799原点979,85、工具栏54×508原点1499,130；2560×1440/150%工作区中心误差约1px。"
+  evidence: [client/flutter_app/build/android-focus-layout-test.log, client/flutter_app/build/android-focus-layout-analyze.log, client/flutter_app/build/android-focus-layout-build.log, client/flutter_app/build/qa/android-focus-layout/runtime/final-start.log, client/flutter_app/build/qa/android-focus-layout/runtime/runtime-check.json, client/flutter_app/build/qa/android-focus-layout/runtime/window-position.json, client/flutter_app/build/qa/android-focus-layout/runtime/focus-home.png, client/flutter_app/build/qa/android-focus-layout/runtime/focus-detail.png]
+  boundary: "布局与原回调/忙禁用由合成用例覆盖；原生API36为待开始首页/详情导航子集，实际运行/暂停/结束、实体手机/OEM/Vulkan/键盘与真实HTTP另验。只改显示窗口配置、不wipe资料，开发APK不替换正式离线发行；未读取真实凭据/向供应商发数据/发布。"
+latest_local_run:
+  requested_action: "DEC-0054两条指令：最早minimalism.html重建简约白、旧设计废案/面板背景区分、大号黑色实心字体logo及小设计；沿此前授权编译并替换开发窗口。"
+  build_command: "D:/soft/flutter/bin/flutter.bat build windows --release --no-pub（client/flutter_app目录）"
+  build_result: "最终exit 0、Windows63.6秒；runner SHA256 e97f66d4a8f46295510119f1383b64edd69f9df67993510160b4569d5c485120、data/app.so ddfff7b025fbc889d652c41c1247483a5080192a6f2fc0d354f8140a31bda9c4。Android联网Debug18秒、SHA256548c612672d59f7c0f43f6688cdca430f4ed1f8ed69f055aa1c387aff9a22af6；174全量41秒/analyze13.3秒和6项布局专项4秒成功。"
+  launch_command: "Start-Process -FilePath同绝对Release/innocence_flutter.exe -WorkingDirectory同目录 -WindowStyle Normal -PassThru；stdout/stderr重定向到build日志"
+  runtime_result: "最终23:21:31 PID30696启动/inputIdle=true；23:22:44复核窗口Innocence/handle591132有响应，stdout/stderr均0字节、指定fatalMarkers0。只关闭同绝对exe旧开发进程，未操作原生UI。"
+  runtime_evidence: ["client/flutter_app/build/minimal-rebuild-windows-build.log", "client/flutter_app/build/minimal-rebuild-android-build.log", "client/flutter_app/build/minimal-rebuild-analyze.log", "client/flutter_app/build/minimal-rebuild-full-test.log", "client/flutter_app/build/minimal-rebuild-runtime-launch.json", "client/flutter_app/build/minimal-rebuild-runtime-review.json", "client/flutter_app/build/minimal-rebuild-artifacts.json", "client/flutter_app/build/qa/minimal-white-rebuild/"]
+  ui_boundary: "10张PNG为合成Flutter布局，已核对黑色文字标识/中文页签/细线刻度与面板区分，不证明原生UI/多DPI/实体设备。open_in_codex预览返回queued；没有向用户窗口或账号输入验收操作，不恢复已停止的旧UI任务。"
+  changed_files: ["client/flutter_app/lib/app/app_visual_theme.dart", "client/flutter_app/lib/core/widgets/minimal_white_hero.dart", "client/flutter_app/lib/core/widgets/minimal_white_backdrop.dart", "client/flutter_app/lib/core/widgets/minimal_progress_rule.dart", "client/flutter_app/lib/core/widgets/white_surface_panel.dart", "client/flutter_app/lib/core/widgets/glass_panel.dart", "client/flutter_app/lib/core/widgets/adaptive_canvas_shell.dart", "client/flutter_app/lib/core/widgets/desktop_close_button.dart", "client/flutter_app/lib/core/widgets/secondary_page_scaffold.dart", "client/flutter_app/lib/features/home/presentation/pages/adaptive_desktop_home.dart", "client/flutter_app/lib/features/home/presentation/pages/android_home_shell.dart", "docs/archive/minimal-white-citrus-20261004/", "docs/design/templates/minimal-white-preview.html", "docs/development/简约白最早基准重建与验收.md"]
+  release_boundary: "只改客户端/fixture/文档及本机双端开发构建；未改版本或正式发行资产、未安装Android/启动后端/提交/推送/发布。完整变更路径见0095。"
+  documentation_verification: "Java与已有SnakeYAML检查21份严格UTF8精确字节回转、9份无重复键YAML、RESUME/INDEX/0095指针及变更路径PASS；git diff --check exit 0，活动lib旧柑橘组件/橙色字面量无匹配。"
 workspace_note: "工作区另有未跟踪的 0052__20260926__P04__DONE__admin-web-local-foundation.md，与已跟踪的 0052 序号重复；其余未跟踪报告产物和 admin_web/.vite 属于现有工作区内容，本次未改动。"
+harmonyos_first_batch_verification:
+  checkpoint: "0100"
+  commands_result: "OH ARM64 kernel exit0；标准及OH Dart源码分析No issues found；25双端相关及10平板/离线回归exit0；PowerShell Parser PASS；git diff --check exit0"
+  document_result: "最终Python检查PASS：7无重复键YAML/10严格UTF8字节回转/INDEX升序与全部路径/RESUME0100→0101/track指针/18原生JSON与JSON5/tablet+横屏+SDK26/10依赖覆盖/15源码备份SHA256"
+  actual_hap_result: "exit1/No Hmos SDK found；无HAP、无原生SDK或设备运行证据；kernel不计为安装包"
+  artifact_paths: ["client/flutter_app/ohos", "client/flutter_app/harmonyos/README.md", "client/flutter_app/tool/harmonyos.ps1", "client/flutter_app/build/qa/harmony-tablet", "client/flutter_app/build/harmonyos-h0/app/.dart_tool/flutter_build/e0e8513c1a536fa42a1e916c5cc46858/app.dill"]
+
+harmonyos_native_build_verification:
+  checkpoint: "0102"
+  tool_result: "DevEco26/API26与F盘隔离环境就绪，HarmonyOS doctor项通过；15项进程环境恢复/PowerShell语法PASS"
+  arm64_result: "Unsigned Debug exit0/18.7秒/115144159字节/SHA256 f10e480b990245d5e3ae8461941cdf108a4e7bb65c902d0c99a96ee10d3998d7；CRC/ARM64 Flutter及SQLite/113共享Dart/5原生配置/四注册插件PASS"
+  x64_result: "Unsigned Debug exit0/156.6秒/116763248字节/SHA256 23bb2b3b6af57f23ce72da76014ec14f6bd5d66c4c04b8cff1527312a811b928；CRC/x86_64 Flutter及SQLite PASS；app-x64独立输出"
+  runtime_boundary: "未签名/无鸿蒙安装启动证据；用户IDE登录成功，HDC目标0、设备Profile待。模拟器首次协议与隐私等待用户自行处理；Debug有INTERNET权限，强制本机模式，不计正式发行或H0/G01完成"
+  artifact_paths: ["client/flutter_app/build/harmonyos-h0/hap-artifact-manifest.json", "client/flutter_app/build/harmonyos-h0/hap-artifact-manifest-x64.json", "client/flutter_app/build/harmonyos-h0/hap-build-final.log", "client/flutter_app/build/harmonyos-h0/hap-build-x64.log"]
+  document_result: "Python verify-documents.py exit0：11严格UTF8字节回转/6无重复键YAML/INDEX升序及全部路径/0102指针/18原生JSON与JSON5 PASS；git diff --check exit0"
+
+harmonyos_brand_update:
+  checkpoint_scope: "0102之后普通资源变更，未增加平台运行完成检查点"
+  changed_files: ["client/flutter_app/ohos/AppScope/resources/base/media/app_icon.png", "client/flutter_app/ohos/entry/src/main/resources/base/media/icon.png", "docs/design/logo/README.md", "client/flutter_app/harmonyos/README.md", "docs/planning/Innocence-鸿蒙平板版本实施规划.md", "progress/0000__AI-RESUME.md"]
+  command: "harmonyos.ps1 -Action build -Unsigned；同命令-Architecture x64；Python verify-branded-packages.py"
+  result: "ARM64 exit0/28.4秒/115600935字节/6d686fccced019542e78a46f1732b0c90666ea6f14d579c9b9514ec701a4387e；x64 exit0/23.0秒/117220024字节/06ff364610cae8b66ec8e9f2cf428af1d71c4e2c60225d60bd96f2573df17fdc；CRC/各两ELF/各113Dart/四包内图标/旧两包摘要PASS"
+  icon_result: "源图1db3d734…逐字节复制；资源编译器输出512×512，四图标一致/45ba83a9de391532bc3af9ed49d4db90b9137b9c4fedb8396ece8e940ab35beb，包内图已目视核对；未称桌面蒙版验收"
+  old_artifacts: "build/harmonyos-h0/archive/0102/arm64-unsigned.hap及x64-unsigned.hap/原清单/原模板图标保留，不修改旧检查点"
+  runtime_boundary: "0103已核对API26/SP8镜像并创建F盘平板实例；GUI无窗口/连接，CLI服务协议提示，未安装/启动鸿蒙应用"
+
+harmonyos_emulator_preparation:
+  checkpoint: "0103"
+  command: "Python verify-tablet-emulator.py；Emulator -list -details/-help；hdc list targets；独立GUI启动与CLI-start诊断"
+  result: "API26/SP8六主要镜像文件大小及F盘实例/x64/2800×1840/360dpi核对PASS；HDC exit0/目标0。GUI启动只有后台进程，无可操作窗口；CLI-start exit1服务协议提示，logZip失败；HypervisorPresent=True仅为只读环境事实"
+  artifact_paths: ["client/flutter_app/build/harmonyos-h0/tablet-emulator-manifest.json", "client/flutter_app/build/harmonyos-h0/task-home/AppData/Local/Huawei/Sdk/system-image/HarmonyOS-7.0.0/tablet_x86", "client/flutter_app/build/harmonyos-h0/task-home/AppData/Local/Huawei/Emulator/deployed/MatePad Air 12"]
+  runtime_boundary: "未执行HAP安装/启动，签名Profile/存储恢复/PC页面/触控与四主题仍待；用户手动启动反馈待。CLI诊断在Windows用户目录生成47字节许可状态，不证明全部工具元数据在F盘；未复制许可或修改系统安全/隐私设置"
+  document_result: "Python verify-documents.py exit0/PASS：12严格UTF8字节回转、7无重复键YAML、INDEX升序与全部路径、0103指针、18原生JSON/JSON5；git diff --check exit0，仅有既有工作区LF/CRLF提示"
+
+harmonyos_native_runtime_verification:
+  checkpoint: "0104"
+  command: "HDC install x64 HAP/aa start；param get const.ohos.apiversion/uname；uitest uiInput与snapshot_display/file recv；aa force-stop/start；Python verify-native-sqlite-initial.py/verify-harmony-runtime.py"
+  result: "API26/x86_64，install bundle successfully/start ability successfully；PC全屏root2800×1840、四主题原生画面、玻璃进程冷启动恢复；F盘许可目录Junction及47字节旧状态备份核对；SQLite初始user_version6/17表/integrity ok，计划/任务行0"
+  artifact_paths: ["client/flutter_app/build/harmonyos-h0/harmony-runtime-manifest.json", "client/flutter_app/build/harmonyos-h0/sqlite-initial-manifest.json", "client/flutter_app/build/qa/harmony-native", "client/flutter_app/build/harmonyos-h0/archive/0103/windows-cli-license-cache"]
+  pending_user_actions: "模拟器小艺输入法首次协议/隐私页亲自选择并反馈；真实平板USB开发者/调试及电脑授权完成后反馈。两项已通过异步问题提出"
+  runtime_boundary: "QA_NATIVE/QA_TASK为未保存的隔离模拟器草稿；业务SQLite写入/冷启动未通过。玻璃编辑黑屏及输入法12800008/9待复验，不把初始小写flutter日志空查询当作无错误；真机签名/触控软键盘/HUKS/槽位/联网及H0-H5/G01整体仍待"
+  document_result: "Python verify-documents.py exit0/PASS：13严格UTF8字节回转、8无重复键YAML、INDEX升序/全部路径/0104指针、18原生JSON/JSON5；git diff --check exit0，仅既有LF/CRLF提示。旧0102/0103字节摘要保持"
+
 ---

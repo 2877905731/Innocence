@@ -22,9 +22,11 @@ read_order:
       - docs/08-project-profile.md
       - docs/02-contract-and-compatibility-rules.md
       - docs/planning/Innocence-Android版本实施规划.md
+      - docs/planning/Innocence-鸿蒙平板版本实施规划.md
       - docs/planning/Innocence-UI设计规划.md
       - docs/planning/Innocence-Windows自适应桌面体验.md
       - docs/planning/Innocence-Windows信息架构与组件体系.md
+      - docs/planning/Innocence-AI智能助手B方案实施与契约.md
     purpose: task_specific_context
 ---
 
@@ -40,7 +42,7 @@ read_order:
 ## project_facts
 
 ```yaml
-project_summary: "Innocence 是面向学习、自律、陪伴和团队互助的双端产品（Flutter 手机端 + 桌面端），15 个产品模块已全部封板，第一版按 MVP 范围开发。前端 UI 全面重写；Windows 四主题并存可切换，采用大/中/小自适应画布 + 主动悬浮球；Android 保留 Material 3 交互组件，同时按用户新决定立即应用简约白色与液态玻璃两套视觉。"
+project_summary: "Innocence 是面向学习、自律、陪伴和团队互助的双端产品（Flutter 手机端 + 桌面端），原15模块已封板；第16助手已有BYOK多轮聊天/14工具及地址+Key发现模型（0093）。2026-10-04按最早minimalism.html重建简约白（0095/DEC-0054），旧柑橘归档；黑白灰/字体Hero/实色直角白面板与浅灰画布细线区分，174 Flutter通过。2026-10-05 Android专注卡数字/表盘合组、底部通栏动作、窄屏重排及小时数单行（0097）；24相关回归/analyze/Debug19秒、API36覆盖安装和原主题实际首页/详情导航通过，窗口居中。同步计时及标语正文继续；真实供应商/HTTP/同步/实体设备与Windows矩阵待验，月历批量和原任务编辑未接工具。原排程为次级入口。Windows四主题与L/M/S/Focus Orb保持；Android保留MD3交互及白色/玻璃两主题。"
 data_owner: "Innocence 自有数据；用户数据归用户，由 Innocence 服务托管"
 current_milestone: "P01/G01：v1.2.2+7 双端更新已正式发布，新增 Android 月计划与年度任务独立手机页，含 Windows 安装器/便携包及同发行签名 Android 本机离线 APK；108项全量、4项离线专项、摘要/签名/权限核对通过，API36从v1.2.1正式版覆盖升级并冷启动保留本机资料；Windows视觉矩阵、Android实体设备/OEM/Vulkan与真实联网同步仍待验收"
 ```

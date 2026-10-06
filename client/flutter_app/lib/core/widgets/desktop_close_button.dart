@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/core/config/app_config.dart';
+import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
+
+bool _isMinimal(BuildContext context) =>
+    Theme.of(context).extension<AppVisualThemeMarker>()?.visualTheme ==
+    AppVisualTheme.minimalism;
 
 class DesktopWindowControls extends StatelessWidget {
   const DesktopWindowControls({
@@ -15,6 +21,9 @@ class DesktopWindowControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
+      return const SizedBox.shrink();
+    }
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -39,6 +48,9 @@ class DesktopCanvasSizeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
+      return const SizedBox.shrink();
+    }
     final colors = Theme.of(context).colorScheme;
     return Semantics(
       label: '界面大小',
@@ -47,18 +59,22 @@ class DesktopCanvasSizeButton extends StatelessWidget {
         height: compact ? 34 : 40,
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
-          color: colors.surface.withValues(alpha: 0.30),
-          borderRadius: BorderRadius.circular(12),
+          color: _isMinimal(context)
+              ? colors.surface
+              : colors.surface.withValues(alpha: 0.30),
+          borderRadius: BorderRadius.circular(_isMinimal(context) ? 0 : 12),
           border: Border.all(
             color: colors.outlineVariant.withValues(alpha: 0.72),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: colors.shadow.withValues(alpha: 0.08),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
+          boxShadow: _isMinimal(context)
+              ? null
+              : [
+                  BoxShadow(
+                    color: colors.shadow.withValues(alpha: 0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -128,7 +144,7 @@ class _CanvasSizePresetButtonState extends State<_CanvasSizePresetButton> {
         child: InkWell(
           key: ValueKey('canvas-size-${widget.preset}'),
           onTap: _selectPreset,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(_isMinimal(context) ? 0 : 8),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
             width: width,
@@ -138,7 +154,7 @@ class _CanvasSizePresetButtonState extends State<_CanvasSizePresetButton> {
               color: _hovered
                   ? colors.primary.withValues(alpha: 0.18)
                   : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(_isMinimal(context) ? 0 : 8),
             ),
             child: Container(
               key: ValueKey('canvas-size-glyph-${widget.preset}'),
@@ -151,7 +167,7 @@ class _CanvasSizePresetButtonState extends State<_CanvasSizePresetButton> {
                   color: _hovered ? colors.primary : colors.onSurfaceVariant,
                   width: 2,
                 ),
-                boxShadow: _hovered
+                boxShadow: _hovered && !_isMinimal(context)
                     ? [
                         BoxShadow(
                           color: colors.primary.withValues(alpha: 0.28),
@@ -201,6 +217,9 @@ class DesktopMinimizeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
+      return const SizedBox.shrink();
+    }
     return _DesktopControlButton(
       tooltip: tooltip ?? '最小化',
       compact: compact,
@@ -222,6 +241,9 @@ class DesktopCloseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!AppConfig.capabilities.supportsDesktopWindow) {
+      return const SizedBox.shrink();
+    }
     return _DesktopControlButton(
       tooltip: tooltip ?? '退出',
       compact: compact,
@@ -268,7 +290,7 @@ class _DesktopControlButtonState extends State<_DesktopControlButton> {
         onExit: (_) => setState(() => _hovered = false),
         child: InkWell(
           onTap: widget.onTap,
-          borderRadius: BorderRadius.circular(11),
+          borderRadius: BorderRadius.circular(_isMinimal(context) ? 0 : 11),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
             width: buttonSize,
@@ -300,19 +322,24 @@ BoxDecoration _controlDecoration(
 }) {
   final colors = Theme.of(context).colorScheme;
   return BoxDecoration(
-    color: color ?? colors.surface.withValues(alpha: 0.34),
-    borderRadius: BorderRadius.circular(11),
+    color: color ??
+        (_isMinimal(context)
+            ? colors.surface
+            : colors.surface.withValues(alpha: 0.34)),
+    borderRadius: BorderRadius.circular(_isMinimal(context) ? 0 : 11),
     border: Border.all(
       color: highlighted
           ? colors.primary.withValues(alpha: 0.62)
           : colors.outlineVariant.withValues(alpha: 0.72),
     ),
-    boxShadow: [
-      BoxShadow(
-        color: colors.shadow.withValues(alpha: highlighted ? 0.16 : 0.08),
-        blurRadius: highlighted ? 14 : 8,
-        offset: const Offset(0, 3),
-      ),
-    ],
+    boxShadow: _isMinimal(context)
+        ? null
+        : [
+            BoxShadow(
+              color: colors.shadow.withValues(alpha: highlighted ? 0.16 : 0.08),
+              blurRadius: highlighted ? 14 : 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
   );
 }

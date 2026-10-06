@@ -3,6 +3,14 @@ schema_version: 1
 document_type: dataflow_and_module_map
 project_name: "Innocence"
 contract_inventory_path: docs/06-contract-inventory.md
+planned_extensions:
+  - id: assistant_b
+    status: byok_chat_discovery_implemented_fixture_verified_live_provider_pending
+    specification: docs/planning/Innocence-AI智能助手B方案实施与契约.md
+    flow: "AssistantChatPage→按owner加密的连接配置→ChatProvider(Chat Completions/Responses)→AssistantChatController多轮工具调用→AssistantAppTools确定性校验/确认→原Session/SQLite或Bearer API→实际结果；日计划走client-proposals/validate/execute/query/undo"
+    boundary: "DEC-0051允许当前本机资料经BYOK按需发往指定模型；本机ownerScope独立，凭据不上传Innocence。身份变化/停止取消后续动作；线上服务端写入后刷新；原本地排程为次级入口，C调度不包含"
+    required_compatibility: "已新增共享dayRevision并接入旧保存/模板/导入；助手使用稳定实体新增，旧整日替换API保留兼容语义"
+    connection_flow: "模型设置地址+Key→ChatServiceAddress同origin路径→GET /models→ChatModelCatalog严格映射→选择真实id→ChatProvider自动协议验证→成功后原生加密仓储；DEC-0052，第13节"
 topology:
   nodes:
     - id: flutter_mobile
@@ -14,6 +22,9 @@ topology:
     - id: admin_web
       name: "独立管理员网站（浏览器静态资源，经同域反向代理访问服务端）"
       owner: "Innocence"
+    - id: user_model_service
+      name: "用户自行配置的模型API（Chat Completions或Responses）"
+      owner: "用户指定供应商"
     - id: backend
       name: "Spring Boot 后端（innocence-server）"
       owner: "Innocence"
@@ -24,6 +35,14 @@ topology:
       name: "MySQL 8 + Redis"
       owner: "Innocence"
   edges:
+    - from: flutter_desktop
+      to: user_model_service
+      call: "当前对话及工具按需读取结果；不发账号token/API Key到对话，模型密钥仅Authorization头；最长60秒、最多8轮工具"
+      auth: "用户自行配置API Key；本机加密存储"
+    - from: flutter_mobile
+      to: user_model_service
+      call: "同桌面BYOK适配器；仅联网开发构建，本轮正式无INTERNET离线APK不变"
+      auth: "用户自行配置API Key；Android Keystore加密"
     - from: flutter_mobile
       to: backend
       call: "REST /api/app/v1 + WebSocket /ws/app"
@@ -127,8 +146,8 @@ pitfalls:
     description: "计划、备忘录、专注事件、年度区间与签到意图使用不同冲突规则，禁止全局套用最后修改覆盖"
     contract_test_required: true
 code_locations:
-  backend: "server/innocence-server/src/main/java/com/innocence/server/modules/（account/checkin/focus/friend/home/memo/notification/plan/report/setting/stats/system/team）"
-  frontend: "client/flutter_app/lib/features/（account/admin/auth/checkin/focus/friends/home/memos/notifications/plans/settings/stats/team）+ core/（network/config/theme/platform/layout/widgets）"
+  backend: "server/innocence-server/src/main/java/com/innocence/server/modules/（assistant/account/checkin/focus/friend/home/memo/notification/plan/report/setting/stats/system/team）"
+  frontend: "client/flutter_app/lib/features/（assistant/account/admin/auth/checkin/focus/friends/home/memos/notifications/plans/settings/stats/team）+ core/（network/config/theme/platform/layout/widgets）"
   admin_frontend: "client/admin_web/src/（独立管理员网站；登录、概览、举报、用户、团队、公告）"
   database: "server/innocence-server/src/main/resources/schema.sql + infra/docker/docker-compose.dev.yml"
 project_boundary:

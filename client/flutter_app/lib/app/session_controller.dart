@@ -1,4 +1,8 @@
 import 'dart:async';
+import '../features/assistant/application/assistant_controller.dart';
+import '../features/assistant/data/assistant_api.dart';
+import '../features/assistant/application/assistant_app_tools.dart';
+import '../features/assistant/application/chat_controller.dart';
 
 import 'package:flutter/material.dart';
 import 'package:innocence_flutter/app/app_language.dart';
@@ -60,6 +64,7 @@ class SessionController extends ChangeNotifier {
     required AuthLocalStorage localStorage,
     required AppLanguageController languageController,
     OfflineStore? offlineStore,
+    AssistantApi? assistantApi,
     StudyPlanApi? studyPlanApi,
     FocusSessionApi? focusSessionApi,
     CheckInApi? checkInApi,
@@ -89,9 +94,36 @@ class SessionController extends ChangeNotifier {
         _settingsApi = settingsApi ?? SettingsApi(),
         _adminReportApi = adminReportApi ?? AdminReportApi(),
         _offlineSyncApi = offlineSyncApi ?? OfflineSyncApi(),
-        _restoreOfflineOnStartup =
-            restoreOfflineOnStartup ?? AppConfig.deviceType == 'android';
+        _restoreOfflineOnStartup = restoreOfflineOnStartup ??
+            AppConfig.capabilities.restoresLocalWorkspace {
+    assistant = AssistantController(
+        identity: this,
+        owner: () => isOffline
+            ? localOwnerScope
+            : _session == null
+                ? null
+                : 'user:${_session!.userId}',
+        offline: () => isOffline || isOfflineOnlyBuild,
+        session: () => _session,
+        loadPlan: loadPlanByDate,
+        refresh: _refreshAssistantPlans,
+        store: _offlineStore,
+        api: assistantApi ?? AssistantApi());
+    assistantTools = AssistantAppTools(
+        session: this,
+        store: _offlineStore,
+        refresh: _refreshAssistantPlans,
+        api: assistantApi);
+    chat = AssistantChatController(
+        identity: this,
+        owner: () => assistantTools.owner,
+        host: assistantTools,
+        offlineOnly: isOfflineOnlyBuild);
+  }
 
+  late final AssistantController assistant;
+  late final AssistantAppTools assistantTools;
+  late final AssistantChatController chat;
   final AuthApi _authApi;
   final bool isOfflineOnlyBuild;
   final AuthLocalStorage _localStorage;
@@ -1278,6 +1310,54 @@ class SessionController extends ChangeNotifier {
             '应用本周快速安排失败。', 'Failed to apply the weekly quick arrangement.'));
   }
 
+  Future<void> _refreshAssistantPlans(String date) async {
+    final identityOwner = isOffline ? localOwnerScope : _session?.userId;
+    final capturedSession = _session;
+    final capturedLocal = localOwnerScope;
+    final plan = isOffline && capturedLocal != null
+        ? await _offlineStore.loadDailyPlan(capturedLocal, date)
+        : capturedSession != null
+            ? await _studyPlanApi.getTodayPlan(capturedSession, planDate: date)
+            : null;
+    if (identityOwner != (isOffline ? localOwnerScope : _session?.userId)) {
+      return;
+    }
+    if (plan != null && date == _todayPlan.planDate) _todayPlan = plan;
+    if (isOffline && capturedLocal != null) {
+      final month = await _offlineStore.loadMonthOverview(
+          capturedLocal, date.substring(0, 7));
+      final stats = await _offlineStore.loadStatsOverview(capturedLocal,
+          days: _statsRangeDays);
+      if (identityOwner != (isOffline ? localOwnerScope : _session?.userId)) {
+        return;
+      }
+      _monthPlanOverview = month;
+      _statsOverview = stats;
+      if (date == _todayPlan.planDate) {
+        _checkInStatus =
+            await _buildOfflineCheckInStatus(capturedLocal, _todayPlan);
+      }
+    } else if (capturedSession != null) {
+      final month = await _studyPlanApi.getMonthPlanOverview(capturedSession,
+          month: date.substring(0, 7));
+      if (_session != capturedSession) return;
+      final summary = await Future.wait([
+        _checkInApi.getTodayStatus(capturedSession),
+        _statsApi.getOverview(capturedSession, days: _statsRangeDays),
+        _studyPlanApi.getWeekPlanOverview(capturedSession,
+            anchorDate: _weekAnchorDate),
+      ]);
+      if (_session != capturedSession) return;
+      _monthPlanOverview = month;
+      _checkInStatus = summary[0] as CheckInStatus;
+      _statsOverview = summary[1] as StatsOverview;
+      _weekPlanOverview = summary[2] as WeekPlanOverview;
+    }
+    if (identityOwner == (isOffline ? localOwnerScope : _session?.userId)) {
+      notifyListeners();
+    }
+  }
+
   Future<void> _refreshAfterPlanMutation(
     AppSession currentSession, {
     bool reloadTodayPlan = false,
@@ -2113,6 +2193,8 @@ class SessionController extends ChangeNotifier {
       if (!cancelled) {
         return;
       }
+      await _offlineStore.clearAssistantOwner('user:${currentSession.userId}');
+      await chat.eraseIdentityData('user:${currentSession.userId}');
       await _localStorage.clearSession();
       _session = null;
       _profile = null;
@@ -3690,6 +3772,8 @@ class SessionController extends ChangeNotifier {
   @override
   void dispose() {
     _stopFocusTicker();
+    assistant.dispose();
+    chat.dispose();
     unawaited(_offlineStore.close());
     super.dispose();
   }

@@ -84,6 +84,14 @@ project_specific_rules:
     enabled: true
     rule: "Android 保留 Material Design 3 导航、表单与可访问性交互，但主题二简约白色和主题四液态玻璃立即覆盖全局令牌、入口、主 Shell 和业务页；仅开启 useMaterial3 或令牌接入不算页面验收"
     verification: "Android A0–A5 按两主题手机导航、组件状态、动态效果、可访问性及真机页面矩阵验收；Windows 四主题范围保持原样"
+  - id: RULE-015
+    enabled: true
+    rule: "智能助手B由DEC-0051修正为BYOK多轮聊天主入口；DEC-0052简化为地址与密钥发现模型、选择后验证协议并加密保存，高级设置可手动配置。当前资料按需发送给指定模型，原排程为次级工具。白名单变更须经确定性校验/当前身份与具体确认；共享单日修订、幂等和带冲突检查的撤销必需；不包含C持续规则"
+    verification: "按B专档各批验收；真实生成/负向/实际写入/重启/同步/双端证据齐全，方向确认不等于实现；Android现行离线发行和原门禁保持"
+  - id: RULE-016
+    enabled: true
+    rule: "DEC-0054覆盖DEC-0053的柑橘视觉：简约白以最早minimalism.html为基准重建，黑白灰、直角/无阴影/无渐变，浅灰画布与实色白面板及清晰细边线区分；移除橙色阶梯并重建排版Hero。专注表盘仍读取原FocusSession，双端删标语标签/保留正文；Android保留MD3交互，四主题存储/年度业务七色/Focus Orb行为与业务语义不变"
+    verification: "表盘tick/暂停/继续/正常及提前结束/重新开始、L/M/S和320dp大字体宿主回归；原生设备和多DPI另验，证据0094"
 change_policy:
   source_of_truth: this_file
   rule_change_checkpoint: DECISION
@@ -97,15 +105,19 @@ change_policy:
     - docs/planning/Innocence-Windows自适应桌面体验.md
     - docs/planning/Innocence-Android版本实施规划.md
     - docs/planning/Innocence-UI设计规划.md
+    - docs/planning/Innocence-AI智能助手B方案实施与契约.md
 ---
 
 # 项目画像说明
 
 本文为 Innocence 项目特有规则的权威来源。产品细节以 `docs/planning/` 为详稿，治理规则以本文为准。
 
+2026-10-05新增鸿蒙平板规划（0098），用户随后要求开始制作（0100）：Air系列/HarmonyOS 7全屏复用PC页面，不提供Windows窗口尺寸调整。实施专档为 `docs/planning/Innocence-鸿蒙平板版本实施规划.md`；0102已在F盘准备官方DevEco26/API26、四插件注册，并完成共享Dart/ArkTS/ARM64原生编译和未签名Debug HAP，CRC/摘要及元数据核对通过。用户已完成DevEco登录，真实调试签名仍需连接设备生成Profile；0104已在F盘API26/x64/MatePad Air12预设安装启动HAP，PC全屏/四主题/玻璃进程冷启动恢复及SQLite初始schema有证据；独立工具许可目录差异通过仅工具目录链接解决。当前小艺输入法首次协议/隐私页待用户，QA_NATIVE/QA_TASK草稿未保存；业务恢复/真实平板Profile签名和完整门禁仍待，H0-H5/G01整体未封板。首轮强制本机模式，Debug仍声明INTERNET权限；具体设备型号和会话槽位暂待核实，不能根据PC布局把设备归成Windows或静默扩大“一台手机 + 一台电脑”规则。既有Windows自适应与Android手机规则继续适用于各自平台。
+
 关键参考文档：
 - 产品规划：`docs/planning/Innocence-项目计划书.md`
 - MVP 范围：`docs/planning/Innocence-MVP第一版功能范围.md`
+- 智能助手B范围/内部模型/开发契约：`docs/planning/Innocence-AI智能助手B方案实施与契约.md`（DEC-0050/0090采用B，DEC-0051/0092修正为BYOK聊天助手，DEC-0052/0093简化为地址+Key发现模型及协议验证；14项工具接原业务，真实模型/完整HTTP/同步/设备仍待，月历批量重排及原任务编辑尚未接工具；原15模块封板记录保留）。配置见`docs/development/AI对话助手配置与验收.md`。
 - 接口契约：`docs/planning/Innocence-接口清单草案.md`
 - 数据库契约：`docs/planning/Innocence-数据库表结构草案.md`
 - UI 规划与主题存档：`docs/planning/Innocence-UI设计规划.md`

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/core/config/app_config.dart';
 
 enum DesktopWindowSurface {
   auth,
@@ -115,6 +116,12 @@ class DesktopPresentationPolicy {
   static const Size largeThreshold = Size(1180, 720);
   static const double hysteresis = 32;
 
+  /// A keyboard changes available height without replacing the PC workbench.
+  static DesktopPresentationTier resolveTabletTier(double width) =>
+      width >= largeThreshold.width
+          ? DesktopPresentationTier.large
+          : DesktopPresentationTier.medium;
+
   static DesktopPresentationTier resolveTier(
     Size viewport, {
     DesktopPresentationTier? previousTier,
@@ -222,10 +229,12 @@ class _DesktopPresentationLayoutState extends State<DesktopPresentationLayout> {
   }
 
   DesktopPresentationSpec _resolveAuth(Size viewport, bool reduceMotion) {
-    final tier = DesktopPresentationPolicy.resolveTier(
-      viewport,
-      previousTier: _previousTier,
-    );
+    final tier = AppConfig.capabilities.isHarmonyTablet
+        ? DesktopPresentationPolicy.resolveTabletTier(viewport.width)
+        : DesktopPresentationPolicy.resolveTier(
+            viewport,
+            previousTier: _previousTier,
+          );
     _previousTier = tier;
     return DesktopPresentationSpec.auth(
       tier: tier,
@@ -234,6 +243,12 @@ class _DesktopPresentationLayoutState extends State<DesktopPresentationLayout> {
   }
 
   DesktopPresentationSpec _resolveCanvas(Size viewport, bool reduceMotion) {
+    if (AppConfig.capabilities.isHarmonyTablet) {
+      return DesktopPresentationSpec.canvas(
+        tier: DesktopPresentationPolicy.resolveTabletTier(viewport.width),
+        reduceMotion: reduceMotion,
+      );
+    }
     final spec = DesktopPresentationPolicy.resolveCanvas(
       viewport,
       previousTier: _previousTier,
