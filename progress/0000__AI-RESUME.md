@@ -3,13 +3,13 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-07"
-last_resumed_at: "2026-10-07T00:54:24+08:00"
+last_resumed_at: "2026-10-07T13:25:17+08:00"
 latest_checkpoint: "0106"
 next_sequence: "0107"
 current_phase: P01
 current_gate: G01
-state: "harmonyos_preview_published_physical_signing_and_recovery_pending"
-current_goal: "0106已补发鸿蒙 v1.2.3-harmonyos-preview.1 独立未签名Debug预览：Release#404950703公开/预发布，ARM64/x64+说明+SHA256四资产摘要与匿名下载通过；源码/注释标签同步，新x64原生安装启动/进程冷启动与PC全屏通过。实体平板不可直接安装，用户USB/授权后需设备Profile与签名。输入法错误2条/玻璃编辑及业务保存恢复、HUKS/槽位/联网和H5/G01仍待；Windows/Android正式latest=v1.2.3。"
+state: "physical_device_authorized_profile_generation_confirmation_pending"
+current_goal: "真实LRT-W20平板已USB连接并由用户亲自授权，HDC确认HarmonyOS7.0.0.109/API26/aarch64；原生Innocence包尚未发现。F盘DevEco ARM64工程已打开自动签名页，空signingConfigs，尚未生成Profile/签名/安装。已请求确认将本设备UDID提交华为开发者平台用于调试Profile，等待答复，不因USB授权代替云端提交确认；候选包与官方签名校验流程准备好。确认后继续自动签名/构建/官方验签/只在用户平板安装启动，设备绑定包不上传公开资产，H5/G01及原业务验收继续待。"
 current_baseline:
   - "2026-10-07 鸿蒙预览已公开（0106）：v1.2.3-harmonyos-preview.1/Release#404950703，2未签名Debug HAP+说明+SHA256共4资产摘要及匿名HEAD200；源码0152a77/注释标签09e8dee精确同步，正式latest仍v1.2.3。原生ARM64/x64重建104.7/118.5秒，CRC/版本8/API/ELF/各113Dart一致性、10平板配置回归通过；新x64模拟器安装/进程冷启动/2800×1840 PC白色首页有原生证据。输入法12800008/9仍2条；真实平板Profile/签名、输入/业务恢复和完整H5/G01待，不可直接安装ARM64下载包。"
   - "2026-10-07 v1.2.3+8已正式发布（0105）：源码f7922f6/注释标签39b50dd，GitHub官方接口Git对象SHA精确保留/非force快进；Release#404930678公开/latest，4项摘要/正文及匿名下载200。188 Flutter/4平台条件跳过、19离线/73后端/4 DPAPI与正式双端产物通过；API36正式v1.2.2升级COLD1742ms，合成备忘录标题/正文/时间及本机身份恢复，错误筛选0。Android原发行证书/无INTERNET；鸿蒙调试源码同步，不发行HAP，原验收门禁仍待。"
