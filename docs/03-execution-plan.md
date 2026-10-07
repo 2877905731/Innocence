@@ -8,7 +8,7 @@ baseline:
   runtime: "Flutter + Java 21 + Spring Boot 3.3.2 + MyBatis + MySQL 8 + Redis"
   current_phase: P01
   current_gate: G01
-  evidence: "2026-10-07 v1.2.3+8正式发布（0105）：188 Flutter/4配置跳过、19离线/73后端/4 DPAPI，Windows/Android正式包版本/签名/权限/CRC/摘要通过；API36正式v1.2.2覆盖冷启动COLD1742ms，合成备忘录保留/错误筛选0；四项公开下载200。鸿蒙仅源码同步，G01及真实模型/HTTP/设备仍待"
+  evidence: "2026-10-07 v1.2.3+8正式发布（0105）：188 Flutter/4配置跳过、19离线/73后端/4 DPAPI，Windows/Android正式包版本/签名/权限/CRC/摘要通过；API36覆盖冷启动备忘录保留/错误筛选0；四项公开下载200。鸿蒙0106独立未签名预览公开，0107单设备签名安装启动及PC全屏通过；G01及真实模型/HTTP/完整设备矩阵仍待"
 android_track:
   status: in_progress
   plan_path: docs/planning/Innocence-Android版本实施规划.md
@@ -16,13 +16,13 @@ android_track:
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 harmonyos_tablet_track:
-  status: unsigned_preview_published_physical_signing_and_recovery_pending
+  status: unsigned_preview_published_physical_signed_install_start_verified
   plan_path: docs/planning/Innocence-鸿蒙平板版本实施规划.md
-  checkpoint: "0106"
+  checkpoint: "0107"
   user_scope: "Air系列平板/HarmonyOS 7，全屏复用PC页面；不做Windows窗口尺寸调整。0098先规划、0099恢复核对，用户随后明确开始制作；0100首批实现"
   order: [H0_toolchain_and_minimal_hap, H1_fullscreen_pc_shell, H2_offline_storage, H3_page_and_touch_parity, H4_online_contract_and_assistant, H5_device_and_release]
-  pending_decisions: "具体真实型号与方向策略继续核实；平板槽位在H4前确认；GitHub未签名开发预览已按用户授权分发，正式联网包范围及H5分发仍待实际签名和设备证据"
-  evidence_boundary: "0106独立鸿蒙开发预览Release#404950703公开，4资产摘要/匿名下载通过；两架构1.2.3+8未签名Debug完整编译、CRC/API/ELF/源码一致性和10宿主回归通过。新x64在API26模拟器安装/启动/进程冷启动、PC全屏2800×1840简约白首页有证据；旧0104四主题/Preferences/SQLite初始证据保留。输入法12800008/9仍2条，真实平板Profile/签名、输入与业务恢复、HUKS/槽位/联网及H5/G01仍待；Debug声明INTERNET，不计可直接安装的正式离线包"
+  pending_decisions: "真实设备型号代码已核对LRT-W20/HarmonyOS7/API26，具体市场年款与方向策略继续核实；平板槽位在H4前确认；正式联网包范围及H5公开分发仍待完整验收"
+  evidence_boundary: "0106独立未签名预览4资产摘要/匿名下载、两架构完整编译/10回归和新版x64模拟器安装/冷启动/PC全屏通过；0104历史四主题/初始存储证据保留。0107实际aarch64平板的单设备Profile、ARM64构建112.3秒/官方验签、安装和解锁后启动通过，App root/截图2800×1840、PC语言/计划页面有画面，PID三个错误筛选0；设备签名包仅F盘私有。当前保留用户页面，真机冷启动/输入/业务恢复、旧模拟器输入法与玻璃编辑、HUKS/槽位/联网及H5/G01仍待；Debug声明INTERNET，不计正式离线分发"
 assistant_track:
   decision: "DEC-0050/0090采用B；DEC-0051/0092修正为自填API Key的全局聊天助手；DEC-0052/0093地址与密钥发现模型"
   status: byok_chat_discovery_implemented_fixture_verified_live_provider_and_device_pending
@@ -206,3 +206,9 @@ next_actions:
 ## 2026-10-07 鸿蒙预览已分发（0106）
 
 `v1.2.3-harmonyos-preview.1` / Release#404950703 已公开，4项资产摘要与匿名下载通过；两架构原生编译、10平板配置回归及新版x64安装/进程冷启动/PC全屏子项通过。当前为未签名Debug，实体平板仍需设备Profile/签名；输入法错误2条、玻璃编辑/业务恢复及H5/G01仍待。正式Windows/Android latest继续v1.2.3。
+
+## 2026-10-07 真实平板签名安装与启动（0107）
+
+用户实际LRT-W20/HarmonyOS7/API26/aarch64通过USB调试授权，单设备Debug Profile与当前设备在内存中匹配，全部材料位于F盘。ARM64签名HAP默认构建exit0/Hvigor112.3秒、官方SDK验签、包CRC/版本8/ELF/113共享源码核对通过。HDC安装成功；锁屏10106102由用户手动解锁后解决，EntryAbility启动/进程存在，2800×1840 PC全屏语言/计划页面有真机画面。当前PID三个错误筛选0，仅覆盖当前启动子集。
+
+设备绑定的签名HAP保存在本机忽略目录，公开预览资产与历史发布说明保持原范围。检查期间用户页面发生变化且计划编辑出现未保存内容，停止点击并保持用户页面，等待用户处理草稿后再确认重启；真机冷启动、业务保存恢复/覆盖升级与完整H5/G01继续待。

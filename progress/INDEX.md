@@ -755,3 +755,10 @@ checkpoints:
     status: complete
     path: progress/0106__20261007__P01__DONE__harmonyos-unsigned-preview-release.md
     title: "鸿蒙平板1.2.3未签名开发预览独立发布，真机签名仍待"
+  - sequence: "0107"
+    created_at: "2026-10-07T13:51:50+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0107__20261007__P01__DONE__harmonyos-physical-signed-install-and-start.md
+    title: "鸿蒙实体平板单设备签名、安装启动与全屏PC页面核对"
