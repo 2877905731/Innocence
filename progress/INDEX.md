@@ -762,3 +762,10 @@ checkpoints:
     status: complete
     path: progress/0107__20261007__P01__DONE__harmonyos-physical-signed-install-and-start.md
     title: "鸿蒙实体平板单设备签名、安装启动与全屏PC页面核对"
+  - sequence: "0108"
+    created_at: "2026-10-07T13:59:39+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0108__20261007__P01__DECISION__harmonyos-user-acceptance-and-github-release.md
+    title: "用户验收鸿蒙平板版本并明确授权GitHub发布"

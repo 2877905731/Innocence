@@ -16,13 +16,13 @@ android_track:
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 harmonyos_tablet_track:
-  status: unsigned_preview_published_physical_signed_install_start_verified
+  status: user_accepted_release_aot_ready_for_github
   plan_path: docs/planning/Innocence-鸿蒙平板版本实施规划.md
-  checkpoint: "0107"
+  checkpoint: "0108"
   user_scope: "Air系列平板/HarmonyOS 7，全屏复用PC页面；不做Windows窗口尺寸调整。0098先规划、0099恢复核对，用户随后明确开始制作；0100首批实现"
   order: [H0_toolchain_and_minimal_hap, H1_fullscreen_pc_shell, H2_offline_storage, H3_page_and_touch_parity, H4_online_contract_and_assistant, H5_device_and_release]
   pending_decisions: "真实设备型号代码已核对LRT-W20/HarmonyOS7/API26，具体市场年款与方向策略继续核实；平板槽位在H4前确认；正式联网包范围及H5公开分发仍待完整验收"
-  evidence_boundary: "0106独立未签名预览4资产摘要/匿名下载、两架构完整编译/10回归和新版x64模拟器安装/冷启动/PC全屏通过；0104历史四主题/初始存储证据保留。0107实际aarch64平板的单设备Profile、ARM64构建112.3秒/官方验签、安装和解锁后启动通过，App root/截图2800×1840、PC语言/计划页面有画面，PID三个错误筛选0；设备签名包仅F盘私有。当前保留用户页面，真机冷启动/输入/业务恢复、旧模拟器输入法与玻璃编辑、HUKS/槽位/联网及H5/G01仍待；Debug声明INTERNET，不计正式离线分发"
+  evidence_boundary: "0107实体Debug签名安装启动与用户0108验收有记录；本轮ARM64 Release/AOT无INTERNET编译/CRC/API/版本8/ELF/113Dart及原生宿主匹配、源码分析/10回归通过，私有x64 Release安装/进程冷启动与2800×1840 PC首页通过，fatal/overflow0、输入法12800008/9仍2。公开包未签名，个人设备材料不上传；ARM64 Release未重装用户平板，完整业务恢复/升级/输入/性能、HUKS/槽位/联网及H5/G01待。GitHub分发准备就绪"
 assistant_track:
   decision: "DEC-0050/0090采用B；DEC-0051/0092修正为自填API Key的全局聊天助手；DEC-0052/0093地址与密钥发现模型"
   status: byok_chat_discovery_implemented_fixture_verified_live_provider_and_device_pending
@@ -212,3 +212,7 @@ next_actions:
 用户实际LRT-W20/HarmonyOS7/API26/aarch64通过USB调试授权，单设备Debug Profile与当前设备在内存中匹配，全部材料位于F盘。ARM64签名HAP默认构建exit0/Hvigor112.3秒、官方SDK验签、包CRC/版本8/ELF/113共享源码核对通过。HDC安装成功；锁屏10106102由用户手动解锁后解决，EntryAbility启动/进程存在，2800×1840 PC全屏语言/计划页面有真机画面。当前PID三个错误筛选0，仅覆盖当前启动子集。
 
 设备绑定的签名HAP保存在本机忽略目录，公开预览资产与历史发布说明保持原范围。检查期间用户页面发生变化且计划编辑出现未保存内容，停止点击并保持用户页面，等待用户处理草稿后再确认重启；真机冷启动、业务保存恢复/覆盖升级与完整H5/G01继续待。
+
+## 2026-10-07 用户验收与Release分发准备（0108）
+
+用户明确验收并选择GitHub；独立Release/AOT本机HAP已构建，移除INTERNET且不包含设备Profile。源码分析/10平板回归与x64 Release安装/冷启动/全屏PC首页通过；全屏模式在首帧后设置，原生宿主扩展SYSTEM安全区。ARM64 Release包与源码/元数据及摘要核对后分发，实际平板进程保持不动；用户验收/Debug真机证据不伪填未执行的Release业务恢复/升级与完整H5/G01。

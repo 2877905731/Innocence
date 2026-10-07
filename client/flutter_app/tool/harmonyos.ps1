@@ -6,6 +6,8 @@ param(
     [string]$DevEcoHome = '',
     [ValidateSet('arm64', 'x64')]
     [string]$Architecture = 'arm64',
+    [ValidateSet('debug', 'release')]
+    [string]$BuildMode = 'debug',
     [switch]$Unsigned,
     [switch]$DirectGit,
     [string]$GitHelperPath = ''
@@ -14,6 +16,7 @@ $ErrorActionPreference = 'Stop'
 $appRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $workRoot = [IO.Path]::GetFullPath((Join-Path $appRoot 'build/harmonyos-h0'))
 $stageFolder = if ($Architecture -eq 'arm64') { 'app' } else { 'app-x64' }
+if ($BuildMode -eq 'release') { $stageFolder += '-release' }
 $stageRoot = Join-Path $workRoot $stageFolder
 if (!$FlutterSdk) { $FlutterSdk = Join-Path $workRoot 'flutter-oh' }
 if (!$DevEcoHome -and (Test-Path -LiteralPath (Join-Path $workRoot 'tools/DevEcoStudio26/sdk'))) {
@@ -145,6 +148,17 @@ try {
     }
     Copy-Item -LiteralPath (Join-Path $appRoot 'pubspec.yaml') -Destination $stageRoot -Force
     Copy-Item -LiteralPath (Join-Path $appRoot 'harmonyos/pubspec_overrides.yaml') -Destination $stageRoot -Force
+    if ($BuildMode -eq 'release') {
+        # This accepted edition is local-only. Do not ship the Debug template's network permission.
+        $stageModulePath = Join-Path $stageRoot 'ohos/entry/src/main/module.json5'
+        $stageModule = [IO.File]::ReadAllText($stageModulePath)
+        $internetPermission = '\{"name"\s*:\s*"ohos\.permission\.INTERNET"\},?'
+        if ([regex]::Matches($stageModule, $internetPermission).Count -gt 1) {
+            throw '原生网络权限声明重复，请核对离线发行配置。'
+        }
+        $stageModule = [regex]::Replace($stageModule, $internetPermission, '')
+        [IO.File]::WriteAllText($stageModulePath, $stageModule, [Text.UTF8Encoding]::new($false))
+    }
     $ohpmCachePath = (Join-Path $workRoot 'ohpm-cache').Replace('\', '/')
     [IO.File]::WriteAllText((Join-Path $stageRoot 'ohos/.ohpmrc'),
         "registry=https://ohpm.openharmony.cn/ohpm/`ncache=$ohpmCachePath`nstrict_ssl=true`n",
@@ -165,7 +179,7 @@ try {
         if ($Action -eq 'analyze') { Invoke-TaskFlutter @('analyze', '--no-pub'); return }
         if ($Action -eq 'build') {
             # Native online/device-slot contracts and key vault are a later gate.
-            $hapArguments = @('build', 'hap', '--debug',
+            $hapArguments = @('build', 'hap', "--$BuildMode",
                 "--target-platform=ohos-$Architecture",
                 '--dart-define=INNOCENCE_TARGET_PLATFORM=harmonyos',
                 '--dart-define=INNOCENCE_OFFLINE_ONLY=true')

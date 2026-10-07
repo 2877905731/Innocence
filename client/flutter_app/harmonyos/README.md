@@ -1,5 +1,7 @@
 # Innocence 鸿蒙平板开发工程
 
+2026-10-07：用户已验收当前实体平板调试版本并授权 GitHub 发布（0108）。[鸿蒙平板本机版 v1.2.3-harmonyos.1](https://github.com/2877905731/Innocence/releases/tag/v1.2.3-harmonyos.1) 提供 ARM64 Release/AOT 未签名 HAP，应用版本1.2.3+8，无INTERNET权限；设备绑定签名包继续仅F盘私有，公开包需接收者自行签名。Release x64模拟器安装/进程冷启动和2800×1840 PC全屏已核对；实际ARM64 Release未重装用户平板，业务恢复等完整门禁待。[本次范围](../../../docs/releases/v1.2.3-harmonyos.1.md)。
+
 2026-10-07：[v1.2.3 鸿蒙平板开发预览 1](https://github.com/2877905731/Innocence/releases/tag/v1.2.3-harmonyos-preview.1) 单独提供 ARM64 平板与 x64 模拟器未签名 Debug HAP，应用版本 `1.2.3+8`。0107另为用户连接的 LRT-W20 / HarmonyOS 7 / API 26 平板生成单设备 Profile，ARM64 签名包经官方 SDK 验签、安装和启动成功，2800×1840 全屏 PC 页面有真机画面。设备绑定包只保存在本机 F 盘，公开下载仍为未签名包；真机冷启动、输入和业务恢复等完整验收继续待。Windows/Android 正式版为 v1.2.3；0104 的历史运行证据仍对应此前 1.2.2+7。公开预览范围见[发布说明](../../../docs/releases/v1.2.3-harmonyos-preview.1.md)。
 
 用户于 2026-10-05 要求开始制作。平板复用 PC 工作台和四主题；当前原生宿主按横屏/反向横屏、沉浸式全屏配置，关闭 Windows 窗口控制、拖边、托盘和 Focus Orb。首轮构建强制本机模式，账号接口和 BYOK 请求不启用，等待设备槽位契约及原生密钥保险库接入。
@@ -26,6 +28,8 @@
 # 自动识别 tools/DevEcoStudio26。
 ./tool/harmonyos.ps1 -Action doctor
 ./tool/harmonyos.ps1 -Action build -Unsigned
+# 本机版公开发行使用独立Release工程，不包含个人签名。
+./tool/harmonyos.ps1 -Action build -BuildMode release -Unsigned
 # Windows 本地模拟器：x64 工程和输出单独位于 app-x64。
 ./tool/harmonyos.ps1 -Action build -Unsigned -Architecture x64
 # 打开暂存的 ohos 工程，在 IDE 完成调试签名。
@@ -34,7 +38,7 @@
 ./tool/harmonyos.ps1 -Action build
 ```
 
-Flutter OH 可用 `-FlutterSdk` 指定，官方工具可用 `-DevEcoHome` 指定；`-DirectGit` 仅用于本机失效代理及旧仓库地址迁移，额外在该进程启用 Git 长路径；`-GitHelperPath` 可指定完整 Git 的辅助程序目录，不修改全局 Git 配置。`-Architecture` 默认为 `arm64`，使用 `x64` 时暂存工程为 `app-x64`、kernel 为 `kernel-check-x64`；`ide` 也按该参数打开对应工程。
+Flutter OH 可用 `-FlutterSdk` 指定，官方工具可用 `-DevEcoHome` 指定；`-DirectGit` 仅用于本机失效代理及旧仓库地址迁移，额外在该进程启用 Git 长路径；`-GitHelperPath` 可指定完整 Git 的辅助程序目录，不修改全局 Git 配置。`-BuildMode` 默认为 `debug`；`release` 使用独立 `app-release` / `app-x64-release`，不覆盖已签名Debug工程，只在Release暂存模块移除模板INTERNET权限。`ide -BuildMode release` 打开对应Release工程。`-Architecture` 默认为 `arm64`，使用 `x64` 时暂存工程为 `app-x64`、kernel 为 `kernel-check-x64`；`ide` 也按该参数打开对应工程。
 
 `prepare` 将 `lib`、shader 与原生工程复制到 `build/harmonyos-h0/app`，只在该暂存工程使用鸿蒙依赖覆盖及锁文件。`GeneratedPluginRegistrant` 已生成 Preferences、路径、文件选择和 SQLite 四个插件的注册，并通过原生编译。调试签名在暂存工程完成；脚本发现其非空签名配置时保留该配置，不复制回仓库。账号登录与设备授权由用户在官方界面操作，签名材料不能纳入 Git。
 
@@ -90,3 +94,7 @@ flutter test --no-pub --dart-define=INNOCENCE_TARGET_PLATFORM=harmonyos `
 HDC安装成功，系统包根字段确认版本 `1.2.3` / code `8`。首轮启动因锁屏返回 `10106102`；用户手动解锁后 EntryAbility 启动成功，进程存在，App root与截图均为 `2800×1840`。语言选择页和PC计划页均有原生画面，计划页侧栏、日/月/年入口及工作台全屏可见，无Windows窗口控制。进程34366的Flutter致命异常、RenderFlex溢出及输入法12800008/9三个筛选计数均0，只覆盖该进程当前日志。原生证据在忽略目录 `build/qa/harmony-physical-v1.2.3`。
 
 用户正在操作平板，检查期间计划编辑页出现未保存更改，已停止点击并请求用户先处理草稿再确认重启。当前未执行真机进程终止/冷启动，也未写入合成任务、提取真实业务库或验证业务恢复；截图和启动成功不能代替这些门禁。
+
+## 用户验收后的Release候选（0108）
+
+用户选择GitHub发布；ARM64 Release/AOT与x64核对构建通过。新版SDK嵌入层全屏状态在首帧后设置，Index宿主明确扩展SYSTEM安全区，保留键盘避让；x64 Release冷启动App root与截图2800×1840，首页有画面，fatal/overflow筛选0，输入法12800008/9仍2条。ARM64 Release包CRC/版本8/API/三份ELF、113Dart和原生宿主字节、无JIT/无INTERNET及个人设备标识/材料不包含通过。用户实际平板上的设备签名Debug包保持原样，不以模拟器Release替代真机Release恢复/升级等完整门禁。

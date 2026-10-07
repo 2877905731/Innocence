@@ -44,7 +44,7 @@ read_order:
 ```yaml
 project_summary: "Innocence 是面向学习、自律、陪伴和团队互助的双端产品（Flutter 手机端 + 桌面端），原15模块已封板；第16助手已有BYOK多轮聊天/14工具及地址+Key发现模型（0093）。2026-10-04按最早minimalism.html重建简约白（0095/DEC-0054），旧柑橘归档；黑白灰/字体Hero/实色直角白面板与浅灰画布细线区分，174 Flutter通过。2026-10-05 Android专注卡数字/表盘合组、底部通栏动作、窄屏重排及小时数单行（0097）；24相关回归/analyze/Debug19秒、API36覆盖安装和原主题实际首页/详情导航通过，窗口居中。同步计时及标语正文继续；真实供应商/HTTP/同步/实体设备与Windows矩阵待验，月历批量和原任务编辑未接工具。原排程为次级入口。Windows四主题与L/M/S/Focus Orb保持；Android保留MD3交互及白色/玻璃两主题。"
 data_owner: "Innocence 自有数据；用户数据归用户，由 Innocence 服务托管"
-current_milestone: "P01/G01：v1.2.3+8 Windows/Android正式版和鸿蒙独立未签名Debug开发预览已公开；两发行各4项公开下载摘要核对通过。0107实体LRT-W20/HarmonyOS7/API26已完成单设备Profile、ARM64签名/官方验签、安装和启动，2800×1840全屏PC页面有画面，当前PID三个错误筛选0；真机冷启动、输入/业务恢复、HUKS/槽位/联网及G01/H5继续待。设备绑定签名包仅本机F盘保存，公开ARM64下载仍为未签名包"
+current_milestone: "P01/G01：v1.2.3双端正式及鸿蒙Debug预览已公开；0107实体平板签名安装启动/PC全屏有证据，0108用户验收并明确授权GitHub。ARM64 Release/AOT本机包及x64 Release冷启动/2800×1840 PC全屏、源码分析/10回归通过，GitHub分发已准备；公开包未签名/无INTERNET，设备Profile仅F盘私有。真实Release恢复/升级、完整输入/性能、HUKS/槽位/联网及H5/G01继续待"
 ```
 
 ## invariants

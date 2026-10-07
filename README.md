@@ -27,7 +27,7 @@ Innocence 当前以 Flutter + Spring Boot 为主线，覆盖 Windows 桌面端�
 |---|---|---|
 | Windows x64 | [安装器](https://github.com/2877905731/Innocence/releases/download/v1.2.3/Innocence-v1.2.3-windows-x64-setup.exe) · [便携 ZIP](https://github.com/2877905731/Innocence/releases/download/v1.2.3/Innocence-v1.2.3-windows-x64-portable.zip) | 桌面版，安装器尚未代码签名 |
 | Android 7.0+ | [本机离线 APK](https://github.com/2877905731/Innocence/releases/download/v1.2.3/Innocence-v1.2.3-android-offline.apk) | 正式发行签名；专注布局改进，继续本机离线 |
-| 鸿蒙平板开发预览 | [ARM64 平板 / x64 模拟器 HAP](https://github.com/2877905731/Innocence/releases/tag/v1.2.3-harmonyos-preview.1) | 未签名 Debug；实体平板须先配置设备 Profile 并签名 |
+| 鸿蒙平板本机版 | [ARM64 Release HAP](https://github.com/2877905731/Innocence/releases/tag/v1.2.3-harmonyos.1) | 未签名 AOT；接收者须配置自己的设备 Profile 并签名 |
 
 [发布说明](https://github.com/2877905731/Innocence/releases/tag/v1.2.3) · [SHA256 校验清单](https://github.com/2877905731/Innocence/releases/download/v1.2.3/SHA256SUMS.txt) · [更新日志](CHANGELOG.md)
 
@@ -44,7 +44,7 @@ Android 首次进入时选择语言并确认使用本机离线模式，可使用
 - 已具备认证、资料、设置、备忘录、统计、通知、好友和团队等主要交互骨架。
 - 后端业务数据按当前登录用户隔离。
 - Windows 聊天助手支持填地址与 Key 获取模型、选择连接及经确认的本机工具操作；真实供应商与完整设备矩阵继续验收。
-- 鸿蒙平板提供[未签名开发预览 HAP](https://github.com/2877905731/Innocence/releases/tag/v1.2.3-harmonyos-preview.1)，复用 PC 全屏页面；真机签名、输入与业务恢复验收仍待。
+- 鸿蒙平板用户已验收设备调试版本；提供[ARM64 Release 本机包](https://github.com/2877905731/Innocence/releases/tag/v1.2.3-harmonyos.1)，复用 PC 全屏页面、无 INTERNET 权限，需接收者自行签名。输入/业务恢复与完整设备矩阵继续按实际证据推进。
 
 ## 仓库结构
 
