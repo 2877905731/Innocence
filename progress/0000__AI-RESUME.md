@@ -3,14 +3,15 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-07"
-last_resumed_at: "2026-10-07T13:59:39+08:00"
-latest_checkpoint: "0108"
-next_sequence: "0109"
+last_resumed_at: "2026-10-07T14:36:57+08:00"
+latest_checkpoint: "0109"
+next_sequence: "0110"
 current_phase: P01
 current_gate: G01
-state: "harmonyos_user_accepted_github_release_building"
-current_goal: "用户明确我验收了，可以进行发布了，并选择GitHub沿用现有流程（0108）。现构建独立ARM64 Release本机包/无INTERNET并核对版本/API/AOT/CRC/源码一致性，准备v1.2.3-harmonyos.1发布说明/源标签/摘要及公开下载。0107单设备Debug签名HAP和Profile仅本机F盘，不公开设备标识；用户验收不伪填未执行冷启动/业务恢复/负向检查。保持正在使用的平板页面，原HUKS/槽位/联网和完整H5/G01待。"
+state: "harmonyos_user_accepted_github_release_published"
+current_goal: "0108用户验收并选择GitHub后，0109已公开v1.2.3-harmonyos.1/Release#405446873，3资产SHA/正文/匿名HTTP200长度匹配；源码2825dea/注释标签c7e0f94精确推送，Windows/Android latest仍v1.2.3。ARM64 Release/AOT44.9秒/27698894bytes/SHA884fd2a7…，无INTERNET/无JIT/CRC/版本8/API/三ELF/113Dart及native宿主匹配；x64 Release44.3秒、安装/进程冷启动/PC全屏2800×1840通过，fatal/overflow0、输入法2。全屏首帧时序与SYSTEM区域修正，分析/10回归通过。公开HAP未签名、个人设备材料仅F盘；用户平板Debug包及业务进程保持原样，真实ARM64 Release恢复/升级等完整H5/G01待。当前GitHub发布目标完成。"
 current_baseline:
+  - "2026-10-07 鸿蒙GitHub Release已分发（0109）：用户0108验收/明确渠道后，v1.2.3-harmonyos.1/Release#405446873公开/非pre-release，3资产摘要/正文/匿名200长度核对；源码2825dea/注释标签c7e0f94精确推送，双端latest仍v1.2.3。ARM64 Release/AOT44.9秒/27698894bytes/SHA884fd2a7…，无INTERNET/CRC/ELF/113Dart及native宿主匹配；x64 Release44.3秒/安装/进程冷启动/2800×1840 PC首页通过，fatal/overflow0、IME2。首帧全屏/SYSTEM区域修正、分析/10回归通过；设备Debug签名材料仅F盘，公开包需自行签名；实际ARM64 Release未重装用户平板，完整H5/G01继续待。"
   - "2026-10-07 用户验收及GitHub发布授权（0108）：用户原文我验收了，可以进行发布了，渠道选择GitHub沿用现有流程。独立Release本机包构建中，单设备签名材料继续F盘私有；未执行设备检查不改成通过。"
   - "2026-10-07 实体签名安装启动（0107）：用户USB/DevEco确认，单设备Profile在内存匹配/全部材料F盘，ARM64默认带签名exit0/Hvigor112.3秒/115983291bytes/SHA25625639048…，官方SDK验签、CRC/版本8/ELF/113Dart通过。LRT-W20/HarmonyOS7/API26/aarch64安装成功，用户解锁后启动/PID34366，2800×1840语言/PC计划页有原生画面，三错误筛选0；保持用户当前页面，冷启动/输入/业务恢复、HUKS/槽位/联网及H5/G01待。签名包只在本机，公开0106仍未签名。"
   - "2026-10-07 鸿蒙预览已公开（0106）：v1.2.3-harmonyos-preview.1/Release#404950703，2未签名Debug HAP+说明+SHA256共4资产摘要及匿名HEAD200；源码0152a77/注释标签09e8dee精确同步，正式latest仍v1.2.3。原生ARM64/x64重建104.7/118.5秒，CRC/版本8/API/ELF/各113Dart一致性、10平板配置回归通过；新x64模拟器安装/进程冷启动/2800×1840 PC白色首页有原生证据。输入法12800008/9仍2条；真实平板Profile/签名、输入/业务恢复和完整H5/G01待，不可直接安装ARM64下载包。"
@@ -86,7 +87,7 @@ active_decisions:
 unfinished:
   - id: TODO-HARMONYOS-TABLET
     priority: P1
-    item: "0107已完成真实平板单设备Profile、ARM64签名/官方验签、安装与解锁后启动，2800×1840PC全屏有原生画面；公开0106仍是未签名开发预览。保持用户当前页面，用户先处理草稿并确认后再验真机进程冷启动/本机资料恢复；完整输入/触控/四主题、业务保存/升级、HUKS/槽位/联网待。0104模拟器输入法首次协议由用户处理，玻璃编辑黑屏/12800008/9仍另验；整体H0-H5/G01未封板。"
+    item: "0109已完成用户0108验收授权的GitHub Release：ARM64未签名Release/AOT本机包无INTERNET、3公开资产摘要/下载通过；x64 Release安装/冷启动/2800×1840 PC首页通过。0107真机Debug签名安装启动及用户验收保留，个人Profile/HAP只在F盘。后续真实ARM64 Release覆盖/业务冷启动恢复、完整输入/触控/四主题/性能、旧模拟器IME2/玻璃编辑、HUKS/槽位/联网及完整H5/G01仍待，不再重复把Debug设备签名或GitHub分发列为未完成。"
     gate: HarmonyOS-H0-H5
   - id: TODO-AI-CHAT-LIVE-VERIFICATION
     priority: P1
@@ -130,8 +131,8 @@ unfinished:
     gate: Android-A0
 next_actions:
   - id: NEXT-HARMONYOS-TABLET-RUNTIME
-    action: "优先完成0108授权的GitHub鸿蒙Release本机包发布：构建、CRC/版本/API/AOT/无INTERNET/无设备材料及摘要核对，源标签精确推送，公开资产与正文下载核对。保持用户当前平板进程；公开不含单设备Debug Profile。后续真机冷启动/业务恢复/触控/软键盘/覆盖升级、HUKS/槽位/联网仍按实际证据推进，不把用户验收伪写成自动检查。"
-    inputs: ["client/flutter_app/tool/harmonyos.ps1", "progress/0108__20261007__P01__DECISION__harmonyos-user-acceptance-and-github-release.md"]
+    action: "接0109：GitHub鸿蒙Release分发/公开下载已完成。保持用户实际平板进程和资料，公开包仍需接收者自行签名，个人Profile/HAP仅F盘。用户后续需要升级时在app-release配置本机签名，保留原身份/业务资料核对ARM64覆盖/冷启动/恢复；继续完整软键盘/触控/四主题/性能、IME2和HUKS/槽位/联网契约。用户验收不能代填未执行自动化负向，整体H5/G01开放。"
+    inputs: ["client/flutter_app/harmonyos/README.md", "client/flutter_app/tool/harmonyos.ps1", "progress/0109__20261007__P01__DONE__harmonyos-release-aot-github-published.md"]
   - id: NEXT-AI-CHAT-LIVE
     action: "0093简化接入及新版启动已完成。用户在软件填服务根地址或API前缀+Key，获取模型/选择/保存并连接；未提供/models时用高级设置手动模型/协议。不读取真实密钥或要求在聊天/仓库粘贴。补真实列表/生成/工具能力/费用与完整登录HTTP/同步、Keystore/设备/Windows矩阵；未接原任务编辑/月历批量工具沿现有校验确认扩展，不自动发布或接C。"
     inputs: ["docs/development/AI对话助手配置与验收.md", "docs/planning/Innocence-AI智能助手B方案实施与契约.md", "client/flutter_app/lib/features/assistant/data/chat_discovery.dart", "client/flutter_app/lib/features/assistant/data/chat_provider.dart"]
@@ -281,3 +282,4 @@ harmonyos_native_runtime_verification:
 ---
   checkpoint_0107: progress/0107__20261007__P01__DONE__harmonyos-physical-signed-install-and-start.md
   checkpoint_0108: progress/0108__20261007__P01__DECISION__harmonyos-user-acceptance-and-github-release.md
+  checkpoint_0109: progress/0109__20261007__P01__DONE__harmonyos-release-aot-github-published.md

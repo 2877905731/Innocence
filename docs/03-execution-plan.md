@@ -16,13 +16,13 @@ android_track:
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 harmonyos_tablet_track:
-  status: user_accepted_release_aot_ready_for_github
+  status: user_accepted_release_aot_github_published
   plan_path: docs/planning/Innocence-鸿蒙平板版本实施规划.md
-  checkpoint: "0108"
+  checkpoint: "0109"
   user_scope: "Air系列平板/HarmonyOS 7，全屏复用PC页面；不做Windows窗口尺寸调整。0098先规划、0099恢复核对，用户随后明确开始制作；0100首批实现"
   order: [H0_toolchain_and_minimal_hap, H1_fullscreen_pc_shell, H2_offline_storage, H3_page_and_touch_parity, H4_online_contract_and_assistant, H5_device_and_release]
   pending_decisions: "真实设备型号代码已核对LRT-W20/HarmonyOS7/API26，具体市场年款与方向策略继续核实；平板槽位在H4前确认；正式联网包范围及H5公开分发仍待完整验收"
-  evidence_boundary: "0107实体Debug签名安装启动与用户0108验收有记录；本轮ARM64 Release/AOT无INTERNET编译/CRC/API/版本8/ELF/113Dart及原生宿主匹配、源码分析/10回归通过，私有x64 Release安装/进程冷启动与2800×1840 PC首页通过，fatal/overflow0、输入法12800008/9仍2。公开包未签名，个人设备材料不上传；ARM64 Release未重装用户平板，完整业务恢复/升级/输入/性能、HUKS/槽位/联网及H5/G01待。GitHub分发准备就绪"
+  evidence_boundary: "0107实体Debug签名安装启动与用户0108验收有记录；本轮ARM64 Release/AOT无INTERNET编译/CRC/API/版本8/ELF/113Dart及原生宿主匹配、源码分析/10回归通过，私有x64 Release安装/进程冷启动与2800×1840 PC首页通过，fatal/overflow0、输入法12800008/9仍2。公开包未签名，个人设备材料不上传；ARM64 Release未重装用户平板，完整业务恢复/升级/输入/性能、HUKS/槽位/联网及H5/G01待。0109 GitHub Release#405446873已公开，3资产摘要/正文/匿名下载核对通过"
 assistant_track:
   decision: "DEC-0050/0090采用B；DEC-0051/0092修正为自填API Key的全局聊天助手；DEC-0052/0093地址与密钥发现模型"
   status: byok_chat_discovery_implemented_fixture_verified_live_provider_and_device_pending
@@ -216,3 +216,7 @@ next_actions:
 ## 2026-10-07 用户验收与Release分发准备（0108）
 
 用户明确验收并选择GitHub；独立Release/AOT本机HAP已构建，移除INTERNET且不包含设备Profile。源码分析/10平板回归与x64 Release安装/冷启动/全屏PC首页通过；全屏模式在首帧后设置，原生宿主扩展SYSTEM安全区。ARM64 Release包与源码/元数据及摘要核对后分发，实际平板进程保持不动；用户验收/Debug真机证据不伪填未执行的Release业务恢复/升级与完整H5/G01。
+
+## 2026-10-07 鸿蒙Release已公开（0109）
+
+v1.2.3-harmonyos.1 / Release#405446873已公开且非pre-release，3资产SHA/正文及匿名200长度核对通过；源码2825dea/注释标签c7e0f94精确推送，Windows/Android latest仍v1.2.3。公开ARM64 Release/AOT包未签名，无INTERNET；个人设备Debug签名材料只在本机。Release模拟器PC全屏/冷启动与用户Debug真机验收分开，实际ARM64 Release未在用户正在使用的平板重装，完整H5/G01继续待。

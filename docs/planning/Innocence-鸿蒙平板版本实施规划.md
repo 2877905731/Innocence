@@ -192,3 +192,11 @@ Flutter的OpenHarmony兼容扩展由OpenHarmony-SIG维护，需要核对所选�
 沿当前本机离线范围准备独立ARM64 Release/AOT构建，移除Debug模板INTERNET权限，暂存目录app-release与现有单设备签名工程分开。GitHub公开包不包含个人设备Profile/标识、密钥与密码；现有单设备签名包继续只在本机F盘保存。公开资产保持未签名并附接收者自行配置Profile/签名说明，Release构建模式不等于已获得通用正式签名。独立源标签v1.2.3-harmonyos.1，应用内版本仍1.2.3+8；Windows/Android正式latest仍v1.2.3。
 
 用户验收与0107真机启动证据并存；业务恢复/覆盖升级、完整触控/键盘/性能与负向、HUKS/设备槽位/联网及完整H5/G01继续按实际证据推进。当前发布不终止用户正在使用的平板进程。
+
+## 16. GitHub Release分发完成（2026-10-07，0109）
+
+`v1.2.3-harmonyos.1` / Release#405446873已公开，非pre-release；ARM64 Release HAP/离线说明/SHA256三资产摘要和正文精确核对，匿名HTTP200/长度3/3。源码2825dea与注释标签c7e0f94通过官方API精确推送，旧Debug预览和双端latest v1.2.3保留。
+
+最终ARM64 Release44.9秒/27698894bytes/SHA884fd2a7…，无INTERNET/JIT及个人设备材料；113Dart与native宿主、CRC/版本8/API/三ELF一致性通过。首轮Release首页root从y72开始，过早系统UI调用产生空白，最终首帧后设置全屏并扩展宿主SYSTEM区域；x64 Release44.3秒、实际安装/进程冷启动与2800×1840 PC首页通过，fatal/overflow0，输入法12800008/9仍2。分析4.4秒/10回归通过，QA模拟器已关闭。
+
+当前用户平板进程和设备签名Debug包未操作。用户已验收此设备调试版本；公开ARM64 Release仍需接收者本机签名，未重装真实设备或验证真实Release覆盖/业务恢复。0109完成的是授权GitHub分发，完整输入/性能/恢复与HUKS/槽位/联网及H5/G01继续待。

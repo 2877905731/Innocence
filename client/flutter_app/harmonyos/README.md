@@ -98,3 +98,5 @@ HDC安装成功，系统包根字段确认版本 `1.2.3` / code `8`。首轮启�
 ## 用户验收后的Release候选（0108）
 
 用户选择GitHub发布；ARM64 Release/AOT与x64核对构建通过。新版SDK嵌入层全屏状态在首帧后设置，Index宿主明确扩展SYSTEM安全区，保留键盘避让；x64 Release冷启动App root与截图2800×1840，首页有画面，fatal/overflow筛选0，输入法12800008/9仍2条。ARM64 Release包CRC/版本8/API/三份ELF、113Dart和原生宿主字节、无JIT/无INTERNET及个人设备标识/材料不包含通过。用户实际平板上的设备签名Debug包保持原样，不以模拟器Release替代真机Release恢复/升级等完整门禁。
+
+0109分发核对：`v1.2.3-harmonyos.1` / Release#405446873已公开（非pre-release），3资产远端SHA256/正文及匿名200长度匹配。源码2825dea/注释标签c7e0f94精确推送，Windows/Android latest仍v1.2.3。实际用户平板进程未操作，单设备签名HAP继续F盘私有；公开未签名HAP需接收者自行签名。

@@ -769,3 +769,10 @@ checkpoints:
     status: complete
     path: progress/0108__20261007__P01__DECISION__harmonyos-user-acceptance-and-github-release.md
     title: "用户验收鸿蒙平板版本并明确授权GitHub发布"
+  - sequence: "0109"
+    created_at: "2026-10-07T14:36:57+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0109__20261007__P01__DONE__harmonyos-release-aot-github-published.md
+    title: "鸿蒙平板Release本机包GitHub分发与公开下载核对"
