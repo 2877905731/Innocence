@@ -86,13 +86,19 @@ class FocusSession {
   }
 
   FocusSession tick() {
+    return advanceTo(referenceTime.add(const Duration(seconds: 1)));
+  }
+
+  /// Catch up after background suspension without counting paused time.
+  FocusSession advanceTo(DateTime now) {
     if (!active || paused) {
       return this;
     }
-
-    final nextRemainingSeconds =
-        remainingSeconds > 0 ? remainingSeconds - 1 : 0;
-    final nextElapsedSeconds = elapsedSeconds + (remainingSeconds > 0 ? 1 : 0);
+    final delta = now.difference(referenceTime).inSeconds;
+    if (delta <= 0 && remainingSeconds > 0) return this;
+    final consumed = delta.clamp(0, remainingSeconds);
+    final nextRemainingSeconds = remainingSeconds - consumed;
+    final nextElapsedSeconds = elapsedSeconds + consumed;
     final nextStageState = _resolveStageState(
       bindPomodoro: bindPomodoro,
       elapsedSeconds: nextElapsedSeconds,
@@ -124,7 +130,7 @@ class FocusSession {
           : completedPomodoroCount,
       stageRemainingSeconds:
           nextRemainingSeconds > 0 ? nextStageState.stageRemainingSeconds : 0,
-      referenceTime: DateTime.now(),
+      referenceTime: referenceTime.add(Duration(seconds: consumed)),
     );
   }
 

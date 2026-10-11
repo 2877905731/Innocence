@@ -43,6 +43,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        testInstrumentationRunner = "com.innocence.app.innocence_flutter.FocusNoticeNativeTest"
     }
 
     if (offlineEdition) {
@@ -61,6 +62,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            if (project.findProperty("innocence.notificationQa") == "true") {
+                applicationIdSuffix = ".focusqa"
+            }
+        }
         release {
             signingConfig = signingConfigs.findByName("release")
         }

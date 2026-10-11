@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'package:innocence_flutter/core/platform/focus_notice_bridge.dart';
 import '../features/assistant/application/assistant_controller.dart';
 import '../features/assistant/data/assistant_api.dart';
 import '../features/assistant/application/assistant_app_tools.dart';
 import '../features/assistant/application/chat_controller.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/team_workspace_snapshot.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
@@ -58,7 +60,7 @@ enum SessionStatus {
   offline,
 }
 
-class SessionController extends ChangeNotifier {
+class SessionController extends ChangeNotifier with WidgetsBindingObserver {
   SessionController({
     required AuthApi authApi,
     required AuthLocalStorage localStorage,
@@ -78,7 +80,9 @@ class SessionController extends ChangeNotifier {
     OfflineSyncApi? offlineSyncApi,
     bool? restoreOfflineOnStartup,
     bool? offlineOnlyBuild,
-  })  : _authApi = authApi,
+    FocusNoticeBridge? focusNoticeBridge,
+  })  : _focusNoticeBridge = focusNoticeBridge ?? FocusNoticeBridge(),
+        _authApi = authApi,
         isOfflineOnlyBuild = offlineOnlyBuild ?? AppConfig.offlineOnlyBuild,
         _localStorage = localStorage,
         _languageController = languageController,
@@ -96,6 +100,8 @@ class SessionController extends ChangeNotifier {
         _offlineSyncApi = offlineSyncApi ?? OfflineSyncApi(),
         _restoreOfflineOnStartup = restoreOfflineOnStartup ??
             AppConfig.capabilities.restoresLocalWorkspace {
+    WidgetsBinding.instance.addObserver(this);
+    _languageController.addListener(_refreshFocusNotices);
     assistant = AssistantController(
         identity: this,
         owner: () => isOffline
@@ -122,6 +128,11 @@ class SessionController extends ChangeNotifier {
   }
 
   late final AssistantController assistant;
+  final FocusNoticeBridge _focusNoticeBridge;
+  FocusNoticeStatus _focusNoticeStatus = FocusNoticeStatus.available;
+  bool _disposed = false;
+  String? _naturalCompletionKey;
+  FocusNoticeStatus get focusNoticeStatus => _focusNoticeStatus;
   late final AssistantAppTools assistantTools;
   late final AssistantChatController chat;
   final AuthApi _authApi;
@@ -1628,6 +1639,9 @@ class SessionController extends ChangeNotifier {
       },
           fallbackMessage:
               _message('开始离线专注失败。', 'Failed to start offline focus.'));
+      if (_focusSession.active) {
+        await _syncFocusNotice(requestPermission: true);
+      }
       return;
     }
     final currentSession = _session;
@@ -1658,6 +1672,9 @@ class SessionController extends ChangeNotifier {
     },
         fallbackMessage:
             _message('开始专注失败。', 'Failed to start the focus session.'));
+    if (_focusSession.active) {
+      await _syncFocusNotice(requestPermission: true);
+    }
   }
 
   Future<void> finishFocusSession() async {
@@ -3404,18 +3421,14 @@ class SessionController extends ChangeNotifier {
   }
 
   void _syncFocusTicker() {
+    if (_focusSession.active) _naturalCompletionKey = null;
     if (_focusSession.active && !_focusSession.paused) {
       _focusTicker ??= Timer.periodic(const Duration(seconds: 1), (_) {
         if (!_focusSession.active || _focusSession.paused) {
           _stopFocusTicker();
           return;
         }
-        _focusSession = _focusSession.tick();
-        notifyListeners();
-        if (!_focusSession.active) {
-          _stopFocusTicker();
-          unawaited(_reconcileFocusCompletion());
-        }
+        _advanceFocus();
       });
       return;
     }
@@ -3427,6 +3440,83 @@ class SessionController extends ChangeNotifier {
     _focusTicker = null;
   }
 
+  String? get _focusOwner => isOffline
+      ? localOwnerScope
+      : _status == SessionStatus.authenticated && _session != null
+          ? 'user:${_session!.userId}'
+          : null;
+
+  void _advanceFocus() {
+    if (!_focusSession.active || _focusSession.paused) return;
+    _focusSession = _focusSession.advanceTo(DateTime.now());
+    if (!_focusSession.active) {
+      _naturalCompletionKey = '$_focusOwner/${_focusSession.sessionId}';
+      _stopFocusTicker();
+      unawaited(_reconcileFocusCompletion());
+    }
+    notifyListeners();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && !_disposed) {
+      _advanceFocus();
+      unawaited(_syncFocusNotice(force: true));
+    }
+  }
+
+  void _refreshFocusNotices() => unawaited(_syncFocusNotice());
+
+  Future<void> _syncFocusNotice({
+    bool requestPermission = false,
+    bool force = false,
+  }) async {
+    if (_disposed || _status == SessionStatus.initializing) return;
+    final owner = _focusOwner;
+    final sessionId = _focusSession.sessionId;
+    final status = await _focusNoticeBridge.sync(
+      session: _focusSession,
+      owner: owner,
+      isChinese: _isChineseLanguage,
+      completed: _naturalCompletionKey == '$owner/$sessionId',
+      requestPermission: requestPermission,
+      force: force,
+    );
+    if (_disposed ||
+        owner != _focusOwner ||
+        sessionId != _focusSession.sessionId) {
+      return;
+    }
+    if (_focusNoticeStatus != status) {
+      _focusNoticeStatus = status;
+      super.notifyListeners();
+    }
+  }
+
+  Future<void> enableFocusNotices() async {
+    try {
+      if (_focusNoticeStatus == FocusNoticeStatus.permissionRequired) {
+        await _syncFocusNotice(requestPermission: true, force: true);
+      }
+      if (_focusNoticeStatus == FocusNoticeStatus.exactPermissionRequired ||
+          _focusNoticeStatus == FocusNoticeStatus.permissionRequired) {
+        await _focusNoticeBridge.openSettings();
+      }
+    } on PlatformException {
+      _focusNoticeStatus = FocusNoticeStatus.unavailable;
+      super.notifyListeners();
+    } on MissingPluginException {
+      _focusNoticeStatus = FocusNoticeStatus.unavailable;
+      super.notifyListeners();
+    }
+  }
+
+  @override
+  void notifyListeners() {
+    super.notifyListeners();
+    unawaited(_syncFocusNotice());
+  }
+
   Future<void> _applyDesktopShellSettings({
     required WidgetSetting widgetSetting,
   }) {
@@ -3436,12 +3526,30 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<void> _reconcileFocusCompletion() async {
+    final completedOwner = _focusOwner;
+    final completedSessionId = _focusSession.sessionId;
     final ownerScope = localOwnerScope;
     if (isOffline && ownerScope != null) {
-      _focusSession = await _offlineStore.finishFocusSession(
-        ownerScope,
-        _focusSession.sessionId,
-      );
+      FocusSession finished;
+      try {
+        finished = await _offlineStore.finishFocusSession(
+            ownerScope, completedSessionId);
+      } catch (_) {
+        if (!_disposed &&
+            completedOwner == _focusOwner &&
+            completedSessionId == _focusSession.sessionId) {
+          _bannerMessage = _message('计时已到点，完成记录保存失败，请重新打开应用后核对。',
+              'Timer ended, but its record could not be saved. Reopen the app to check.');
+          notifyListeners();
+        }
+        return;
+      }
+      if (_disposed ||
+          completedOwner != _focusOwner ||
+          completedSessionId != _focusSession.sessionId) {
+        return;
+      }
+      _focusSession = finished;
       notifyListeners();
       return;
     }
@@ -3464,6 +3572,11 @@ class SessionController extends ChangeNotifier {
       final teamChatOverview = teamOverview.inTeam
           ? await _teamApi.getTeamChat(currentSession)
           : TeamChatOverview.empty();
+      if (_disposed ||
+          completedOwner != _focusOwner ||
+          completedSessionId != _focusSession.sessionId) {
+        return;
+      }
       _focusSession = focusSession;
       _profile = profile;
       _checkInStatus = checkInStatus;
@@ -3771,6 +3884,9 @@ class SessionController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
+    WidgetsBinding.instance.removeObserver(this);
+    _languageController.removeListener(_refreshFocusNotices);
     _stopFocusTicker();
     assistant.dispose();
     chat.dispose();

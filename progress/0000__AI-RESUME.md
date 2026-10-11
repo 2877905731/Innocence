@@ -2,15 +2,16 @@
 schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
-updated_at: "2026-10-07"
-last_resumed_at: "2026-10-07T14:36:57+08:00"
-latest_checkpoint: "0109"
-next_sequence: "0110"
+updated_at: "2026-10-11"
+last_resumed_at: "2026-10-11T15:36:52+08:00"
+latest_checkpoint: "0110"
+next_sequence: "0111"
 current_phase: P01
 current_gate: G01
-state: "harmonyos_user_accepted_github_release_published"
-current_goal: "0108用户验收并选择GitHub后，0109已公开v1.2.3-harmonyos.1/Release#405446873，3资产SHA/正文/匿名HTTP200长度匹配；源码2825dea/注释标签c7e0f94精确推送，Windows/Android latest仍v1.2.3。ARM64 Release/AOT44.9秒/27698894bytes/SHA884fd2a7…，无INTERNET/无JIT/CRC/版本8/API/三ELF/113Dart及native宿主匹配；x64 Release44.3秒、安装/进程冷启动/PC全屏2800×1840通过，fatal/overflow0、输入法2。全屏首帧时序与SYSTEM区域修正，分析/10回归通过。公开HAP未签名、个人设备材料仅F盘；用户平板Debug包及业务进程保持原样，真实ARM64 Release恢复/升级等完整H5/G01待。当前GitHub发布目标完成。"
+state: "portrait_and_focus_notices_implemented_android_native_verified"
+current_goal: "0110按用户要求补鸿蒙自动横竖屏/PC内容重排、按实际经过时长推进计时、Android系统倒计时/暂停/精确闹钟与完成接收器、鸿蒙系统代理提醒和实况窗TIMER适配、Windows完成气泡。196 Flutter/5平台专属跳过、6平板回归、分析无问题；Android API36独立QA的4原生组/拒绝权限/实际am kill后完成通知与旧通知移除通过。最终Android Debug19秒/Windows Release62.8秒、ARM64设备签名Debug及x64未签名Debug构建/官方验签/CRC/114 Dart字节/横竖屏/权限/ELF通过。签名包仅F盘0110目录，未操作实体平板/推送/发行；鸿蒙TIMER准入与真实横竖屏/锁屏提醒、Windows实际气泡和OEM矩阵待验，不把适配或构建算实际设备完成。"
 current_baseline:
+  - "2026-10-11 平板竖屏与专注系统提醒（0110）：鸿蒙auto_rotation和竖屏PC宽度重排；共享后台计时追赶/暂停/番茄阶段，通知绑定当前owner+session并串行取消。Android Chronometer/AlarmManager、鸿蒙代理提醒/Live View TIMER、Windows完成气泡；196 Flutter/5跳过、6平板回归/分析及三端开发构建通过。API36 QA的4原生组、拒绝权限和am kill后真实完成通知通过。ARM64签名包116016345bytes/SHA e75a00f9…、x64 117255243bytes/SHA3f21f9e2…；官方验签/CRC/114 Dart字节/宿主/方向/权限/ELF通过。实况窗准入/真机、Windows显示及完整锁屏/重启/OEM矩阵待验；未安装真实平板或发布。"
   - "2026-10-07 鸿蒙GitHub Release已分发（0109）：用户0108验收/明确渠道后，v1.2.3-harmonyos.1/Release#405446873公开/非pre-release，3资产摘要/正文/匿名200长度核对；源码2825dea/注释标签c7e0f94精确推送，双端latest仍v1.2.3。ARM64 Release/AOT44.9秒/27698894bytes/SHA884fd2a7…，无INTERNET/CRC/ELF/113Dart及native宿主匹配；x64 Release44.3秒/安装/进程冷启动/2800×1840 PC首页通过，fatal/overflow0、IME2。首帧全屏/SYSTEM区域修正、分析/10回归通过；设备Debug签名材料仅F盘，公开包需自行签名；实际ARM64 Release未重装用户平板，完整H5/G01继续待。"
   - "2026-10-07 用户验收及GitHub发布授权（0108）：用户原文我验收了，可以进行发布了，渠道选择GitHub沿用现有流程。独立Release本机包构建中，单设备签名材料继续F盘私有；未执行设备检查不改成通过。"
   - "2026-10-07 实体签名安装启动（0107）：用户USB/DevEco确认，单设备Profile在内存匹配/全部材料F盘，ARM64默认带签名exit0/Hvigor112.3秒/115983291bytes/SHA25625639048…，官方SDK验签、CRC/版本8/ELF/113Dart通过。LRT-W20/HarmonyOS7/API26/aarch64安装成功，用户解锁后启动/PID34366，2800×1840语言/PC计划页有原生画面，三错误筛选0；保持用户当前页面，冷启动/输入/业务恢复、HUKS/槽位/联网及H5/G01待。签名包只在本机，公开0106仍未签名。"
@@ -130,6 +131,9 @@ unfinished:
     item: "Android A0尚未通过：正式离线签名/发行与API36核心流程有0083/0086/0088证据，月/年手机页已进入v1.2.2正式包且通过API36正式版覆盖升级子集；仍须实体设备、SDK license、其余二级手机页、真实设备键盘/大字体和前后台性能。联网会话保护、真实同步、WebSocket/推送后续接入，不重复列发行签名或月年源码为未完成。"
     gate: Android-A0
 next_actions:
+  - id: NEXT-PORTRAIT-FOCUS-NATIVE-DEVICE
+    action: "0110开发候选已经生成。使用F盘signed-device/0110中的ARM64签名Debug包，在用户处理草稿并连接平板后核对真实横竖屏、草稿/导航保持、通知授权、后台/锁屏/暂停/提前结束和代理提醒；TIMER动态通知须完成华为场景准入，未开通时仅快照/结束时间且UI明确提示。Windows完成气泡、Android实体/OEM/锁屏/重启与旧正式签名升级仍待验；本轮不自动公开发行。"
+    inputs: ["docs/development/平板竖屏与专注系统提醒.md", "progress/0110__20261011__P01__DONE__portrait-and-focus-system-notices.md", "client/flutter_app/build/harmonyos-h0/signed-device/0110/Innocence-portrait-focus-arm64-device-debug.hap"]
   - id: NEXT-HARMONYOS-TABLET-RUNTIME
     action: "接0109：GitHub鸿蒙Release分发/公开下载已完成。保持用户实际平板进程和资料，公开包仍需接收者自行签名，个人Profile/HAP仅F盘。用户后续需要升级时在app-release配置本机签名，保留原身份/业务资料核对ARM64覆盖/冷启动/恢复；继续完整软键盘/触控/四主题/性能、IME2和HUKS/槽位/联网契约。用户验收不能代填未执行自动化负向，整体H5/G01开放。"
     inputs: ["client/flutter_app/harmonyos/README.md", "client/flutter_app/tool/harmonyos.ps1", "progress/0109__20261007__P01__DONE__harmonyos-release-aot-github-published.md"]

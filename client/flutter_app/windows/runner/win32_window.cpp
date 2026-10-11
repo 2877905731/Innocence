@@ -485,6 +485,7 @@ Win32Window::MessageHandler(HWND hwnd,
       switch (LOWORD(lparam)) {
         case WM_LBUTTONDBLCLK:
         case WM_LBUTTONUP:
+        case NIN_BALLOONUSERCLICK:
           ShowMainWindow();
           break;
         case WM_CONTEXTMENU:
@@ -836,6 +837,25 @@ void Win32Window::RemoveTrayIcon(HWND const window) {
   data.uID = kTrayIconId;
   Shell_NotifyIconW(NIM_DELETE, &data);
   tray_icon_added_ = false;
+}
+
+bool Win32Window::ShowFocusCompletion(bool is_chinese) {
+  if (window_handle_ == nullptr) return false;
+  AddTrayIcon(window_handle_);
+  if (!tray_icon_added_) return false;
+  NOTIFYICONDATAW data = {};
+  data.cbSize = sizeof(data);
+  data.hWnd = window_handle_;
+  data.uID = kTrayIconId;
+  data.uFlags = NIF_INFO;
+  data.dwInfoFlags = NIIF_INFO;
+  wcscpy_s(data.szInfoTitle, is_chinese
+      ? L"\u4E13\u6CE8\u8BA1\u65F6\u5DF2\u5B8C\u6210"
+      : L"Focus timer complete");
+  wcscpy_s(data.szInfo, is_chinese
+      ? L"\u672C\u6B21\u5012\u8BA1\u65F6\u5DF2\u5230\u70B9\uFF0C\u4F11\u606F\u4E00\u4E0B\u5427\u3002"
+      : L"Your countdown has ended. Take a break.");
+  return Shell_NotifyIconW(NIM_MODIFY, &data) != FALSE;
 }
 
 void Win32Window::ShowMainWindow() {

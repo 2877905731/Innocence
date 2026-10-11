@@ -3701,24 +3701,28 @@ class _ResponsivePair extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (spec.tier == DesktopPresentationTier.small) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    return LayoutBuilder(builder: (context, constraints) {
+      if (spec.tier == DesktopPresentationTier.small ||
+          (AppConfig.capabilities.isHarmonyTablet &&
+              constraints.maxWidth < 820)) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            primary,
+            const SizedBox(height: 16),
+            secondary,
+          ],
+        );
+      }
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          primary,
-          const SizedBox(height: 16),
-          secondary,
+          Expanded(flex: primaryFlex, child: primary),
+          const SizedBox(width: 18),
+          Expanded(flex: secondaryFlex, child: secondary),
         ],
       );
-    }
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(flex: primaryFlex, child: primary),
-        const SizedBox(width: 18),
-        Expanded(flex: secondaryFlex, child: secondary),
-      ],
-    );
+    });
   }
 }
 
@@ -4611,13 +4615,16 @@ class _MetricGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final columns = switch (spec.tier) {
-      DesktopPresentationTier.large => 4,
-      DesktopPresentationTier.medium => 3,
-      DesktopPresentationTier.small || null => 2,
-    };
     return LayoutBuilder(
       builder: (context, constraints) {
+        final columns =
+            AppConfig.capabilities.isHarmonyTablet && constraints.maxWidth < 820
+                ? 2
+                : switch (spec.tier) {
+                    DesktopPresentationTier.large => 4,
+                    DesktopPresentationTier.medium => 3,
+                    DesktopPresentationTier.small || null => 2,
+                  };
         const gap = 12.0;
         final width = (constraints.maxWidth - gap * (columns - 1)) / columns;
         return Wrap(

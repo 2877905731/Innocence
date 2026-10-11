@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
+import 'package:innocence_flutter/core/platform/focus_notice_bridge.dart';
 import 'package:innocence_flutter/core/local/offline_sync_models.dart';
 import 'package:innocence_flutter/features/auth/presentation/pages/android_language_selection_page.dart';
 import 'package:innocence_flutter/features/auth/presentation/pages/auth_page.dart';
@@ -102,7 +103,34 @@ class _InnocenceAppState extends State<InnocenceApp> {
           themeMode: visualTokens.isDark ? ThemeMode.dark : ThemeMode.light,
           builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
             value: overlayStyle,
-            child: child ?? const SizedBox.shrink(),
+            child: Column(children: [
+              if (widget.sessionController.focusSession.active &&
+                  widget.sessionController.focusNoticeStatus !=
+                      FocusNoticeStatus.available)
+                Material(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 4),
+                      child: Row(children: [
+                        Expanded(child: Text(_focusNoticeMessage(language))),
+                        if (widget.sessionController.focusNoticeStatus ==
+                                FocusNoticeStatus.permissionRequired ||
+                            widget.sessionController.focusNoticeStatus ==
+                                FocusNoticeStatus.exactPermissionRequired)
+                          TextButton(
+                            onPressed:
+                                widget.sessionController.enableFocusNotices,
+                            child: Text(language.isChinese ? '开启提醒' : 'Enable'),
+                          ),
+                      ]),
+                    ),
+                  ),
+                ),
+              Expanded(child: child ?? const SizedBox.shrink()),
+            ]),
           ),
           locale: language.locale,
           supportedLocales: const [
@@ -366,6 +394,28 @@ class _InnocenceAppState extends State<InnocenceApp> {
           ),
         );
     }
+  }
+
+  String _focusNoticeMessage(AppLanguage language) {
+    final zh = language.isChinese;
+    return switch (widget.sessionController.focusNoticeStatus) {
+      FocusNoticeStatus.permissionRequired => zh
+          ? '允许通知后，可在通知栏查看计时并收到到点提醒。'
+          : 'Allow notifications to see the timer and receive a completion alert.',
+      FocusNoticeStatus.exactPermissionRequired => zh
+          ? '倒计时已显示；允许“闹钟和提醒”以避免后台到点提醒延迟。'
+          : 'Timer is visible. Allow alarms and reminders for timely background alerts.',
+      FocusNoticeStatus.liveCountdownUnavailable => zh
+          ? (widget.sessionController.focusSession.paused
+              ? '计时已暂停，通知栏动态倒计时暂不可用。'
+              : '到点提醒已设置，通知栏动态倒计时暂不可用。')
+          : (widget.sessionController.focusSession.paused
+              ? 'Timer is paused. Live notification countdown is unavailable.'
+              : 'Completion alert is set. Live notification countdown is unavailable.'),
+      _ => zh
+          ? '系统计时提醒未能开启，请检查系统通知设置。'
+          : 'Timer alerts could not be enabled. Check system notification settings.',
+    };
   }
 }
 

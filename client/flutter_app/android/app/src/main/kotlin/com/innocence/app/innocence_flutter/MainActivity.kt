@@ -12,8 +12,10 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 class MainActivity : FlutterActivity() {
+    private var focusNotices: FocusNoticeChannel? = null
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        focusNotices = FocusNoticeChannel(this, flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "innocence/assistant_vault")
             .setMethodCallHandler { call, result ->
                 if (call.method !in listOf("encrypt", "decrypt")) { result.notImplemented(); return@setMethodCallHandler }
@@ -44,5 +46,10 @@ class MainActivity : FlutterActivity() {
                     result.success(output)
                 } catch (_: Exception) { result.error("vault_failed", "Credential protection failed.", null) }
             }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        focusNotices?.onPermissionResult(requestCode)
     }
 }

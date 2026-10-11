@@ -3,8 +3,10 @@ import { FlutterAbility, FlutterEngine } from '@ohos/flutter_ohos';
 import { GeneratedPluginRegistrant } from '../plugins/GeneratedPluginRegistrant';
 import { window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { FocusNoticeChannel } from './FocusNoticeChannel';
 
 export default class EntryAbility extends FlutterAbility {
+  private focusNotices?: FocusNoticeChannel;
   onWindowStageCreate(windowStage: window.WindowStage): void {
     super.onWindowStageCreate(windowStage);
     windowStage.getMainWindow().then(async (mainWindow: window.Window) => {
@@ -19,5 +21,11 @@ export default class EntryAbility extends FlutterAbility {
   configureFlutterEngine(flutterEngine: FlutterEngine) {
     super.configureFlutterEngine(flutterEngine)
     GeneratedPluginRegistrant.registerWith(flutterEngine)
+    this.focusNotices = new FocusNoticeChannel(this.context, flutterEngine);
+  }
+
+  cleanUpFlutterEngine(flutterEngine: FlutterEngine): void {
+    this.focusNotices?.detach();
+    super.cleanUpFlutterEngine(flutterEngine);
   }
 }

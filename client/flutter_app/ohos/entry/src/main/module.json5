@@ -14,7 +14,7 @@
     "abilities": [
       {
         "name": "EntryAbility",
-        "orientation": "auto_rotation_landscape",
+        "orientation": "auto_rotation",
         "srcEntry": "./ets/entryability/EntryAbility.ets",
         "description": "$string:EntryAbility_desc",
         "icon": "$media:icon",
@@ -36,6 +36,7 @@
     ],
     "requestPermissions": [
       {"name" :  "ohos.permission.INTERNET"},
+      {"name": "ohos.permission.PUBLISH_AGENT_REMINDER"},
     ]
   }
 }

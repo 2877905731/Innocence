@@ -225,6 +225,23 @@ void FlutterWindow::RegisterDesktopWidgetChannel() {
           return;
         }
 
+        if (call.method_name() == "showFocusCompletion") {
+          const auto* arguments =
+              std::get_if<flutter::EncodableMap>(call.arguments());
+          bool is_chinese = true;
+          if (arguments != nullptr) {
+            const auto found = arguments->find(flutter::EncodableValue("isChinese"));
+            if (found != arguments->end()) {
+              if (const auto value = std::get_if<bool>(&found->second)) {
+                is_chinese = *value;
+              }
+            }
+          }
+          if (ShowFocusCompletion(is_chinese)) result->Success();
+          else result->Error("focus_notice_failed", "Unable to show timer completion notification.");
+          return;
+        }
+
         if (call.method_name() == "setCanvasSizePreset") {
           const auto* arguments =
               std::get_if<flutter::EncodableMap>(call.arguments());

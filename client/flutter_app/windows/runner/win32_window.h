@@ -82,6 +82,8 @@ class Win32Window {
                     bool focus_paused,
                     bool is_chinese);
 
+  bool ShowFocusCompletion(bool is_chinese);
+
   // If true, closing this window will quit the application.
   void SetQuitOnClose(bool quit_on_close);
 

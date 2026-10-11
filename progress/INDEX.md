@@ -776,3 +776,10 @@ checkpoints:
     status: complete
     path: progress/0109__20261007__P01__DONE__harmonyos-release-aot-github-published.md
     title: "鸿蒙平板Release本机包GitHub分发与公开下载核对"
+  - sequence: "0110"
+    created_at: "2026-10-11T16:14:27+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0110__20261011__P01__DONE__portrait-and-focus-system-notices.md
+    title: "鸿蒙竖屏与三端专注系统提醒适配、Android原生提醒及本机签名候选"

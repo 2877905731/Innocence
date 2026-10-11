@@ -61,6 +61,44 @@ void main() {
     expect(AppConfig.offlineOnlyBuild, isTrue);
     expect(AppConfig.apiBaseUrl, isEmpty);
   }, skip: !tabletRun);
+
+  testWidgets('rotation preserves PC destination and focus state',
+      (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1244, 768);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+    await tester.pumpWidget(desktopSloganFixture(
+        AppVisualTheme.minimalism, AppLanguage.simplifiedChinese));
+    await tester.pump();
+    await tester.tap(find.byTooltip('专注'));
+    await tester.pump();
+    expect(find.text('Synthetic focus'), findsWidgets);
+    for (final size in [
+      const Size(768, 1244),
+      const Size(768, 430),
+      const Size(1244, 768)
+    ]) {
+      tester.view.physicalSize = size;
+      await tester.pump();
+      final shell =
+          tester.widget<AdaptiveCanvasShell>(find.byType(AdaptiveCanvasShell));
+      expect(shell.selectedDestinationId, 'focus');
+      expect(find.text('Synthetic focus'), findsWidgets);
+      expect(tester.takeException(), isNull);
+    }
+    await tester.tap(find.byTooltip('计划'));
+    await tester.pump();
+    tester.view.physicalSize = const Size(768, 1244);
+    await tester.pump();
+    expect(
+        tester
+            .widget<AdaptiveCanvasShell>(find.byType(AdaptiveCanvasShell))
+            .selectedDestinationId,
+        'plans');
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  }, skip: !tabletRun);
   testWidgets('tablet retains PC rail when a keyboard consumes height',
       (tester) async {
     tester.view.devicePixelRatio = 1;
@@ -71,6 +109,8 @@ void main() {
       const Size(1360, 390),
       const Size(1024, 768),
       const Size(1024, 360),
+      const Size(768, 1244),
+      const Size(768, 430),
     ]) {
       tester.view.physicalSize = size;
       DesktopPresentationSpec? observed;
@@ -126,7 +166,12 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
-    for (final size in [const Size(1360, 900), const Size(1024, 768)]) {
+    for (final size in [
+      const Size(1360, 900),
+      const Size(1024, 768),
+      const Size(768, 1244),
+      const Size(600, 960)
+    ]) {
       tester.view.physicalSize = size;
       for (final theme in AppVisualTheme.values) {
         final imageKey = GlobalKey();
