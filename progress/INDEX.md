@@ -797,3 +797,10 @@ checkpoints:
     status: complete
     path: progress/0112__20261012__P01__CORRECTION__android-offline-focus-sqlite-compatibility.md
     title: "Android离线专注SQLite兼容性修复及同证书本机安装包"
+  - sequence: "0113"
+    created_at: "2026-10-12T20:07:41+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0113__20261012__P01__DECISION__harmony4-phone-and-android-retest.md
+    title: "用户补充鸿蒙4手机环境并选择后续安卓系统复验"
