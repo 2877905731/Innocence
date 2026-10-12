@@ -9,14 +9,19 @@ param(
     [ValidateSet('debug', 'release')]
     [string]$BuildMode = 'debug',
     [switch]$Unsigned,
+    [switch]$FocusNoticeProbe,
     [switch]$DirectGit,
     [string]$GitHelperPath = ''
 )
 $ErrorActionPreference = 'Stop'
 $appRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $workRoot = [IO.Path]::GetFullPath((Join-Path $appRoot 'build/harmonyos-h0'))
+if ($FocusNoticeProbe -and ($Architecture -ne 'x64' -or !$Unsigned -or $BuildMode -ne 'debug')) {
+    throw '通知验证入口只允许 x64 未签名 Debug 模拟器包，不生成实体设备或发行包。'
+}
 $stageFolder = if ($Architecture -eq 'arm64') { 'app' } else { 'app-x64' }
 if ($BuildMode -eq 'release') { $stageFolder += '-release' }
+if ($FocusNoticeProbe) { $stageFolder += '-focus-qa' }
 $stageRoot = Join-Path $workRoot $stageFolder
 if (!$FlutterSdk) { $FlutterSdk = Join-Path $workRoot 'flutter-oh' }
 if (!$DevEcoHome -and (Test-Path -LiteralPath (Join-Path $workRoot 'tools/DevEcoStudio26/sdk'))) {
@@ -148,6 +153,19 @@ try {
     }
     Copy-Item -LiteralPath (Join-Path $appRoot 'pubspec.yaml') -Destination $stageRoot -Force
     Copy-Item -LiteralPath (Join-Path $appRoot 'harmonyos/pubspec_overrides.yaml') -Destination $stageRoot -Force
+    if ($FocusNoticeProbe) {
+        Copy-Item -LiteralPath (Join-Path $appRoot 'tool/focus_notice_probe.dart') `
+            -Destination (Join-Path $stageRoot 'lib/focus_notice_probe.dart') -Force
+        $probeScopePath = Join-Path $stageRoot 'ohos/AppScope/app.json5'
+        $probeScope = [IO.File]::ReadAllText($probeScopePath)
+        $originalBundle = '"com.innocence.tablet.innocence_flutter"'
+        if ([regex]::Matches($probeScope, [regex]::Escape($originalBundle)).Count -ne 1) {
+            throw '验证包需要唯一的原应用包名，不能覆盖正常应用。'
+        }
+        [IO.File]::WriteAllText($probeScopePath,
+            $probeScope.Replace($originalBundle, '"com.innocence.tablet.innocence_flutter.focusqa"'),
+            [Text.UTF8Encoding]::new($false))
+    }
     if ($BuildMode -eq 'release') {
         # This accepted edition is local-only. Do not ship the Debug template's network permission.
         $stageModulePath = Join-Path $stageRoot 'ohos/entry/src/main/module.json5'
@@ -184,6 +202,7 @@ try {
                 '--dart-define=INNOCENCE_TARGET_PLATFORM=harmonyos',
                 '--dart-define=INNOCENCE_OFFLINE_ONLY=true')
             if ($Unsigned) { $hapArguments += '--no-codesign' }
+            if ($FocusNoticeProbe) { $hapArguments += '--target=lib/focus_notice_probe.dart' }
             Invoke-TaskFlutter $hapArguments
         }
     } finally { Pop-Location }

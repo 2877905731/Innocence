@@ -9,6 +9,10 @@ enum FocusNoticeStatus {
   permissionRequired,
   exactPermissionRequired,
   liveCountdownUnavailable,
+  backgroundReminderUnavailable,
+  backgroundAndLiveUnavailable,
+  liveCountdownRightsRequired,
+  backgroundAndLiveRightsRequired,
   unavailable,
 }
 
@@ -77,6 +81,14 @@ class FocusNoticeBridge {
               FocusNoticeStatus.exactPermissionRequired,
             'liveCountdownUnavailable' =>
               FocusNoticeStatus.liveCountdownUnavailable,
+            'backgroundReminderUnavailable' =>
+              FocusNoticeStatus.backgroundReminderUnavailable,
+            'backgroundAndLiveUnavailable' =>
+              FocusNoticeStatus.backgroundAndLiveUnavailable,
+            'liveCountdownRightsRequired' =>
+              FocusNoticeStatus.liveCountdownRightsRequired,
+            'backgroundAndLiveRightsRequired' =>
+              FocusNoticeStatus.backgroundAndLiveRightsRequired,
             _ => FocusNoticeStatus.unavailable,
           };
         }

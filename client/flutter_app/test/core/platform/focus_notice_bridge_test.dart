@@ -74,6 +74,14 @@ void main() {
       'permissionRequired': FocusNoticeStatus.permissionRequired,
       'exactPermissionRequired': FocusNoticeStatus.exactPermissionRequired,
       'liveCountdownUnavailable': FocusNoticeStatus.liveCountdownUnavailable,
+      'backgroundReminderUnavailable':
+          FocusNoticeStatus.backgroundReminderUnavailable,
+      'backgroundAndLiveUnavailable':
+          FocusNoticeStatus.backgroundAndLiveUnavailable,
+      'liveCountdownRightsRequired':
+          FocusNoticeStatus.liveCountdownRightsRequired,
+      'backgroundAndLiveRightsRequired':
+          FocusNoticeStatus.backgroundAndLiveRightsRequired,
     }.entries) {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (_) async => pair.key);

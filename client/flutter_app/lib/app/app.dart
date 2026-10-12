@@ -412,6 +412,22 @@ class _InnocenceAppState extends State<InnocenceApp> {
           : (widget.sessionController.focusSession.paused
               ? 'Timer is paused. Live notification countdown is unavailable.'
               : 'Completion alert is set. Live notification countdown is unavailable.'),
+      FocusNoticeStatus.backgroundReminderUnavailable => zh
+          ? '后台到点提醒暂不可用；请保持应用在前台以接收完成提醒。'
+          : 'Background completion alerts are unavailable. Keep the app in the foreground for an alert.',
+      FocusNoticeStatus.backgroundAndLiveUnavailable => zh
+          ? '动态倒计时与后台到点提醒暂不可用；通知栏仅显示计时快照，请保持应用在前台。'
+          : 'Live countdown and background alerts are unavailable. The notification shows a snapshot. Keep the app in the foreground.',
+      FocusNoticeStatus.liveCountdownRightsRequired => zh
+          ? (widget.sessionController.focusSession.paused
+              ? '专注已暂停；实时倒计时需要为应用开通华为实况窗权益。'
+              : '到点提醒已设置；实时倒计时需要为应用开通华为实况窗权益。')
+          : (widget.sessionController.focusSession.paused
+              ? 'Timer is paused. Live countdown requires Huawei Live View rights for this app.'
+              : 'Completion alert is set. Live countdown requires Huawei Live View rights for this app.'),
+      FocusNoticeStatus.backgroundAndLiveRightsRequired => zh
+          ? '实时倒计时需要为应用开通华为实况窗权益；后台到点提醒暂不可用，请保持应用在前台。'
+          : 'Live countdown requires Huawei Live View rights for this app. Background alerts are unavailable; keep the app in the foreground.',
       _ => zh
           ? '系统计时提醒未能开启，请检查系统通知设置。'
           : 'Timer alerts could not be enabled. Check system notification settings.',

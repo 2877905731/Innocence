@@ -4,12 +4,12 @@ document_type: platform_implementation_plan
 project_name: "Innocence"
 platform: HarmonyOS_tablet
 created_at: "2026-10-05"
-updated_at: "2026-10-06"
-status: emulator_pc_shell_running_input_method_and_device_pending
+updated_at: "2026-10-12"
+status: physical_portrait_confirmed_live_view_rights_pending
 authority: "用户要求鸿蒙平板全屏复用PC页面；先规划后明确开始制作"
-target_device: "用户原文airpaid；暂按华为MatePad Air系列理解，具体年款/型号待设备核实"
+target_device: "已核对用户实体平板LRT-W20/HarmonyOS7/API26/aarch64；不推测市场年款"
 target_os: "HarmonyOS 7（用户提供）"
-related_checkpoint: "0104"
+related_checkpoint: "0111"
 related_gate: "沿用P01/G01；新增H0-H5平台验收，不将规划计为实现"
 ---
 
@@ -200,3 +200,11 @@ Flutter的OpenHarmony兼容扩展由OpenHarmony-SIG维护，需要核对所选�
 最终ARM64 Release44.9秒/27698894bytes/SHA884fd2a7…，无INTERNET/JIT及个人设备材料；113Dart与native宿主、CRC/版本8/API/三ELF一致性通过。首轮Release首页root从y72开始，过早系统UI调用产生空白，最终首帧后设置全屏并扩展宿主SYSTEM区域；x64 Release44.3秒、实际安装/进程冷启动与2800×1840 PC首页通过，fatal/overflow0，输入法12800008/9仍2。分析4.4秒/10回归通过，QA模拟器已关闭。
 
 当前用户平板进程和设备签名Debug包未操作。用户已验收此设备调试版本；公开ARM64 Release仍需接收者本机签名，未重装真实设备或验证真实Release覆盖/业务恢复。0109完成的是授权GitHub分发，完整输入/性能/恢复与HUKS/槽位/联网及H5/G01继续待。
+
+## 17. 竖屏与实时专注提醒续验（2026-10-12，0111）
+
+用户要求补齐鸿蒙竖屏和通知栏倒计时，后续明确保存草稿、允许覆盖安装并重启，确认竖屏页面正常。0110已完成auto_rotation与PC内容重排、按实际时长追赶及三端本地系统通知适配。本轮ARM64候选覆盖启动和本机资料/液态玻璃恢复有设备证据；用户真实计时的调试回执是实况窗1003500005、代理提醒1700002。实况窗权益未开通，普通固定通知不能算真机实时显示。
+
+API26独立模拟器TIMER胶囊实际由00:53变00:48，暂停冻结57秒、继续和清理/到点去重通过。运行参数补齐layoutData与正式图标，timer/capsule均设暂停，停止使用新构造有效载荷。普通通知降级以有效0删除时间并先取消旧删除计划；强制权益缺失的QA中，暂停7秒再等12秒，系统通知仍在且未完成，继续/提前结束/到点一次通过。最终签名包覆盖安装成功，首次锁屏拒绝10106102后用户确认解锁打开；最新进程/权益状态回执通过，提示文本UI确证仍待。
+
+华为TIMER实况窗与后台代理提醒分别需要核对权益，当前Profile没有Live View或Push能力。用户确认没有AGC应用/开发者账号，选择先自行注册和实名认证；官方登录页已保留，本轮未代创建、申请权益、发送邮件或改公开资产。[接入材料与申请草稿](../development/鸿蒙专注提醒权益接入.md)已准备。签名/设备回执只在F盘忽略目录，仅读通用错误码，不提取真实业务SQLite。此子集不封闭H2-H5/G01，也不把模拟器成功当作真机权益已取得。

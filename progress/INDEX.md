@@ -783,3 +783,10 @@ checkpoints:
     status: complete
     path: progress/0110__20261011__P01__DONE__portrait-and-focus-system-notices.md
     title: "鸿蒙竖屏与三端专注系统提醒适配、Android原生提醒及本机签名候选"
+  - sequence: "0111"
+    created_at: "2026-10-12T16:57:58+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0111__20261012__P01__DONE__focus-runtime-and-harmony-rights.md
+    title: "真机竖屏升级与实况窗权益定位、Android重启和Windows系统通知回执"
