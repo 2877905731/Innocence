@@ -1096,9 +1096,7 @@ class OfflineStore {
     await database.transaction((transaction) async {
       await _assistantAdvance(
           transaction, ownerScope, nowText.substring(0, 10));
-      await transaction.rawUpdate(
-          r"UPDATE local_assistant_document SET payload=json_set(payload,'$.execution.undoEligibility',json('false')) WHERE owner_scope=? AND kind='execution' AND json_extract(payload,'$.execution.undoEligibility')=1",
-          [ownerScope]);
+      await _assistantInvalidateUndo(transaction, ownerScope);
       await transaction.update(
         'local_focus_session',
         {'active': 0, 'actual_end_time': nowText},

@@ -3,14 +3,15 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-12"
-last_resumed_at: "2026-10-12T16:57:58+08:00"
-latest_checkpoint: "0111"
-next_sequence: "0112"
+last_resumed_at: "2026-10-12T18:17:06+08:00"
+latest_checkpoint: "0112"
+next_sequence: "0113"
 current_phase: P01
 current_gate: G01
-state: "physical_portrait_confirmed_live_view_rights_pending"
-current_goal: "0111用户保存草稿并授权覆盖重启，ARM64候选真机安装启动/本机资料与玻璃恢复、用户竖屏确认完成。真实计时Live1003500005明确权益未开通，代理1700002受限；当前Profile无Live/Push能力。API26独立模拟器系统胶囊00:53→00:48、暂停57秒/恢复/清理/完成去重通过；普通通知降级先取消旧删除计划并用有效0，暂停7秒等12秒仍保留/不误完成。最终ARM64签名29.2秒/x64未签名24.5秒、SDK验签/CRC/114Dart/native/ELF通过；最终包覆盖后首次锁屏拒启动，用户已解锁打开，最新进程/权益状态回执存在，提示文本UI确证待。196Flutter/5跳过、分析无问题；Windows真实气泡回执、Android同发行证书离线Release构建/较早候选覆盖与API36重启完成一次通过。用户确认无AGC应用/开发者账号，先自行注册实名；官方登录页保留，字段/权益草稿就绪。未代注册/创建/申请/发邮件/推送/发行，真机动态与完整H5/G01待。"
+state: "android_offline_focus_fix_candidate_ready_physical_pending"
+current_goal: "0112用户明确离线使用并提示开始离线专注失败；去掉开始专注事务中的SQLite JSON扩展依赖，保持owner撤销保护/修订/outbox原子性。受限FFI同用例修改前失败/修改后33相关回归通过，分析无问题；API36独立QA原生sqflite生命周期全通过，但API36原来支持JSON，不能作为用户手机故障复现。原发行证书离线Release37.7秒/65427988bytes/SHA05fdc52a…，版本1.2.3+8/无INTERNET/non-debug，候选仅F盘，实体手机系统/异常/覆盖效果待。0111鸿蒙真实计时Live1003500005及代理1700002、Profile无权益继续待用户自行开发者注册实名；竖屏已由用户确认。Windows气泡/Android重启子集证据保留；真机动态和完整H5/G01仍待。未推送或新发行。"
 current_baseline:
+  - "2026-10-12 Android离线专注兼容性修复（0112）：用户确认开始离线专注失败；移除SQLite json_set/json/json_extract依赖，原事务内Dart更新当前owner的execution撤销资格，保留字段/其他身份/过期摘要。受限FFI旧代码失败、新代码33相关回归通过/analyze无问题；API36独立QA原生开始/暂停/关闭重开恢复/继续/结束全通过。离线Release37.7秒/原发行证书/版本8/non-debug/无INTERNET，APK65427988bytes/SHA05fdc52a…仅build/qa/android-offline-focus；QA卸载/本轮模拟器关闭。手机系统/底层错误/实际覆盖效果待，未推送/发布；鸿蒙权益待办保留。"
   - "2026-10-12 设备续验及权益定位（0111）：用户确认竖屏正常；真机旧候选升级启动/资料恢复和真实计时错误1003500005/1700002有收据。独立模拟器动态胶囊、暂停/恢复/结束/完成去重，强制权益缺失下暂停跨原截止点仍保留通过。Windows系统SHOW/HIDE回执、AndroidAPI36重启7303=1/7302=0通过；196全量/5跳过、分析及最终三端构建通过。最终ARM64签名SHA9a169440…仅F盘0111，覆盖后用户解锁打开/新权益回执；x64SHA532e3891…、Android正式证书离线候选SHA6d4a4e52…。用户无开发者账号先自行注册实名，官方登录页及接入材料就绪；实况窗/代理权益、新Profile待，未改远端/公开资产。"
   - "2026-10-11 平板竖屏与专注系统提醒（0110）：鸿蒙auto_rotation和竖屏PC宽度重排；共享后台计时追赶/暂停/番茄阶段，通知绑定当前owner+session并串行取消。Android Chronometer/AlarmManager、鸿蒙代理提醒/Live View TIMER、Windows完成气泡；196 Flutter/5跳过、6平板回归/分析及三端开发构建通过。API36 QA的4原生组、拒绝权限和am kill后真实完成通知通过。ARM64签名包116016345bytes/SHA e75a00f9…、x64 117255243bytes/SHA3f21f9e2…；官方验签/CRC/114 Dart字节/宿主/方向/权限/ELF通过。实况窗准入/真机、Windows显示及完整锁屏/重启/OEM矩阵待验；未安装真实平板或发布。"
   - "2026-10-07 鸿蒙GitHub Release已分发（0109）：用户0108验收/明确渠道后，v1.2.3-harmonyos.1/Release#405446873公开/非pre-release，3资产摘要/正文/匿名200长度核对；源码2825dea/注释标签c7e0f94精确推送，双端latest仍v1.2.3。ARM64 Release/AOT44.9秒/27698894bytes/SHA884fd2a7…，无INTERNET/CRC/ELF/113Dart及native宿主匹配；x64 Release44.3秒/安装/进程冷启动/2800×1840 PC首页通过，fatal/overflow0、IME2。首帧全屏/SYSTEM区域修正、分析/10回归通过；设备Debug签名材料仅F盘，公开包需自行签名；实际ARM64 Release未重装用户平板，完整H5/G01继续待。"
@@ -132,6 +133,9 @@ unfinished:
     item: "Android A0尚未通过：正式离线签名/发行与API36核心流程有0083/0086/0088证据，月/年手机页已进入v1.2.2正式包且通过API36正式版覆盖升级子集；仍须实体设备、SDK license、其余二级手机页、真实设备键盘/大字体和前后台性能。联网会话保护、真实同步、WebSocket/推送后续接入，不重复列发行签名或月年源码为未完成。"
     gate: Android-A0
 next_actions:
+  - id: NEXT-ANDROID-FOCUS-PHYSICAL
+    action: "0112本机修正版APK已生成，原发行证书可覆盖安装；用户手机复验原资料/开始/暂停/继续/结束，勿卸载旧版。系统版本和实际底层异常尚未取得，仍失败时据脱敏回执续查，不能把受限FFI或API36当实体旧系统验收。"
+    inputs: ["client/flutter_app/build/qa/android-offline-focus/Innocence-android-offline-focus-fix.apk", "progress/0112__20261012__P01__CORRECTION__android-offline-focus-sqlite-compatibility.md"]
   - id: NEXT-FOCUS-HARMONY-RIGHTS
     action: "接0111：最终ARM64修正版已覆盖，用户解锁打开后新权益回执/进程存在；现有安装授权继续有效。用户没有AGC应用/开发者账号，明确先自行注册实名认证，官方OAuth登录页已保留；等待账号就绪后按接入材料核对同包名APP ID、TIMER调测权益及代理提醒，远端创建/提交需用户具体授权，不代填实名/发邮件。新Profile就绪后官方验签/原证书覆盖，真机动态、暂停/继续、后台锁屏/进程回收与到点分别取证。Windows实际气泡和Android重启/正式签名候选子集已通过，完整Flutter Windows到点UI/免打扰和实体Android/OEM/Doze/强行停止仍待。"
     inputs: ["docs/development/鸿蒙专注提醒权益接入.md", "docs/development/平板竖屏与专注系统提醒.md", "progress/0111__20261012__P01__DONE__focus-runtime-and-harmony-rights.md", "client/flutter_app/build/harmonyos-h0/signed-device/0111/Innocence-portrait-focus-arm64-device-debug.hap"]

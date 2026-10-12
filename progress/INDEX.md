@@ -790,3 +790,10 @@ checkpoints:
     status: complete
     path: progress/0111__20261012__P01__DONE__focus-runtime-and-harmony-rights.md
     title: "真机竖屏升级与实况窗权益定位、Android重启和Windows系统通知回执"
+  - sequence: "0112"
+    created_at: "2026-10-12T18:27:04+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0112__20261012__P01__CORRECTION__android-offline-focus-sqlite-compatibility.md
+    title: "Android离线专注SQLite兼容性修复及同证书本机安装包"

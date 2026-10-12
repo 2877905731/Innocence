@@ -20,6 +20,28 @@ Future<void> _assistantAdvance(
       [owner, date]);
 }
 
+Future<void> _assistantInvalidateUndo(DatabaseExecutor db, String owner) async {
+  // Android SQLite does not always provide JSON SQL functions.
+  final rows = await db.query('local_assistant_document',
+      columns: ['document_id', 'payload'],
+      where: 'owner_scope=? AND kind=?',
+      whereArgs: [owner, 'execution']);
+  for (final row in rows) {
+    final record = jsonDecode(row['payload'] as String);
+    if (record is! Map<String, dynamic>) continue;
+    final execution = record['execution'];
+    if (execution is! Map<String, dynamic> ||
+        (execution['undoEligibility'] != true &&
+            execution['undoEligibility'] != 1)) {
+      continue;
+    }
+    execution['undoEligibility'] = false;
+    await _assistantPut(
+        db, owner, 'execution', row['document_id'] as String, record,
+        update: true);
+  }
+}
+
 Future<TodayPlan> _assistantPlan(
     DatabaseExecutor db, String owner, String date) async {
   final revision = await db.query('local_day_revision',
