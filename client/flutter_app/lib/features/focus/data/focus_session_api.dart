@@ -62,6 +62,26 @@ class FocusSessionApi {
     return FocusSession.fromJson(data);
   }
 
+  Future<FocusSession> configurePomodoro(
+    AppSession session, {
+    required int sessionId,
+    required bool bindPomodoro,
+    required int pomodoroStudyMinutes,
+    required int pomodoroBreakMinutes,
+  }) async {
+    final data = await _apiClient
+        .post('focus/session/pomodoro', headers: session.authHeaders, body: {
+      'sessionId': sessionId,
+      'bindPomodoro': bindPomodoro,
+      'pomodoroStudyMinutes': pomodoroStudyMinutes,
+      'pomodoroBreakMinutes': pomodoroBreakMinutes,
+    });
+    if (data is! Map<String, dynamic>) {
+      throw const ApiException('Failed to update pomodoro.');
+    }
+    return FocusSession.fromJson(data);
+  }
+
   Future<FocusSession> pauseSession(AppSession session) async {
     final data = await _apiClient.post(
       'focus/session/pause',

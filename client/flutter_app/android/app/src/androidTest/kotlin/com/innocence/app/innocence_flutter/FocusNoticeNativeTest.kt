@@ -25,6 +25,8 @@ class FocusNoticeNativeTest : Instrumentation() {
             "system_alarm_once_without_flutter" to ::testSystemAlarmCompletesOnceWithoutFlutterTicker,
             "stale_session_tenant_mismatch" to ::testStaleSessionAndTenantMismatchDoNotAlert,
             "missing_field_invalid_identity" to ::testMissingFieldAndInvalidIdentity,
+            "pomodoro_stage_pause_restore_unbind" to ::testPomodoroStagePauseRestoreAndUnbind,
+            "pomodoro_missing_fields_and_total_completion" to ::testPomodoroValidationAndCompletion,
         )
         try {
             if (mode == "backgroundArm") {
@@ -50,7 +52,7 @@ class FocusNoticeNativeTest : Instrumentation() {
                 try { test() } finally { tearDown() }
                 sendStatus(0, Bundle().apply { putString("stream", "$name: PASS\n") })
             }
-            finish(-1, Bundle().apply { putString("stream", "OK (4 native timer checks)\n") })
+            finish(-1, Bundle().apply { putString("stream", "OK (${tests.size} native timer checks)\n") })
         } catch (error: Throwable) {
             finish(0, Bundle().apply { putString("stream", "FAIL $currentTest: ${error.javaClass.simpleName} at ${error.stackTrace.firstOrNull { it.className.endsWith("FocusNoticeNativeTest") }}\n") })
         }
@@ -144,5 +146,53 @@ class FocusNoticeNativeTest : Instrumentation() {
         FocusNotices.sync(app, "", "", false, false, 0, 0, false, true)
         FocusNotices.complete(app, "qa-b/3", newDeadline)
         awaitAbsent(7302, 7303)
+    }
+
+    fun testPomodoroStagePauseRestoreAndUnbind() {
+        val total = System.currentTimeMillis() + 90000
+        val first = System.currentTimeMillis() + 2500
+        FocusNotices.sync(app, "qa", "qa/pomodoro", true, false, total, 90, false, true,
+            PomodoroNotice(1, 1, "study", 1, first, 3))
+        val study = awaitNotice(7304) { it.extras.getString(Notification.EXTRA_TITLE) == "番茄 · 学习" }.notification
+        assertTrue(study.extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER))
+        awaitNotice(7304) { it.extras.getString(Notification.EXTRA_TITLE) == "番茄 · 休息" }
+        FocusNotices.sync(app, "qa", "qa/pomodoro", true, true, total, 80, false, true,
+            PomodoroNotice(1, 1, "break", 1, System.currentTimeMillis() + 3000, 3))
+        val paused = awaitNotice(7304) { it.extras.getString(Notification.EXTRA_TITLE) == "番茄 · 休息 · 已暂停" }.notification
+        assertFalse(paused.extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER))
+        assertEquals("第 1 轮 · 00:03", paused.extras.getString(Notification.EXTRA_TEXT))
+        Thread.sleep(3500)
+        FocusNotices.restore(app)
+        assertEquals("第 1 轮 · 00:03", awaitNotice(7304).notification.extras.getString(Notification.EXTRA_TEXT))
+        val resumed = System.currentTimeMillis() + 2500
+        FocusNotices.sync(app, "qa", "qa/pomodoro", true, false, System.currentTimeMillis() + 80000, 80, false, true,
+            PomodoroNotice(1, 1, "break", 1, resumed, 3))
+        awaitNotice(7304) { it.extras.getString(Notification.EXTRA_TITLE) == "番茄 · 学习" }
+        assertEquals("第 2 轮", awaitNotice(7304).notification.extras.getString(Notification.EXTRA_TEXT))
+        FocusNotices.sync(app, "qa", "qa/pomodoro", true, false, System.currentTimeMillis() + 60000, 60, false, true)
+        awaitAbsent(7304)
+        awaitNotice(7302)
+        FocusNotices.updatePomodoro(app, "qa/pomodoro", resumed)
+        awaitAbsent(7304)
+    }
+
+    fun testPomodoroValidationAndCompletion() {
+        val total = System.currentTimeMillis() + 3000
+        val valid = mapOf<String, Any>("owner" to "qa", "key" to "qa/pomodoro-validation", "active" to true,
+            "paused" to false, "deadlineMs" to total, "remainingSeconds" to 3, "completed" to false, "isChinese" to true,
+            "bindPomodoro" to true, "pomodoroStudyMinutes" to 1, "pomodoroBreakMinutes" to 0,
+            "pomodoroStage" to "study", "pomodoroCycle" to 1, "pomodoroDeadlineMs" to total, "pomodoroRemainingSeconds" to 3)
+        assertTrue(FocusNoticeArguments.parse(valid).pomodoro != null)
+        for (invalid in listOf(valid - "pomodoroStage", valid + ("pomodoroStudyMinutes" to 0),
+            valid + ("pomodoroDeadlineMs" to total + 1), valid + ("pomodoroStage" to "break"))) {
+            var rejected = false
+            try { FocusNoticeArguments.parse(invalid) } catch (_: IllegalArgumentException) { rejected = true }
+            assertTrue(rejected)
+        }
+        FocusNotices.sync(app, "qa", "qa/pomodoro-validation", true, false, total, 3, false, true,
+            PomodoroNotice(1, 0, "study", 1, total, 3))
+        awaitNotice(7304)
+        awaitNotice(7303)
+        awaitAbsent(7302, 7304)
     }
 }

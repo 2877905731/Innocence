@@ -1729,6 +1729,45 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
             _message('结束专注失败。', 'Failed to finish the focus session.'));
   }
 
+  Future<void> configureFocusPomodoro({
+    required bool bindPomodoro,
+    required int pomodoroStudyMinutes,
+    required int pomodoroBreakMinutes,
+  }) async {
+    if (!_focusSession.active || _isBusy) return;
+    final owner = localOwnerScope;
+    final account = _session;
+    final id = _focusSession.sessionId;
+    await _runBusyAction(() async {
+      final updated = isOffline && owner != null
+          ? await _offlineStore.configureFocusPomodoro(owner, id,
+              bindPomodoro: bindPomodoro,
+              pomodoroStudyMinutes: pomodoroStudyMinutes,
+              pomodoroBreakMinutes: pomodoroBreakMinutes)
+          : account != null
+              ? await _focusSessionApi.configurePomodoro(account,
+                  sessionId: id,
+                  bindPomodoro: bindPomodoro,
+                  pomodoroStudyMinutes: pomodoroStudyMinutes,
+                  pomodoroBreakMinutes: pomodoroBreakMinutes)
+              : null;
+      if (updated == null ||
+          _disposed ||
+          localOwnerScope != owner ||
+          _session != account ||
+          _focusSession.sessionId != id ||
+          !_focusSession.active) {
+        return;
+      }
+      _focusSession = updated;
+      _bannerMessage = bindPomodoro
+          ? _message('番茄闹钟已绑定。', 'Pomodoro bound.')
+          : _message('番茄闹钟已解除绑定。', 'Pomodoro unbound.');
+      _syncFocusTicker();
+      await _syncFocusNotice(force: true);
+    }, fallbackMessage: _message('保存番茄闹钟失败。', 'Failed to save pomodoro.'));
+  }
+
   Future<void> toggleFocusPause() async {
     if (!_focusSession.active) {
       return;

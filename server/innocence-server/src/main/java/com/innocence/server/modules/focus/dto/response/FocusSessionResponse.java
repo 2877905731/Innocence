@@ -1,6 +1,12 @@
 package com.innocence.server.modules.focus.dto.response;
 
 public class FocusSessionResponse {
+    private int pomodoroElapsedOffsetSeconds;
+    private int pomodoroCompletedBaseCount;
+    public int getPomodoroElapsedOffsetSeconds() { return pomodoroElapsedOffsetSeconds; }
+    public void setPomodoroElapsedOffsetSeconds(int value) { pomodoroElapsedOffsetSeconds = value; }
+    public int getPomodoroCompletedBaseCount() { return pomodoroCompletedBaseCount; }
+    public void setPomodoroCompletedBaseCount(int value) { pomodoroCompletedBaseCount = value; }
 
     private Long sessionId;
     private boolean active;

@@ -74,12 +74,18 @@ class OfflineStore {
     _database = await factory.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 6,
+        version: 7,
         onConfigure: (database) async {
           await database.execute('PRAGMA foreign_keys = ON');
         },
         onCreate: (database, version) => _createSchema(database),
         onUpgrade: (database, oldVersion, newVersion) async {
+          if (oldVersion < 7) {
+            await database.execute(
+                'ALTER TABLE local_focus_session ADD COLUMN pomodoro_elapsed_offset_seconds INTEGER NOT NULL DEFAULT 0');
+            await database.execute(
+                'ALTER TABLE local_focus_session ADD COLUMN pomodoro_completed_base_count INTEGER NOT NULL DEFAULT 0');
+          }
           if (oldVersion < 6) await _createAssistantTables(database);
           if (oldVersion < 2) {
             await _createLocalWidgetSettingTable(database);
@@ -276,6 +282,7 @@ class OfflineStore {
         WHEN 'checkin_intent' THEN 6
         ELSE 99 END,
         created_at,
+        client_version,
         operation_id''',
       [ownerScope],
     );
@@ -1058,24 +1065,76 @@ class OfflineStore {
       await finishFocusSession(ownerScope, row['session_id'] as int);
       return FocusSession.empty();
     }
-    return FocusSession.fromJson({
-      'sessionId': row['session_id'],
-      'active': true,
-      'paused': progress.paused,
-      'taskName': row['task_name'],
-      'stageName': row['stage_name'],
-      'startTime': row['start_time'],
-      'plannedEndTime': row['planned_end_time'],
-      'actualEndTime': row['actual_end_time'],
-      'plannedMinutes': row['planned_minutes'],
-      'elapsedSeconds': progress.elapsedSeconds,
-      'remainingSeconds': progress.remainingSeconds,
-      'bindPomodoro': row['bind_pomodoro'] == 1,
-      'pomodoroStudyMinutes': row['pomodoro_study_minutes'],
-      'pomodoroBreakMinutes': row['pomodoro_break_minutes'],
-      'currentCycleNo': row['current_cycle_no'],
-      'completedPomodoroCount': row['completed_pomodoro_count'],
-      'stageRemainingSeconds': progress.remainingSeconds,
+    return _localFocusSessionFromRow(row, progress,
+        plannedEndTime: '${row['planned_end_time']}');
+  }
+
+  Future<FocusSession> configureFocusPomodoro(
+    String ownerScope,
+    int sessionId, {
+    required bool bindPomodoro,
+    required int pomodoroStudyMinutes,
+    required int pomodoroBreakMinutes,
+  }) async {
+    if (bindPomodoro &&
+        (pomodoroStudyMinutes < 1 ||
+            pomodoroStudyMinutes > 1440 ||
+            pomodoroBreakMinutes < 0 ||
+            pomodoroBreakMinutes > 1440)) {
+      throw ArgumentError('Invalid pomodoro duration');
+    }
+    final database = await _readyDatabase();
+    return database.transaction((transaction) async {
+      final rows = await transaction.query('local_focus_session',
+          where: 'owner_scope = ? AND session_id = ? AND active = 1',
+          whereArgs: [ownerScope, sessionId],
+          limit: 1);
+      if (rows.isEmpty) throw StateError('No matching active focus session');
+      final row = rows.first;
+      final now = DateTime.now();
+      final progress = _resolveLocalFocusProgress(row, now);
+      if (progress.remainingSeconds <= 0) {
+        throw StateError('Focus session expired');
+      }
+      final current = _localFocusSessionFromRow(row, progress,
+          plannedEndTime: '${row['planned_end_time']}');
+      final study = bindPomodoro ? pomodoroStudyMinutes : 0;
+      final rest = bindPomodoro ? pomodoroBreakMinutes : 0;
+      if (current.bindPomodoro == bindPomodoro &&
+          current.pomodoroStudyMinutes == study &&
+          current.pomodoroBreakMinutes == rest) {
+        return current;
+      }
+      final values = <String, Object?>{
+        'bind_pomodoro': bindPomodoro ? 1 : 0,
+        'pomodoro_study_minutes': study,
+        'pomodoro_break_minutes': rest,
+        'pomodoro_elapsed_offset_seconds': progress.elapsedSeconds,
+        'pomodoro_completed_base_count': current.completedPomodoroCount,
+        'completed_pomodoro_count': current.completedPomodoroCount,
+        'elapsed_seconds': progress.elapsedSeconds,
+        'remaining_seconds': progress.remainingSeconds,
+        'updated_at': now.toIso8601String(),
+        'dirty': 1,
+      };
+      await transaction.update('local_focus_session', values,
+          where: 'owner_scope = ? AND session_id = ? AND active = 1',
+          whereArgs: [ownerScope, sessionId]);
+      await _enqueue(transaction,
+          ownerScope: ownerScope,
+          aggregateType: 'focus_session',
+          aggregateId: '$sessionId',
+          operationType: 'pomodoro',
+          createdAt: now.toUtc().toIso8601String(),
+          payload: {
+            'bindPomodoro': bindPomodoro,
+            'pomodoroStudyMinutes': study,
+            'pomodoroBreakMinutes': rest,
+            'pomodoroElapsedOffsetSeconds': progress.elapsedSeconds,
+            'pomodoroCompletedBaseCount': current.completedPomodoroCount,
+          });
+      return _localFocusSessionFromRow({...row, ...values}, progress,
+          plannedEndTime: '${row['planned_end_time']}');
     });
   }
 
@@ -1262,6 +1321,9 @@ class OfflineStore {
     final row = rows.first;
     final progress = _resolveLocalFocusProgress(row, now);
     final elapsedSeconds = progress.elapsedSeconds;
+    final completedCount = _localFocusSessionFromRow(row, progress,
+            plannedEndTime: '${row['planned_end_time']}')
+        .completedPomodoroCount;
     await database.transaction((transaction) async {
       await transaction.update(
         'local_focus_session',
@@ -1271,6 +1333,7 @@ class OfflineStore {
           'stage_name': 'finished',
           'actual_end_time': nowText,
           'elapsed_seconds': elapsedSeconds,
+          'completed_pomodoro_count': completedCount,
           'remaining_seconds': 0,
           'updated_at': nowText,
           'dirty': 1,
@@ -1287,6 +1350,7 @@ class OfflineStore {
         payload: {
           'actualEndTime': nowText,
           'durationSeconds': elapsedSeconds,
+          'completedPomodoroCount': completedCount,
         },
         createdAt: now.toUtc().toIso8601String(),
       );
@@ -1307,7 +1371,7 @@ class OfflineStore {
       'pomodoroStudyMinutes': row['pomodoro_study_minutes'],
       'pomodoroBreakMinutes': row['pomodoro_break_minutes'],
       'currentCycleNo': row['current_cycle_no'],
-      'completedPomodoroCount': row['completed_pomodoro_count'],
+      'completedPomodoroCount': completedCount,
       'stageRemainingSeconds': 0,
     });
   }
@@ -1372,6 +1436,9 @@ class OfflineStore {
       'currentCycleNo': row['current_cycle_no'],
       'completedPomodoroCount': row['completed_pomodoro_count'],
       'stageRemainingSeconds': progress.remainingSeconds,
+      'pomodoroElapsedOffsetSeconds':
+          row['pomodoro_elapsed_offset_seconds'] ?? 0,
+      'pomodoroCompletedBaseCount': row['pomodoro_completed_base_count'] ?? 0,
     });
   }
 
@@ -1558,6 +1625,8 @@ class OfflineStore {
         bind_pomodoro INTEGER NOT NULL DEFAULT 0,
         pomodoro_study_minutes INTEGER NOT NULL DEFAULT 0,
         pomodoro_break_minutes INTEGER NOT NULL DEFAULT 0,
+        pomodoro_elapsed_offset_seconds INTEGER NOT NULL DEFAULT 0,
+        pomodoro_completed_base_count INTEGER NOT NULL DEFAULT 0,
         current_cycle_no INTEGER NOT NULL DEFAULT 0,
         completed_pomodoro_count INTEGER NOT NULL DEFAULT 0,
         elapsed_seconds INTEGER NOT NULL DEFAULT 0,
@@ -1784,6 +1853,14 @@ class OfflineStore {
     required String createdAt,
   }) async {
     final operationId = _uuidV4();
+    final previousVersions = aggregateType == 'focus_session'
+        ? await database.rawQuery(
+            'SELECT COALESCE(MAX(client_version), 0) AS version FROM sync_outbox WHERE owner_scope = ? AND aggregate_type = ? AND aggregate_id = ?',
+            [ownerScope, aggregateType, aggregateId])
+        : null;
+    final version = previousVersions == null
+        ? 1
+        : (previousVersions.first['version'] as int) + 1;
     await database.insert('sync_outbox', {
       'operation_id': operationId,
       'owner_scope': ownerScope,
@@ -1791,7 +1868,7 @@ class OfflineStore {
       'aggregate_id': aggregateId,
       'operation_type': operationType,
       'payload_json': jsonEncode(payload),
-      'client_version': 1,
+      'client_version': version,
       'created_at': createdAt,
       'status': 'pending',
       'retry_count': 0,
@@ -1899,7 +1976,9 @@ class OfflineStore {
     int durationMinutes,
   ) {
     final stored = row['completed_pomodoro_count'] as int? ?? 0;
-    if (stored > 0 || row['bind_pomodoro'] != 1) {
+    if (stored > 0 ||
+        row['bind_pomodoro'] != 1 ||
+        (row['pomodoro_elapsed_offset_seconds'] as int? ?? 0) > 0) {
       return stored;
     }
     final study = row['pomodoro_study_minutes'] as int? ?? 0;

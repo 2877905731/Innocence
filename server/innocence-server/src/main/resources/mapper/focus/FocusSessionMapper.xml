@@ -17,6 +17,8 @@
         <result property="pausedDurationSeconds" column="paused_duration_seconds"/>
         <result property="bindPomodoroFlag" column="bind_pomodoro_flag"/>
         <result property="pomodoroStudyMinutes" column="pomodoro_study_minutes"/>
+        <result property="pomodoroElapsedOffsetSeconds" column="pomodoro_elapsed_offset_seconds"/>
+        <result property="pomodoroCompletedBaseCount" column="pomodoro_completed_base_count"/>
         <result property="pomodoroBreakMinutes" column="pomodoro_break_minutes"/>
         <result property="completedPomodoroCount" column="completed_pomodoro_count"/>
         <result property="completionNotifiedFlag" column="completion_notified_flag"/>
@@ -132,6 +134,18 @@
         where id = #{sessionId}
           and user_id = #{userId}
           and status = 'active'
+    </update>
+
+    <update id="configurePomodoro">
+        update study_timer_record
+        set bind_pomodoro_flag = #{bindPomodoroFlag},
+            pomodoro_study_minutes = #{pomodoroStudyMinutes},
+            pomodoro_break_minutes = #{pomodoroBreakMinutes},
+            pomodoro_elapsed_offset_seconds = #{pomodoroElapsedOffsetSeconds},
+            pomodoro_completed_base_count = #{pomodoroCompletedBaseCount},
+            completed_pomodoro_count = #{completedPomodoroCount}
+        where id = #{id} and user_id = #{userId}
+          and status in ('active', 'paused', 'finished')
     </update>
 
     <update id="resumeStudyTimerRecord">

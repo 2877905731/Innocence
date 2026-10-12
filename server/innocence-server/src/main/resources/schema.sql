@@ -505,6 +505,8 @@ CREATE TABLE IF NOT EXISTS study_timer_record
     paused_duration_seconds  INT          NOT NULL DEFAULT 0,
     bind_pomodoro_flag       TINYINT      NOT NULL DEFAULT 0,
     pomodoro_study_minutes   INT          NOT NULL DEFAULT 0,
+    pomodoro_elapsed_offset_seconds INT NOT NULL DEFAULT 0,
+    pomodoro_completed_base_count INT NOT NULL DEFAULT 0,
     pomodoro_break_minutes   INT          NOT NULL DEFAULT 0,
     completed_pomodoro_count INT          NOT NULL DEFAULT 0,
     completion_notified_flag TINYINT      NOT NULL DEFAULT 0,

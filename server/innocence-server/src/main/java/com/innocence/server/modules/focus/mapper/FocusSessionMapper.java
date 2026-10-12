@@ -27,6 +27,7 @@ public interface FocusSessionMapper {
     void insertStudyTimerRecord(StudyTimerRecord record);
 
     void insertImportedStudyTimerRecord(StudyTimerRecord record);
+    int configurePomodoro(StudyTimerRecord record);
 
     void finishStudyTimerRecord(
             @Param("sessionId") Long sessionId,

@@ -18,6 +18,8 @@ class FocusSession {
     required this.completedPomodoroCount,
     required this.stageRemainingSeconds,
     required this.referenceTime,
+    this.pomodoroElapsedOffsetSeconds = 0,
+    this.pomodoroCompletedBaseCount = 0,
   });
 
   final int sessionId;
@@ -38,6 +40,8 @@ class FocusSession {
   final int completedPomodoroCount;
   final int stageRemainingSeconds;
   final DateTime referenceTime;
+  final int pomodoroElapsedOffsetSeconds;
+  final int pomodoroCompletedBaseCount;
 
   factory FocusSession.empty() {
     return FocusSession(
@@ -63,12 +67,23 @@ class FocusSession {
   }
 
   factory FocusSession.fromJson(Map<String, dynamic> json) {
+    final active = json['active'] == true;
+    final elapsed = _toInt(json['elapsedSeconds']);
+    final offset = _toInt(json['pomodoroElapsedOffsetSeconds']);
+    final base = _toInt(json['pomodoroCompletedBaseCount']);
+    final stage = _resolveStageState(
+      bindPomodoro: json['bindPomodoro'] == true,
+      elapsedSeconds: (elapsed - offset).clamp(0, elapsed),
+      remainingSeconds: _toInt(json['remainingSeconds']),
+      pomodoroStudyMinutes: _toInt(json['pomodoroStudyMinutes']),
+      pomodoroBreakMinutes: _toInt(json['pomodoroBreakMinutes']),
+    );
     return FocusSession(
       sessionId: _toInt(json['sessionId']),
       active: json['active'] == true,
       paused: json['paused'] == true,
       taskName: '${json['taskName'] ?? ''}',
-      stageName: '${json['stageName'] ?? 'idle'}',
+      stageName: active ? stage.stageName : '${json['stageName'] ?? 'idle'}',
       startTime: '${json['startTime'] ?? ''}',
       plannedEndTime: '${json['plannedEndTime'] ?? ''}',
       actualEndTime: '${json['actualEndTime'] ?? ''}',
@@ -78,10 +93,17 @@ class FocusSession {
       bindPomodoro: json['bindPomodoro'] == true,
       pomodoroStudyMinutes: _toInt(json['pomodoroStudyMinutes']),
       pomodoroBreakMinutes: _toInt(json['pomodoroBreakMinutes']),
-      currentCycleNo: _toInt(json['currentCycleNo']),
-      completedPomodoroCount: _toInt(json['completedPomodoroCount']),
-      stageRemainingSeconds: _toInt(json['stageRemainingSeconds']),
+      currentCycleNo:
+          active ? stage.currentCycleNo : _toInt(json['currentCycleNo']),
+      completedPomodoroCount: active
+          ? base + stage.completedPomodoroCount
+          : _toInt(json['completedPomodoroCount']),
+      stageRemainingSeconds: active
+          ? stage.stageRemainingSeconds
+          : _toInt(json['stageRemainingSeconds']),
       referenceTime: DateTime.now(),
+      pomodoroElapsedOffsetSeconds: offset,
+      pomodoroCompletedBaseCount: base,
     );
   }
 
@@ -101,7 +123,8 @@ class FocusSession {
     final nextElapsedSeconds = elapsedSeconds + consumed;
     final nextStageState = _resolveStageState(
       bindPomodoro: bindPomodoro,
-      elapsedSeconds: nextElapsedSeconds,
+      elapsedSeconds: (nextElapsedSeconds - pomodoroElapsedOffsetSeconds)
+          .clamp(0, nextElapsedSeconds),
       remainingSeconds: nextRemainingSeconds,
       pomodoroStudyMinutes: pomodoroStudyMinutes,
       pomodoroBreakMinutes: pomodoroBreakMinutes,
@@ -125,12 +148,13 @@ class FocusSession {
       currentCycleNo: nextRemainingSeconds > 0
           ? nextStageState.currentCycleNo
           : currentCycleNo,
-      completedPomodoroCount: nextRemainingSeconds > 0
-          ? nextStageState.completedPomodoroCount
-          : completedPomodoroCount,
+      completedPomodoroCount:
+          pomodoroCompletedBaseCount + nextStageState.completedPomodoroCount,
       stageRemainingSeconds:
           nextRemainingSeconds > 0 ? nextStageState.stageRemainingSeconds : 0,
       referenceTime: referenceTime.add(Duration(seconds: consumed)),
+      pomodoroElapsedOffsetSeconds: pomodoroElapsedOffsetSeconds,
+      pomodoroCompletedBaseCount: pomodoroCompletedBaseCount,
     );
   }
 

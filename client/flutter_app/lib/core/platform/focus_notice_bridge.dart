@@ -41,8 +41,11 @@ class FocusNoticeBridge {
     final active = owner != null && session.active;
     final deadline = session.referenceTime.millisecondsSinceEpoch +
         session.remainingSeconds * 1000;
+    final pomodoroDeadline = session.referenceTime.millisecondsSinceEpoch +
+        session.stageRemainingSeconds * 1000;
     final signature = '$key|$active|${session.paused}|$deadline|'
-        '$completed|$isChinese';
+        '$completed|$isChinese|${session.bindPomodoro}|${session.pomodoroStudyMinutes}|${session.pomodoroBreakMinutes}|'
+        '${session.stageName}|${session.currentCycleNo}|$pomodoroDeadline';
     if (!force && !requestPermission && signature == _signature) {
       return _pending.then((_) => _status);
     }
@@ -73,6 +76,13 @@ class FocusNoticeBridge {
             'deadlineMs': deadline,
             'completed': completed,
             'isChinese': isChinese,
+            'bindPomodoro': session.bindPomodoro && active,
+            'pomodoroStudyMinutes': session.pomodoroStudyMinutes,
+            'pomodoroBreakMinutes': session.pomodoroBreakMinutes,
+            'pomodoroStage': session.stageName,
+            'pomodoroCycle': session.currentCycleNo,
+            'pomodoroDeadlineMs': pomodoroDeadline,
+            'pomodoroRemainingSeconds': session.stageRemainingSeconds,
           });
           _status = switch (status) {
             'available' => FocusNoticeStatus.available,

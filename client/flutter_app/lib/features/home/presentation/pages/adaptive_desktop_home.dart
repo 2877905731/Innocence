@@ -22,6 +22,7 @@ import 'package:innocence_flutter/core/widgets/white_surface_panel.dart';
 import 'package:innocence_flutter/features/account/domain/models/user_profile.dart';
 import 'package:innocence_flutter/features/checkin/domain/models/check_in_status.dart';
 import 'package:innocence_flutter/features/focus/domain/models/focus_session.dart';
+import 'package:innocence_flutter/features/focus/presentation/widgets/focus_session_tabs.dart';
 import 'package:innocence_flutter/features/friends/domain/models/friend_overview.dart';
 import 'package:innocence_flutter/features/home/domain/theme_daily_slogan.dart';
 import 'package:innocence_flutter/features/memos/domain/models/memo_overview.dart';
@@ -66,6 +67,7 @@ class AdaptiveDesktopHome extends StatefulWidget {
     required this.onOpenSettings,
     required this.onOpenTeamWorkspace,
     required this.onStartFocus,
+    this.onConfigureFocusPomodoro,
     required this.onFinishFocus,
     required this.onToggleFocus,
     required this.onSubmitCheckIn,
@@ -93,6 +95,7 @@ class AdaptiveDesktopHome extends StatefulWidget {
   final AppVisualTheme visualTheme;
   final UserProfile profile;
   final FocusSession focusSession;
+  final ConfigureFocusPomodoro? onConfigureFocusPomodoro;
   final CheckInStatus checkInStatus;
   final StatsOverview statsOverview;
   final TeamOverview teamOverview;
@@ -187,6 +190,12 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome>
   @override
   void didUpdateWidget(covariant AdaptiveDesktopHome oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.isBusy &&
+        !widget.isBusy &&
+        !oldWidget.focusSession.active &&
+        widget.focusSession.active) {
+      _selectedDestinationId = 'focus';
+    }
     if (oldWidget.focusSession.active != widget.focusSession.active ||
         oldWidget.focusSession.paused != widget.focusSession.paused ||
         oldWidget.appLanguage != widget.appLanguage) {
@@ -968,17 +977,22 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome>
       palette: palette,
       visualTheme: widget.visualTheme,
       children: [
-        _FocusPanel(
-          palette: palette,
-          session: widget.focusSession,
-          isChinese: _isChinese,
-          isBusy: widget.isBusy,
-          expanded: true,
-          onAction: widget.focusSession.active
-              ? widget.onFinishFocus
-              : widget.onStartFocus,
-          onToggle: widget.onToggleFocus,
-        ),
+        FocusSessionTabs(
+            session: widget.focusSession,
+            isChinese: _isChinese,
+            isBusy: widget.isBusy,
+            onConfigure: widget.onConfigureFocusPomodoro,
+            timer: _FocusPanel(
+              palette: palette,
+              session: widget.focusSession,
+              isChinese: _isChinese,
+              isBusy: widget.isBusy,
+              expanded: true,
+              onAction: widget.focusSession.active
+                  ? widget.onFinishFocus
+                  : widget.onStartFocus,
+              onToggle: widget.onToggleFocus,
+            )),
         const SizedBox(height: 20),
         _MetricGrid(
           spec: spec,

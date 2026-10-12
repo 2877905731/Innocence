@@ -149,10 +149,12 @@ void main() {
             if (session.active) {
               final toggle = find.byKey(const ValueKey('android-focus-toggle'));
               await tester.ensureVisible(toggle);
+              await tester.pump();
               await tester.tap(toggle);
               await tester.pump();
               final finish = find.byKey(const ValueKey('android-focus-finish'));
               await tester.ensureVisible(finish);
+              await tester.pump();
               await tester.tap(finish);
               await tester.pump();
               expect((starts, toggles, finishes), (0, 1, 1));

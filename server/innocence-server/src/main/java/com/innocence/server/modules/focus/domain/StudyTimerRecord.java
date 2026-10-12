@@ -3,6 +3,12 @@ package com.innocence.server.modules.focus.domain;
 import java.time.LocalDateTime;
 
 public class StudyTimerRecord {
+    private Integer pomodoroElapsedOffsetSeconds = 0;
+    private Integer pomodoroCompletedBaseCount = 0;
+    public Integer getPomodoroCompletedBaseCount() { return pomodoroCompletedBaseCount; }
+    public void setPomodoroCompletedBaseCount(Integer value) { pomodoroCompletedBaseCount = value; }
+    public Integer getPomodoroElapsedOffsetSeconds() { return pomodoroElapsedOffsetSeconds; }
+    public void setPomodoroElapsedOffsetSeconds(Integer value) { pomodoroElapsedOffsetSeconds = value; }
 
     private Long id;
     private Long userId;

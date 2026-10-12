@@ -5,6 +5,7 @@ import com.innocence.server.common.exception.ErrorCode;
 import com.innocence.server.modules.focus.domain.StudyTimerRecord;
 import com.innocence.server.modules.focus.dto.request.FinishFocusSessionRequest;
 import com.innocence.server.modules.focus.dto.request.StartFocusSessionRequest;
+import com.innocence.server.modules.focus.dto.request.ConfigurePomodoroRequest;
 import com.innocence.server.modules.focus.dto.response.FocusSessionResponse;
 import com.innocence.server.modules.focus.mapper.FocusSessionMapper;
 import com.innocence.server.modules.notification.service.NotificationService;
@@ -139,6 +140,51 @@ public class FocusSessionService {
     }
 
     @Transactional
+    public FocusSessionResponse configurePomodoro(Long userId, ConfigurePomodoroRequest request) {
+        focusSessionMapper.lockPlanningOwner(userId);
+        StudyTimerRecord record = focusSessionMapper.findCurrentSessionByUserId(userId);
+        if (record == null || !record.getId().equals(request.sessionId())) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "No matching active focus session.");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        FocusSessionResponse current = buildCurrentResponse(record, now);
+        if (current.getRemainingSeconds() <= 0) throw new BusinessException(ErrorCode.BAD_REQUEST, "Focus session expired.");
+        boolean bind = Boolean.TRUE.equals(request.bindPomodoro());
+        int study = bind ? requirePositiveMinutes(request.pomodoroStudyMinutes(), "Study minutes are required.") : 0;
+        int rest = bind ? requireNonNegativeMinutes(request.pomodoroBreakMinutes(), "Invalid break minutes.") : 0;
+        if (bind && request.pomodoroBreakMinutes() == null || study > 1440 || rest > 1440) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "Pomodoro minutes must be within 0 to 1440.");
+        }
+        if (isPomodoroBound(record) == bind && defaultNumber(record.getPomodoroStudyMinutes()) == study
+                && defaultNumber(record.getPomodoroBreakMinutes()) == rest) return current;
+        record.setBindPomodoroFlag(bind ? 1 : 0);
+        record.setPomodoroStudyMinutes(study);
+        record.setPomodoroBreakMinutes(rest);
+        record.setPomodoroElapsedOffsetSeconds(current.getElapsedSeconds());
+        record.setCompletedPomodoroCount(current.getCompletedPomodoroCount());
+        record.setPomodoroCompletedBaseCount(current.getCompletedPomodoroCount());
+        if (focusSessionMapper.configurePomodoro(record) != 1) throw new BusinessException(ErrorCode.BAD_REQUEST, "Focus session changed.");
+        return buildCurrentResponse(record, now);
+    }
+
+    @Transactional
+    public void configureImportedPomodoro(Long userId, Long sessionId, boolean bind, int study, int rest, int offset, int base) {
+        StudyTimerRecord record = focusSessionMapper.findSessionByIdAndUserId(sessionId, userId);
+        if (record == null) throw new BusinessException(ErrorCode.NOT_FOUND, "Imported focus session was not found.");
+        if (offset < 0 || base < 0 || base > offset / 60 || offset > defaultNumber(record.getPlannedMinutes()) * 60
+                || (bind && (study < 1 || study > 1440 || rest < 0 || rest > 1440))) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "Invalid imported pomodoro snapshot.");
+        }
+        record.setBindPomodoroFlag(bind ? 1 : 0);
+        record.setPomodoroStudyMinutes(bind ? study : 0);
+        record.setPomodoroBreakMinutes(bind ? rest : 0);
+        record.setPomodoroElapsedOffsetSeconds(offset);
+        record.setCompletedPomodoroCount(base);
+        record.setPomodoroCompletedBaseCount(base);
+        if (focusSessionMapper.configurePomodoro(record) != 1) throw new BusinessException(ErrorCode.BAD_REQUEST, "Imported focus session changed.");
+    }
+
+    @Transactional
     public FocusSessionResponse resumeSession(Long userId) {
         StudyTimerRecord record = focusSessionMapper.findCurrentSessionByUserId(userId);
         if (record == null) {
@@ -234,6 +280,12 @@ public class FocusSessionService {
             LocalDateTime actualEndTime,
             Integer importedDurationSeconds
     ) {
+        finishImportedSession(userId, sessionId, actualEndTime, importedDurationSeconds, null);
+    }
+
+    @Transactional
+    public void finishImportedSession(Long userId, Long sessionId, LocalDateTime actualEndTime,
+            Integer importedDurationSeconds, Integer importedPomodoroCount) {
         StudyTimerRecord record = focusSessionMapper.findSessionByIdAndUserId(sessionId, userId);
         if (record == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "Imported focus session was not found.");
@@ -251,16 +303,22 @@ public class FocusSessionService {
         int durationSeconds = importedDurationSeconds == null
                 ? calculateElapsedSeconds(record.getCreateTime(), resolvedEnd)
                 : Math.min(Math.max(importedDurationSeconds, 0), maximumDurationSeconds);
+        if (importedPomodoroCount != null && (importedPomodoroCount < 0 || importedPomodoroCount > durationSeconds / 60)) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "Invalid imported pomodoro count.");
+        }
         focusSessionMapper.finishImportedStudyTimerRecord(
                 sessionId,
                 userId,
                 resolvedEnd,
                 durationSeconds,
-                resolveImportedPomodoroCount(record, durationSeconds)
+                importedPomodoroCount == null ? resolveImportedPomodoroCount(record, durationSeconds) : importedPomodoroCount
         );
     }
 
     private int resolveImportedPomodoroCount(StudyTimerRecord record, int durationSeconds) {
+        if (defaultNumber(record.getPomodoroElapsedOffsetSeconds()) > 0 || defaultNumber(record.getPomodoroCompletedBaseCount()) > 0) {
+            return calculateCompletedPomodoroCount(record, durationSeconds);
+        }
         if (!isPomodoroBound(record) || defaultNumber(record.getPomodoroStudyMinutes()) <= 0) {
             return 0;
         }
@@ -331,6 +389,8 @@ public class FocusSessionService {
         response.setElapsedSeconds(elapsedSeconds);
         response.setRemainingSeconds(remainingSeconds);
         response.setBindPomodoro(isPomodoroBound(record));
+        response.setPomodoroElapsedOffsetSeconds(defaultNumber(record.getPomodoroElapsedOffsetSeconds()));
+        response.setPomodoroCompletedBaseCount(defaultNumber(record.getPomodoroCompletedBaseCount()));
         response.setPomodoroStudyMinutes(defaultNumber(record.getPomodoroStudyMinutes()));
         response.setPomodoroBreakMinutes(defaultNumber(record.getPomodoroBreakMinutes()));
         response.setCurrentCycleNo(pomodoroState.currentCycleNo());
@@ -388,8 +448,10 @@ public class FocusSessionService {
             int elapsedSeconds,
             int remainingSeconds
     ) {
+        elapsedSeconds = Math.max(0, elapsedSeconds - defaultNumber(record.getPomodoroElapsedOffsetSeconds()));
+        int base = defaultNumber(record.getPomodoroCompletedBaseCount());
         if (!isPomodoroBound(record) || defaultNumber(record.getPomodoroStudyMinutes()) <= 0) {
-            return new PomodoroState("study", 1, 0, remainingSeconds);
+            return new PomodoroState("study", 1, base, remainingSeconds);
         }
 
         int studySeconds = defaultNumber(record.getPomodoroStudyMinutes()) * 60;
@@ -402,7 +464,7 @@ public class FocusSessionService {
             return new PomodoroState(
                     "study",
                     currentCycleNo,
-                    completedCount,
+                    base + completedCount,
                     Math.min(stageRemainingSeconds, remainingSeconds)
             );
         }
@@ -414,7 +476,7 @@ public class FocusSessionService {
             return new PomodoroState(
                     "study",
                     cycleIndex + 1,
-                    cycleIndex,
+                    base + cycleIndex,
                     Math.min(studySeconds - cyclePosition, remainingSeconds)
             );
         }
@@ -422,30 +484,17 @@ public class FocusSessionService {
         return new PomodoroState(
                 "break",
                 cycleIndex + 1,
-                cycleIndex + 1,
+                base + cycleIndex + 1,
                 Math.min(cycleSeconds - cyclePosition, remainingSeconds)
         );
     }
 
     private int calculateCompletedPomodoroCount(StudyTimerRecord record, int elapsedSeconds) {
-        if (!isPomodoroBound(record) || defaultNumber(record.getPomodoroStudyMinutes()) <= 0) {
-            return 0;
-        }
-
-        int studySeconds = defaultNumber(record.getPomodoroStudyMinutes()) * 60;
-        int breakSeconds = defaultNumber(record.getPomodoroBreakMinutes()) * 60;
-        if (breakSeconds <= 0) {
-            return elapsedSeconds / studySeconds;
-        }
-        if (elapsedSeconds < studySeconds) {
-            return 0;
-        }
-
-        int cycleSeconds = studySeconds + breakSeconds;
-        return 1 + ((elapsedSeconds - studySeconds) / cycleSeconds);
+        return resolvePomodoroState(record, elapsedSeconds, 0).completedPomodoroCount();
     }
 
     private int resolveFinishedCycleNo(StudyTimerRecord record, int elapsedSeconds) {
+        elapsedSeconds = Math.max(0, elapsedSeconds - defaultNumber(record.getPomodoroElapsedOffsetSeconds()));
         if (!isPomodoroBound(record) || defaultNumber(record.getPomodoroStudyMinutes()) <= 0) {
             return 1;
         }

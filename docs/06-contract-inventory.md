@@ -100,6 +100,14 @@ endpoints:
     failures: "未认证返回 401；没有已暂停专注或状态不匹配返回 404/400；只允许操作 token 所属用户的数据"
     evidence_status: client_server_implemented_unit_verified_http_pending
     trigger: "2026-09-10 已完成顺延结束时间、累计暂停秒数、Flutter 在线/离线恢复和服务单测；真实 HTTP 回放待补"
+  - id: U26
+    method: POST
+    path: "/api/app/v1/focus/session/pomodoro"
+    source_behavior: "在当前专注分页绑定、调整或解除番茄；配置改变从有效秒数锚点开始新学习阶段，保留总计时、暂停与完成基数；相同配置不重置"
+    success: "sessionId与bindPomodoro必填；绑定时学习1–1440/休息0–1440分钟，返回完整FocusSession及兼容新增pomodoroElapsedOffsetSeconds/pomodoroCompletedBaseCount"
+    failures: "未认证401；字段缺失或时长非法400；其他用户/陈旧session404，过期或状态变化400；token确定用户"
+    evidence_status: client_server_implemented_fixture_verified_live_http_pending
+    trigger: "2026-10-12全平台分页与本机事务/原生通知；联网需先迁移数据库再部署，真实HTTP另验；详见docs/development/专注页番茄分页与通知.md"
   - id: U04
     method: POST
     path: "/api/app/v1/check-in/submit"

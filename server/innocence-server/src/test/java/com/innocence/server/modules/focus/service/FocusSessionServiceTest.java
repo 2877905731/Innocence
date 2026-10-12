@@ -27,6 +27,61 @@ class FocusSessionServiceTest {
     private FocusSessionMapper focusSessionMapper;
     private FocusSessionService focusSessionService;
 
+    @Test
+    void bindAfterStartStartsFreshStageAndKeepsFocusDeadline() {
+        StudyTimerRecord record = activeRecord();
+        LocalDateTime deadline = record.getPlannedEndTime();
+        when(focusSessionMapper.findCurrentSessionByUserId(7L)).thenReturn(record);
+        when(focusSessionMapper.configurePomodoro(record)).thenReturn(1);
+        FocusSessionResponse response = focusSessionService.configurePomodoro(7L,
+                new com.innocence.server.modules.focus.dto.request.ConfigurePomodoroRequest(42L, true, 25, 5));
+        assertEquals(Math.min(1500, response.getRemainingSeconds()), response.getStageRemainingSeconds());
+        assertEquals(response.getElapsedSeconds(), response.getPomodoroElapsedOffsetSeconds());
+        assertEquals(deadline, record.getPlannedEndTime());
+        assertEquals(0, response.getCompletedPomodoroCount());
+        verify(focusSessionMapper).configurePomodoro(record);
+    }
+
+    @Test
+    void reconfigurePausedKeepsCompletedCountAndPausedState() {
+        StudyTimerRecord record = activeRecord();
+        record.setStatus("paused"); record.setPausedAt(record.getCreateTime().plusSeconds(240));
+        record.setBindPomodoroFlag(1); record.setPomodoroStudyMinutes(1); record.setPomodoroBreakMinutes(0);
+        when(focusSessionMapper.findCurrentSessionByUserId(7L)).thenReturn(record);
+        when(focusSessionMapper.configurePomodoro(record)).thenReturn(1);
+        var response = focusSessionService.configurePomodoro(7L,
+                new com.innocence.server.modules.focus.dto.request.ConfigurePomodoroRequest(42L, true, 10, 2));
+        assertTrue(response.isPaused()); assertEquals(4, response.getCompletedPomodoroCount());
+        assertEquals(600, response.getStageRemainingSeconds()); assertEquals(240, response.getPomodoroElapsedOffsetSeconds());
+        var unbound = focusSessionService.configurePomodoro(7L,
+                new com.innocence.server.modules.focus.dto.request.ConfigurePomodoroRequest(42L, false, 0, 0));
+        assertEquals(4, unbound.getCompletedPomodoroCount()); assertTrue(unbound.isPaused());
+    }
+
+    @Test
+    void otherSessionMissingMinutesAndChangedRowAreRejected() {
+        StudyTimerRecord record = activeRecord();
+        when(focusSessionMapper.findCurrentSessionByUserId(7L)).thenReturn(record);
+        assertThrows(BusinessException.class, () -> focusSessionService.configurePomodoro(7L,
+                new com.innocence.server.modules.focus.dto.request.ConfigurePomodoroRequest(999L, true, 25, 5)));
+        assertThrows(BusinessException.class, () -> focusSessionService.configurePomodoro(7L,
+                new com.innocence.server.modules.focus.dto.request.ConfigurePomodoroRequest(42L, true, null, 5)));
+        assertThrows(BusinessException.class, () -> focusSessionService.configurePomodoro(7L,
+                new com.innocence.server.modules.focus.dto.request.ConfigurePomodoroRequest(42L, true, 25, null)));
+        assertThrows(BusinessException.class, () -> focusSessionService.configurePomodoro(7L,
+                new com.innocence.server.modules.focus.dto.request.ConfigurePomodoroRequest(42L, true, 25, 5)));
+    }
+
+    @Test
+    void importedFinishPreservesExactOfflineCountAndRejectsImpossibleCount() {
+        StudyTimerRecord record = activeRecord();
+        when(focusSessionMapper.findSessionByIdAndUserId(42L, 7L)).thenReturn(record);
+        focusSessionService.finishImportedSession(7L, 42L, record.getCreateTime().plusSeconds(240), 240, 2);
+        verify(focusSessionMapper).finishImportedStudyTimerRecord(42L, 7L, record.getCreateTime().plusSeconds(240), 240, 2);
+        assertThrows(BusinessException.class, () -> focusSessionService.finishImportedSession(7L, 42L,
+                record.getCreateTime().plusSeconds(240), 240, 5));
+    }
+
     @BeforeEach
     void setUp() {
         focusSessionMapper = mock(FocusSessionMapper.class);

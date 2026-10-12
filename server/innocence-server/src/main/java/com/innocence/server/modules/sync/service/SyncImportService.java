@@ -115,6 +115,7 @@ public class SyncImportService {
         operations.sort(Comparator
                 .comparingInt((SyncImportOperationRequest operation) -> dependencyOrder(operation.aggregateType()))
                 .thenComparing(SyncImportOperationRequest::createdAt)
+                .thenComparingInt(operation -> "focus_session".equals(operation.aggregateType()) && operation.clientVersion() != null ? operation.clientVersion() : 1)
                 .thenComparing(SyncImportOperationRequest::operationId));
 
         List<SyncImportItemResponse> items = new ArrayList<>();
@@ -317,6 +318,19 @@ public class SyncImportService {
             String localProfileId,
             SyncImportOperationRequest operation
     ) {
+        if ("pomodoro".equals(operation.operationType())) {
+            Long serverId = requireBoundLong(userId, localProfileId, operation);
+            for (String field : java.util.List.of("bindPomodoro", "pomodoroStudyMinutes", "pomodoroBreakMinutes",
+                    "pomodoroElapsedOffsetSeconds", "pomodoroCompletedBaseCount")) {
+                if (!operation.payload().containsKey(field)) throw new IllegalArgumentException("Pomodoro snapshot field is required.");
+            }
+            if (!(operation.payload().get("bindPomodoro") instanceof Boolean)) throw new IllegalArgumentException("Invalid pomodoro binding.");
+            focusSessionService.configureImportedPomodoro(userId, serverId,
+                    Boolean.TRUE.equals(operation.payload().get("bindPomodoro")),
+                    pomodoroInt(operation.payload(), "pomodoroStudyMinutes"), pomodoroInt(operation.payload(), "pomodoroBreakMinutes"),
+                    pomodoroInt(operation.payload(), "pomodoroElapsedOffsetSeconds"), pomodoroInt(operation.payload(), "pomodoroCompletedBaseCount"));
+            return String.valueOf(serverId);
+        }
         if ("finish".equals(operation.operationType())) {
             Long serverId = requireBoundLong(userId, localProfileId, operation);
             focusSessionService.finishImportedSession(
@@ -325,7 +339,9 @@ public class SyncImportService {
                     parseDateTime(asText(operation.payload().get("actualEndTime"))),
                     operation.payload().containsKey("durationSeconds")
                             ? asInt(operation.payload().get("durationSeconds"))
-                            : null
+                            : null,
+                    operation.payload().containsKey("completedPomodoroCount")
+                            ? pomodoroInt(operation.payload(), "completedPomodoroCount") : null
             );
             return String.valueOf(serverId);
         }
@@ -351,6 +367,14 @@ public class SyncImportService {
         String planDate = asText(operation.payload().get("planDate"));
         checkInService.importCheckInIntent(userId, LocalDate.parse(planDate));
         return planDate;
+    }
+
+    private int pomodoroInt(Map<String, Object> payload, String field) {
+        Object value = payload.get(field);
+        if (!(value instanceof Number number) || !Double.isFinite(number.doubleValue()) || number.doubleValue() != number.intValue()) {
+            throw new IllegalArgumentException("Invalid pomodoro integer.");
+        }
+        return ((Number) value).intValue();
     }
 
     private String findBinding(Long userId, String localProfileId, SyncImportOperationRequest operation) {

@@ -22,6 +22,7 @@ import 'package:innocence_flutter/features/account/domain/models/current_device_
 import 'package:innocence_flutter/features/admin/domain/models/admin_report_models.dart';
 import 'package:innocence_flutter/features/checkin/domain/models/check_in_status.dart';
 import 'package:innocence_flutter/features/focus/domain/models/focus_session.dart';
+import 'package:innocence_flutter/features/focus/presentation/widgets/focus_session_tabs.dart';
 import 'package:innocence_flutter/features/friends/domain/models/friend_overview.dart';
 import 'package:innocence_flutter/features/friends/presentation/pages/friend_page.dart';
 import 'package:innocence_flutter/features/home/presentation/pages/adaptive_desktop_home.dart';
@@ -376,6 +377,7 @@ class HomePage extends StatelessWidget {
     required this.onRefresh,
     required this.onLogout,
     required this.onStartFocusSession,
+    this.onConfigureFocusPomodoro,
     required this.onFinishFocusSession,
     required this.onToggleFocusPause,
     required this.onSubmitCheckIn,
@@ -489,6 +491,7 @@ class HomePage extends StatelessWidget {
   final ValueChanged<AppVisualTheme> onChangeVisualTheme;
   final UserProfile profile;
   final FocusSession focusSession;
+  final ConfigureFocusPomodoro? onConfigureFocusPomodoro;
   final CheckInStatus checkInStatus;
   final StatsOverview statsOverview;
   final TeamOverview teamOverview;
@@ -1038,6 +1041,7 @@ class HomePage extends StatelessWidget {
 
     if (AppConfig.deviceType == 'android') {
       return AndroidHomeShell(
+        onConfigureFocusPomodoro: onConfigureFocusPomodoro,
         assistantNavigation: assistantNavigation,
         language: appLanguage,
         profile: profile,
@@ -1085,6 +1089,7 @@ class HomePage extends StatelessWidget {
 
     if (AppConfig.capabilities.usesPcLayout) {
       return AdaptiveDesktopHome(
+        onConfigureFocusPomodoro: onConfigureFocusPomodoro,
         assistantNavigation: assistantNavigation,
         appLanguage: appLanguage,
         visualTheme: currentVisualTheme,

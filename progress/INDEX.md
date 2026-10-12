@@ -804,3 +804,10 @@ checkpoints:
     status: complete
     path: progress/0113__20261012__P01__DECISION__harmony4-phone-and-android-retest.md
     title: "用户补充鸿蒙4手机环境并选择后续安卓系统复验"
+  - sequence: "0114"
+    created_at: "2026-10-12T20:51:13+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0114__20261012__P01__DONE__focus-pomodoro-tabs-and-mobile-notices.md
+    title: "全平台专注番茄分页、活动会话设置与Android系统通知"

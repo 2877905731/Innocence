@@ -45,6 +45,7 @@ class SyncImportServiceTest {
     private StudyPlanService studyPlanService;
     private SyncImportMapper syncImportMapper;
     private SyncImportService service;
+    private FocusSessionService focusService;
 
     @BeforeEach
     void setUp() {
@@ -52,6 +53,7 @@ class SyncImportServiceTest {
         studyPlanMapper = mock(StudyPlanMapper.class);
         studyPlanService = mock(StudyPlanService.class);
         syncImportMapper = mock(SyncImportMapper.class);
+        focusService = mock(FocusSessionService.class);
         PlatformTransactionManager transactionManager = mock(PlatformTransactionManager.class);
         when(transactionManager.getTransaction(any(TransactionDefinition.class)))
                 .thenReturn(mock(TransactionStatus.class));
@@ -60,7 +62,7 @@ class SyncImportServiceTest {
                 studyPlanService,
                 studyPlanMapper,
                 mock(MemoService.class),
-                mock(FocusSessionService.class),
+                focusService,
                 mock(CheckInService.class),
                 syncImportMapper,
                 new ObjectMapper().findAndRegisterModules(),
@@ -186,6 +188,25 @@ class SyncImportServiceTest {
                 operationId,
                 "2026-09-09T00:00:00Z"
         );
+    }
+
+    @Test
+    void pomodoroImportsKeepVersionOrderAndRejectMalformedSnapshots() {
+        when(accountService.getMyProfile(7L)).thenReturn(profile(7L, "U7", "June"));
+        when(syncImportMapper.findServerAggregateId(7L, "local-profile", "focus_session", "1")).thenReturn("42");
+        var valid = Map.<String, Object>of("bindPomodoro", true, "pomodoroStudyMinutes", 25, "pomodoroBreakMinutes", 5,
+                "pomodoroElapsedOffsetSeconds", 1200, "pomodoroCompletedBaseCount", 0);
+        var later = new SyncImportOperationRequest("a", "focus_session", "1", "pomodoro", valid, 3, "a", "2026-10-12T12:00:00");
+        var first = new SyncImportOperationRequest("z", "focus_session", "1", "pomodoro", valid, 2, "z", "2026-10-12T12:00:00");
+        var response = service.importData(7L, new SyncImportRequest("local-profile", "U7", "overwrite", List.of(later, first)));
+        assertEquals(2, response.acceptedCount());
+        var captor = ArgumentCaptor.forClass(SyncImportOperationRecord.class);
+        verify(syncImportMapper, times(2)).upsertOperation(captor.capture());
+        assertEquals("z", captor.getAllValues().getFirst().getOperationId());
+        var invalid = new java.util.HashMap<>(valid); invalid.put("pomodoroStudyMinutes", "25");
+        var malformed = new SyncImportOperationRequest("invalid", "focus_session", "1", "pomodoro", invalid, 4, "invalid", "2026-10-12T12:00:00");
+        assertEquals(1, service.importData(7L, new SyncImportRequest("local-profile", "U7", "overwrite", List.of(malformed))).rejectedCount());
+        verify(focusService, times(2)).configureImportedPomodoro(7L, 42L, true, 25, 5, 1200, 0);
     }
 
     private UserProfileResponse profile(Long userId, String userNo, String nickname) {

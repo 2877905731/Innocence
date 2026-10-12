@@ -102,6 +102,36 @@ void main() {
         FocusNoticeStatus.unavailable);
   });
 
+  test(
+      'pomodoro bind stage change and unbind update native snapshot without per-second duplicates',
+      () async {
+    final bridge = FocusNoticeBridge(platform: 'android');
+    final focus = FocusSession.fromJson({
+      'sessionId': 7,
+      'active': true,
+      'remainingSeconds': 600,
+      'bindPomodoro': true,
+      'pomodoroStudyMinutes': 1,
+      'pomodoroBreakMinutes': 1
+    });
+    await bridge.sync(session: focus, owner: 'local:qa', isChinese: true);
+    await bridge.sync(
+        session: focus.tick(), owner: 'local:qa', isChinese: true);
+    expect(calls.length, 1);
+    expect(calls.last.arguments['pomodoroStage'], 'study');
+    final rest =
+        focus.advanceTo(focus.referenceTime.add(const Duration(seconds: 60)));
+    await bridge.sync(session: rest, owner: 'local:qa', isChinese: true);
+    expect(calls.length, 2);
+    expect(calls.last.arguments['pomodoroStage'], 'break');
+    await bridge.sync(
+        session: FocusSession.fromJson(
+            {'sessionId': 7, 'active': true, 'remainingSeconds': 540}),
+        owner: 'local:qa',
+        isChinese: true);
+    expect(calls.last.arguments['bindPomodoro'], isFalse);
+  });
+
   test('Windows completion is issued once, even after language change',
       () async {
     const desktop = MethodChannel('innocence/desktop_widget');

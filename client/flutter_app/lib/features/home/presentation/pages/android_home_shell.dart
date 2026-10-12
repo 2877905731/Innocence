@@ -18,6 +18,7 @@ import 'package:innocence_flutter/core/widgets/minimal_white_backdrop.dart';
 import 'package:innocence_flutter/features/account/domain/models/user_profile.dart';
 import 'package:innocence_flutter/features/checkin/domain/models/check_in_status.dart';
 import 'package:innocence_flutter/features/focus/domain/models/focus_session.dart';
+import 'package:innocence_flutter/features/focus/presentation/widgets/focus_session_tabs.dart';
 import 'package:innocence_flutter/features/friends/domain/models/friend_overview.dart';
 import 'package:innocence_flutter/features/home/domain/theme_daily_slogan.dart';
 import 'package:innocence_flutter/features/notifications/domain/models/notification_overview.dart';
@@ -51,6 +52,7 @@ class AndroidHomeShell extends StatefulWidget {
     required this.onOpenPlanEditor,
     required this.onToggleTodayPlanItem,
     required this.onStartFocus,
+    this.onConfigureFocusPomodoro,
     required this.onToggleFocusPause,
     required this.onFinishFocus,
     required this.onSubmitCheckIn,
@@ -86,6 +88,7 @@ class AndroidHomeShell extends StatefulWidget {
   final Future<void> Function() onOpenPlanEditor;
   final Future<void> Function(int index, bool completed) onToggleTodayPlanItem;
   final Future<void> Function() onStartFocus;
+  final ConfigureFocusPomodoro? onConfigureFocusPomodoro;
   final Future<void> Function() onToggleFocusPause;
   final Future<void> Function() onFinishFocus;
   final Future<void> Function() onSubmitCheckIn;
@@ -125,6 +128,17 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
       setState(() {});
       _scheduleSloganRefresh();
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant AndroidHomeShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isBusy &&
+        !widget.isBusy &&
+        !oldWidget.focusSession.active &&
+        widget.focusSession.active) {
+      _destination = AndroidHomeDestination.focus;
+    }
   }
 
   @override
@@ -683,7 +697,12 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
       Text(_text('专注时段', 'Focus session'),
           style: Theme.of(context).textTheme.headlineSmall),
       const SizedBox(height: 16),
-      _focusCard(detailed: true),
+      FocusSessionTabs(
+          session: widget.focusSession,
+          isChinese: _zh,
+          isBusy: widget.isBusy,
+          onConfigure: widget.onConfigureFocusPomodoro,
+          timer: _focusCard(detailed: true)),
       _sectionCard(
         title: _text('今日签到', 'Today’s check-in'),
         body: checkIn.checkedInToday

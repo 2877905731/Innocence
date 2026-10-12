@@ -364,6 +364,8 @@ void main() {
       options: OpenDatabaseOptions(
         version: 4,
         onCreate: (database, version) async {
+          await database.execute(
+              'CREATE TABLE local_focus_session(session_id INTEGER PRIMARY KEY)');
           await database.execute('''CREATE TABLE local_annual_segment (
             owner_scope TEXT NOT NULL,
             segment_id TEXT NOT NULL,

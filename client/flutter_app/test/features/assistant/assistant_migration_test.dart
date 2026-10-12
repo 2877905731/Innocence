@@ -16,6 +16,8 @@ void main() {
             version: 5,
             onCreate: (db, version) async {
               await db.execute(
+                  'CREATE TABLE local_focus_session(session_id INTEGER PRIMARY KEY)');
+              await db.execute(
                   'CREATE TABLE local_daily_plan(owner_scope TEXT,plan_date TEXT,plan_name TEXT,PRIMARY KEY(owner_scope,plan_date))');
               await db.execute(
                   'CREATE TABLE local_daily_plan_item(owner_scope TEXT,plan_date TEXT,item_id INTEGER,title TEXT,completed INTEGER,planned_minutes INTEGER,actual_minutes INTEGER,start_slot INTEGER,end_slot INTEGER,sort_order INTEGER)');
@@ -49,7 +51,7 @@ void main() {
       expect(plan.items.single.actualMinutes, 55);
       expect(plan.dayRevision, 0);
       final db = await databaseFactoryFfi.openDatabase(path);
-      expect(await db.getVersion(), 6);
+      expect(await db.getVersion(), 7);
     } finally {
       await store.close();
       expect(dir.absolute.path, startsWith(Directory.systemTemp.absolute.path));
