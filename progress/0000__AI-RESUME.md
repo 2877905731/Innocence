@@ -2,14 +2,14 @@
 schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
-updated_at: "2026-10-12"
-last_resumed_at: "2026-10-12T20:51:13+08:00"
+updated_at: "2026-10-14"
+last_resumed_at: "2026-10-14T22:48:20+08:00"
 latest_checkpoint: "0114"
 next_sequence: "0115"
 current_phase: P01
 current_gate: G01
-state: "pomodoro_tabs_and_mobile_notices_candidate_ready_device_pending"
-current_goal: "0114全平台专注计时/番茄闹钟分页与活动会话配置接入；SQLite v7锚点/基数及原子outbox，Android双Chronometer和阶段闹钟。214 Flutter/5跳过、6平板/14后端、分析及API36原生6组/拒绝权限通过；最终三端本机包与签名/CRC/115 Dart逐字节通过。用户真机覆盖、鸿蒙双TIMER与权益/后台接力、Windows运行及真实联网迁移部署仍待；新APK含0112兼容修复仅F盘，未推送或新发行。"
+state: "v1_2_4_release_preparation_authorized"
+current_goal: "用户明确授权整合最近改动做一次小版本发布；0114后继续准备v1.2.4+9 Windows/同证书Android离线及独立v1.2.4-harmonyos.1未签名Release。远端main=fcc896d、既有GitHub凭据及push权限可用；先构建/回归/校验后推送和公开。鸿蒙权益、真机和真实HTTP门禁保留，不部署后端，不公开个人Profile。"
 current_baseline:
   - "2026-10-12 全平台番茄分页（0114）：0114全平台专注计时/番茄闹钟分页与活动会话配置接入；SQLite v7锚点/基数及原子outbox，Android双Chronometer和阶段闹钟。214 Flutter/5跳过、6平板/14后端、分析及API36原生6组/拒绝权限通过；最终三端本机包与签名/CRC/115 Dart逐字节通过。用户真机覆盖、鸿蒙双TIMER与权益/后台接力、Windows运行及真实联网迁移部署仍待；新APK含0112兼容修复仅F盘，未推送或新发行。"
   - "2026-10-12 用户补充手机环境及后续安排（0113）：实际反馈设备为鸿蒙4手机，型号/SQLite底层异常/修正版覆盖效果未提供；用户认为可能是系统原因并选择后续在安卓系统测试。仅记录环境和用户安排，不能将系统名称当成故障定论；0112数据库兼容性修复/同证书本机APK与鸿蒙7平板权益待办保留。本轮未改源码、重建或操控设备。"

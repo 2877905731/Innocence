@@ -21,17 +21,17 @@
 
 Innocence 当前以 Flutter + Spring Boot 为主线，覆盖 Windows 桌面端与移动端。
 
-## 下载 v1.2.3
+## 下载 v1.2.4
 
 | 平台 | 下载 | 范围 |
 |---|---|---|
-| Windows x64 | [安装器](https://github.com/2877905731/Innocence/releases/download/v1.2.3/Innocence-v1.2.3-windows-x64-setup.exe) · [便携 ZIP](https://github.com/2877905731/Innocence/releases/download/v1.2.3/Innocence-v1.2.3-windows-x64-portable.zip) | 桌面版，安装器尚未代码签名 |
-| Android 7.0+ | [本机离线 APK](https://github.com/2877905731/Innocence/releases/download/v1.2.3/Innocence-v1.2.3-android-offline.apk) | 正式发行签名；专注布局改进，继续本机离线 |
-| 鸿蒙平板本机版 | [ARM64 Release HAP](https://github.com/2877905731/Innocence/releases/tag/v1.2.3-harmonyos.1) | 未签名 AOT；接收者须配置自己的设备 Profile 并签名 |
+| Windows x64 | [安装器](https://github.com/2877905731/Innocence/releases/download/v1.2.4/Innocence-v1.2.4-windows-x64-setup.exe) · [便携 ZIP](https://github.com/2877905731/Innocence/releases/download/v1.2.4/Innocence-v1.2.4-windows-x64-portable.zip) | 桌面版，安装器尚未代码签名 |
+| Android 7.0+ | [本机离线 APK](https://github.com/2877905731/Innocence/releases/download/v1.2.4/Innocence-v1.2.4-android-offline.apk) | 正式发行签名；番茄分页与双倒计时通知，继续本机离线 |
+| 鸿蒙平板本机版 | [ARM64 Release HAP](https://github.com/2877905731/Innocence/releases/tag/v1.2.4-harmonyos.1) | 未签名 AOT；接收者须配置自己的设备 Profile 并签名 |
 
-[发布说明](https://github.com/2877905731/Innocence/releases/tag/v1.2.3) · [SHA256 校验清单](https://github.com/2877905731/Innocence/releases/download/v1.2.3/SHA256SUMS.txt) · [更新日志](CHANGELOG.md)
+[发布说明](https://github.com/2877905731/Innocence/releases/tag/v1.2.4) · [SHA256 校验清单](https://github.com/2877905731/Innocence/releases/download/v1.2.4/SHA256SUMS.txt) · [更新日志](CHANGELOG.md)
 
-v1.2.3 更新简约白页面、专注表盘和 Android 专注卡布局，Windows 新增自带 Key 的聊天助手。Android 沿用正式发行签名，可覆盖 v1.2.2 保留本机资料，继续提供无 INTERNET 权限的本机离线版。
+v1.2.4 整合全平台番茄分页、专注系统提醒、Android 离线专注 SQLite 兼容修复和鸿蒙竖屏适配。Android 沿用正式发行签名，可覆盖 v1.2.3 保留本机资料，继续提供无 INTERNET 权限的本机离线版。鸿蒙实时通知与后台阶段接力仍受权益和系统能力限制，具体范围见发行说明。
 
 Android 首次进入时选择语言并确认使用本机离线模式，可使用短计划圆盘选时、月历和多日套用、年度任务与子任务、专注、统计、备忘录及本机设置。资料仅存设备，卸载／清除数据会丢失；此前开发 Debug APK 与正式版签名不同，不能直接覆盖。实体手机/OEM/Vulkan和联网同步仍待后续验收。
 
@@ -44,7 +44,7 @@ Android 首次进入时选择语言并确认使用本机离线模式，可使用
 - 已具备认证、资料、设置、备忘录、统计、通知、好友和团队等主要交互骨架。
 - 后端业务数据按当前登录用户隔离。
 - Windows 聊天助手支持填地址与 Key 获取模型、选择连接及经确认的本机工具操作；真实供应商与完整设备矩阵继续验收。
-- 鸿蒙平板用户已验收设备调试版本；提供[ARM64 Release 本机包](https://github.com/2877905731/Innocence/releases/tag/v1.2.3-harmonyos.1)，复用 PC 全屏页面、无 INTERNET 权限，需接收者自行签名。输入/业务恢复与完整设备矩阵继续按实际证据推进。
+- 鸿蒙平板用户已验收设备调试版本；提供[ARM64 Release 本机包](https://github.com/2877905731/Innocence/releases/tag/v1.2.4-harmonyos.1)，复用 PC 全屏页面、无 INTERNET 权限，需接收者自行签名。输入/业务恢复与完整设备矩阵继续按实际证据推进。
 
 ## 仓库结构
 
