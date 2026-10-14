@@ -323,3 +323,9 @@ Android Studio 2026.1 的安装记录指向 `D:\soft\ad s\bin\studio.exe`，`flu
 实现上，Android 在用户显式进入本机离线模式后记录入口状态。下次进程启动时先查找既有 SQLite 本机资料，再恢复相同 ownerScope 的计划、专注、备忘录与本地设置；若资料不存在，清除入口状态并返回认证页，不静默创建新身份。成功保存在线会话或明确退出会清除离线入口状态，SQLite 资料保留供后续确认导入。该入口状态只适用于 Android，Windows 原有启动行为不变。
 
 宿主测试覆盖显式离线 → 持久化计划 → 新控制器恢复、保留在线凭据时离线选择优先、退出后清理入口状态、在线会话保存清理状态与缺失资料负向路径。Android 16／API 36 Pixel 7 模拟器重新安装 Debug APK 后，点击“Continue offline”并确认，首页呈现“On-device profile”；`am force-stop` 后 `am start -W` 为 `LaunchState: COLD`、`Status: ok`，再次显示离线首页和本机资料标识。通过三点侧边栏点击“Sign out”后，冷启动显示“Password login”和“Continue offline”；本机 SQLite 文件仍存在，再次显式进入离线模式可回到本机首页。APK 为 180,082,003 字节，SHA-256 `4419C41C4BCF247722C4897E2EB6797EE91B27F24196EB523BA3AE50EDC47AC0`；应用 PID 13123 的 `logcat` 未筛出 `FATAL EXCEPTION`、`E/flutter`、`Unhandled Exception` 或 `FlutterError`。模拟器复验不代替实体手机、真实认证与导入 HTTP 回放；A0 仍缺实体手机启动与 SDK license 处理，A1/A2 页面和真实业务闭环仍未完成。
+
+## 2026-10-14 三端小版本分发（0115）
+
+v1.2.4+9 Windows/Android正式与v1.2.4-harmonyos.1独立Release均公开，Release#412856784/#412858146，latest=v1.2.4；7资产远端摘要/正文及匿名200长度通过，源码623a321与两注释标签原子快进推送。214 Flutter/5跳过、19离线/10平板/80后端、分析及三端发行构建和签名/CRC/115 Dart一致性通过。API36正式v1.2.3覆盖Success/COLD1333ms/进程错误筛选0，系统桌面ANR影响业务UI，数据保留UI证据未取得；未把它当真机通过。鸿蒙公开ARM64 AOT未签名/无INTERNET，权益及后台接力/设备门禁保持；后端未部署。
+
+发行说明：[Windows/Android](../releases/v1.2.4.md)、[鸿蒙本机版](../releases/v1.2.4-harmonyos.1.md)。

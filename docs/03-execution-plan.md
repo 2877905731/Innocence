@@ -8,21 +8,21 @@ baseline:
   runtime: "Flutter + Java 21 + Spring Boot 3.3.2 + MyBatis + MySQL 8 + Redis"
   current_phase: P01
   current_gate: G01
-  evidence: "2026-10-07 v1.2.3+8正式发布（0105）：188 Flutter/4配置跳过、19离线/73后端/4 DPAPI，Windows/Android正式包版本/签名/权限/CRC/摘要通过；API36覆盖冷启动备忘录保留/错误筛选0；四项公开下载200。鸿蒙0106独立未签名预览公开，0107单设备签名安装启动及PC全屏通过；G01及真实模型/HTTP/完整设备矩阵仍待"
+  evidence: "2026-10-14 三端v1.2.4发行（0115）：v1.2.4+9 Windows/Android正式与v1.2.4-harmonyos.1独立Release均公开，Release#412856784/#412858146，latest=v1.2.4；7资产远端摘要/正文及匿名200长度通过，源码623a321与两注释标签原子快进推送。214 Flutter/5跳过、19离线/10平板/80后端、分析及三端发行构建和签名/CRC/115 Dart一致性通过。API36正式v1.2.3覆盖Success/COLD1333ms/进程错误筛选0，系统桌面ANR影响业务UI，数据保留UI证据未取得；未把它当真机通过。鸿蒙公开ARM64 AOT未签名/无INTERNET，权益及后台接力/设备门禁保持；后端未部署。"
 android_track:
   status: in_progress
   plan_path: docs/planning/Innocence-Android版本实施规划.md
-  current_step: "v1.2.3+8正式离线APK已发行，同证书/无INTERNET；0105记录正式v1.2.2覆盖升级冷启动备忘录保留与公开下载。实体设备/OEM/Vulkan/长期恢复/同步及A0–A5继续待"
+  current_step: "v1.2.4+9正式离线APK已公开，同发行证书/无INTERNET。0115记录API36覆盖/冷启动及7公开资产核对；系统ANR影响本轮数据UI收据，实体设备与完整A0–A5继续待。"
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 harmonyos_tablet_track:
-  status: user_accepted_release_aot_github_published
+  status: v1_2_4_release_aot_published_device_gates_open
   plan_path: docs/planning/Innocence-鸿蒙平板版本实施规划.md
-  checkpoint: "0109"
+  checkpoint: "0115"
   user_scope: "Air系列平板/HarmonyOS 7，全屏复用PC页面；不做Windows窗口尺寸调整。0098先规划、0099恢复核对，用户随后明确开始制作；0100首批实现"
   order: [H0_toolchain_and_minimal_hap, H1_fullscreen_pc_shell, H2_offline_storage, H3_page_and_touch_parity, H4_online_contract_and_assistant, H5_device_and_release]
   pending_decisions: "真实设备型号代码已核对LRT-W20/HarmonyOS7/API26，具体市场年款与方向策略继续核实；平板槽位在H4前确认；正式联网包范围及H5公开分发仍待完整验收"
-  evidence_boundary: "0107实体Debug签名安装启动与用户0108验收有记录；本轮ARM64 Release/AOT无INTERNET编译/CRC/API/版本8/ELF/113Dart及原生宿主匹配、源码分析/10回归通过，私有x64 Release安装/进程冷启动与2800×1840 PC首页通过，fatal/overflow0、输入法12800008/9仍2。公开包未签名，个人设备材料不上传；ARM64 Release未重装用户平板，完整业务恢复/升级/输入/性能、HUKS/槽位/联网及H5/G01待。0109 GitHub Release#405446873已公开，3资产摘要/正文/匿名下载核对通过"
+  evidence_boundary: "v1.2.4-harmonyos.1/Release#412858146独立公开，ARM64 AOT未签名/无INTERNET；x64仅私有构建。本轮未执行Release设备安装/冷启动，旧0111 Debug真机竖屏/资料恢复证据保留；Live/代理权益与后台连续阶段、真实升级/输入/HUKS/槽位/联网/H5/G01仍待。"
 assistant_track:
   decision: "DEC-0050/0090采用B；DEC-0051/0092修正为自填API Key的全局聊天助手；DEC-0052/0093地址与密钥发现模型"
   status: byok_chat_discovery_implemented_fixture_verified_live_provider_and_device_pending
@@ -220,3 +220,7 @@ next_actions:
 ## 2026-10-07 鸿蒙Release已公开（0109）
 
 v1.2.3-harmonyos.1 / Release#405446873已公开且非pre-release，3资产SHA/正文及匿名200长度核对通过；源码2825dea/注释标签c7e0f94精确推送，Windows/Android latest仍v1.2.3。公开ARM64 Release/AOT包未签名，无INTERNET；个人设备Debug签名材料只在本机。Release模拟器PC全屏/冷启动与用户Debug真机验收分开，实际ARM64 Release未在用户正在使用的平板重装，完整H5/G01继续待。
+
+## 2026-10-14 v1.2.4 三端小版本公开（0115）
+
+v1.2.4+9 Windows/Android正式与v1.2.4-harmonyos.1独立Release均公开，Release#412856784/#412858146，latest=v1.2.4；7资产远端摘要/正文及匿名200长度通过，源码623a321与两注释标签原子快进推送。214 Flutter/5跳过、19离线/10平板/80后端、分析及三端发行构建和签名/CRC/115 Dart一致性通过。API36正式v1.2.3覆盖Success/COLD1333ms/进程错误筛选0，系统桌面ANR影响业务UI，数据保留UI证据未取得；未把它当真机通过。鸿蒙公开ARM64 AOT未签名/无INTERNET，权益及后台接力/设备门禁保持；后端未部署。

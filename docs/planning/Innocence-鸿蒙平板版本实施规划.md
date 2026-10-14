@@ -4,12 +4,12 @@ document_type: platform_implementation_plan
 project_name: "Innocence"
 platform: HarmonyOS_tablet
 created_at: "2026-10-05"
-updated_at: "2026-10-12"
+updated_at: "2026-10-14"
 status: physical_portrait_confirmed_live_view_rights_pending
 authority: "用户要求鸿蒙平板全屏复用PC页面；先规划后明确开始制作"
 target_device: "已核对用户实体平板LRT-W20/HarmonyOS7/API26/aarch64；不推测市场年款"
 target_os: "HarmonyOS 7（用户提供）"
-related_checkpoint: "0111"
+related_checkpoint: "0115"
 related_gate: "沿用P01/G01；新增H0-H5平台验收，不将规划计为实现"
 ---
 
@@ -208,3 +208,9 @@ Flutter的OpenHarmony兼容扩展由OpenHarmony-SIG维护，需要核对所选�
 API26独立模拟器TIMER胶囊实际由00:53变00:48，暂停冻结57秒、继续和清理/到点去重通过。运行参数补齐layoutData与正式图标，timer/capsule均设暂停，停止使用新构造有效载荷。普通通知降级以有效0删除时间并先取消旧删除计划；强制权益缺失的QA中，暂停7秒再等12秒，系统通知仍在且未完成，继续/提前结束/到点一次通过。最终签名包覆盖安装成功，首次锁屏拒绝10106102后用户确认解锁打开；最新进程/权益状态回执通过，提示文本UI确证仍待。
 
 华为TIMER实况窗与后台代理提醒分别需要核对权益，当前Profile没有Live View或Push能力。用户确认没有AGC应用/开发者账号，选择先自行注册和实名认证；官方登录页已保留，本轮未代创建、申请权益、发送邮件或改公开资产。[接入材料与申请草稿](../development/鸿蒙专注提醒权益接入.md)已准备。签名/设备回执只在F盘忽略目录，仅读通用错误码，不提取真实业务SQLite。此子集不封闭H2-H5/G01，也不把模拟器成功当作真机权益已取得。
+
+## 2026-10-14 三端小版本分发（0115）
+
+v1.2.4+9 Windows/Android正式与v1.2.4-harmonyos.1独立Release均公开，Release#412856784/#412858146，latest=v1.2.4；7资产远端摘要/正文及匿名200长度通过，源码623a321与两注释标签原子快进推送。214 Flutter/5跳过、19离线/10平板/80后端、分析及三端发行构建和签名/CRC/115 Dart一致性通过。API36正式v1.2.3覆盖Success/COLD1333ms/进程错误筛选0，系统桌面ANR影响业务UI，数据保留UI证据未取得；未把它当真机通过。鸿蒙公开ARM64 AOT未签名/无INTERNET，权益及后台接力/设备门禁保持；后端未部署。
+
+发行说明：[Windows/Android](../releases/v1.2.4.md)、[鸿蒙本机版](../releases/v1.2.4-harmonyos.1.md)。

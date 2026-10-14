@@ -811,3 +811,10 @@ checkpoints:
     status: complete
     path: progress/0114__20261012__P01__DONE__focus-pomodoro-tabs-and-mobile-notices.md
     title: "全平台专注番茄分页、活动会话设置与Android系统通知"
+  - sequence: "0115"
+    created_at: "2026-10-14T23:17:40+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0115__20261014__P01__DONE__v1.2.4-three-platform-release.md
+    title: "v1.2.4三端小版本GitHub公开与下载核验"
