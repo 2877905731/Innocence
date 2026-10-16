@@ -3,14 +3,15 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-16"
-last_resumed_at: "2026-10-16T21:28:29+08:00"
-latest_checkpoint: "0116"
-next_sequence: "0117"
+last_resumed_at: "2026-10-16T21:34:09+08:00"
+latest_checkpoint: "0117"
+next_sequence: "0118"
 current_phase: P01
 current_gate: G01
-state: "v1_2_5_independent_pomodoro_release_ready"
-current_goal: "v1.2.4番茄分页仅依附总专注的范围已纠正；三端独立开始/暂停/继续/结束与SQLite v8接入，原绑定兼容。228 Flutter/5条件跳过、19离线/10平板、分析及API36原生9组/拒绝权限通过；三端正式包与ARM64/x64 AOT、签名/CRC/118 Dart字节核验通过，v1.2.5+10待推送与公开。鸿蒙权益和后台8阶段窗口明确保留，未部署后端。"
+state: "v1_2_5_independent_pomodoro_published_device_verification_pending"
+current_goal: "v1.2.5+10 Windows/Android及v1.2.5-harmonyos.1已公开，Release#414997721/414998892，latest=v1.2.5；7资产远端SHA/正文及匿名200长度通过，源码eb33985与双注释标签SHA精确同步。番茄可不启动总专注而独立开始/暂停/继续/结束，总专注结束不停止，SQLite v8按owner恢复。228 Flutter/5条件跳过、19离线/10平板、分析及API36原生9组/拒绝权限、三端包/118 Dart一致性通过；QA页面无总专注启动、暂停24:34、强停冷启恢复同值/继续/结束有证据；正式1.2.4覆盖Success/COLD3060ms/进程错误0。鸿蒙未签名/无INTERNET、权益与8阶段有限预排和实际设备门禁保留；未部署后端。"
 current_baseline:
+  - "2026-10-16 独立番茄公开（0117）：v1.2.5+10 Windows/Android及v1.2.5-harmonyos.1已公开，Release#414997721/414998892，latest=v1.2.5；7资产远端SHA/正文及匿名200长度通过，源码eb33985与双注释标签SHA精确同步。番茄可不启动总专注而独立开始/暂停/继续/结束，总专注结束不停止，SQLite v8按owner恢复。228 Flutter/5条件跳过、19离线/10平板、分析及API36原生9组/拒绝权限、三端包/118 Dart一致性通过；QA页面无总专注启动、暂停24:34、强停冷启恢复同值/继续/结束有证据；正式1.2.4覆盖Success/COLD3060ms/进程错误0。鸿蒙未签名/无INTERNET、权益与8阶段有限预排和实际设备门禁保留；未部署后端。"
   - "2026-10-16 独立番茄（0116）：v1.2.4番茄分页仅依附总专注的范围已纠正；三端独立开始/暂停/继续/结束与SQLite v8接入，原绑定兼容。228 Flutter/5条件跳过、19离线/10平板、分析及API36原生9组/拒绝权限通过；三端正式包与ARM64/x64 AOT、签名/CRC/118 Dart字节核验通过，v1.2.5+10待推送与公开。鸿蒙权益和后台8阶段窗口明确保留，未部署后端。"
   - "2026-10-14 三端小版本发行（0115）：v1.2.4+9 Windows/Android正式与v1.2.4-harmonyos.1独立Release均公开，Release#412856784/#412858146，latest=v1.2.4；7资产远端摘要/正文及匿名200长度通过，源码623a321与两注释标签原子快进推送。214 Flutter/5跳过、19离线/10平板/80后端、分析及三端发行构建和签名/CRC/115 Dart一致性通过。API36正式v1.2.3覆盖Success/COLD1333ms/进程错误筛选0，系统桌面ANR影响业务UI，数据保留UI证据未取得；未把它当真机通过。鸿蒙公开ARM64 AOT未签名/无INTERNET，权益及后台接力/设备门禁保持；后端未部署。"
   - "2026-10-12 全平台番茄分页（0114）：0114全平台专注计时/番茄闹钟分页与活动会话配置接入；SQLite v7锚点/基数及原子outbox，Android双Chronometer和阶段闹钟。214 Flutter/5跳过、6平板/14后端、分析及API36原生6组/拒绝权限通过；最终三端本机包与签名/CRC/115 Dart逐字节通过。用户真机覆盖、鸿蒙双TIMER与权益/后台接力、Windows运行及真实联网迁移部署仍待；新APK含0112兼容修复仅F盘，未推送或新发行。"
@@ -138,8 +139,8 @@ unfinished:
     gate: Android-A0
 next_actions:
   - id: NEXT-ANDROID-FOCUS-PHYSICAL
-    action: "0113用户确认鸿蒙4手机并选择后续Android复验；0115正式v1.2.4+9同发行证书离线APK已公开，保留0112兼容修复与0114番茄分页，覆盖时勿卸载旧版，核对资料/开始/暂停/继续/结束及绑定/后台通知。真实手机型号、SQLite异常及覆盖效果仍待；鸿蒙7双TIMER权益及后台接力另验，不把受限FFI/API36当实体手机验收。"
-    inputs: ["client/flutter_app/build/releases/v1.2.4/Innocence-v1.2.4-android-offline.apk", "docs/releases/v1.2.4.md", "docs/development/专注页番茄分页与通知.md", "progress/0112__20261012__P01__CORRECTION__android-offline-focus-sqlite-compatibility.md"]
+    action: "0113用户确认鸿蒙4手机并选择后续Android复验；0117正式v1.2.5+10同发行证书离线APK已公开，保留0112兼容修复与0116独立番茄，覆盖时勿卸载旧版，核对资料/开始/暂停/继续/结束及独立番茄开始/暂停/继续/结束与后台通知。真实手机型号、SQLite异常及覆盖效果仍待；鸿蒙7双TIMER权益及后台接力另验，不把受限FFI/API36当实体手机验收。"
+    inputs: ["client/flutter_app/build/releases/v1.2.5/Innocence-v1.2.5-android-offline.apk", "docs/releases/v1.2.5.md", "docs/development/独立番茄闹钟.md", "progress/0112__20261012__P01__CORRECTION__android-offline-focus-sqlite-compatibility.md"]
   - id: NEXT-FOCUS-HARMONY-RIGHTS
     action: "接0111：最终ARM64修正版已覆盖，用户解锁打开后新权益回执/进程存在；现有安装授权继续有效。用户没有AGC应用/开发者账号，明确先自行注册实名认证，官方OAuth登录页已保留；等待账号就绪后按接入材料核对同包名APP ID、TIMER调测权益及代理提醒，远端创建/提交需用户具体授权，不代填实名/发邮件。新Profile就绪后官方验签/原证书覆盖，真机动态、暂停/继续、后台锁屏/进程回收与到点分别取证。Windows实际气泡和Android重启/正式签名候选子集已通过，完整Flutter Windows到点UI/免打扰和实体Android/OEM/Doze/强行停止仍待。"
     inputs: ["docs/development/鸿蒙专注提醒权益接入.md", "docs/development/平板竖屏与专注系统提醒.md", "progress/0111__20261012__P01__DONE__focus-runtime-and-harmony-rights.md", "client/flutter_app/build/harmonyos-h0/signed-device/0111/Innocence-portrait-focus-arm64-device-debug.hap"]

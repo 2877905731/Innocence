@@ -825,3 +825,10 @@ checkpoints:
     status: complete
     path: progress/0116__20261016__P01__CORRECTION__independent-pomodoro-and-release-ready.md
     title: "番茄独立计时范围纠正、三端实现与v1.2.5发行就绪"
+  - sequence: "0117"
+    created_at: "2026-10-16T21:34:09+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0117__20261016__P01__DONE__v1.2.5-independent-pomodoro-published.md
+    title: "v1.2.5独立番茄三端公开与七项下载核验"
