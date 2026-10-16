@@ -1,3 +1,4 @@
+import 'package:innocence_flutter/features/focus/application/pomodoro_controller.dart';
 import 'dart:async';
 
 import 'package:innocence_flutter/features/plans/presentation/pages/android_plans_view.dart';
@@ -378,6 +379,7 @@ class HomePage extends StatelessWidget {
     required this.onLogout,
     required this.onStartFocusSession,
     this.onConfigureFocusPomodoro,
+    this.pomodoroController,
     required this.onFinishFocusSession,
     required this.onToggleFocusPause,
     required this.onSubmitCheckIn,
@@ -492,6 +494,7 @@ class HomePage extends StatelessWidget {
   final UserProfile profile;
   final FocusSession focusSession;
   final ConfigureFocusPomodoro? onConfigureFocusPomodoro;
+  final PomodoroController? pomodoroController;
   final CheckInStatus checkInStatus;
   final StatsOverview statsOverview;
   final TeamOverview teamOverview;
@@ -1042,6 +1045,7 @@ class HomePage extends StatelessWidget {
     if (AppConfig.deviceType == 'android') {
       return AndroidHomeShell(
         onConfigureFocusPomodoro: onConfigureFocusPomodoro,
+        pomodoroController: pomodoroController,
         assistantNavigation: assistantNavigation,
         language: appLanguage,
         profile: profile,
@@ -1090,6 +1094,7 @@ class HomePage extends StatelessWidget {
     if (AppConfig.capabilities.usesPcLayout) {
       return AdaptiveDesktopHome(
         onConfigureFocusPomodoro: onConfigureFocusPomodoro,
+        pomodoroController: pomodoroController,
         assistantNavigation: assistantNavigation,
         appLanguage: appLanguage,
         visualTheme: currentVisualTheme,

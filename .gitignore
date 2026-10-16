@@ -46,5 +46,6 @@ client/admin_web/dist/
 data/uploads/
 
 # Local temp
+client/flutter_app/android/.kotlin/
 tmp/
 temp/

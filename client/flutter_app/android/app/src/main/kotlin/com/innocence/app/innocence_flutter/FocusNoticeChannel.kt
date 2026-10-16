@@ -35,7 +35,8 @@ class FocusNoticeChannel(private val activity: MainActivity, messenger: BinaryMe
                         } else result.success(null)
                     }
                     "openSettings" -> {
-                        val intent = if (!FocusNotices.allowed(activity)) {
+                        val independent = (call.arguments as? Map<*, *>)?.get("independent") == true
+                        val intent = if (!(if (independent) PomodoroNotices.allowed(activity) else FocusNotices.allowed(activity))) {
                             Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, activity.packageName)
                         } else if (Build.VERSION.SDK_INT >= 31) {
                             Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:${activity.packageName}"))
@@ -43,6 +44,7 @@ class FocusNoticeChannel(private val activity: MainActivity, messenger: BinaryMe
                         activity.startActivity(intent)
                         result.success(null)
                     }
+                    "syncPomodoro" -> result.success(PomodoroNotices.sync(activity, IndependentPomodoro.parse(call.arguments)))
                     "sync" -> {
                         val args = FocusNoticeArguments.parse(call.arguments)
                         result.success(FocusNotices.sync(activity, args.owner, args.key, args.active, args.paused,
@@ -296,9 +298,12 @@ class FocusAlarmReceiver : BroadcastReceiver() {
                 FocusNotices.complete(context, intent.getStringExtra("key") ?: "", intent.getLongExtra("deadline", 0))
             } else if (intent.action == "com.innocence.POMODORO_STAGE") {
                 FocusNotices.updatePomodoro(context, intent.getStringExtra("key") ?: "", intent.getLongExtra("deadline", 0))
+            } else if (intent.action == "com.innocence.INDEPENDENT_POMODORO") {
+                PomodoroNotices.update(context, intent.getStringExtra("key") ?: "", intent.getLongExtra("deadline", 0))
             } else if (intent.action == Intent.ACTION_BOOT_COMPLETED ||
                 intent.action == AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED) {
                 FocusNotices.restore(context)
+                PomodoroNotices.update(context)
             }
         } catch (_: Exception) {
             // No account, task content, or native arguments in system logs.

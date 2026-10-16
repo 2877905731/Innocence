@@ -193,6 +193,7 @@ class _InnocenceAppState extends State<InnocenceApp> {
           child: Stack(
             children: [
               HomePage(
+                pomodoroController: widget.sessionController.pomodoro,
                 assistantNavigation: _assistantNavigation,
                 onOpenAssistant: () async {
                   await _navigatorKey.currentState!.push(

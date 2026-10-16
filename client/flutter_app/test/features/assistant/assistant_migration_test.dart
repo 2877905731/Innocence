@@ -51,7 +51,7 @@ void main() {
       expect(plan.items.single.actualMinutes, 55);
       expect(plan.dayRevision, 0);
       final db = await databaseFactoryFfi.openDatabase(path);
-      expect(await db.getVersion(), 7);
+      expect(await db.getVersion(), 8);
     } finally {
       await store.close();
       expect(dir.absolute.path, startsWith(Directory.systemTemp.absolute.path));

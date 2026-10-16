@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:innocence_flutter/features/focus/domain/models/pomodoro_timer.dart';
 import 'dart:io';
 import 'dart:math';
 
@@ -74,12 +75,13 @@ class OfflineStore {
     _database = await factory.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 7,
+        version: 8,
         onConfigure: (database) async {
           await database.execute('PRAGMA foreign_keys = ON');
         },
         onCreate: (database, version) => _createSchema(database),
         onUpgrade: (database, oldVersion, newVersion) async {
+          if (oldVersion < 8) await _createPomodoroTable(database);
           if (oldVersion < 7) {
             await database.execute(
                 'ALTER TABLE local_focus_session ADD COLUMN pomodoro_elapsed_offset_seconds INTEGER NOT NULL DEFAULT 0');
@@ -1500,6 +1502,28 @@ class OfflineStore {
     return _database!;
   }
 
+  static Future<void> _createPomodoroTable(DatabaseExecutor database) =>
+      database.execute(
+          'CREATE TABLE IF NOT EXISTS local_pomodoro_timer (owner_scope TEXT PRIMARY KEY, snapshot TEXT NOT NULL)');
+
+  Future<PomodoroTimer> loadPomodoro(String owner) async {
+    if (owner.isEmpty) throw ArgumentError('Owner is required');
+    final rows = await (await _readyDatabase()).query('local_pomodoro_timer',
+        where: 'owner_scope = ?', whereArgs: [owner], limit: 1);
+    return rows.isEmpty
+        ? const PomodoroTimer()
+        : PomodoroTimer.fromJson(jsonDecode(rows.first['snapshot'] as String)
+            as Map<String, dynamic>);
+  }
+
+  Future<void> savePomodoro(String owner, PomodoroTimer timer) async {
+    if (owner.isEmpty) throw ArgumentError('Owner is required');
+    PomodoroTimer.fromJson(timer.toJson());
+    await (await _readyDatabase()).insert('local_pomodoro_timer',
+        {'owner_scope': owner, 'snapshot': jsonEncode(timer.toJson())},
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
   DatabaseFactory _defaultDatabaseFactory() {
     if (Platform.isWindows || Platform.isLinux) {
       sqfliteFfiInit();
@@ -1526,6 +1550,7 @@ class OfflineStore {
   }
 
   static Future<void> _createSchema(Database database) async {
+    await _createPomodoroTable(database);
     await _createAssistantTables(database);
     final statements = <String>[
       '''CREATE TABLE local_profile (

@@ -27,6 +27,9 @@ class FocusNoticeNativeTest : Instrumentation() {
             "missing_field_invalid_identity" to ::testMissingFieldAndInvalidIdentity,
             "pomodoro_stage_pause_restore_unbind" to ::testPomodoroStagePauseRestoreAndUnbind,
             "pomodoro_missing_fields_and_total_completion" to ::testPomodoroValidationAndCompletion,
+            "independent_stage_survives_focus_end" to ::testIndependentStageSurvivesFocusEnd,
+            "independent_pause_restore_owner_cancel" to ::testIndependentPauseRestoreOwnerCancel,
+            "independent_payload_validation" to ::testIndependentPayloadValidation,
         )
         try {
             if (mode == "backgroundArm") {
@@ -41,6 +44,8 @@ class FocusNoticeNativeTest : Instrumentation() {
                 manager = app.getSystemService(NotificationManager::class.java)
                 assertFalse(FocusNotices.allowed(app))
                 assertEquals("permissionRequired", FocusNotices.sync(app, "qa", "qa/denied", true, false, System.currentTimeMillis() + 60000, 60, false, true))
+                assertEquals("permissionRequired", PomodoroNotices.sync(app, IndependentPomodoro("qa", "qa/pomodoro/denied", true,
+                    false, 1, 1, 0, System.currentTimeMillis(), true)))
                 awaitAbsent(7302, 7303)
                 tearDown()
                 finish(-1, Bundle().apply { putString("stream", "Denied notification permission: PASS\n") })
@@ -68,6 +73,8 @@ class FocusNoticeNativeTest : Instrumentation() {
     }
 
     private fun tearDown() {
+        PomodoroNotices.sync(app, IndependentPomodoro("", "", false, false, 25, 5, 0, 0, true))
+        app.getSharedPreferences("independent_pomodoro", Context.MODE_PRIVATE).edit().clear().commit()
         FocusNotices.sync(app, "", "", false, false, 0, 0, false, true)
         app.getSharedPreferences("focus_notice", Context.MODE_PRIVATE).edit().clear().commit()
     }
@@ -101,6 +108,57 @@ class FocusNoticeNativeTest : Instrumentation() {
             assertTrue(rejected)
         }
         awaitAbsent(7302, 7303)
+    }
+
+    fun testIndependentStageSurvivesFocusEnd() {
+        PomodoroNotices.sync(app, IndependentPomodoro("qa", "qa/pomodoro/independent", true, false, 1, 1, 58000,
+            System.currentTimeMillis(), true))
+        val notice = awaitNotice(7305).notification
+        assertTrue(notice.extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER))
+        awaitNotice(7305) { it.extras.getString(Notification.EXTRA_TITLE) == "番茄 · 休息" }
+        awaitNotice(7306)
+        val deadline = System.currentTimeMillis() + 2000
+        FocusNotices.sync(app, "qa", "qa/total", true, false, deadline, 2, false, true)
+        awaitNotice(7303)
+        awaitAbsent(7302)
+        awaitNotice(7305)
+        PomodoroNotices.update(app) // Simulate boot/restore without a Flutter engine.
+        awaitNotice(7305) { it.extras.getString(Notification.EXTRA_TITLE) == "番茄 · 休息" }
+    }
+
+    fun testIndependentPauseRestoreOwnerCancel() {
+        PomodoroNotices.sync(app, IndependentPomodoro("qa", "qa/pomodoro/pause", true, true, 1, 0, 59000,
+            System.currentTimeMillis(), true))
+        val pause = awaitNotice(7305) { !it.extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER) }.notification
+        assertEquals("第 1 轮 · 00:01", pause.extras.getString(Notification.EXTRA_TEXT))
+        Thread.sleep(1500)
+        PomodoroNotices.update(app)
+        assertEquals("第 1 轮 · 00:01", awaitNotice(7305).notification.extras.getString(Notification.EXTRA_TEXT))
+        PomodoroNotices.sync(app, IndependentPomodoro("qa", "qa/pomodoro/pause", true, false, 1, 0, 59000,
+            System.currentTimeMillis(), true))
+        awaitNotice(7305) { it.extras.getString(Notification.EXTRA_TEXT) == "第 2 轮" }
+        val saved = app.getSharedPreferences("independent_pomodoro", Context.MODE_PRIVATE)
+        val stale = saved.getLong("deadline", 0)
+        PomodoroNotices.sync(app, IndependentPomodoro("other", "other/pomodoro/new", true, false, 25, 5, 0,
+            System.currentTimeMillis(), true))
+        PomodoroNotices.update(app, "qa/pomodoro/pause", stale)
+        assertEquals("other/pomodoro/new", saved.getString("key", ""))
+        PomodoroNotices.sync(app, IndependentPomodoro("", "", false, false, 25, 5, 0, 0, true))
+        PomodoroNotices.update(app)
+        awaitAbsent(7305, 7306)
+    }
+
+    fun testIndependentPayloadValidation() {
+        val valid = mapOf<String, Any>("owner" to "qa", "key" to "qa/pomodoro/validation", "active" to true,
+            "paused" to false, "studyMinutes" to 25, "breakMinutes" to 5, "elapsedMs" to 0,
+            "referenceMs" to System.currentTimeMillis(), "isChinese" to true)
+        assertTrue(IndependentPomodoro.parse(valid).active)
+        for (bad in listOf(valid - "referenceMs", valid + ("studyMinutes" to 0), valid + ("owner" to "other"),
+            valid + ("breakMinutes" to -1), valid + ("elapsedMs" to Double.NaN), valid + ("studyMinutes" to 1.5))) {
+            var rejected = false
+            try { IndependentPomodoro.parse(bad) } catch (_: IllegalArgumentException) { rejected = true }
+            assertTrue(rejected)
+        }
     }
 
     fun testCountdownPauseResumeAndEarlyFinish() {

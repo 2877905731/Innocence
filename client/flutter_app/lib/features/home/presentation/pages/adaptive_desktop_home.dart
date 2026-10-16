@@ -1,3 +1,4 @@
+import 'package:innocence_flutter/features/focus/application/pomodoro_controller.dart';
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
@@ -68,6 +69,7 @@ class AdaptiveDesktopHome extends StatefulWidget {
     required this.onOpenTeamWorkspace,
     required this.onStartFocus,
     this.onConfigureFocusPomodoro,
+    this.pomodoroController,
     required this.onFinishFocus,
     required this.onToggleFocus,
     required this.onSubmitCheckIn,
@@ -96,6 +98,7 @@ class AdaptiveDesktopHome extends StatefulWidget {
   final UserProfile profile;
   final FocusSession focusSession;
   final ConfigureFocusPomodoro? onConfigureFocusPomodoro;
+  final PomodoroController? pomodoroController;
   final CheckInStatus checkInStatus;
   final StatsOverview statsOverview;
   final TeamOverview teamOverview;
@@ -978,6 +981,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome>
       visualTheme: widget.visualTheme,
       children: [
         FocusSessionTabs(
+            pomodoroController: widget.pomodoroController,
             session: widget.focusSession,
             isChinese: _isChinese,
             isBusy: widget.isBusy,

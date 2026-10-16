@@ -94,6 +94,7 @@ export class FocusNoticeChannel implements MethodCallHandler {
       result.success(null);
       return;
     }
+    if (call.method === 'syncPomodoro') { await this.syncIndependent(call.args, result); return; }
     if (call.method !== 'sync') { result.notImplemented(); return; }
     if (!(call.args instanceof Map)) {
       result.error('invalid_arguments', 'Invalid timer snapshot.', null);
@@ -310,6 +311,93 @@ export class FocusNoticeChannel implements MethodCallHandler {
     }
   }
 
+  // Device-local independent clock. Stage reminders are bounded by OS quota;
+  // refreshing in the foreground replenishes the next eight stage boundaries.
+  private async syncIndependent(value: Object, result: MethodResult): Promise<void> {
+    if (!(value instanceof Map)) { result.error('invalid_arguments', 'Invalid timer.', null); return; }
+    const args = value as Map<string, Object>;
+    const owner = args.get('owner') as string;
+    const key = args.get('key') as string;
+    const active = args.get('active') as boolean;
+    const paused = args.get('paused') as boolean;
+    const chinese = args.get('isChinese') as boolean;
+    const study = args.get('studyMinutes') as number;
+    const rest = args.get('breakMinutes') as number;
+    const elapsed = args.get('elapsedMs') as number;
+    const reference = args.get('referenceMs') as number;
+    if (typeof owner !== 'string' || owner.length > 128 || typeof key !== 'string' || key.length > 256 ||
+        typeof active !== 'boolean' || typeof paused !== 'boolean' || typeof chinese !== 'boolean' ||
+        !Number.isSafeInteger(study) || study < 1 || study > 1440 || !Number.isSafeInteger(rest) || rest < 0 || rest > 1440 ||
+        !Number.isSafeInteger(elapsed) || elapsed < 0 || elapsed > 3155760000000 ||
+        !Number.isSafeInteger(reference) || reference < 0 ||
+        (key.length > 0 && (owner.length === 0 || !key.startsWith(owner + '/pomodoro/'))) ||
+        (active && (key.length === 0 || reference <= 0))) {
+      result.error('invalid_arguments', 'Invalid timer.', null); return;
+    }
+    const store = await preferences.getPreferences(this.context, { name: 'independent_pomodoro' });
+    const reminders = await store.get('reminders', []) as number[];
+    for (const id of reminders) {
+      try { await reminderAgentManager.cancelReminder(id); } catch (_) {}
+    }
+    await store.put('reminders', [] as number[]);
+    await store.flush();
+    await this.cancelNotice(7319);
+    if (!active || (await store.get('key', '') as string) !== key) await this.stopPomodoro(true);
+    await store.put('key', key);
+    await store.flush();
+    if (!active) { await this.stopPomodoro(true); result.success('available'); return; }
+    if (!(await notificationManager.isNotificationEnabled())) {
+      await this.stopPomodoro(true); result.success('permissionRequired'); return;
+    }
+    const now = Date.now();
+    const effective = elapsed + (paused ? 0 : Math.max(0, now - reference));
+    const period = (study + rest) * 60000;
+    const position = effective % period;
+    const resting = rest > 0 && position >= study * 60000;
+    const remainingMs = (resting ? period : study * 60000) - position;
+    const deadline = now + remainingMs;
+    const cycle = Math.floor(effective / period) + 1;
+    const click = await wantAgent.getWantAgent({
+      wants: [{ bundleName: this.context.abilityInfo.bundleName, abilityName: 'EntryAbility' }],
+      operationType: wantAgent.OperationType.START_ABILITY, requestCode: 7318,
+      wantAgentFlags: [wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
+    });
+    const liveReady = await this.publishPomodoro(resting ? 'break' : 'study', cycle, deadline,
+      Math.ceil(remainingMs / 1000), paused, chinese, click, deadline, true);
+    let backgroundReady = true;
+    if (!paused) {
+      let due = deadline;
+      let nextResting = resting;
+      const ids: number[] = [];
+      try {
+        for (let i = 0; i < 8; i++) {
+          nextResting = !nextResting && rest > 0;
+          const nextDuration = (nextResting ? rest : study) * 60000;
+          const end = new Date(due + nextDuration);
+          const endLabel = end.toLocaleTimeString();
+          const title = chinese ? `番茄 · ${nextResting ? '休息' : '学习'}` : `Pomodoro · ${nextResting ? 'Break' : 'Study'}`;
+          const content = chinese ? `阶段已开始 · 下阶段结束于 ${endLabel}` : `Stage started · Ends at ${endLabel}`;
+          const reminder: reminderAgentManager.ReminderRequestTimer = {
+            reminderType: reminderAgentManager.ReminderType.REMINDER_TYPE_TIMER,
+            triggerTimeInSeconds: Math.max(1, Math.ceil((due - Date.now()) / 1000)),
+            title: title, content: content, expiredContent: content, notificationId: 7319,
+            ringDuration: 0, slotType: notificationManager.SlotType.SOCIAL_COMMUNICATION,
+            wantAgent: { pkgName: this.context.abilityInfo.bundleName, abilityName: 'EntryAbility' }
+          };
+          ids.push(await reminderAgentManager.publishReminder(reminder));
+          await store.put('reminders', ids);
+          await store.flush();
+          due += nextDuration;
+        }
+      } catch (_) { backgroundReady = false; }
+    }
+    // A single Live View does not update itself to the next stage when Flutter
+    // is suspended. Always disclose this, even if all reminders were scheduled.
+    result.success(paused && liveReady ? 'available' :
+      !liveReady && !backgroundReady ? 'backgroundAndLiveUnavailable' :
+      !liveReady ? 'liveCountdownUnavailable' : !backgroundReady ? 'backgroundReminderUnavailable' : 'backgroundWindow');
+  }
+
   private recordCapability(status: string): void {
     if (!this.context.applicationInfo.debug) return;
     // Debug receipts contain only capability/error codes. Never copy owner,
@@ -411,13 +499,15 @@ export class FocusNoticeChannel implements MethodCallHandler {
     }
   }
 
-  private async stopPomodoro(): Promise<void> {
-    await this.stopLiveView(FocusNoticeChannel.POMODORO_LIVE_ID);
-    await this.cancelNotice(FocusNoticeChannel.POMODORO_SNAPSHOT_ID);
+  private async stopPomodoro(independent: boolean = false): Promise<void> {
+    await this.stopLiveView(independent ? 7317 : FocusNoticeChannel.POMODORO_LIVE_ID);
+    await this.cancelNotice(independent ? 7318 : FocusNoticeChannel.POMODORO_SNAPSHOT_ID);
   }
 
   private async publishPomodoro(stage: string, cycle: number, deadline: number, remaining: number,
-    paused: boolean, chinese: boolean, click: WantAgent, totalDeadline: number): Promise<boolean> {
+    paused: boolean, chinese: boolean, click: WantAgent, totalDeadline: number, independent: boolean = false): Promise<boolean> {
+    const liveId = independent ? 7317 : FocusNoticeChannel.POMODORO_LIVE_ID;
+    const snapshotId = independent ? 7318 : FocusNoticeChannel.POMODORO_SNAPSHOT_ID;
     const title = chinese ? `番茄 · ${stage === 'break' ? '休息' : '学习'}${paused ? ' · 已暂停' : ''}` :
       `Pomodoro · ${stage === 'break' ? 'Break' : 'Study'}${paused ? ' · Paused' : ''}`;
     const cycleText = chinese ? `第 ${cycle} 轮` : `Cycle ${cycle}`;
@@ -425,7 +515,7 @@ export class FocusNoticeChannel implements MethodCallHandler {
     try {
       if (this.qaLiveRightsDenied) throw new Error('qa_live_rights_denied');
       const live: liveViewManager.LiveView = {
-        id: FocusNoticeChannel.POMODORO_LIVE_ID, event: 'TIMER', isMute: true,
+        id: liveId, event: 'TIMER', isMute: true,
         timer: { time: seconds * 1000, isCountdown: true, isPaused: paused },
         liveViewData: {
           primary: { title: title, content: [{ text: cycleText }, { text: '${placeholder.timer}' }],
@@ -438,18 +528,18 @@ export class FocusNoticeChannel implements MethodCallHandler {
         }
       };
       let exists = false;
-      try { await liveViewManager.getActiveLiveView(FocusNoticeChannel.POMODORO_LIVE_ID); exists = true; } catch (_) {}
+      try { await liveViewManager.getActiveLiveView(liveId); exists = true; } catch (_) {}
       const response = exists ? await liveViewManager.updateLiveView(live) : await liveViewManager.startLiveView(live);
       if (response.resultCode !== 0) throw new Error('pomodoro_live_unavailable');
-      await this.cancelNotice(FocusNoticeChannel.POMODORO_SNAPSHOT_ID);
+      await this.cancelNotice(snapshotId);
       return true;
     } catch (_) {
-      await this.stopLiveView(FocusNoticeChannel.POMODORO_LIVE_ID);
-      await this.cancelNotice(FocusNoticeChannel.POMODORO_SNAPSHOT_ID);
+      await this.stopLiveView(liveId);
+      await this.cancelNotice(snapshotId);
       const end = new Date(deadline);
       const endLabel = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}:${end.getSeconds().toString().padStart(2, '0')}`;
       const text = `${cycleText} · ${this.duration(seconds)}${paused ? '' : ` · ${chinese ? '阶段结束于' : 'Stage ends at'} ${endLabel}`}`;
-      await notificationManager.publish({ id: FocusNoticeChannel.POMODORO_SNAPSHOT_ID,
+      await notificationManager.publish({ id: snapshotId,
         content: { notificationContentType: notificationManager.ContentType.NOTIFICATION_CONTENT_BASIC_TEXT,
           normal: { title: title, text: text } }, notificationSlotType: notificationManager.SlotType.OTHER_TYPES,
         isOngoing: true, isAlertOnce: true, tapDismissed: false, wantAgent: click,

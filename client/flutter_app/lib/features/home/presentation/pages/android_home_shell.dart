@@ -1,3 +1,4 @@
+import 'package:innocence_flutter/features/focus/application/pomodoro_controller.dart';
 import 'dart:async';
 import 'dart:ui';
 
@@ -53,6 +54,7 @@ class AndroidHomeShell extends StatefulWidget {
     required this.onToggleTodayPlanItem,
     required this.onStartFocus,
     this.onConfigureFocusPomodoro,
+    this.pomodoroController,
     required this.onToggleFocusPause,
     required this.onFinishFocus,
     required this.onSubmitCheckIn,
@@ -89,6 +91,7 @@ class AndroidHomeShell extends StatefulWidget {
   final Future<void> Function(int index, bool completed) onToggleTodayPlanItem;
   final Future<void> Function() onStartFocus;
   final ConfigureFocusPomodoro? onConfigureFocusPomodoro;
+  final PomodoroController? pomodoroController;
   final Future<void> Function() onToggleFocusPause;
   final Future<void> Function() onFinishFocus;
   final Future<void> Function() onSubmitCheckIn;
@@ -698,6 +701,7 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
           style: Theme.of(context).textTheme.headlineSmall),
       const SizedBox(height: 16),
       FocusSessionTabs(
+          pomodoroController: widget.pomodoroController,
           session: widget.focusSession,
           isChinese: _zh,
           isBusy: widget.isBusy,

@@ -1,6 +1,6 @@
 # Innocence 鸿蒙平板开发工程
 
-2026-10-14：已公开[鸿蒙本机版 v1.2.4-harmonyos.1](https://github.com/2877905731/Innocence/releases/tag/v1.2.4-harmonyos.1)，应用版本1.2.4+9，整合自动横竖屏、番茄分页与通知适配。公开ARM64 Release/AOT未签名包无INTERNET，需接收者自行签名；真机权益和后台连续阶段接力仍待。[发行范围](../../../docs/releases/v1.2.4-harmonyos.1.md)。
+2026-10-16：[鸿蒙本机版 v1.2.5-harmonyos.1](https://github.com/2877905731/Innocence/releases/tag/v1.2.5-harmonyos.1)，应用版本 1.2.5+10，新增独立番茄计时。公开 ARM64 Release/AOT 未签名、无 INTERNET，需接收者自行签名。后台有限预排 8 阶段，实况窗/代理权益与真机门禁保持，见[发行范围](../../../docs/releases/v1.2.5-harmonyos.1.md)。
 
 2026-10-07：用户已验收当前实体平板调试版本并授权 GitHub 发布（0108）。[鸿蒙平板本机版 v1.2.3-harmonyos.1](https://github.com/2877905731/Innocence/releases/tag/v1.2.3-harmonyos.1) 提供 ARM64 Release/AOT 未签名 HAP，应用版本1.2.3+8，无INTERNET权限；设备绑定签名包继续仅F盘私有，公开包需接收者自行签名。Release x64模拟器安装/进程冷启动和2800×1840 PC全屏已核对；实际ARM64 Release未重装用户平板，业务恢复等完整门禁待。[本次范围](../../../docs/releases/v1.2.3-harmonyos.1.md)。
 

@@ -2,15 +2,16 @@
 schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
-updated_at: "2026-10-14"
-last_resumed_at: "2026-10-14T23:17:40+08:00"
-latest_checkpoint: "0115"
-next_sequence: "0116"
+updated_at: "2026-10-16"
+last_resumed_at: "2026-10-16T21:28:29+08:00"
+latest_checkpoint: "0116"
+next_sequence: "0117"
 current_phase: P01
 current_gate: G01
-state: "v1_2_4_github_published_device_verification_pending"
-current_goal: "v1.2.4+9 Windows/Android正式与v1.2.4-harmonyos.1独立Release均公开，Release#412856784/#412858146，latest=v1.2.4；7资产远端摘要/正文及匿名200长度通过，源码623a321与两注释标签原子快进推送。214 Flutter/5跳过、19离线/10平板/80后端、分析及三端发行构建和签名/CRC/115 Dart一致性通过。API36正式v1.2.3覆盖Success/COLD1333ms/进程错误筛选0，系统桌面ANR影响业务UI，数据保留UI证据未取得；未把它当真机通过。鸿蒙公开ARM64 AOT未签名/无INTERNET，权益及后台接力/设备门禁保持；后端未部署。"
+state: "v1_2_5_independent_pomodoro_release_ready"
+current_goal: "v1.2.4番茄分页仅依附总专注的范围已纠正；三端独立开始/暂停/继续/结束与SQLite v8接入，原绑定兼容。228 Flutter/5条件跳过、19离线/10平板、分析及API36原生9组/拒绝权限通过；三端正式包与ARM64/x64 AOT、签名/CRC/118 Dart字节核验通过，v1.2.5+10待推送与公开。鸿蒙权益和后台8阶段窗口明确保留，未部署后端。"
 current_baseline:
+  - "2026-10-16 独立番茄（0116）：v1.2.4番茄分页仅依附总专注的范围已纠正；三端独立开始/暂停/继续/结束与SQLite v8接入，原绑定兼容。228 Flutter/5条件跳过、19离线/10平板、分析及API36原生9组/拒绝权限通过；三端正式包与ARM64/x64 AOT、签名/CRC/118 Dart字节核验通过，v1.2.5+10待推送与公开。鸿蒙权益和后台8阶段窗口明确保留，未部署后端。"
   - "2026-10-14 三端小版本发行（0115）：v1.2.4+9 Windows/Android正式与v1.2.4-harmonyos.1独立Release均公开，Release#412856784/#412858146，latest=v1.2.4；7资产远端摘要/正文及匿名200长度通过，源码623a321与两注释标签原子快进推送。214 Flutter/5跳过、19离线/10平板/80后端、分析及三端发行构建和签名/CRC/115 Dart一致性通过。API36正式v1.2.3覆盖Success/COLD1333ms/进程错误筛选0，系统桌面ANR影响业务UI，数据保留UI证据未取得；未把它当真机通过。鸿蒙公开ARM64 AOT未签名/无INTERNET，权益及后台接力/设备门禁保持；后端未部署。"
   - "2026-10-12 全平台番茄分页（0114）：0114全平台专注计时/番茄闹钟分页与活动会话配置接入；SQLite v7锚点/基数及原子outbox，Android双Chronometer和阶段闹钟。214 Flutter/5跳过、6平板/14后端、分析及API36原生6组/拒绝权限通过；最终三端本机包与签名/CRC/115 Dart逐字节通过。用户真机覆盖、鸿蒙双TIMER与权益/后台接力、Windows运行及真实联网迁移部署仍待；新APK含0112兼容修复仅F盘，未推送或新发行。"
   - "2026-10-12 用户补充手机环境及后续安排（0113）：实际反馈设备为鸿蒙4手机，型号/SQLite底层异常/修正版覆盖效果未提供；用户认为可能是系统原因并选择后续在安卓系统测试。仅记录环境和用户安排，不能将系统名称当成故障定论；0112数据库兼容性修复/同证书本机APK与鸿蒙7平板权益待办保留。本轮未改源码、重建或操控设备。"

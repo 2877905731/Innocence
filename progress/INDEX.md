@@ -818,3 +818,10 @@ checkpoints:
     status: complete
     path: progress/0115__20261014__P01__DONE__v1.2.4-three-platform-release.md
     title: "v1.2.4三端小版本GitHub公开与下载核验"
+  - sequence: "0116"
+    created_at: "2026-10-16T21:28:29+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0116__20261016__P01__CORRECTION__independent-pomodoro-and-release-ready.md
+    title: "番茄独立计时范围纠正、三端实现与v1.2.5发行就绪"

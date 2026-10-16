@@ -1,3 +1,5 @@
+import 'package:innocence_flutter/features/focus/application/pomodoro_controller.dart';
+import 'pomodoro_timer_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:innocence_flutter/core/widgets/glass_panel.dart';
@@ -16,12 +18,14 @@ class FocusSessionTabs extends StatefulWidget {
       required this.isChinese,
       required this.isBusy,
       required this.timer,
-      this.onConfigure});
+      this.onConfigure,
+      this.pomodoroController});
   final FocusSession session;
   final bool isChinese;
   final bool isBusy;
   final Widget timer;
   final ConfigureFocusPomodoro? onConfigure;
+  final PomodoroController? pomodoroController;
 
   @override
   State<FocusSessionTabs> createState() => _FocusSessionTabsState();
@@ -133,7 +137,19 @@ class _FocusSessionTabsState extends State<FocusSessionTabs> {
       const SizedBox(height: 16),
       if (_tab == 0)
         widget.timer
-      else
+      else if (widget.pomodoroController != null) ...[
+        PomodoroTimerPanel(
+            controller: widget.pomodoroController!,
+            isChinese: widget.isChinese),
+        if (session.active && session.bindPomodoro) ...[
+          const SizedBox(height: 16),
+          Text(text('原专注仍绑定番茄（${session.stageRemainingLabel}）；可解除，独立闹钟不受影响。',
+              'The focus session has a legacy bound pomodoro (${session.stageRemainingLabel}). Unbinding will not affect the independent timer.')),
+          TextButton(
+              onPressed: enabled ? () => _save(false) : null,
+              child: Text(text('解除原专注绑定', 'Unbind from focus'))),
+        ],
+      ] else
         GlassPanel(
             child: Form(
                 key: _form,

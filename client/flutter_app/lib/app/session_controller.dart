@@ -1,3 +1,4 @@
+import 'package:innocence_flutter/features/focus/application/pomodoro_controller.dart';
 import 'dart:async';
 import 'package:innocence_flutter/core/platform/focus_notice_bridge.dart';
 import '../features/assistant/application/assistant_controller.dart';
@@ -100,6 +101,10 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
         _offlineSyncApi = offlineSyncApi ?? OfflineSyncApi(),
         _restoreOfflineOnStartup = restoreOfflineOnStartup ??
             AppConfig.capabilities.restoresLocalWorkspace {
+    pomodoro = PomodoroController(
+        store: _offlineStore,
+        owner: () => _focusOwner,
+        chinese: () => _isChineseLanguage);
     WidgetsBinding.instance.addObserver(this);
     _languageController.addListener(_refreshFocusNotices);
     assistant = AssistantController(
@@ -127,6 +132,7 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
         offlineOnly: isOfflineOnlyBuild);
   }
 
+  late final PomodoroController pomodoro;
   late final AssistantController assistant;
   final FocusNoticeBridge _focusNoticeBridge;
   FocusNoticeStatus _focusNoticeStatus = FocusNoticeStatus.available;
@@ -3504,7 +3510,10 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
-  void _refreshFocusNotices() => unawaited(_syncFocusNotice());
+  void _refreshFocusNotices() {
+    unawaited(_syncFocusNotice());
+    unawaited(pomodoro.refreshNotices());
+  }
 
   Future<void> _syncFocusNotice({
     bool requestPermission = false,
@@ -3554,6 +3563,7 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
   void notifyListeners() {
     super.notifyListeners();
     unawaited(_syncFocusNotice());
+    unawaited(pomodoro.updateIdentity());
   }
 
   Future<void> _applyDesktopShellSettings({
@@ -3927,6 +3937,7 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _languageController.removeListener(_refreshFocusNotices);
     _stopFocusTicker();
+    pomodoro.dispose();
     assistant.dispose();
     chat.dispose();
     unawaited(_offlineStore.close());

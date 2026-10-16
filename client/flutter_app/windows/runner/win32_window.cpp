@@ -858,6 +858,22 @@ bool Win32Window::ShowFocusCompletion(bool is_chinese) {
   return Shell_NotifyIconW(NIM_MODIFY, &data) != FALSE;
 }
 
+bool Win32Window::ShowPomodoroTransition(bool is_chinese, bool is_break) {
+  if (window_handle_ == nullptr) return false;
+  AddTrayIcon(window_handle_);
+  if (!tray_icon_added_) return false;
+  NOTIFYICONDATAW data = {};
+  data.cbSize = sizeof(data);
+  data.hWnd = window_handle_;
+  data.uID = kTrayIconId;
+  data.uFlags = NIF_INFO;
+  data.dwInfoFlags = NIIF_INFO;
+  wcscpy_s(data.szInfoTitle, is_chinese ? L"\u756A\u8304\u9636\u6BB5\u5DF2\u5B8C\u6210" : L"Pomodoro stage complete");
+  wcscpy_s(data.szInfo, is_chinese ? (is_break ? L"\u5F00\u59CB\u4F11\u606F\u3002" : L"\u5F00\u59CB\u65B0\u4E00\u8F6E\u5B66\u4E60\u3002")
+      : (is_break ? L"Time for a break." : L"Start the next study stage."));
+  return Shell_NotifyIconW(NIM_MODIFY, &data) != FALSE;
+}
+
 void Win32Window::ShowMainWindow() {
   if (window_handle_ == nullptr) {
     return;

@@ -83,6 +83,7 @@ class Win32Window {
                     bool is_chinese);
 
   bool ShowFocusCompletion(bool is_chinese);
+  bool ShowPomodoroTransition(bool is_chinese, bool is_break);
 
   // If true, closing this window will quit the application.
   void SetQuitOnClose(bool quit_on_close);

@@ -242,6 +242,30 @@ void FlutterWindow::RegisterDesktopWidgetChannel() {
           return;
         }
 
+        if (call.method_name() == "showPomodoroTransition") {
+          const auto* arguments =
+              std::get_if<flutter::EncodableMap>(call.arguments());
+          bool is_chinese = true;
+          if (arguments != nullptr) {
+            const auto found = arguments->find(flutter::EncodableValue("isChinese"));
+            if (found != arguments->end()) {
+              if (const auto value = std::get_if<bool>(&found->second)) {
+                is_chinese = *value;
+              }
+            }
+          }
+          bool is_break = false;
+          if (arguments != nullptr) {
+            const auto found = arguments->find(flutter::EncodableValue("isBreak"));
+            if (found != arguments->end()) {
+              if (const auto value = std::get_if<bool>(&found->second)) is_break = *value;
+            }
+          }
+          if (ShowPomodoroTransition(is_chinese, is_break)) result->Success();
+          else result->Error("focus_notice_failed", "Unable to show timer completion notification.");
+          return;
+        }
+
         if (call.method_name() == "setCanvasSizePreset") {
           const auto* arguments =
               std::get_if<flutter::EncodableMap>(call.arguments());
