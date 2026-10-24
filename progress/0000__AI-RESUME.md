@@ -3,14 +3,15 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-24"
-last_resumed_at: "2026-10-24T15:37:24+08:00"
-latest_checkpoint: "0118"
-next_sequence: "0119"
+last_resumed_at: "2026-10-24T16:20:31+08:00"
+latest_checkpoint: "0119"
+next_sequence: "0120"
 current_phase: P01
 current_gate: G01
-state: "theme_artwork_candidates_ready_device_verification_pending"
-current_goal: "0118按用户截图纠正侘寂展示字和鸿蒙玻璃光束：Crimson Text原生斜体/Noto Serif SC与OFL离线打包，首页/标题/品牌字接入；三光源改连续羽化、按DPR共享最长2048纹理并提高重采样。231 Flutter/5条件跳过、13鸿蒙宿主、字形与密度/缩放回归和lib/test分析通过；Android同发行签名离线候选79727911bytes/SHA d7ea6872…、鸿蒙ARM64 Release未签名53017333bytes/SHA23b3f28c…均CRC/字体与许可精确字节/119 Dart同步通过，SDK确认HAP无签名块。安装/覆盖说明就绪；HDC目标0，未安装设备、未推送/新发行，公开仍v1.2.5。既有番茄/权益/真实设备与G01门禁保持。"
+state: "harmonyos_self_use_pending_real_name_and_profile"
+current_goal: "0119用户确认鸿蒙只给自己用、开发者账号已注册但实名认证未完成；保留平板点安装链接更新的目标，不安排正式公开上架。只读元数据确认本机app中一份Debug Profile已于2026-10-21 13:17:09+08:00过期，app-release无Profile。用户本人完成实名后再核对指定设备发布资格/发布材料与覆盖身份，不能承诺个人账号必能申请；网页HAP/描述文件尚未签名或部署。0118修复候选及231全量/13鸿蒙宿主证据保持，公开仍v1.2.5；无新构建、安装或远端变更，G01未封板。"
 current_baseline:
+  - "2026-10-24 个人自用范围与账号待实名（0119）：原文我想只给自己用/已注册，实名认证还没完成。目标为本人平板链接安装与后续更新，不公开个人签名材料。现有Debug Profile已过期，Release无Profile；未读取输出设备标识/密码/私钥。安装文档补本人实名→资格核对→有效发布Profile/签名HAP/签名描述/HTTPS入口→保资料覆盖验证。仅决策及准备，不计网页安装制作完成。"
   - "0118收尾普通资源规则：assets/fonts/.gitattributes仅对两份第三方OFL原件关闭换行归一化和空白审查，保留上游字节及原有行尾空格；字体许可原件不作格式清理。Git提交与RESUME记录，旧检查点保持不可变。"
   - "2026-10-24 侘寂字体与玻璃边缘修正（0118）：内置Crimson Text/Noto Serif SC，英文斜体/中文真实字形、标题及品牌接入；光束连续羽化/DPR/2048上限。231 Flutter/5跳过、13鸿蒙宿主、分析与两端本机Release构建通过；Android79727911bytes/d7ea6872…沿原签名，HAP53017333bytes/23b3f28c…未签名；CRC/五字体许可资产字节/119 Dart一致性及SDK签名边界通过。HAP不能直接点装的签名+HDC/保资料覆盖说明补齐。无连接设备，真机画面/性能未验；未推送/新发行，版本仍1.2.5+10。"
   - "2026-10-16 独立番茄公开（0117）：v1.2.5+10 Windows/Android及v1.2.5-harmonyos.1已公开，Release#414997721/414998892，latest=v1.2.5；7资产远端SHA/正文及匿名200长度通过，源码eb33985与双注释标签SHA精确同步。番茄可不启动总专注而独立开始/暂停/继续/结束，总专注结束不停止，SQLite v8按owner恢复。228 Flutter/5条件跳过、19离线/10平板、分析及API36原生9组/拒绝权限、三端包/118 Dart一致性通过；QA页面无总专注启动、暂停24:34、强停冷启恢复同值/继续/结束有证据；正式1.2.4覆盖Success/COLD3060ms/进程错误0。鸿蒙未签名/无INTERNET、权益与8阶段有限预排和实际设备门禁保留；未部署后端。"
@@ -140,6 +141,9 @@ unfinished:
     item: "Android A0尚未通过：正式离线签名/发行与API36核心流程有0083/0086/0088证据，月/年手机页已进入v1.2.2正式包且通过API36正式版覆盖升级子集；仍须实体设备、SDK license、其余二级手机页、真实设备键盘/大字体和前后台性能。联网会话保护、真实同步、WebSocket/推送后续接入，不重复列发行签名或月年源码为未完成。"
     gate: Android-A0
 next_actions:
+  - id: NEXT-HARMONYOS-SELF-USE-SIGNING
+    action: "接0119：用户已注册未实名，先由用户本人完成华为开发者实名认证。随后核对其账号实际能否申请指定设备发布Profile，仅加入自己的平板；保持包名并核对与旧调试安装的身份/覆盖兼容，不能仅凭同包名保证保留资料。准备有效发布材料、签名Release HAP和安装描述/HTTPS入口；私钥/Profile继续F盘私有，不公开上传，不未经具体授权远端创建/提交/部署。若个人账号无此资格，解释约束后讨论能满足自用的替代安装路径，不把USB安装当作网页安装已经完成。"
+    inputs: ["client/flutter_app/harmonyos/INSTALL.zh-CN.md", "client/flutter_app/build/qa/theme-artwork/candidate-manifest.json", "progress/0119__20261024__P01__DECISION__harmonyos-personal-use-and-real-name-pending.md"]
   - id: NEXT-THEME-ARTWORK-DEVICE
     action: "0118本机候选和安装说明就绪，公开GitHub仍旧v1.2.5。保持原资料，用同发行签名Android候选覆盖；鸿蒙需有效设备Profile/原应用签名后覆盖，不能直接点装未签名HAP。核对侘寂英文斜体/中文标题与品牌、玻璃运动和折射边缘，以及DPR/旋转/后台/持续帧率功耗；本轮HDC目标0，宿主图不能代替真实平板验收。新版本或正式分发按用户后续范围处理。"
     inputs: ["client/flutter_app/build/qa/theme-artwork/candidate-manifest.json", "client/flutter_app/build/qa/theme-artwork/Innocence-artwork-android-offline.apk", "client/flutter_app/build/qa/theme-artwork/Innocence-artwork-harmonyos-arm64-release-unsigned.hap", "client/flutter_app/harmonyos/INSTALL.zh-CN.md", "progress/0118__20261024__P01__CORRECTION__bundled-display-fonts-and-smooth-glass.md"]

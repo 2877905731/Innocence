@@ -839,3 +839,10 @@ checkpoints:
     status: complete
     path: progress/0118__20261024__P01__CORRECTION__bundled-display-fonts-and-smooth-glass.md
     title: "侘寂内置展示字体、玻璃光束连续羽化与鸿蒙HAP安装说明"
+  - sequence: "0119"
+    created_at: "2026-10-24T16:20:31+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0119__20261024__P01__DECISION__harmonyos-personal-use-and-real-name-pending.md
+    title: "鸿蒙仅供本人使用，账号已注册但实名认证待完成"
