@@ -846,3 +846,10 @@ checkpoints:
     status: complete
     path: progress/0119__20261024__P01__DECISION__harmonyos-personal-use-and-real-name-pending.md
     title: "鸿蒙仅供本人使用，账号已注册但实名认证待完成"
+  - sequence: "0120"
+    created_at: "2026-10-24T22:17:05+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0120__20261024__P01__DONE__harmonyos-app-id-and-release-certificate-draft.md
+    title: "鸿蒙同包名APP ID创建、指定设备选项核对与发布证书草稿"
