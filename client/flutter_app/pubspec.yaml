@@ -25,5 +25,17 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/fonts/crimson_text/OFL.txt
+    - assets/fonts/noto_serif_sc/OFL.txt
+  fonts:
+    - family: CrimsonText
+      fonts:
+        - asset: assets/fonts/crimson_text/CrimsonText-Regular.ttf
+        - asset: assets/fonts/crimson_text/CrimsonText-Italic.ttf
+          style: italic
+    - family: NotoSerifSC
+      fonts:
+        - asset: assets/fonts/noto_serif_sc/NotoSerifSC-Variable.ttf
   shaders:
     - shaders/glass_refraction.frag

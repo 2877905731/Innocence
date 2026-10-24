@@ -1,0 +1,3 @@
+# Preserve upstream license bytes, including their original whitespace.
+crimson_text/OFL.txt -text -whitespace
+noto_serif_sc/OFL.txt -text -whitespace

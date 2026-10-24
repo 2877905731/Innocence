@@ -100,9 +100,10 @@ void main() {
   testWidgets('reduced motion holds the shared scene and resizing replaces it',
       (tester) async {
     GlassLightScene? scene;
-    Widget view(double width) => MaterialApp(
+    Widget view(double width, {double pixelRatio = 1}) => MaterialApp(
             home: MediaQuery(
-          data: const MediaQueryData(disableAnimations: true),
+          data: MediaQueryData(
+              disableAnimations: true, devicePixelRatio: pixelRatio),
           child: Center(
               child: SizedBox(
             width: width,
@@ -123,6 +124,18 @@ void main() {
     await tester.pump();
     expect(scene!.size, const Size(500, 300));
     expect(identical(scene!.image, first), isFalse);
+    final resized = scene!.image;
+    await tester.pumpWidget(view(500, pixelRatio: 2));
+    await tester.pump();
+    expect(scene!.image!.width, 1000);
+    expect(scene!.image!.height, 600);
+    expect(identical(scene!.image, resized), isFalse);
+    await tester.pumpWidget(view(500, pixelRatio: 8));
+    await tester.pump();
+    expect(scene!.image!.width, 2048);
+    final capped = scene!.image;
+    await tester.pump(const Duration(seconds: 1));
+    expect(identical(scene!.image, capped), isTrue);
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
     expect(tester.takeException(), isNull);

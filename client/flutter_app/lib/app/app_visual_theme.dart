@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
+import 'package:innocence_flutter/app/wabi_sabi_typography.dart';
 
 enum AppVisualTheme {
   minimalism,
@@ -214,7 +215,7 @@ class AppVisualTokens {
       borderSide: BorderSide(color: line),
     );
 
-    return ThemeData(
+    final theme = ThemeData(
       useMaterial3: true,
       extensions: [AppVisualThemeMarker(visualTheme)],
       brightness: isDark ? Brightness.dark : Brightness.light,
@@ -439,6 +440,19 @@ class AppVisualTokens {
                   ),
                 )
               : null,
+    );
+    if (visualTheme != AppVisualTheme.wabiSabi) return theme;
+    final text = theme.textTheme;
+    return theme.copyWith(
+      textTheme: text.copyWith(
+        displayLarge: WabiSabiTypography.heading(text.displayLarge!),
+        displayMedium: WabiSabiTypography.heading(text.displayMedium!),
+        displaySmall: WabiSabiTypography.heading(text.displaySmall!),
+        headlineLarge: WabiSabiTypography.heading(text.headlineLarge!),
+        headlineMedium: WabiSabiTypography.heading(text.headlineMedium!),
+        headlineSmall: WabiSabiTypography.heading(text.headlineSmall!),
+        titleLarge: WabiSabiTypography.heading(text.titleLarge!),
+      ),
     );
   }
 }

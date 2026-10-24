@@ -9,6 +9,7 @@ import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
+import 'package:innocence_flutter/app/wabi_sabi_typography.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/layout/desktop_presentation.dart';
 import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
@@ -3908,11 +3909,16 @@ class _HeroStatementState extends State<_HeroStatement>
                     style: TextStyle(
                       color: darkHero ? palette.onInk : palette.ink,
                       fontFamily: switch (palette.visualTheme) {
-                        AppVisualTheme.wabiSabi => 'Georgia',
+                        AppVisualTheme.wabiSabi =>
+                          WabiSabiTypography.latinFamily,
                         AppVisualTheme.midCentury => 'Century Gothic',
                         AppVisualTheme.glass => 'Segoe UI Variable Display',
                         _ => 'Segoe UI',
                       },
+                      fontFamilyFallback:
+                          palette.visualTheme == AppVisualTheme.wabiSabi
+                              ? WabiSabiTypography.fallback
+                              : null,
                       fontSize: switch (palette.visualTheme) {
                         AppVisualTheme.minimalism => 34,
                         AppVisualTheme.glass => 34,

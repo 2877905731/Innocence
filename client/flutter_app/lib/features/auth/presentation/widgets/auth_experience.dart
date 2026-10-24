@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
+import 'package:innocence_flutter/app/wabi_sabi_typography.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/widgets/desktop_close_button.dart';
 import 'package:innocence_flutter/core/widgets/desktop_drag_region.dart';
@@ -312,7 +313,8 @@ class _ThemeBrandTitle extends StatelessWidget {
             'Inno',
             style: TextStyle(
               color: tokens.ink,
-              fontFamily: 'Georgia',
+              fontFamily: WabiSabiTypography.latinFamily,
+              fontFamilyFallback: WabiSabiTypography.fallback,
               fontSize: large,
               fontStyle: FontStyle.italic,
               fontWeight: FontWeight.w400,
@@ -328,7 +330,8 @@ class _ThemeBrandTitle extends StatelessWidget {
             'cence',
             style: TextStyle(
               color: tokens.artOne,
-              fontFamily: 'Georgia',
+              fontFamily: WabiSabiTypography.latinFamily,
+              fontFamilyFallback: WabiSabiTypography.fallback,
               fontSize: compact ? 49 : 70,
               fontStyle: FontStyle.italic,
               fontWeight: FontWeight.w400,
@@ -349,7 +352,7 @@ class _ThemeBrandTitle extends StatelessWidget {
               '静',
               style: TextStyle(
                 color: tokens.onAccent,
-                fontFamily: 'serif',
+                fontFamily: WabiSabiTypography.chineseFamily,
                 fontSize: compact ? 16 : 19,
                 fontWeight: FontWeight.w700,
               ),
@@ -364,7 +367,7 @@ class _ThemeBrandTitle extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: tokens.muted,
-              fontFamily: 'serif',
+              fontFamily: WabiSabiTypography.chineseFamily,
               fontSize: compact ? 9 : 10,
               height: 1.35,
               letterSpacing: 1.6,

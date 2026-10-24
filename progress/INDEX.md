@@ -832,3 +832,10 @@ checkpoints:
     status: complete
     path: progress/0117__20261016__P01__DONE__v1.2.5-independent-pomodoro-published.md
     title: "v1.2.5独立番茄三端公开与七项下载核验"
+  - sequence: "0118"
+    created_at: "2026-10-24T15:37:24+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0118__20261024__P01__CORRECTION__bundled-display-fonts-and-smooth-glass.md
+    title: "侘寂内置展示字体、玻璃光束连续羽化与鸿蒙HAP安装说明"

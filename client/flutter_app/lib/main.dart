@@ -6,6 +6,7 @@ import 'app/app.dart';
 import 'app/app_language.dart';
 import 'app/app_visual_theme.dart';
 import 'app/session_controller.dart';
+import 'app/wabi_sabi_typography.dart';
 import 'core/local/offline_store.dart';
 import 'core/config/app_config.dart';
 import 'features/auth/data/auth_api.dart';
@@ -13,6 +14,7 @@ import 'features/auth/data/auth_local_storage.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  WabiSabiTypography.registerLicenses();
 
   final preferences = await SharedPreferences.getInstance();
   final languageController = AppLanguageController(preferences);

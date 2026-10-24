@@ -23,6 +23,7 @@ class _GlassMotionBackdropState extends State<GlassMotionBackdrop>
   bool _foreground = true;
   bool _reduceMotion = false;
   bool _layoutPending = false;
+  double _pixelRatio = 1;
   @override
   void initState() {
     super.initState();
@@ -32,9 +33,11 @@ class _GlassMotionBackdropState extends State<GlassMotionBackdrop>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final previousPixelRatio = _pixelRatio;
+    _pixelRatio = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1;
     _reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     _syncMotion();
-    if (_reduceMotion) _renderScene();
+    if (_reduceMotion || previousPixelRatio != _pixelRatio) _renderScene();
   }
 
   @override
@@ -61,9 +64,10 @@ class _GlassMotionBackdropState extends State<GlassMotionBackdrop>
 
   void _renderScene() {
     if (_size.isEmpty) return;
-    // Light already has 22–40 logical px of diffusion. Bound the shared texture
-    // rather than allocating a full-resolution copy for every panel and DPI.
-    final scale = math.min(1.0, 1440 / math.max(_size.width, _size.height));
+    // Share one density-aware texture. The cap bounds memory on large displays;
+    // the continuous feather below avoids a backend's downsampled blur tiles.
+    final scale =
+        math.min(_pixelRatio, 2048 / math.max(_size.width, _size.height));
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder)..scale(scale);
     _paintLights(canvas, _size, _reduceMotion ? 0 : _clock.elapsedMilliseconds);
@@ -126,7 +130,7 @@ class _ScenePainter extends CustomPainter {
         image,
         Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
         Offset.zero & size,
-        Paint()..filterQuality = FilterQuality.low);
+        Paint()..filterQuality = FilterQuality.medium);
   }
 
   @override
@@ -176,8 +180,7 @@ void _paintLights(Canvas canvas, Size size, int elapsed) {
         center: Offset.zero,
         width: dimensions.width,
         height: dimensions.height);
-    final paint = Paint()
-      ..imageFilter = ui.ImageFilter.blur(sigmaX: sigma, sigmaY: sigma);
+    final paint = Paint();
     if (desktop) {
       paint.colorFilter = const ColorFilter.matrix([
         1.197,
@@ -202,16 +205,57 @@ void _paintLights(Canvas canvas, Size size, int elapsed) {
         0,
       ]);
     }
-    canvas.saveLayer(rect.inflate(sigma * 4), paint);
+    final featherBounds = rect.inflate(sigma * 3);
+    canvas.saveLayer(featherBounds, paint);
     if (gradient is RadialGradient) {
       canvas.save();
       canvas.scale(dimensions.width / dimensions.height, 1);
-      final circle =
-          Rect.fromCircle(center: Offset.zero, radius: dimensions.height / 2);
+      final circle = Rect.fromCircle(
+          center: Offset.zero, radius: dimensions.height / 2 + sigma);
       canvas.drawOval(circle, Paint()..shader = gradient.createShader(circle));
       canvas.restore();
     } else {
-      canvas.drawOval(rect, Paint()..shader = gradient.createShader(rect));
+      canvas.drawRect(
+          featherBounds,
+          Paint()
+            ..isAntiAlias = false
+            ..shader = gradient.createShader(rect));
+      // A continuous Gaussian-profile mask gives the ellipse a soft edge at
+      // the actual texture resolution. Large ImageFilter.blur kernels can be
+      // reduced to coarse tiles by the HarmonyOS renderer before upscaling.
+      final radius = dimensions.height / 2;
+      final outerRadius = radius + sigma * 3;
+      final stops = <double>[0];
+      final colors = <Color>[Colors.white];
+      const samples = [
+        (-3.0, .99865),
+        (-2.0, .97725),
+        (-1.0, .84134),
+        (0.0, .5),
+        (1.0, .15866),
+        (2.0, .02275),
+      ];
+      for (final (distance, opacity) in samples) {
+        final stop = (radius + distance * sigma) / outerRadius;
+        if (stop > 0 && stop < 1) {
+          stops.add(stop);
+          colors.add(Colors.white.withValues(alpha: opacity));
+        }
+      }
+      stops.add(1);
+      colors.add(Colors.transparent);
+      canvas.save();
+      canvas.scale(featherBounds.width / featherBounds.height, 1);
+      final maskBounds =
+          Rect.fromCircle(center: Offset.zero, radius: outerRadius);
+      canvas.drawRect(
+          maskBounds.inflate(2),
+          Paint()
+            ..isAntiAlias = false
+            ..blendMode = BlendMode.dstIn
+            ..shader = RadialGradient(colors: colors, stops: stops)
+                .createShader(maskBounds));
+      canvas.restore();
     }
     canvas.restore();
     canvas.restore();

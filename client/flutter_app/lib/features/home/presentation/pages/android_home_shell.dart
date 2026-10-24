@@ -9,6 +9,7 @@ import 'package:innocence_flutter/features/plans/domain/models/weekly_plan_templ
 import 'package:flutter/material.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
+import 'package:innocence_flutter/app/wabi_sabi_typography.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/widgets/minimal_white_hero.dart';
 import 'package:innocence_flutter/core/widgets/minimal_progress_rule.dart';
@@ -590,7 +591,10 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(slogan.title(isChinese: _zh),
-                style: Theme.of(context).textTheme.headlineSmall),
+                style: _visualTheme == AppVisualTheme.wabiSabi
+                    ? WabiSabiTypography.slogan(
+                        Theme.of(context).textTheme.headlineSmall!)
+                    : Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(slogan.subtitle(isChinese: _zh),
                 style: Theme.of(context).textTheme.bodyMedium),
