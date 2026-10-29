@@ -860,3 +860,10 @@ checkpoints:
     status: complete
     path: progress/0121__20261029__P01__DONE__harmonyos-release-certificate-and-device-profile.md
     title: "个人发布证书、单设备指定发布Profile签发与官方验证"
+  - sequence: "0122"
+    created_at: "2026-10-30T02:29:34+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0122__20261030__P01__DONE__harmonyos-self-use-signed-hap-and-temporary-entry-plan.md
+    title: "单设备Release签名HAP验签、离线资源核对与临时入口选择"

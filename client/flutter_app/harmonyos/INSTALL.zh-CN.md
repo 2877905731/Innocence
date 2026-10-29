@@ -32,9 +32,27 @@
 - 完整设备 ID 集合在内存中与旧调试 Profile 精确比对，均为同一台设备。控制台将类型显示为“手机”；该显示不替代实际设备 ID 核对。没有输出或在仓库记录真实 UDID。
 - 新 Profile 内嵌证书与下载证书链中的签名证书逐字节一致，包名、开发者标识、公钥及设备集合匹配旧配置；但 `app-identifier` 已变为当前登记的 APP ID，与旧调试 Profile 不同。该差异已明确保留，未篡改签名 Profile 来掩盖差异。
 
-目前完成的是发布签名材料准备。仍需本机签名构建、官方 HAP 验签、安装描述与 HTTPS 入口，以及真实安装／覆盖验证。旧调试版与 Release 的 `debug` 状态和应用标识须另外核对；官方文档指出 `app.json` 的 `debug` 不一致会导致 `9568336`，参见[安装时 debug 类型不一致](https://developer.huawei.com/consumer/cn/doc/harmonyos-faqs-V5/faqs-app-debugging-32-V5)。不通过卸载旧版来试错，也不把公钥相同当成资料保留已验证。
+0121 完成发布签名材料准备，后续 0122 已完成本机签名构建和官方 HAP 验签；安装描述、HTTPS 入口及真实安装／覆盖验证仍待。旧调试版与 Release 的 `debug` 状态和应用标识须另外核对；官方文档指出 `app.json` 的 `debug` 不一致会导致 `9568336`，参见[安装时 debug 类型不一致](https://developer.huawei.com/consumer/cn/doc/harmonyos-faqs-V5/faqs-app-debugging-32-V5)。不通过卸载旧版来试错，也不把公钥相同当成资料保留已验证。
 
 证书、Profile、含设备内容的 SDK 验证结果及后续个人签名包只保存在 F 盘忽略目录；未上传到 GitHub。私钥沿用本机原材料，未复制或导出新私钥。TIMER 实况窗与后台代理提醒权益尚未申请，签名成功不代表这些权益已开通。
+
+### 本机单设备签名 HAP 已完成（2026-10-30，0122）
+
+已用原密钥、新发布证书和上述单设备 Profile 完成 ARM64 Release/AOT 签名构建；Hvigor `assembleHap` 为 167.3 秒，包含依赖解析的本次成功包装流程为 222.4 秒。产物仅放在 F 盘：
+
+```text
+client/flutter_app/build/harmonyos-h0/self-use/20261029/Innocence-v1.2.5-harmonyos-arm64-self-use-signed.hap
+字节数：53297721
+SHA256：059af0066d95618d3c6cdf633c69555dccf4edf114b224771ce6b431078e93a1
+```
+
+官方 `verify-app`、三份 ARM64 ELF 的代码签名、摘要、权限签名和 ZIP CRC 均通过。包内 Profile 与已验证的 `.p7b` 逐字节相同，证书链公钥匹配；版本为 `1.2.5+10`、平板、`debug=false`，只有 `PUBLISH_AGENT_REMINDER`，没有 `INTERNET` 权限。全部 5 份字体／许可资产及 119 个暂存 Dart 文件与当前工程逐字节一致；仓库签名配置仍为空。
+
+保留兼容性门禁：本机 0111 旧候选为 `debug=true`，本次为 `false`，且前述 `app-identifier` 不同。未连接观察当前安装状态，也未覆盖或卸载真实平板应用；资料保留和实际安装不可记为通过。
+
+用户在 2026-10-30 选择“没有，准备临时入口”。当前仅授权准备临时 HTTPS 入口，尚未对外开放含设备 Profile 的安装包。按[华为 Deeplink 分发规范](https://developer.huawei.com/consumer/cn/doc/doccenter-submission/agc-help-internal-test-release-app-0000002260691994)，还需同域名的 HTTPS 包／图标／签名描述文件、HEAD 文件大小、Range 分片响应，以及华为浏览器中的用户点击入口。描述签名工具已按官方链接定位并固定到 `c71aa1afd261b8921a2062e478ba86641c0e646c`，尚未生成可用公网入口。
+
+另需保留资格边界：[官方测试流程](https://developer.huawei.com/consumer/cn/doc/doccenter-submission/agc-help-internal-test-guide-0000002295325149)当前注明指定设备发布仅支持企业开发者。当前账号已实际取得 Profile，但账号类型未读取、网页实机安装未验证；不由签发成功推断完整网页分发资格。任何临时对外共享均须先展示实际链接、文件和有效范围，再按用户具体确认开放；私钥与密码只在本机使用。
 
 希望在平板浏览器中点安装链接，需要先确认开发者账号可申请“指定设备发布”Profile，并准备：
 
