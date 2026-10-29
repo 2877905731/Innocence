@@ -3,14 +3,15 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-30"
-last_resumed_at: "2026-10-30T02:52:50+08:00"
-latest_checkpoint: "0123"
-next_sequence: "0124"
+last_resumed_at: "2026-10-30T03:34:50+08:00"
+latest_checkpoint: "0124"
+next_sequence: "0125"
 current_phase: P01
 current_gate: G01
-state: "harmonyos_temporary_installer_prepared_files_gated_pending_specific_publish_confirmation"
-current_goal: "0123同域4文件安装页/manifest签名已就绪；官方工具验签、新CER公钥及版本篡改拒绝通过，工具不签路由字段的边界明确，整文件摘要锁定。官方便携Cloudflare临时隧道已注册，只转发受控回环端口；30项HEAD/Range/负向门禁及外部TLS健康200通过，公网HAP/manifest404，真实开放标记缺失。用户仅同意准备，展示实际链接/4文件/30分钟范围后才开放。签名HAP沿0122 SHA059af006…/53297721bytes/1.2.5+10；旧Debug及app-identifier差异、企业资格/账号类型及实际网页安装仍待，保资料不卸载。私有链接/设备材料/工具仅F盘忽略目录，不上传密钥密码、不改GitHub；真实覆盖/视觉/权益及G01仍待。"
+state: "harmonyos_temporary_installer_opened_30_minutes_with_consent_device_feedback_pending"
+current_goal: "0124用户确认同一具体Cloudflare链接/4文件开放30分钟，已按run_id/origin/HAP/全文件摘要绑定标记，北京时间2026-10-30 03:31:50至04:01:50（1800秒）。外部7项HTTPS健康/三小文件精确摘要/HAP HEAD53297721bytes/前后Range206及字节通过；浏览器公网页面和Deeplink可读，截图两次失败。签名HAP沿0122 SHA059af006…/1.2.5+10，真实平板安装/旧Debug覆盖/资料恢复、企业资格及权益仍待。到期文件拒绝/服务停止，隧道随停，不自动续期；续接先查当前时钟和私有状态。完整链接/设备材料/授权只F盘忽略目录，未共享私钥密码或改GitHub；G01保持开放。"
 current_baseline:
+  - "2026-10-30 用户确认后临时入口开放（0124）：同一具体链接和4文件，经原子标记开放03:31:50→04:01:50/1800秒；外部7项健康/小文件字节摘要/HAP长度及两Range通过。公网页面/Deeplink可读，截图接口两次失败，无新公网截图。未实机安装，旧版/资料/企业资格待；到期关闭，不自动续期，完整链接不入Git。"
   - "2026-10-30 临时安装入口准备（0123）：本机4文件manifest官方签名/验签、新发布公钥及版本篡改拒绝通过；签名DTO覆盖和路由逐值/整文件摘要区分明确。Cloudflare2026.10.6官方摘要/Authenticode通过、临时HTTP2隧道连通，仅健康200/false；30项HEAD/Range/名单/路径/隔离开放标记负向通过，实际HAP/manifest公网404。浏览器预览截图F盘；待具体30分钟文件开放确认，未实机安装，不公开私有URL到Git。"
   - "2026-10-30 单设备签名候选与临时入口选择（0122）：独立Release配置沿用原密钥和编码字段，官方构建/verify-app及codesign/摘要/权限通过；HAP53297721bytes/059af006…，debug=false/tablet/API18→26/无INTERNET，Profile exact/三ELF/五字体许可/119 Dart通过。旧候选debug=true及app-identifier变化明确保留，未覆盖实体平板。用户没有，准备临时入口；尚无manifest签名或对外下载安装完成证据。官方网页指南企业限制待核对；签名工具官方链接仓库c71aa1a已固定，仅F盘，未公开个人文件。"
   - "2026-10-29 发布材料已签发并验证（0121）：用户确认上传CSR申请发布证书及创建单设备Profile；24日CER生效，29日Profile生效/指定设备发布/到期2027-04-29，控制台主账号显示已认证。CER2910字节/3证书链与原CSR公钥一致；P7B4164字节/e509314c…官方verify-profile成功，内嵌证书及完整单设备集合、公钥/包名/开发者标识匹配旧调试材料。app-identifier变化已记录，尚无签名HAP或覆盖证据；材料/完整SDK结果仅F盘，未导出私钥或公开个人包。"
@@ -146,8 +147,8 @@ unfinished:
     gate: Android-A0
 next_actions:
   - id: NEXT-HARMONYOS-SELF-USE-SIGNING
-    action: "接0123：4文件本机入口签名和30项HTTP检查已完成，实际临时域名与随机路径仅F盘私有运行记录；公网只有健康检查。展示截图/实际链接及4文件/30分钟范围，取得用户具体共享确认后，核对存活状态并以当前run_id/origin/HAP/全文件摘要生成真实开放标记，再验外部TLS HEAD/Range。若进程或域名失效则重建并重签manifest，不沿用旧域名描述。核对企业资格和实机华为浏览器安装，保留旧Debug/app-identifier差异不卸载试错；不重问证书/Profile授权，不公开密钥/密码或更改GitHub。"
-    inputs: ["client/flutter_app/harmonyos/INSTALL.zh-CN.md", "client/flutter_app/build/harmonyos-h0/self-use/20261030/server-readiness.json", "client/flutter_app/build/harmonyos-h0/self-use/20261030/tunnel-readiness.json", "client/flutter_app/build/harmonyos-h0/self-use/20261030/install-bundle-readiness.json", "progress/0123__20261030__P01__DONE__harmonyos-temporary-installer-prepared-and-gated.md"]
+    action: "接0124：人类已确认的同一链接4文件实际开放03:31:50→04:01:50，外部7项检查通过；交付用户在登记平板华为浏览器点击并按真实提示定位。先读当前时间/服务状态，过期不自动续期或重建域名公开；新授权才另开窗口。核对企业资格、旧Debug/新Release和app-identifier差异，保留旧应用/资料不卸载试错；不重问已完成证书/Profile授权，不共享私钥密码，不更改GitHub。"
+    inputs: ["client/flutter_app/harmonyos/INSTALL.zh-CN.md", "client/flutter_app/build/harmonyos-h0/self-use/20261030/publication-readiness.json", "client/flutter_app/build/harmonyos-h0/self-use/20261030/server-readiness.json", "progress/0124__20261030__P01__DONE__harmonyos-temporary-download-opened-with-consent.md"]
   - id: NEXT-THEME-ARTWORK-DEVICE
     action: "0118本机候选和安装说明就绪，公开GitHub仍旧v1.2.5。保持原资料，用同发行签名Android候选覆盖；鸿蒙需有效设备Profile/原应用签名后覆盖，不能直接点装未签名HAP。核对侘寂英文斜体/中文标题与品牌、玻璃运动和折射边缘，以及DPR/旋转/后台/持续帧率功耗；本轮HDC目标0，宿主图不能代替真实平板验收。新版本或正式分发按用户后续范围处理。"
     inputs: ["client/flutter_app/build/qa/theme-artwork/candidate-manifest.json", "client/flutter_app/build/qa/theme-artwork/Innocence-artwork-android-offline.apk", "client/flutter_app/build/qa/theme-artwork/Innocence-artwork-harmonyos-arm64-release-unsigned.hap", "client/flutter_app/harmonyos/INSTALL.zh-CN.md", "progress/0118__20261024__P01__CORRECTION__bundled-display-fonts-and-smooth-glass.md"]
@@ -246,6 +247,7 @@ history:
   checkpoint_0121: progress/0121__20261029__P01__DONE__harmonyos-release-certificate-and-device-profile.md
   checkpoint_0122: progress/0122__20261030__P01__DONE__harmonyos-self-use-signed-hap-and-temporary-entry-plan.md
   checkpoint_0123: progress/0123__20261030__P01__DONE__harmonyos-temporary-installer-prepared-and-gated.md
+  checkpoint_0124: progress/0124__20261030__P01__DONE__harmonyos-temporary-download-opened-with-consent.md
 latest_android_run:
   requested_action: "专注的布局不太合理，你修改一下（附Android首页截图）"
   avd: Innocence_API36_Pixel7

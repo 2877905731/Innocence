@@ -874,3 +874,10 @@ checkpoints:
     status: complete
     path: progress/0123__20261030__P01__DONE__harmonyos-temporary-installer-prepared-and-gated.md
     title: "自用网页描述签名、临时HTTPS健康入口与受控下载准备"
+  - sequence: "0124"
+    created_at: "2026-10-30T03:34:50+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0124__20261030__P01__DONE__harmonyos-temporary-download-opened-with-consent.md
+    title: "用户确认后临时自用入口开放30分钟与外部下载校验"
