@@ -3,14 +3,15 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-30"
-last_resumed_at: "2026-10-30T02:29:34+08:00"
-latest_checkpoint: "0122"
-next_sequence: "0123"
+last_resumed_at: "2026-10-30T02:52:50+08:00"
+latest_checkpoint: "0123"
+next_sequence: "0124"
 current_phase: P01
 current_gate: G01
-state: "harmonyos_self_use_signed_hap_verified_temporary_web_entry_preparing"
-current_goal: "0122原密钥/CER/单设备Profile已用于独立app-release签名构建；ARM64 Release/AOT 1.2.5+10 HAP53297721bytes/SHA059af006…，Hvigor167.3秒/包装222.4秒。官方HAP/代码/摘要/权限验签、CRC、Profile精确字节、三ARM64 ELF、五字体许可及119 Dart一致性通过，无INTERNET，仓库签名配置仍空。旧0111候选debug=true/本次false，app-identifier不同；未观察或改动实体设备资料。用户30日选择没有现成HTTPS、准备临时入口，只授权准备，安装文件未对外开放。继续本机manifest签名、同域HTTPS/HEAD/Range/点击Deeplink与实际安装；官方指南企业资格限制和账号类型待核对，不能由已签发Profile保证网页可装。个人材料仅F盘，不上传私钥/密码，不改GitHub，G01开放。"
+state: "harmonyos_temporary_installer_prepared_files_gated_pending_specific_publish_confirmation"
+current_goal: "0123同域4文件安装页/manifest签名已就绪；官方工具验签、新CER公钥及版本篡改拒绝通过，工具不签路由字段的边界明确，整文件摘要锁定。官方便携Cloudflare临时隧道已注册，只转发受控回环端口；30项HEAD/Range/负向门禁及外部TLS健康200通过，公网HAP/manifest404，真实开放标记缺失。用户仅同意准备，展示实际链接/4文件/30分钟范围后才开放。签名HAP沿0122 SHA059af006…/53297721bytes/1.2.5+10；旧Debug及app-identifier差异、企业资格/账号类型及实际网页安装仍待，保资料不卸载。私有链接/设备材料/工具仅F盘忽略目录，不上传密钥密码、不改GitHub；真实覆盖/视觉/权益及G01仍待。"
 current_baseline:
+  - "2026-10-30 临时安装入口准备（0123）：本机4文件manifest官方签名/验签、新发布公钥及版本篡改拒绝通过；签名DTO覆盖和路由逐值/整文件摘要区分明确。Cloudflare2026.10.6官方摘要/Authenticode通过、临时HTTP2隧道连通，仅健康200/false；30项HEAD/Range/名单/路径/隔离开放标记负向通过，实际HAP/manifest公网404。浏览器预览截图F盘；待具体30分钟文件开放确认，未实机安装，不公开私有URL到Git。"
   - "2026-10-30 单设备签名候选与临时入口选择（0122）：独立Release配置沿用原密钥和编码字段，官方构建/verify-app及codesign/摘要/权限通过；HAP53297721bytes/059af006…，debug=false/tablet/API18→26/无INTERNET，Profile exact/三ELF/五字体许可/119 Dart通过。旧候选debug=true及app-identifier变化明确保留，未覆盖实体平板。用户没有，准备临时入口；尚无manifest签名或对外下载安装完成证据。官方网页指南企业限制待核对；签名工具官方链接仓库c71aa1a已固定，仅F盘，未公开个人文件。"
   - "2026-10-29 发布材料已签发并验证（0121）：用户确认上传CSR申请发布证书及创建单设备Profile；24日CER生效，29日Profile生效/指定设备发布/到期2027-04-29，控制台主账号显示已认证。CER2910字节/3证书链与原CSR公钥一致；P7B4164字节/e509314c…官方verify-profile成功，内嵌证书及完整单设备集合、公钥/包名/开发者标识匹配旧调试材料。app-identifier变化已记录，尚无签名HAP或覆盖证据；材料/完整SDK结果仅F盘，未导出私钥或公开个人包。"
   - "2026-10-24 应用登记与证书草稿（0120）：用户内置浏览器中已创建同包名平板APP ID；指定设备发布可选，未提交Profile。已有CSR510字节签名验证/公钥与旧证书链匹配，通过后复用公开请求文件，未导出私钥。发布证书名称/类型已填，等具体上传与签发确认；没有提交实名、签发证书或产出可点装包。应用结果/证书草稿截图及CSR元数据只在F盘build忽略目录，未公开个人签名材料。"
@@ -145,8 +146,8 @@ unfinished:
     gate: Android-A0
 next_actions:
   - id: NEXT-HARMONYOS-SELF-USE-SIGNING
-    action: "接0122：签名HAP及离线/源码/字体验签证据已完整；用户已选准备临时HTTPS入口，尚未授权对外提供个人包。依华为当前Deeplink规范与官方链接的本地manifest工具，完成签名描述/安装页及同域HEAD/Range校验；原密钥/密码仅本机签名，不上传第三方，不记录明文。临时入口先仅健康页或本机预览，展示实际文件/链接/期限后再收集对外共享确认。核对官方企业账号限制与真实安装；旧Debug/新Release和app-identifier差异需保资料处理，不卸载试错。证书/Profile申请及签名构建不重问，不改GitHub公开资产。"
-    inputs: ["client/flutter_app/harmonyos/INSTALL.zh-CN.md", "client/flutter_app/build/harmonyos-h0/self-use/20261029/signed-hap-readiness.json", "client/flutter_app/build/harmonyos-h0/tools/internal-testing-c71aa1a/README.md", "progress/0122__20261030__P01__DONE__harmonyos-self-use-signed-hap-and-temporary-entry-plan.md"]
+    action: "接0123：4文件本机入口签名和30项HTTP检查已完成，实际临时域名与随机路径仅F盘私有运行记录；公网只有健康检查。展示截图/实际链接及4文件/30分钟范围，取得用户具体共享确认后，核对存活状态并以当前run_id/origin/HAP/全文件摘要生成真实开放标记，再验外部TLS HEAD/Range。若进程或域名失效则重建并重签manifest，不沿用旧域名描述。核对企业资格和实机华为浏览器安装，保留旧Debug/app-identifier差异不卸载试错；不重问证书/Profile授权，不公开密钥/密码或更改GitHub。"
+    inputs: ["client/flutter_app/harmonyos/INSTALL.zh-CN.md", "client/flutter_app/build/harmonyos-h0/self-use/20261030/server-readiness.json", "client/flutter_app/build/harmonyos-h0/self-use/20261030/tunnel-readiness.json", "client/flutter_app/build/harmonyos-h0/self-use/20261030/install-bundle-readiness.json", "progress/0123__20261030__P01__DONE__harmonyos-temporary-installer-prepared-and-gated.md"]
   - id: NEXT-THEME-ARTWORK-DEVICE
     action: "0118本机候选和安装说明就绪，公开GitHub仍旧v1.2.5。保持原资料，用同发行签名Android候选覆盖；鸿蒙需有效设备Profile/原应用签名后覆盖，不能直接点装未签名HAP。核对侘寂英文斜体/中文标题与品牌、玻璃运动和折射边缘，以及DPR/旋转/后台/持续帧率功耗；本轮HDC目标0，宿主图不能代替真实平板验收。新版本或正式分发按用户后续范围处理。"
     inputs: ["client/flutter_app/build/qa/theme-artwork/candidate-manifest.json", "client/flutter_app/build/qa/theme-artwork/Innocence-artwork-android-offline.apk", "client/flutter_app/build/qa/theme-artwork/Innocence-artwork-harmonyos-arm64-release-unsigned.hap", "client/flutter_app/harmonyos/INSTALL.zh-CN.md", "progress/0118__20261024__P01__CORRECTION__bundled-display-fonts-and-smooth-glass.md"]
@@ -244,6 +245,7 @@ history:
   checkpoint_0120: progress/0120__20261024__P01__DONE__harmonyos-app-id-and-release-certificate-draft.md
   checkpoint_0121: progress/0121__20261029__P01__DONE__harmonyos-release-certificate-and-device-profile.md
   checkpoint_0122: progress/0122__20261030__P01__DONE__harmonyos-self-use-signed-hap-and-temporary-entry-plan.md
+  checkpoint_0123: progress/0123__20261030__P01__DONE__harmonyos-temporary-installer-prepared-and-gated.md
 latest_android_run:
   requested_action: "专注的布局不太合理，你修改一下（附Android首页截图）"
   avd: Innocence_API36_Pixel7

@@ -867,3 +867,10 @@ checkpoints:
     status: complete
     path: progress/0122__20261030__P01__DONE__harmonyos-self-use-signed-hap-and-temporary-entry-plan.md
     title: "单设备Release签名HAP验签、离线资源核对与临时入口选择"
+  - sequence: "0123"
+    created_at: "2026-10-30T02:52:50+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0123__20261030__P01__DONE__harmonyos-temporary-installer-prepared-and-gated.md
+    title: "自用网页描述签名、临时HTTPS健康入口与受控下载准备"

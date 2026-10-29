@@ -50,7 +50,17 @@ SHA256：059af0066d95618d3c6cdf633c69555dccf4edf114b224771ce6b431078e93a1
 
 保留兼容性门禁：本机 0111 旧候选为 `debug=true`，本次为 `false`，且前述 `app-identifier` 不同。未连接观察当前安装状态，也未覆盖或卸载真实平板应用；资料保留和实际安装不可记为通过。
 
-用户在 2026-10-30 选择“没有，准备临时入口”。当前仅授权准备临时 HTTPS 入口，尚未对外开放含设备 Profile 的安装包。按[华为 Deeplink 分发规范](https://developer.huawei.com/consumer/cn/doc/doccenter-submission/agc-help-internal-test-release-app-0000002260691994)，还需同域名的 HTTPS 包／图标／签名描述文件、HEAD 文件大小、Range 分片响应，以及华为浏览器中的用户点击入口。描述签名工具已按官方链接定位并固定到 `c71aa1afd261b8921a2062e478ba86641c0e646c`，尚未生成可用公网入口。
+用户在 2026-10-30 选择“没有，准备临时入口”。当前仅授权准备临时 HTTPS 入口，尚未对外开放含设备 Profile 的安装包。按[华为 Deeplink 分发规范](https://developer.huawei.com/consumer/cn/doc/doccenter-submission/agc-help-internal-test-release-app-0000002260691994)，已准备同域名的 HTTPS 包／图标／签名描述文件、HEAD 文件大小、Range 分片响应，以及华为浏览器中的用户点击入口；实际开放与实体安装继续分别验证。
+
+### 临时网页入口准备完成（2026-10-30，0123）
+
+固定官方链接仓库 `c71aa1afd261b8921a2062e478ba86641c0e646c` 中的 manifest 工具 1.0.0，在本机使用原密钥签名，官方验签和新发布证书公钥交叉验证通过；修改版本号后的描述文件被拒绝。工具按其类型 DTO 签名，覆盖应用／版本／模块摘要等字段，不覆盖 `deployDomain`、图标 URL 和 `packageUrl`；这些路由字段已逐值检查，下载服务另按整份文件 SHA256 固定，不能把它描述为所有字段都受工具签名保护。
+
+安装页、`manifest.json5`、图标和 53297721 字节 HAP 共 4 个文件均在 F 盘忽略目录。便携 Cloudflare Quick Tunnel 2026.10.6 已核对官方资产 SHA256 和有效 Authenticode，未安装服务或更改防火墙；当前隧道只转发需要明确开放标记的本机端口。公网 `/health` 返回可达且 `files_published=false`，真实安装文件仍为 404。本机预览可显示安装页，未在电脑点击安装 Deeplink。
+
+30 项 HTTP／访问检查通过：HEAD 精确长度且无正文、前缀和后缀 Range 206／字节一致、非法范围 416、目录／非名单文件／路径穿越 404、POST 405，以及未确认公网关闭。另一个仅回环地址的隔离夹具验证了有效标记、过期／超 30 分钟／旧运行 ID／来源及摘要不匹配拒绝、描述文件改动拒绝；隔离标记没有开放真实公网服务。
+
+用户确认具体链接和范围后才生成真实开放标记，最长 30 分钟，届时仍需核对外部 HTTPS 的 HEAD／Range 和华为浏览器安装。链接持有者可下载包含设备 Profile 和证书信息的 HAP，只有登记设备能按该 Profile 安装；私钥、密码和独立 Profile 文件不进入下载白名单。完整临时域名和随机路径只留私有运行记录与用户交付，不提交仓库。电脑在线、进程存活和临时地址有效均是必要条件，不能当成永久下载空间。[Cloudflare Quick Tunnel 文档](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/)
 
 另需保留资格边界：[官方测试流程](https://developer.huawei.com/consumer/cn/doc/doccenter-submission/agc-help-internal-test-guide-0000002295325149)当前注明指定设备发布仅支持企业开发者。当前账号已实际取得 Profile，但账号类型未读取、网页实机安装未验证；不由签发成功推断完整网页分发资格。任何临时对外共享均须先展示实际链接、文件和有效范围，再按用户具体确认开放；私钥与密码只在本机使用。
 
