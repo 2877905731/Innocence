@@ -853,3 +853,10 @@ checkpoints:
     status: complete
     path: progress/0120__20261024__P01__DONE__harmonyos-app-id-and-release-certificate-draft.md
     title: "鸿蒙同包名APP ID创建、指定设备选项核对与发布证书草稿"
+  - sequence: "0121"
+    created_at: "2026-10-29T15:36:28+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0121__20261029__P01__DONE__harmonyos-release-certificate-and-device-profile.md
+    title: "个人发布证书、单设备指定发布Profile签发与官方验证"

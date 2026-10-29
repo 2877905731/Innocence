@@ -2,15 +2,16 @@
 schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
-updated_at: "2026-10-24"
-last_resumed_at: "2026-10-24T22:17:05+08:00"
-latest_checkpoint: "0120"
-next_sequence: "0121"
+updated_at: "2026-10-29"
+last_resumed_at: "2026-10-29T15:36:28+08:00"
+latest_checkpoint: "0121"
+next_sequence: "0122"
 current_phase: P01
 current_gate: G01
-state: "harmonyos_app_id_created_release_certificate_draft_pending_confirmation"
-current_goal: "0120用户准备控制台并要求继续；已创建Innocence APP ID6917619921714239020，包名com.innocence.tablet.innocence_flutter/平板/简体中文/项目Innocence，状态准备提交。Profile表单可选指定设备发布但未签发；唯一旧调试证书已过期。发布证书草稿Innocence-self-use-release已填，510字节旧CSR自签名/公钥匹配核验通过，仅F盘，尚未上传或签发；已具体请求上传CSR到华为及申请发布证书的当次确认。实名结果未读取，不能由创建成功推断；签名配置/覆盖身份/Profile/网页HAP与描述/HTTPS和实际安装仍待。0118候选及231全量/13鸿蒙宿主证据保持，无新构建、设备安装或GitHub变更，G01未封板。"
+state: "harmonyos_release_certificate_and_single_device_profile_verified"
+current_goal: "0121两次具体确认均已执行：原CSR上传华为后签发Innocence-self-use-release发布证书，2029-10-24到期；2026-10-29创建Innocence-self-use-tablet-release指定设备发布Profile，2027-04-29到期，指纹自动关联应用。用户手动下载CER/P7B均已按字节复制F盘私有目录，官方verify-profile成功/verifiedPassed=true；4164字节Profile完整设备集与旧Profile精确匹配1台，公钥/内嵌证书/包名/开发者标识通过。app-identifier与旧调试Profile不同，新值为已登记APP ID；Debug至Release覆盖/资料保留尚未验证，不改Profile或卸载。继续本机签名构建/验签、签名安装描述与HTTPS及真实安装；未申请TIMER/代理权益、未部署或改GitHub，G01开放。"
 current_baseline:
+  - "2026-10-29 发布材料已签发并验证（0121）：用户确认上传CSR申请发布证书及创建单设备Profile；24日CER生效，29日Profile生效/指定设备发布/到期2027-04-29，控制台主账号显示已认证。CER2910字节/3证书链与原CSR公钥一致；P7B4164字节/e509314c…官方verify-profile成功，内嵌证书及完整单设备集合、公钥/包名/开发者标识匹配旧调试材料。app-identifier变化已记录，尚无签名HAP或覆盖证据；材料/完整SDK结果仅F盘，未导出私钥或公开个人包。"
   - "2026-10-24 应用登记与证书草稿（0120）：用户内置浏览器中已创建同包名平板APP ID；指定设备发布可选，未提交Profile。已有CSR510字节签名验证/公钥与旧证书链匹配，通过后复用公开请求文件，未导出私钥。发布证书名称/类型已填，等具体上传与签发确认；没有提交实名、签发证书或产出可点装包。应用结果/证书草稿截图及CSR元数据只在F盘build忽略目录，未公开个人签名材料。"
   - "2026-10-24 个人自用范围与账号待实名（0119）：原文我想只给自己用/已注册，实名认证还没完成。目标为本人平板链接安装与后续更新，不公开个人签名材料。现有Debug Profile已过期，Release无Profile；未读取输出设备标识/密码/私钥。安装文档补本人实名→资格核对→有效发布Profile/签名HAP/签名描述/HTTPS入口→保资料覆盖验证。仅决策及准备，不计网页安装制作完成。"
   - "0118收尾普通资源规则：assets/fonts/.gitattributes仅对两份第三方OFL原件关闭换行归一化和空白审查，保留上游字节及原有行尾空格；字体许可原件不作格式清理。Git提交与RESUME记录，旧检查点保持不可变。"
@@ -99,7 +100,7 @@ active_decisions:
 unfinished:
   - id: TODO-HARMONYOS-TABLET
     priority: P1
-    item: "0109 GitHub分发/0107设备签名及0111 Debug覆盖和用户竖屏确认保留；0120已建同包名APP ID，发布证书草稿/CSR就绪待具体确认，指定设备发布Profile未签发，实名结果未读取。TIMER1003500005与代理1700002权益仍待独立开通及新Profile；继续真实ARM64 Release覆盖/完整输入触控四主题性能、旧模拟器IME2/玻璃编辑、HUKS/槽位/联网及H5/G01。Profile/HAP仅F盘，不把应用登记当成权益或网页安装完成。"
+    item: "0109 GitHub分发/0107设备签名及0111 Debug覆盖和竖屏确认保留；0121已签发并官方验证个人发布证书/单设备指定发布Profile，仅F盘。新旧公钥/设备/包名一致，app-identifier变化与Debug至Release覆盖门禁仍待；TIMER1003500005与代理1700002权益尚未独立开通。继续本机签名包/网页入口及真实ARM64 Release覆盖/完整输入触控四主题性能、IME2/玻璃编辑、HUKS/槽位/联网及H5/G01。"
     gate: HarmonyOS-H0-H5
   - id: TODO-AI-CHAT-LIVE-VERIFICATION
     priority: P1
@@ -143,8 +144,8 @@ unfinished:
     gate: Android-A0
 next_actions:
   - id: NEXT-HARMONYOS-SELF-USE-SIGNING
-    action: "接0120：APP ID已创建，证书页草稿Innocence-self-use-release/发布证书已填；等待对将510字节CSR上传华为开发者中心并申请发布证书的具体当次确认。确认后按浏览器文件上传文档提交，仅传CSR，不上传私钥；核对平台接受/证书下载和本机私钥可用性。再为同包名应用申请仅含本人平板的指定设备发布Profile，核对实际资格和实名结果；若需实名由用户本人操作。保留旧版资料核对签名身份/覆盖兼容，再准备Release HAP/签名描述/HTTPS入口与实际安装，不能仅凭公钥相同保证覆盖。个人签名/Profile仅F盘，不公开GitHub；遇到协议、设备标识传输等按当次具体范围处理。"
-    inputs: ["client/flutter_app/harmonyos/INSTALL.zh-CN.md", "client/flutter_app/build/harmonyos-h0/self-use/20261024/csr-readiness.json", "client/flutter_app/build/qa/harmony-self-use/release-certificate-draft.jpg", "progress/0120__20261024__P01__DONE__harmonyos-app-id-and-release-certificate-draft.md"]
+    action: "接0121：发布证书与单设备Profile已签发/本机验证，两项具体授权已执行，无需重问。使用F盘24日CER和29日P7B、原密钥，在独立app-release暂存工程配置并签名构建；不输出密码或把编码密码当CLI明文，不导出私钥。官方HAP验签/CRC/源码和字体一致性后，再制作签名安装描述/HTTPS入口。app-identifier已变化且Debug/Release状态可能限制覆盖；未验证不承诺资料迁移，不以卸载试错。个人Profile/HAP仅F盘，不公开GitHub；远端上传或部署按具体资产及目的地授权。"
+    inputs: ["client/flutter_app/harmonyos/INSTALL.zh-CN.md", "client/flutter_app/build/harmonyos-h0/self-use/20261029/profile-readiness.json", "client/flutter_app/build/harmonyos-h0/self-use/20261024/release-certificate-readiness.json", "progress/0121__20261029__P01__DONE__harmonyos-release-certificate-and-device-profile.md"]
   - id: NEXT-THEME-ARTWORK-DEVICE
     action: "0118本机候选和安装说明就绪，公开GitHub仍旧v1.2.5。保持原资料，用同发行签名Android候选覆盖；鸿蒙需有效设备Profile/原应用签名后覆盖，不能直接点装未签名HAP。核对侘寂英文斜体/中文标题与品牌、玻璃运动和折射边缘，以及DPR/旋转/后台/持续帧率功耗；本轮HDC目标0，宿主图不能代替真实平板验收。新版本或正式分发按用户后续范围处理。"
     inputs: ["client/flutter_app/build/qa/theme-artwork/candidate-manifest.json", "client/flutter_app/build/qa/theme-artwork/Innocence-artwork-android-offline.apk", "client/flutter_app/build/qa/theme-artwork/Innocence-artwork-harmonyos-arm64-release-unsigned.hap", "client/flutter_app/harmonyos/INSTALL.zh-CN.md", "progress/0118__20261024__P01__CORRECTION__bundled-display-fonts-and-smooth-glass.md"]
@@ -240,6 +241,7 @@ history:
   checkpoint_0110: progress/0110__20261011__P01__DONE__portrait-and-focus-system-notices.md
   checkpoint_0111: progress/0111__20261012__P01__DONE__focus-runtime-and-harmony-rights.md
   checkpoint_0120: progress/0120__20261024__P01__DONE__harmonyos-app-id-and-release-certificate-draft.md
+  checkpoint_0121: progress/0121__20261029__P01__DONE__harmonyos-release-certificate-and-device-profile.md
 latest_android_run:
   requested_action: "专注的布局不太合理，你修改一下（附Android首页截图）"
   avd: Innocence_API36_Pixel7
