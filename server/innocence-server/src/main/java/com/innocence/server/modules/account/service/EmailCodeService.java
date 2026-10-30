@@ -8,6 +8,7 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -26,18 +27,23 @@ public class EmailCodeService {
     private final JavaMailSender javaMailSender;
     private final SecureRandom secureRandom = new SecureRandom();
     private final String fromAddress;
+    private final RegistrationPolicyService registrationPolicy;
 
     public EmailCodeService(
             StringRedisTemplate stringRedisTemplate,
             JavaMailSender javaMailSender,
-            @Value("${spring.mail.username}") String fromAddress
+            @Value("${spring.mail.username}") String fromAddress,
+            RegistrationPolicyService registrationPolicy
     ) {
         this.stringRedisTemplate = stringRedisTemplate;
         this.javaMailSender = javaMailSender;
         this.fromAddress = fromAddress;
+        this.registrationPolicy = registrationPolicy;
     }
 
+    @Transactional(readOnly = true)
     public Map<String, Object> sendRegisterCode(String email) {
+        registrationPolicy.requireEnabled();
         return sendCode(email, "register", "Innocence 注册验证码");
     }
 

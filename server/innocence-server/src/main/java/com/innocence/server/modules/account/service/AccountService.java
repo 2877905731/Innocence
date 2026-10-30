@@ -40,21 +40,25 @@ public class AccountService {
     private final EmailCodeService emailCodeService;
     private final CheckInService checkInService;
     private final FriendMapper friendMapper;
+    private final RegistrationPolicyService registrationPolicy;
 
     public AccountService(
             UserMapper userMapper,
             EmailCodeService emailCodeService,
             CheckInService checkInService,
-            FriendMapper friendMapper
+            FriendMapper friendMapper,
+            RegistrationPolicyService registrationPolicy
     ) {
         this.userMapper = userMapper;
         this.emailCodeService = emailCodeService;
         this.checkInService = checkInService;
         this.friendMapper = friendMapper;
+        this.registrationPolicy = registrationPolicy;
     }
 
     @Transactional
     public AuthTokenResponse registerByEmail(EmailRegisterRequest request) {
+        registrationPolicy.requireEnabled();
         UserAuth existing = userMapper.findAuthByEmail(request.getEmail());
         if (existing != null) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "该邮箱已注册");

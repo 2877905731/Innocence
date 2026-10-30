@@ -2,14 +2,14 @@
 schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
-updated_at: "2026-10-30"
-last_resumed_at: "2026-10-30T23:56:13+08:00"
-latest_checkpoint: "0134"
-next_sequence: "0135"
+updated_at: "2026-10-31"
+last_resumed_at: "2026-10-31T00:41:50+08:00"
+latest_checkpoint: "0135"
+next_sequence: "0136"
 current_phase: P01
 current_gate: G01
-state: "three_platform_online_v130_github_published"
-current_goal: "0134：v1.3.0 Windows/Android及v1.3.0-harmonyos.1已公开，Release#429211948/429217039；七资产远端SHA/正文及匿名200长度通过，latest=v1.3.0；源码5fabdb2及双标签精确同步。生产IP HTTPS、三类独立会话/PBKDF2已生效，备份隔离恢复与续期演练通过、QA已清理。鸿蒙原生HUKS/TLS子集及个人平板签名Release安装启动/PC画面通过，个人材料仅F盘；公开HAP未签名。完整实体业务/旧资料恢复/性能、真实模型与长期容量/G01仍待，交付链接后按用户实际反馈推进。"
+state: "admin_registration_delete_and_team_fix_in_progress"
+current_goal: "0135：用户要求后台注册开关/删除用户及团队异常修复。MySQL1052字段歧义已定位并修正两处查询；93后端回归与网页生产构建通过。独立MySQL/Redis实际HTTP已验证注册两入口拦截/旧验证码/重启持久化/重新开放、团队创建加入与统计、管理员保护、删除事务回滚/关联清理/他人个人资料保留/令牌撤销；无界面Chrome页面确认/取消和390窄屏通过。隧道自动重连辅助已启用，18090断开恢复验证后清理。待私有备份并部署生产，不自动删除真实用户；现行三端客户端无需重建。"
 server_deployment_consultation:
   updated_at: "2026-10-30T22:04:00+08:00"
   user_scope: "用户将现有管理后台和后端部署至已有香港服务器，有公网IPv4/无域名；原截图Debian13.7/x86_64/SSH22/无swap及Docker29.9.2/Compose5.6.1/Nginx1.26.3。0130明确授权直接SSH，0131专用密钥认证及本人只读检查成功，用户不再需要手工复制一般状态命令。"

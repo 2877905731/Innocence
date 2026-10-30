@@ -32,11 +32,15 @@ public class AdminAccessService {
         if (userId == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "Administrator login is required.");
         }
-        UserAuth userAuth = userMapper.findAuthByUserId(userId);
-        String email = userAuth == null ? "" : defaultText(userAuth.getAuthAccount()).toLowerCase(Locale.ROOT);
-        if (!adminEmails.contains(email)) {
+        if (!isAdminAccount(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN, "You do not have administrator permission.");
         }
+    }
+
+    public boolean isAdminAccount(Long userId) {
+        UserAuth userAuth = userId == null ? null : userMapper.findAuthByUserId(userId);
+        String email = userAuth == null ? "" : defaultText(userAuth.getAuthAccount()).toLowerCase(Locale.ROOT);
+        return adminEmails.contains(email);
     }
 
     private String defaultText(String value) {

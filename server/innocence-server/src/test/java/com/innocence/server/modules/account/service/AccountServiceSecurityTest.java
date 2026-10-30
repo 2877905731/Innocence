@@ -30,7 +30,8 @@ class AccountServiceSecurityTest {
                 userMapper,
                 mock(EmailCodeService.class),
                 mock(CheckInService.class),
-                mock(FriendMapper.class)
+                mock(FriendMapper.class),
+                mock(RegistrationPolicyService.class)
         );
     }
 

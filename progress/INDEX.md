@@ -951,3 +951,10 @@ checkpoints:
     status: complete
     path: progress/0134__20261030__P01__DONE__three-platform-online-v130-github-published.md
     title: "三端联网1.3.0正式公开，七资产远端摘要和匿名下载通过"
+  - sequence: "0135"
+    created_at: "2026-10-31T00:12:00+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0135__20261031__P01__DECISION__admin-registration-user-deletion-and-team-error.md
+    title: "后台注册控制与删除用户需求，团队MySQL字段歧义已定位"

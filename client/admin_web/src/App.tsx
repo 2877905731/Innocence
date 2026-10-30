@@ -1,8 +1,8 @@
 import { useEffect, useState, type DependencyList, type FormEvent, type ReactNode } from 'react'
 import { Bell, BookOpenText, ChevronRight, CircleHelp, ClipboardList, DoorOpen, LayoutDashboard, LoaderCircle, Menu, RefreshCw, Search, ShieldCheck, Users, UsersRound, X } from 'lucide-react'
-import { api, type Announcement, type Overview, type Punishment, type Report, type ReportDetail, type Session, type Team, type TeamDetail, type User, type UserDetail } from './api'
+import { api, type Announcement, type Overview, type Punishment, type Report, type ReportDetail, type Session, type Team, type TeamDetail, type User, type UserDetail, type RegistrationPolicy, type DeletionPreview } from './api'
 
-type Page = 'overview' | 'reports' | 'users' | 'teams' | 'announcements'
+type Page = 'overview' | 'reports' | 'users' | 'teams' | 'announcements' | 'registration'
 type Confirm = { title: string; body: string; tone?: 'danger'; action: () => Promise<unknown> }
 type Ask = (confirm: Confirm) => void
 const sessionKey = 'innocence.admin.session'
@@ -128,10 +128,16 @@ function UsersPage({ session, ask, notify }: { session: Session; ask: Ask; notif
   const profile = useResource<UserDetail | null>(() => selected ? api.user(session, selected) : Promise.resolve(null), [session, selected])
   const penalties = useResource<Punishment[]>(() => selected ? api.punishments(session, selected) : Promise.resolve([]), [session, selected])
   const reports = useResource<Report[]>(() => selected ? api.userReports(session, selected) : Promise.resolve([]), [session, selected])
+  const deletion = useResource<DeletionPreview | null>(() => selected ? api.deletionPreview(session, selected) : Promise.resolve(null), [session, selected])
   return <div className="page-flow"><div className="page-heading"><div><span className="eyebrow">PEOPLE</span><h1>用户管理</h1><p>查找账号、查看关联举报与处罚记录。</p></div><Refresh onClick={list.refresh} /></div>
     <form className="search-bar" onSubmit={event => { event.preventDefault(); setKeyword(draft.trim()) }}><Search size={18} /><input value={draft} onChange={event => setDraft(event.target.value)} placeholder="搜索用户编号、昵称或邮箱" aria-label="搜索用户" /><button className="secondary-button">搜索</button></form>
     <div className="split-layout"><section className="surface list-surface"><PanelTitle title="用户列表" description="显示最近 100 条匹配结果" /><State loading={list.loading} error={list.error} retry={list.refresh} />{list.value && (list.value.length ? <div className="item-list">{list.value.map(item => <button key={item.userId} className={`list-item ${selected === item.userId ? 'active' : ''}`} onClick={() => setSelected(item.userId)}><div className="list-item-top"><strong>{item.displayName || item.userNo}</strong><Badge value={item.statusLabel || item.statusCode} /></div><div className="item-meta">{item.userNo} {item.teamName && `· ${item.teamName}`}</div><small>最近登录：{item.lastLoginTime || '暂无记录'}</small></button>)}</div> : <Empty>没有找到匹配的用户</Empty>)}</section>
     <section className="surface detail-surface"><PanelTitle title="用户档案" />{selected ? <><State loading={profile.loading} error={profile.error} retry={profile.refresh} />{profile.value && <><div className="detail-head"><strong>{profile.value.displayName || profile.value.userNo}</strong><Badge value={profile.value.statusLabel || profile.value.statusCode} /></div><dl className="detail-grid"><div><dt>用户编号</dt><dd>{profile.value.userNo}</dd></div><div><dt>邮箱</dt><dd className="wrap">{profile.value.email}</dd></div><div><dt>团队</dt><dd>{profile.value.teamName || '未加入'}</dd></div><div><dt>总学习时长</dt><dd>{profile.value.totalStudyMinutes} 分钟</dd></div><div><dt>累计签到</dt><dd>{profile.value.totalCheckInDays} 天</dd></div><div><dt>最近登录</dt><dd>{profile.value.lastLoginTime || '—'}</dd></div></dl><div className="detail-block"><span className="detail-label">个人简介</span><p>{profile.value.bio || '暂无简介'}</p></div></>}
+      <div className="account-delete-zone"><div><h3>删除用户</h3><p>删除该账号及其服务器业务资料，所有已登录设备的会话将失效。</p></div><State loading={deletion.loading} error={deletion.error} retry={deletion.refresh} />{deletion.value && !deletion.value.deletable && <p className="muted">{deletion.value.reason}</p>}<button className="danger-button" disabled={deletion.loading || !deletion.value?.deletable || !profile.value} onClick={() => {
+        const userId = selected; const target = profile.value; const impact = deletion.value
+        if (!userId || !target || !impact?.deletable) return
+        ask({ title: '永久删除这位用户？', body: `将删除「${target.displayName || target.userNo}」（${target.userNo}）的账号、服务器资料和会话。${impact.ownedTeamCount > 0 ? `该账号拥有 ${impact.ownedTeamCount} 个团队，也将一并解散，其余成员的个人资料保留。` : ''}请确认所选账号。`, tone: 'danger', action: async () => { await api.deleteUser(session, userId); setSelected(null); notify('用户及关联资料已删除'); list.refresh() } })
+      }}>删除用户</button></div>
       <div className="subsection"><h3>处罚记录</h3><State loading={penalties.loading} error={penalties.error} retry={penalties.refresh} />{penalties.value && (penalties.value.length ? penalties.value.map(item => <div className="record-row" key={item.punishmentId}><div><Badge value={item.punishmentType} /> <Badge value={item.status} /><p>{item.reason || '无备注'}</p><small>{item.startTime} {item.endTime && `— ${item.endTime}`}</small></div>{item.liftable && <button className="secondary-button small" onClick={() => ask({ title: '解除这项处罚？', body: `将解除用户 ${selected} 的 ${item.punishmentType} 处罚。`, action: async () => { await api.lift(session, selected, item.punishmentId); notify('处罚已解除'); penalties.refresh(); profile.refresh() } })}>解除</button>}</div>) : <Empty>暂无处罚记录</Empty>)}</div>
       <div className="subsection"><h3>相关举报</h3><State loading={reports.loading} error={reports.error} retry={reports.refresh} />{reports.value && (reports.value.length ? reports.value.map(item => <div className="record-row" key={item.reportId}><div><strong>#{item.reportId} · {item.reason}</strong><p>{item.description || item.contentPreview || '无说明'}</p></div><Badge value={item.status} /></div>) : <Empty>暂无相关举报</Empty>)}</div></> : <Empty>从列表中选择用户</Empty>}</section></div></div>
 }
@@ -160,12 +166,23 @@ function AnnouncementsPage({ session, ask, notify }: { session: Session; ask: As
   return <div className="page-flow"><div className="page-heading"><div><span className="eyebrow">ANNOUNCEMENTS</span><h1>系统公告</h1><p>向用户发布重要通知，查看近期发布记录。</p></div><Refresh onClick={list.refresh} /></div><div className="announcement-grid"><section className="surface"><PanelTitle title="发布公告" description="发布前请核对标题与内容" /><form className="announcement-form" onSubmit={publish}><label>公告标题<input maxLength={64} value={title} onChange={event => setTitle(event.target.value)} placeholder="输入公告标题" required /><small>{title.length} / 64</small></label><label>公告内容<textarea maxLength={255} rows={7} value={content} onChange={event => setContent(event.target.value)} placeholder="输入要发送给用户的内容" required /><small>{content.length} / 255</small></label><button className="primary-button">发布公告</button></form></section><section className="surface"><PanelTitle title="近期公告" description="最近 100 条" /><State loading={list.loading} error={list.error} retry={list.refresh} />{list.value && (list.value.length ? <div className="announcement-list">{list.value.map(item => <div className="announcement-item" key={item.announcementId}><div className="announcement-head"><strong>{item.title}</strong><DateText value={item.createTime} /></div><p>{item.content}</p><div className="announcement-bottom"><span>已发送给 {item.recipientCount} 位用户</span><button className="text-button danger-text" onClick={() => ask({ title: '删除这条公告？', body: `将删除「${item.title}」及其通知记录。`, tone: 'danger', action: async () => { await api.deleteAnnouncement(session, item.announcementId); notify('公告已删除'); list.refresh() } })}>删除</button></div></div>)}</div> : <Empty>暂无已发布公告</Empty>)}</section></div></div>
 }
 
+function RegistrationPage({ session, ask, notify }: { session: Session; ask: Ask; notify: (value: string) => void }) {
+  const policy = useResource<RegistrationPolicy>(() => api.registrationPolicy(session), [session])
+  function toggle() {
+    if (!policy.value || policy.loading) return
+    const enabled = !policy.value.enabled
+    ask({ title: enabled ? '开启新用户注册？' : '暂停接受新用户注册？', body: enabled ? '开启后，新用户可以获取验证码并完成邮箱注册。' : '关闭后，新用户将无法获取注册验证码或完成注册。已有账号可以继续登录和使用。', action: async () => { await api.setRegistrationPolicy(session, enabled); notify(enabled ? '已开启新用户注册' : '已暂停新用户注册'); policy.refresh() } })
+  }
+  return <div className="page-flow"><div className="page-heading"><div><span className="eyebrow">REGISTRATION</span><h1>注册设置</h1><p>管理新用户注册入口。</p></div><Refresh onClick={policy.refresh} /></div><section className="surface registration-panel"><PanelTitle title="接受注册" description="按当前运营需要开放或暂停新账号注册" /><State loading={policy.loading} error={policy.error} retry={policy.refresh} />{policy.value && <div className="registration-content"><div className="registration-row"><div><strong>{policy.value.enabled ? '已开启注册' : '已暂停注册'}</strong><p>{policy.value.enabled ? '新用户可以通过邮箱验证码创建账号。' : '新用户暂时无法注册，已有账号可以继续使用。'}</p></div><button className="registration-toggle" role="switch" aria-label="接受注册" aria-checked={policy.value.enabled} disabled={policy.loading} onClick={toggle}><span /></button></div><p className="muted">设置保存后立即生效，并在服务重启后保留。</p></div>}</section></div>
+}
+
 const nav: { id: Page; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'overview', label: '工作概览', icon: LayoutDashboard },
   { id: 'reports', label: '举报审核', icon: ClipboardList },
   { id: 'users', label: '用户管理', icon: Users },
   { id: 'teams', label: '团队管理', icon: UsersRound },
   { id: 'announcements', label: '系统公告', icon: Bell },
+  { id: 'registration', label: '注册设置', icon: ShieldCheck },
 ]
 function Shell({ session, onLogout }: { session: Session; onLogout: () => void }) {
   const [page, setPage] = useState<Page>('overview')
@@ -189,6 +206,7 @@ function Shell({ session, onLogout }: { session: Session; onLogout: () => void }
     users: <UsersPage session={session} ask={setConfirm} notify={notify} />,
     teams: <TeamsPage session={session} ask={setConfirm} notify={notify} />,
     announcements: <AnnouncementsPage session={session} ask={setConfirm} notify={notify} />,
+    registration: <RegistrationPage session={session} ask={setConfirm} notify={notify} />,
   }
   return <div className="admin-shell"><aside className={`sidebar ${menuOpen ? 'open' : ''}`}><div className="sidebar-brand"><div className="brand-mark">I<span>•</span></div><div><strong>INNOCENCE</strong><small>管理后台</small></div><button className="mobile-close icon-button" aria-label="关闭菜单" onClick={() => setMenuOpen(false)}><X size={20} /></button></div><div className="nav-label">工作空间</div><nav aria-label="管理导航">{nav.map(item => <button key={item.id} className={`nav-item ${page === item.id ? 'active' : ''}`} onClick={() => navigate(item.id)}><item.icon size={19} strokeWidth={1.8} /><span>{item.label}</span>{page === item.id && <span className="nav-indicator" />}</button>)}</nav><div className="sidebar-bottom"><div className="admin-identity"><div className="avatar">{(session.userInfo?.nickname || '管').slice(0, 1)}</div><div><strong>{session.userInfo?.nickname || '管理员'}</strong><small>已验证管理员</small></div></div><button className="logout-button" onClick={onLogout}><DoorOpen size={17} /> 退出登录</button></div></aside>
     {menuOpen && <button className="mobile-scrim" aria-label="关闭菜单" onClick={() => setMenuOpen(false)} />}

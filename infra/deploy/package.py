@@ -22,6 +22,8 @@ FILES = (
     "prepare-ip-certificate.sh", "enable-public-api.sh", "backup-before-upgrade.sh",
     "verify-backup-restore.sh", "upgrade-online-backend.sh",
     "systemd/innocence-cert-renew.service", "systemd/innocence-cert-renew.timer",
+    "database/20261031-admin-account-controls.sql",
+    "upgrade-admin-controls.sh",
 )
 
 
@@ -78,7 +80,7 @@ def main() -> None:
             shutil.copyfile(source, destination)
 
     schema = backend / "src" / "main" / "resources" / "schema.sql"
-    (bundle / "database").mkdir()
+    (bundle / "database").mkdir(exist_ok=True)
     shutil.copyfile(schema, bundle / "database" / "schema.sql")
     commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,
                             capture_output=True, text=True).stdout.strip()

@@ -4,6 +4,8 @@ export type Report = { reportId: number; reportType: string; status: string; rea
 export type ReportDetail = Report & { description: string; targetContent: string; targetMasked: boolean; targetDeleted: boolean; auditHistory: { auditId: number; decision: string; punishmentType: string; durationDays: number; reason: string; adminDisplayName: string; createTime: string }[] }
 export type User = { userId: number; userNo: string; displayName: string; statusCode: number; statusLabel: string; teamName: string; lastLoginTime: string; createTime: string }
 export type UserDetail = User & { email: string; bio: string; timezone: string; totalStudyMinutes: number; totalCheckInDays: number; consecutiveCheckInDays: number; teamRole: string; teamJoinedTime: string }
+export type RegistrationPolicy = { enabled: boolean }
+export type DeletionPreview = { userId: number; deletable: boolean; reason: string; ownedTeamCount: number }
 export type Punishment = { punishmentId: number; reportId: number; punishmentType: string; status: string; liftable: boolean; durationDays: number; reason: string; startTime: string; endTime: string }
 export type Team = { teamId: number; teamName: string; inviteCode: string; ownerDisplayName: string; statusCode: number; statusLabel: string; memberCount: number; createTime: string }
 export type TeamDetail = Team & { memberLimit: number; latestChatPreview: string; members: { userId: number; userNo: string; nickname: string; role: string; owner: boolean; activeStudy: boolean }[] }
@@ -51,6 +53,10 @@ export const api = {
   review: (session: Session, id: number, body: { decision: string; deleteContent: boolean; punishmentType: string; durationDays: number; reason: string }) => post(`/reports/${id}/review`, session, body),
   users: (session: Session, keyword: string) => request<User[]>(`/users/search${query({ keyword, limit: 100 })}`, {}, session),
   user: (session: Session, id: number) => request<UserDetail>(`/users/${id}`, {}, session),
+  deletionPreview: (session: Session, id: number) => request<DeletionPreview>(`/users/${id}/deletion-preview`, {}, session),
+  deleteUser: (session: Session, id: number) => request<{ userId: number; success: boolean; dissolvedTeamCount: number }>(`/users/${id}`, { method: 'DELETE' }, session),
+  registrationPolicy: (session: Session) => request<RegistrationPolicy>('/settings/registration', {}, session),
+  setRegistrationPolicy: (session: Session, enabled: boolean) => request<RegistrationPolicy>('/settings/registration', { method: 'PUT', body: JSON.stringify({ enabled }) }, session),
   userReports: (session: Session, id: number) => request<Report[]>(`/users/${id}/reports?limit=50`, {}, session),
   punishments: (session: Session, id: number) => request<Punishment[]>(`/users/${id}/punishments?limit=50`, {}, session),
   lift: (session: Session, userId: number, punishmentId: number) => post(`/users/${userId}/punishments/${punishmentId}/lift`, session),

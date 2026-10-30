@@ -32,7 +32,7 @@ class AdminWebSessionTest {
     void setUp() {
         mapper = mock(UserMapper.class);
         access = mock(AdminAccessService.class);
-        account = new AccountService(mapper, mock(EmailCodeService.class), mock(CheckInService.class), mock(FriendMapper.class));
+        account = new AccountService(mapper, mock(EmailCodeService.class), mock(CheckInService.class), mock(FriendMapper.class), mock(RegistrationPolicyService.class));
         when(mapper.upgradePasswordHash(anyLong(), anyString(), anyString())).thenReturn(1);
     }
 

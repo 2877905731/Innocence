@@ -270,6 +270,7 @@ undocumented_route_families:
     evidence_status: source_and_unit_verified_http_pending
     trigger: "独立管理员网站已对接现有举报、用户、团队、公告接口；真实管理员 HTTP 回放和服务器部署待验收"
 admin_web_contract:
+  account_controls: "0135：docs/development/后台注册控制与用户删除.md；GET/PUT /settings/registration，GET /users/{id}/deletion-preview，DELETE /users/{id}；管理员专用、持久化注册策略、删除确认/保护管理员/清理关联/事务审计"
   updated_at: "2026-09-26"
   base_url: "同域 /api；本地 Vite 转发到 http://127.0.0.1:8080"
   envelope: "HTTP 2xx 且 code=0 为成功；非 0 使用 message，401 清理网页会话"

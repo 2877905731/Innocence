@@ -213,13 +213,13 @@
                  ) study on study.user_id = tm.user_id
                  left join check_in_summary summary on summary.user_id = tm.user_id
                  left join (
-                    select user_id,
+                    select dpi.user_id,
                            count(*) as total_count,
-                           sum(case when status = 1 then 1 else 0 end) as completed_count
+                           sum(case when dpi.status = 1 then 1 else 0 end) as completed_count
                     from daily_plan_item dpi
                              inner join daily_plan dp on dp.id = dpi.plan_id
                     where dp.plan_date = #{planDate}
-                    group by user_id
+                    group by dpi.user_id
                  ) plan on plan.user_id = tm.user_id
                  left join (
                     select user_id, floor(coalesce(sum(duration_seconds), 0) / 60) as total_minutes
@@ -276,13 +276,13 @@
                  ) study on study.user_id = tm.user_id
                  left join check_in_summary summary on summary.user_id = tm.user_id
                  left join (
-                    select user_id,
+                    select dpi.user_id,
                            count(*) as total_count,
-                           sum(case when status = 1 then 1 else 0 end) as completed_count
+                           sum(case when dpi.status = 1 then 1 else 0 end) as completed_count
                     from daily_plan_item dpi
                              inner join daily_plan dp on dp.id = dpi.plan_id
                     where dp.plan_date = #{planDate}
-                    group by user_id
+                    group by dpi.user_id
                  ) plan on plan.user_id = tm.user_id
                  left join (
                     select user_id, floor(coalesce(sum(duration_seconds), 0) / 60) as total_minutes
