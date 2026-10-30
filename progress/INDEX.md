@@ -965,3 +965,17 @@ checkpoints:
     status: complete
     path: progress/0136__20261031__P01__DONE__admin-controls-and-team-fix-deployed.md
     title: "后台注册开关与删除用户上线，团队创建修复及隧道自动重连验证"
+  - sequence: "0137"
+    created_at: "2026-10-31T01:00:00+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0137__20261031__P01__CORRECTION__android-glass-original-scope-restored.md
+    title: "纠正0118共享玻璃修正范围，恢复Android原光束并保留侘寂字体"
+  - sequence: "0138"
+    created_at: "2026-10-31T01:01:12+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0138__20261031__P01__CORRECTION__harmony-glass-regression-count.md
+    title: "更正0137鸿蒙玻璃专项计数为3项"

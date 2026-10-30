@@ -25,15 +25,15 @@ Innocence is built with Flutter and Spring Boot and currently targets Windows de
 
 | Platform | Download | Scope |
 |---|---|---|
-| Windows x64 · v1.2.5 | [Installer](https://github.com/2877905731/Innocence/releases/download/v1.2.5/Innocence-v1.2.5-windows-x64-setup.exe) · [Portable ZIP](https://github.com/2877905731/Innocence/releases/download/v1.2.5/Innocence-v1.2.5-windows-x64-portable.zip) | Desktop edition; installer has no Authenticode signature |
-| Android 7.0+ · v1.2.6 | [Offline APK](https://github.com/2877905731/Innocence/releases/download/v1.2.6/Innocence-v1.2.6-android-offline.apk) | Original release signature; bundled display fonts and smoother glass beams; install with the system package installer |
-| HarmonyOS tablet local edition · v1.2.6 | [ARM64 Release HAP](https://github.com/2877905731/Innocence/releases/tag/v1.2.6-harmonyos.1) | Unsigned AOT; requires a matching device profile, signing, and DevEco/HDC; opening the downloaded file does not install it |
+| Windows x64 · v1.3.0 | [Installer](https://github.com/2877905731/Innocence/releases/download/v1.3.0/Innocence-v1.3.0-windows-x64-setup.exe) · [Portable ZIP](https://github.com/2877905731/Innocence/releases/download/v1.3.0/Innocence-v1.3.0-windows-x64-portable.zip) | Online desktop edition; installer has no Authenticode signature |
+| Android 7.0+ · v1.3.1 | [Online APK](https://github.com/2877905731/Innocence/releases/download/v1.3.1/Innocence-v1.3.1-android-online.apk) | Restores the original Android glass rendering and retains Wabi-Sabi display fonts; original release signature |
+| HarmonyOS tablet online edition · v1.3.0 | [ARM64 Release HAP](https://github.com/2877905731/Innocence/releases/tag/v1.3.0-harmonyos.1) | Unsigned AOT; requires a matching device profile, signing, and DevEco/HDC |
 
-[Android v1.2.6 release notes](https://github.com/2877905731/Innocence/releases/tag/v1.2.6) · [SHA256 checksums](https://github.com/2877905731/Innocence/releases/download/v1.2.6/SHA256SUMS.txt) · [Windows v1.2.5](https://github.com/2877905731/Innocence/releases/tag/v1.2.5) · [Changelog](CHANGELOG.md)
+[Android v1.3.1 release notes](https://github.com/2877905731/Innocence/releases/tag/v1.3.1) · [Android SHA256](https://github.com/2877905731/Innocence/releases/download/v1.3.1/SHA256SUMS.txt) · [Windows v1.3.0](https://github.com/2877905731/Innocence/releases/tag/v1.3.0) · [Changelog](CHANGELOG.md)
 
-v1.2.6 bundles real Wabi-Sabi display fonts and improves Liquid Glass beam edges on Android and HarmonyOS. Android retains its original release signature and local data when upgrading a compatible official release; it remains offline without INTERNET permission. The full Chinese font increases package size. Windows downloads remain at v1.2.5.
+Android v1.3.1 restores the original Liquid Glass blur and texture sampling while retaining the bundled Wabi-Sabi display fonts. It uses the original release signature and production HTTPS service. One Android phone, Windows computer, and HarmonyOS tablet can stay signed in simultaneously, with an independent session slot for each platform.
 
-Choose a language and explicitly enter offline mode on first launch. Android supports daily plans with a 24-hour clock picker, a full monthly calendar with batch templates, annual tasks and subtasks, focus, statistics, memos, and local settings. Data stays on the device and is removed by uninstalling or clearing app data. Earlier development APKs use a different signature and cannot be upgraded directly. Physical-device/OEM/Vulkan checks and online synchronization remain in progress.
+Sign in with a server account or choose local mode. Local data is uploaded only after previewing and confirming the target account. Keep the installed app and its data when updating. Physical-device/OEM/Vulkan checks and long-running performance remain in progress.
 
 ## Current Status
 

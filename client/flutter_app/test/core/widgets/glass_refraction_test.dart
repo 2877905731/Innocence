@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/widgets/glass_motion_backdrop.dart';
 import 'package:innocence_flutter/core/widgets/glass_refractive_surface.dart';
 
@@ -127,12 +128,13 @@ void main() {
     final resized = scene!.image;
     await tester.pumpWidget(view(500, pixelRatio: 2));
     await tester.pump();
-    expect(scene!.image!.width, 1000);
-    expect(scene!.image!.height, 600);
+    final originalAndroid = AppConfig.capabilities.isAndroidPhone;
+    expect(scene!.image!.width, originalAndroid ? 500 : 1000);
+    expect(scene!.image!.height, originalAndroid ? 300 : 600);
     expect(identical(scene!.image, resized), isFalse);
     await tester.pumpWidget(view(500, pixelRatio: 8));
     await tester.pump();
-    expect(scene!.image!.width, 2048);
+    expect(scene!.image!.width, originalAndroid ? 500 : 2048);
     final capped = scene!.image;
     await tester.pump(const Duration(seconds: 1));
     expect(identical(scene!.image, capped), isTrue);

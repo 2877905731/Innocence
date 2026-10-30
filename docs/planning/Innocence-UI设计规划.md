@@ -3,7 +3,7 @@ schema_version: 1
 document_type: ui_design_plan
 project_name: "Innocence"
 created_at: "2026-08-07"
-updated_at: "2026-10-05"
+updated_at: "2026-10-31"
 information_architecture_status: approved
 windows_shell_implementation_status: p01_foundation_implemented
 themes:
@@ -30,6 +30,16 @@ themes:
 ---
 
 # Innocence UI 设计规划
+
+## 2026-10-31 Android液态玻璃范围纠正（0137）
+
+用户原文：
+
+> 然后安卓端的液态玻璃是没有问题的，只有寂宅有点问题，你前面改错了，把他改回去再重新发布安卓端的包
+
+这里“寂宅”沿0118对应现有侘寂主题。原反馈的玻璃光束边缘问题仅针对鸿蒙，0118共享改动误覆盖了Android。按本次指令，Android恢复 `4417cdf^`（175338f）原始ImageFilter.blur、椭圆绘制、1440逻辑像素纹理上限及低重采样；侘寂Crimson Text/Noto Serif SC内置展示字修正保留。Windows/鸿蒙继续使用其现有密度纹理和连续羽化方式。主题存储值和账号/联网/本机资料不变，单独发布Android联网v1.3.1+13。
+
+对照图从误改前源码在宿主Android能力配置生成；误改版有38.95%像素不符，恢复版逐像素通过。宿主对照不等同实体Android GPU、性能或完整机型矩阵通过。
 
 ## 2026-10-24 侘寂展示字与鸿蒙光束边缘修正（0118）
 

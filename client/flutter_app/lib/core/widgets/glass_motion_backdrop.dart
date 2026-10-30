@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
 import 'glass_refractive_surface.dart';
 
+// Android's accepted appearance predates the Harmony-only edge correction.
+bool get _useOriginalAndroidLights => AppConfig.capabilities.isAndroidPhone;
+
 /// Render the preview's lights once, sharing the resulting texture with panels.
 class GlassMotionBackdrop extends StatefulWidget {
   const GlassMotionBackdrop({super.key, required this.child});
@@ -37,7 +40,10 @@ class _GlassMotionBackdropState extends State<GlassMotionBackdrop>
     _pixelRatio = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1;
     _reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     _syncMotion();
-    if (_reduceMotion || previousPixelRatio != _pixelRatio) _renderScene();
+    if (_reduceMotion ||
+        (!_useOriginalAndroidLights && previousPixelRatio != _pixelRatio)) {
+      _renderScene();
+    }
   }
 
   @override
@@ -64,10 +70,10 @@ class _GlassMotionBackdropState extends State<GlassMotionBackdrop>
 
   void _renderScene() {
     if (_size.isEmpty) return;
-    // Share one density-aware texture. The cap bounds memory on large displays;
-    // the continuous feather below avoids a backend's downsampled blur tiles.
-    final scale =
-        math.min(_pixelRatio, 2048 / math.max(_size.width, _size.height));
+    final longestSide = math.max(_size.width, _size.height);
+    final scale = _useOriginalAndroidLights
+        ? math.min(1.0, 1440 / longestSide)
+        : math.min(_pixelRatio, 2048 / longestSide);
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder)..scale(scale);
     _paintLights(canvas, _size, _reduceMotion ? 0 : _clock.elapsedMilliseconds);
@@ -130,7 +136,10 @@ class _ScenePainter extends CustomPainter {
         image,
         Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
         Offset.zero & size,
-        Paint()..filterQuality = FilterQuality.medium);
+        Paint()
+          ..filterQuality = _useOriginalAndroidLights
+              ? FilterQuality.low
+              : FilterQuality.medium);
   }
 
   @override
@@ -181,6 +190,9 @@ void _paintLights(Canvas canvas, Size size, int elapsed) {
         width: dimensions.width,
         height: dimensions.height);
     final paint = Paint();
+    if (_useOriginalAndroidLights) {
+      paint.imageFilter = ui.ImageFilter.blur(sigmaX: sigma, sigmaY: sigma);
+    }
     if (desktop) {
       paint.colorFilter = const ColorFilter.matrix([
         1.197,
@@ -206,14 +218,20 @@ void _paintLights(Canvas canvas, Size size, int elapsed) {
       ]);
     }
     final featherBounds = rect.inflate(sigma * 3);
-    canvas.saveLayer(featherBounds, paint);
+    canvas.saveLayer(
+        _useOriginalAndroidLights ? rect.inflate(sigma * 4) : featherBounds,
+        paint);
     if (gradient is RadialGradient) {
       canvas.save();
       canvas.scale(dimensions.width / dimensions.height, 1);
       final circle = Rect.fromCircle(
-          center: Offset.zero, radius: dimensions.height / 2 + sigma);
+          center: Offset.zero,
+          radius:
+              dimensions.height / 2 + (_useOriginalAndroidLights ? 0 : sigma));
       canvas.drawOval(circle, Paint()..shader = gradient.createShader(circle));
       canvas.restore();
+    } else if (_useOriginalAndroidLights) {
+      canvas.drawOval(rect, Paint()..shader = gradient.createShader(rect));
     } else {
       canvas.drawRect(
           featherBounds,
