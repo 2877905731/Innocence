@@ -3,7 +3,7 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-30"
-last_resumed_at: "2026-10-30T19:05:00+08:00"
+last_resumed_at: "2026-10-30T19:28:00+08:00"
 latest_checkpoint: "0128"
 next_sequence: "0129"
 current_phase: P01
@@ -11,12 +11,13 @@ current_gate: G01
 state: "server_empty_database_and_smtp_selected_waiting_configuration_and_start"
 current_goal: "用户现有香港Debian13服务器部署管理网站与后端；0128明确从空库开始、不迁移本地数据，已有SMTP且自行在服务器填写。0127首轮SSH隧道包40193731bytes/37818eb0…保持原样；80后端回归、网页构建及Compose/脚本/归档核对保留。本机正常邮箱注册辅助脚本已准备，PowerShell7及WindowsPowerShell5.1各7个合成HTTP流程通过，不发真实邮件。待用户上传、服务器私有.env/SMTP/白名单配置、空库初始化及真实启动注册登录；未SSH登录或修改远端，无公网后台/HTTPS完成证据。既有客户端发行/离线/鸿蒙权益及G01边界保持。"
 server_deployment_consultation:
-  updated_at: "2026-10-30T19:05:00+08:00"
+  updated_at: "2026-10-30T19:28:00+08:00"
   user_scope: "用户将现有管理后台和后端部署至已有香港服务器，有公网IPv4/无域名；截图Debian13.7/x86_64/SSH22/可用1.7GiB及28GB/无swap，后续截图显示Docker29.9.2/Compose5.6.1/Nginx1.26.3均active和本机HTTP200。本机TCP22连接通过，未SSH认证。"
   local_findings: "已核对React/Vite管理端、Java21/Spring Boot后端、prod环境变量、MySQL8.4/Redis开发编排与Nginx示例。prod不自动初始化数据库；管理员白名单不创建账号。现有README列有登录限流、密码哈希升级及备份恢复待办；Android正式包与鸿蒙现行离线限制不随后端部署自动解除。"
   data_scope: "0128用户明确从空库开始，不迁移本地数据；允许在该新服务器按首轮脚本初始化新库，不导出本地账号或资料。"
-  mail_scope: "用户已有SMTP，凭据由用户直接填写服务器.env，不在聊天、日志或仓库接收。"
-  next_step: "0127原包及摘要不变，用户SCP上传并prepare生成私有.env，填写注册邮箱白名单和SMTP后执行sh start.sh --initialize-empty-database。真实健康通过后保持SSH隧道，在本机运行infra/deploy/register-admin.ps1经邮箱验证码注册并进入后台；未代发邮件/读凭据。公开HTTPS、恢复及加固继续待。"
+  mail_scope: "用户要求查找项目已有SMTP。已在本机核对smtp.qq.com/465/SSL及认证启用；账号与授权码配置存在于被Git忽略且未跟踪的server/innocence-server/config/application-local-secret.yml，由application-local.yml的optional:file导入。仅输出非敏感字段和存在性，不回显/复制账号或授权码，不发邮件。"
+  existing_smtp_configuration: "普通配置server/innocence-server/src/main/resources/application-local.yml:18；私有username/password分别为config/application-local-secret.yml:3/:4。部署包排除开发配置且不包含本机私有文件，prod需要映射到服务器INNOCENCE_MAIL_*环境变量，不能据本机存在配置声称服务器已加载或邮件已通过。"
+  next_step: "0127原包及摘要不变，用户SCP上传并prepare生成私有.env。沿用本机已定位SMTP配置映射至服务器变量，无需重新准备邮箱；填写注册邮箱白名单后按已选空库执行sh start.sh --initialize-empty-database。真实健康通过后保持SSH隧道，在本机运行register-admin.ps1经真实邮箱验证码注册并进入后台；本轮未上传私有配置或发送邮件。公开HTTPS、恢复及加固继续待。"
 current_baseline:
   - "2026-10-30 空库及SMTP选择（0128）：用户原文从空库开始，不迁移本地数据；已有SMTP，可在服务器填写配置。正常注册辅助脚本仅走SSH回环API、隐藏验证码/密码，成功后退出临时Windows会话；PowerShell7及5.1各7项本机合成HTTP/精确UTF8/失败拒绝/无令牌输出通过，非真实服务器或邮件证据。0127包不重建，真实初始化/注册登录待用户执行。"
   - "2026-10-30 首轮服务器部署包（0127）：本机16文件40193731bytes/SHA37818eb0bc7aba50cdde55e35f1f79a1ceb0f824e005ee0671afb13bb98cf1c7，排除JAR开发配置，余ZIP载荷/CRC/Boot分层读取及归档字节通过；80后端回归、网页生产构建、官方Compose5.6.1摘要/语义解析、端口/配额/缺管理员字段拒绝与POSIX语法通过。MySQL/Redis/头像持久卷及凭据服务器生成，首轮仅回环/SSH入口；实际启动登录/邮件/数据方案/HTTPS与恢复未完成。"
