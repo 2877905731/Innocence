@@ -916,3 +916,10 @@ checkpoints:
     status: complete
     path: progress/0129__20261030__P01__DONE__server-loopback-startup-and-memory-pending.md
     title: "用户服务器回环启动健康回执，1.8GB内存报告待实际指标核对"
+  - sequence: "0130"
+    created_at: "2026-10-30T21:48:00+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0130__20261030__P01__DECISION__direct-ssh-control-and-dedicated-key.md
+    title: "用户授权直接SSH管理，专用密钥就绪待控制台安装公钥"

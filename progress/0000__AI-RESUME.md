@@ -3,23 +3,26 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-30"
-last_resumed_at: "2026-10-30T21:40:00+08:00"
-latest_checkpoint: "0129"
-next_sequence: "0130"
+last_resumed_at: "2026-10-30T21:48:00+08:00"
+latest_checkpoint: "0130"
+next_sequence: "0131"
 current_phase: P01
 current_gate: G01
-state: "server_loopback_stack_healthy_memory_capacity_pending"
-current_goal: "0129用户服务器截图确认MySQL/Redis/backend三容器healthy，Actuator UP、Nginx配置检查、静态页面及无凭据后台401检查通过，后端仅127.0.0.1:8080映射；首轮回环部署已有用户执行回执。用户报告面板内存1.8GB，实际MemAvailable/容器占用尚未提供，先只读观察再决定调参或扩容。空库不迁移范围保持；SMTP投递、真实注册/管理员登录、备份恢复、长期负载及公网HTTPS待验。本人未SSH认证/执行远端变更；既有客户端离线、发行及G01边界保持。"
+state: "server_ssh_control_authorized_waiting_dedicated_public_key_install"
+current_goal: "0130用户明确要求直接SSH控制服务器，沿现有部署范围授权。已知主机密钥记录存在，但现有密钥两轮BatchMode认证均拒绝；专用Ed25519密钥已在本机忽略目录生成，当前用户专属ACL/配对核对通过，待用户在已登录Xterm安装公钥后再连接。新截图available约1.0GiB，backend245.6/MySQL280/Redis17.16MiB，当前无需据面板1.8GB扩容，持续负载另验。0130前未SSH认证/操作远端；空库不迁移、账号/邮件/备份/公网HTTPS及客户端原边界保持。"
 server_deployment_consultation:
-  updated_at: "2026-10-30T21:40:00+08:00"
+  updated_at: "2026-10-30T21:48:00+08:00"
   user_scope: "用户将现有管理后台和后端部署至已有香港服务器，有公网IPv4/无域名；截图Debian13.7/x86_64/SSH22/可用1.7GiB及28GB/无swap，后续截图显示Docker29.9.2/Compose5.6.1/Nginx1.26.3均active和本机HTTP200。本机TCP22连接通过，未SSH认证。"
   local_findings: "已核对React/Vite管理端、Java21/Spring Boot后端、prod环境变量、MySQL8.4/Redis开发编排与Nginx示例。prod不自动初始化数据库；管理员白名单不创建账号。现有README列有登录限流、密码哈希升级及备份恢复待办；Android正式包与鸿蒙现行离线限制不随后端部署自动解除。"
   data_scope: "0128用户明确从空库开始，不迁移本地数据；允许在该新服务器按首轮脚本初始化新库，不导出本地账号或资料。"
   mail_scope: "用户要求查找项目已有SMTP。已在本机核对smtp.qq.com/465/SSL及认证启用；账号与授权码配置存在于被Git忽略且未跟踪的server/innocence-server/config/application-local-secret.yml，由application-local.yml的optional:file导入。仅输出非敏感字段和存在性，不回显/复制账号或授权码，不发邮件。"
   existing_smtp_configuration: "普通配置server/innocence-server/src/main/resources/application-local.yml:18；私有username/password分别为config/application-local-secret.yml:3/:4。部署包排除开发配置且不包含本机私有文件，prod需要映射到服务器INNOCENCE_MAIL_*环境变量，不能据本机存在配置声称服务器已加载或邮件已通过。"
   runtime_receipt: "0129用户截图：compose ps三容器healthy；start.sh的Nginx语法/health UP/静态页/无凭据admin401通过。后端127.0.0.1:8080，MySQL/Redis仅容器端口；用户报告面板内存1.8GB，未取得free/docker stats，不能推断OOM或容量已验收。"
-  next_step: "用户先运行free -h和docker stats --no-stream，核对可用内存/缓存及各容器实际占用，再处理内存预算或扩容；保持当前健康服务，不重跑初始化。之后保持SSH隧道，在本机运行register-admin.ps1核对真实邮件/注册及管理登录；公开HTTPS、备份恢复及加固继续待。"
+  memory_receipt: "0130新截图free显示total1.9GiB/used908MiB/buff-cache1.1GiB/available1.0GiB/无swap；Docker backend245.6MiB、MySQL280MiB、Redis17.16MiB，合计约543MiB。当前瞬时有余量，不代表持续负载门禁通过。"
+  ssh_control: "用户明确请求直接SSH管理。Windows known_hosts已有目标记录；StrictHostKeyChecking=yes与BatchMode现有身份两轮均Permission denied。专用本机路径build/deployment/ssh-control/id_ed25519_innocence及.pub均Git忽略；公钥SHA256:chtAwNNht2+nFew3W3XwDEbZj+nFj/BeBcbOJQyHKQ4。icacls后ACL实检仅当前用户、继承禁用、ssh-keygen -y配对一致；未读取输出任何现有私钥，未SSH认证成功。"
+  next_step: "向用户交付专用公钥安装命令，在已登录Xterm追加authorized_keys且保留已有条目。用户执行后使用该专用身份、StrictHostKeyChecking=yes、BatchMode连接，先只读核对系统/容器/资源/回环健康；随后沿已授权部署继续。无需发送root密码，不重跑初始化或迁移本地数据；账号/邮件/备份/公网HTTPS继续待。"
 current_baseline:
+  - "2026-10-30 SSH管理授权与内存回执（0130）：用户要求直接SSH控制；已有known_hosts但现有身份认证拒绝，专用本机密钥/用户专属ACL/配对准备完成，待控制台安装公钥。新截图available1.0GiB及三容器合计约543MiB，暂无当前内存不足证据；长期负载/账号邮件/恢复/公网待验，未认证或远端改动。"
   - "2026-10-30 服务器首轮回环运行回执（0129）：用户截图三容器healthy、Actuator UP/Nginx配置/静态页/后台无凭据401通过，DB/Redis不发布公网端口。用户报告面板1.8GB，实际可用及容器占用待读；不据健康瞬时状态标记长期内存、SMTP、账号登录、恢复、公网HTTPS或G01完成。"
   - "2026-10-30 空库及SMTP选择（0128）：用户原文从空库开始，不迁移本地数据；已有SMTP，可在服务器填写配置。正常注册辅助脚本仅走SSH回环API、隐藏验证码/密码，成功后退出临时Windows会话；PowerShell7及5.1各7项本机合成HTTP/精确UTF8/失败拒绝/无令牌输出通过，非真实服务器或邮件证据。0127包不重建，真实初始化/注册登录待用户执行。"
   - "2026-10-30 首轮服务器部署包（0127）：本机16文件40193731bytes/SHA37818eb0bc7aba50cdde55e35f1f79a1ceb0f824e005ee0671afb13bb98cf1c7，排除JAR开发配置，余ZIP载荷/CRC/Boot分层读取及归档字节通过；80后端回归、网页生产构建、官方Compose5.6.1摘要/语义解析、端口/配额/缺管理员字段拒绝与POSIX语法通过。MySQL/Redis/头像持久卷及凭据服务器生成，首轮仅回环/SSH入口；实际启动登录/邮件/数据方案/HTTPS与恢复未完成。"
@@ -161,8 +164,8 @@ unfinished:
     gate: Android-A0
 next_actions:
   - id: NEXT-SERVER-FIRST-DEPLOYMENT
-    action: "0129已收到服务器三容器/回环健康回执。先读free -h/docker stats --no-stream判断用户面板1.8GB的实际压力，不再重复初始化；据真实数据决定调参/缓冲或扩容。随后通过SSH隧道18080→18081运行本机register-admin.ps1，验真实邮件、注册和网页登录；不迁移本地资料。继续权限/持久化/备份恢复及HTTPS和公网加固。"
-    inputs: ["infra/deploy/README.zh-CN.md", "infra/deploy/register-admin.ps1", "infra/deploy/compose.yaml", "progress/0129__20261030__P01__DONE__server-loopback-startup-and-memory-pending.md"]
+    action: "0130已授权直接SSH，待用户在已登录终端安装专用公钥。安装后以本机专用身份/严格主机密钥连接，先核对健康和资源，再继续真实邮件/注册登录及权限/持久化/备份恢复、HTTPS。最新截图available1.0GiB，不重复问扩容或重跑初始化，不迁移本地资料。"
+    inputs: ["build/deployment/ssh-control/id_ed25519_innocence", "infra/deploy/README.zh-CN.md", "infra/deploy/register-admin.ps1", "progress/0130__20261030__P01__DECISION__direct-ssh-control-and-dedicated-key.md"]
   - id: NEXT-UI126-PHYSICAL
     action: "接0126：双端GitHub公开/5匿名下载已完成，交付链接并明确Android可交系统安装器、原生HAP点文件直装不由签名实现。保持旧资料，按真实反馈验两端字体/光束/安装/性能；个人签名材料不公开，旧临时入口已停，不自动续期"
     inputs: ["docs/releases/v1.2.6.md", "docs/releases/v1.2.6-harmonyos.1.md", "client/flutter_app/build/qa/v1.2.6/verification-manifest.json", "client/flutter_app/build/qa/release126.py"]
