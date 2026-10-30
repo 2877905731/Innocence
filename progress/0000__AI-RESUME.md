@@ -3,26 +3,27 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-30"
-last_resumed_at: "2026-10-30T22:04:00+08:00"
-latest_checkpoint: "0131"
-next_sequence: "0132"
+last_resumed_at: "2026-10-30T23:43:45+08:00"
+latest_checkpoint: "0133"
+next_sequence: "0134"
 current_phase: P01
 current_gate: G01
-state: "server_ssh_connected_and_local_admin_tunnel_verified"
-current_goal: "0131专用密钥SSH认证成功，id -u=0；本人逐项只读核对三容器healthy、Actuator UP、远端后台200/无凭据管理401、available1.0GiB及三容器约560MiB。已建立本机127.0.0.1:18080→远端127.0.0.1:18081的SSH隧道，exec session19569；本机HTTP200/401通过，可交用户打开后台。服务器配置/数据未改，未发邮件或检查账号计数；真实注册/管理登录、备份恢复、长期负载及公网HTTPS/加固继续待。空库不迁移、既有客户端发行离线与G01边界保持。"
+state: "online_v130_three_platform_ready_physical_harmony_installed_publish_next"
+current_goal: "0133：生产IP HTTPS/续期演练、PBKDF2与独立tablet已部署；真实HTTPS三类会话/导入/专注与负向通过，QA owner已清理，最新私有备份隔离恢复37表/六类行数通过。1.3.0+12三端候选/119源码/CRC/签名/HTTPS核对通过；鸿蒙独立原生HUKS与重启/TLS通过，用户解锁后实体签名Release已安装启动并有PC收件箱画面。尚未公开新Release，下一步匹配源码提交/标签及七资产上传验证；完整设备/恢复/模型/长期容量与G01边界保持。"
 server_deployment_consultation:
   updated_at: "2026-10-30T22:04:00+08:00"
   user_scope: "用户将现有管理后台和后端部署至已有香港服务器，有公网IPv4/无域名；原截图Debian13.7/x86_64/SSH22/无swap及Docker29.9.2/Compose5.6.1/Nginx1.26.3。0130明确授权直接SSH，0131专用密钥认证及本人只读检查成功，用户不再需要手工复制一般状态命令。"
-  local_findings: "已核对React/Vite管理端、Java21/Spring Boot后端、prod环境变量、MySQL8.4/Redis开发编排与Nginx示例。prod不自动初始化数据库；管理员白名单不创建账号。现有README列有登录限流、密码哈希升级及备份恢复待办；Android正式包与鸿蒙现行离线限制不随后端部署自动解除。"
+  local_findings: "0133生产HTTPS已启用，管理SSH私有；PBKDF2和三类会话、备份恢复及入口限流均有本轮证据。不迁移本地账号。"
   data_scope: "0128用户明确从空库开始，不迁移本地数据；允许在该新服务器按首轮脚本初始化新库，不导出本地账号或资料。"
   mail_scope: "用户要求查找项目已有SMTP。已在本机核对smtp.qq.com/465/SSL及认证启用；账号与授权码配置存在于被Git忽略且未跟踪的server/innocence-server/config/application-local-secret.yml，由application-local.yml的optional:file导入。仅输出非敏感字段和存在性，不回显/复制账号或授权码，不发邮件。"
   existing_smtp_configuration: "普通配置server/innocence-server/src/main/resources/application-local.yml:18；私有username/password分别为config/application-local-secret.yml:3/:4。部署包排除开发配置且不包含本机私有文件，prod需要映射到服务器INNOCENCE_MAIL_*环境变量，不能据本机存在配置声称服务器已加载或邮件已通过。"
   runtime_receipt: "0129用户截图：compose ps三容器healthy；start.sh的Nginx语法/health UP/静态页/无凭据admin401通过。后端127.0.0.1:8080，MySQL/Redis仅容器端口；用户报告面板内存1.8GB，未取得free/docker stats，不能推断OOM或容量已验收。"
   memory_receipt: "0131本人SSH free显示total1.9GiB/used940MiB/buff-cache1.1GiB/available1.0GiB/无swap；Docker backend251.4MiB、MySQL291.5MiB、Redis17.19MiB，合计约560MiB。当前有余量，持续负载门禁仍待。"
-  ssh_control: "0131已使用专用Ed25519身份/BatchMode/IdentitiesOnly/StrictHostKeyChecking=yes认证成功，id -u=0。专用路径build/deployment/ssh-control/id_ed25519_innocence，Git忽略/用户专属ACL及公钥指纹沿0130。仅执行逐项只读健康/资源/HTTP命令；未改远端配置或业务数据。"
+  ssh_control: "0131专用密钥已认证；0133按用户在线发行范围完成备份/隔离恢复、API证书/自动续期、后端升级与公开API限流，保留.env和卷。"
   local_admin_tunnel: "本机127.0.0.1:18080→远端127.0.0.1:18081，exec session19569；ExitOnForwardFailure/ServerAlive及严格主机密钥检查启用，本机HTTP首页200、无凭据管理接口401。隧道依赖当前进程；若断开，以专用身份重建，不重置服务器。"
-  next_step: "用户可打开http://127.0.0.1:18080/。若尚未注册，运行本机register-admin.ps1通过真实邮箱验证码完成账号，再在网页登录；不收聊天密码/验证码。保持隧道，继续实际权限/持久化/备份恢复/长期负载与公网HTTPS及加固。未经具体账号流程不发送测试邮件，保持空库不迁移范围。"
+  next_step: "0133三端候选已就绪、用户平板签名包安装启动和PC页面核对；匹配源码提交及双标签公开，检查七资产远端摘要/匿名下载。完整实体业务与长期容量继续待。"
 current_baseline:
+  - "0133：生产IP HTTPS/续期演练、PBKDF2与独立tablet已部署；真实HTTPS三类会话/导入/专注与负向通过，QA owner已清理，最新私有备份隔离恢复37表/六类行数通过。1.3.0+12三端候选/119源码/CRC/签名/HTTPS核对通过；鸿蒙独立原生HUKS与重启/TLS通过，用户解锁后实体签名Release已安装启动并有PC收件箱画面。尚未公开新Release，下一步匹配源码提交/标签及七资产上传验证；完整设备/恢复/模型/长期容量与G01边界保持。"
   - "2026-10-30 专用SSH连接及本机后台入口（0131）：id-u0，三容器healthy/healthUP/远端及隧道HTTP200和无凭据401通过；当前available1.0GiB、容器约560MiB。隧道session19569/127.0.0.1:18080已就绪，仅只读远端核对；真实账号邮件/恢复/公开HTTPS和长期容量待验。"
   - "2026-10-30 SSH管理授权与内存回执（0130）：用户要求直接SSH控制；已有known_hosts但现有身份认证拒绝，专用本机密钥/用户专属ACL/配对准备完成，待控制台安装公钥。新截图available1.0GiB及三容器合计约543MiB，暂无当前内存不足证据；长期负载/账号邮件/恢复/公网待验，未认证或远端改动。"
   - "2026-10-30 服务器首轮回环运行回执（0129）：用户截图三容器healthy、Actuator UP/Nginx配置/静态页/后台无凭据401通过，DB/Redis不发布公网端口。用户报告面板1.8GB，实际可用及容器占用待读；不据健康瞬时状态标记长期内存、SMTP、账号登录、恢复、公网HTTPS或G01完成。"
@@ -165,6 +166,9 @@ unfinished:
     item: "Android A0尚未通过：正式离线签名/发行与API36核心流程有0083/0086/0088证据，月/年手机页已进入v1.2.2正式包且通过API36正式版覆盖升级子集；仍须实体设备、SDK license、其余二级手机页、真实设备键盘/大字体和前后台性能。联网会话保护、真实同步、WebSocket/推送后续接入，不重复列发行签名或月年源码为未完成。"
     gate: Android-A0
 next_actions:
+  - id: NEXT-ONLINE-V130-PUBLISH
+    action: "0133三端联网候选就绪，匹配源码/双标签后公开并检查七资产摘要和匿名下载；保持用户平板进程/资料，后续真实账号流程由用户本人操作。"
+    inputs: [docs/releases/v1.3.0.md, docs/releases/v1.3.0-harmonyos.1.md, client/flutter_app/build/qa/release130.py]
   - id: NEXT-SERVER-FIRST-DEPLOYMENT
     action: "0131已专用密钥root认证并建立本机18080→远端18081隧道，HTTP200/401通过。交用户打开后台，如尚未注册则运行本机邮箱注册辅助后登录；真实邮件/账号由用户输入凭据，不在聊天接收。后续可直接SSH检查和维护，继续实际权限/持久化/恢复、负载与公网HTTPS加固；不重跑初始化或迁移本地资料。"
     inputs: ["build/deployment/ssh-control/id_ed25519_innocence", "infra/deploy/README.zh-CN.md", "infra/deploy/register-admin.ps1", "progress/0131__20261030__P01__DONE__ssh-connected-and-local-admin-tunnel.md"]

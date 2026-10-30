@@ -17,9 +17,8 @@ class AppConfig {
   static const bool _offlineOnlyBuild =
       bool.fromEnvironment('INNOCENCE_OFFLINE_ONLY', defaultValue: false);
 
-  // The Harmony online/device-slot contract is not enabled in this first build.
-  static bool get offlineOnlyBuild =>
-      _offlineOnlyBuild || capabilities.isHarmonyTablet;
+  // The edition is explicit on every platform; Harmony owns its tablet slot.
+  static bool get offlineOnlyBuild => _offlineOnlyBuild;
 
   static const String _overrideBaseUrl =
       String.fromEnvironment('INNOCENCE_API_BASE_URL', defaultValue: '');

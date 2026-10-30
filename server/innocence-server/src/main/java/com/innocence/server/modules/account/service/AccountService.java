@@ -28,11 +28,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -79,7 +75,7 @@ public class AccountService {
         userAuth.setAuthType("email");
         userAuth.setAuthAccount(request.getEmail());
         userAuth.setPasswordSalt(salt);
-        userAuth.setPasswordHash(sha256(request.getPassword() + salt));
+        userAuth.setPasswordHash(PasswordHashing.encode(request.getPassword()));
         userAuth.setIsVerified(1);
         userMapper.insertUserAuth(userAuth);
 
@@ -105,10 +101,12 @@ public class AccountService {
     @Transactional
     public AuthTokenResponse loginByPassword(PasswordLoginRequest request) {
         UserAuth userAuth = requireUserAuth(request.getEmail());
-        String expectedHash = sha256(request.getPassword() + userAuth.getPasswordSalt());
-        if (!expectedHash.equals(userAuth.getPasswordHash())) {
+        if (!PasswordHashing.matches(request.getPassword(), userAuth.getPasswordHash(), userAuth.getPasswordSalt())) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "邮箱或密码错误");
         }
+
+        normalizeDeviceType(request.getDeviceType());
+        upgradePasswordHash(userAuth, request.getPassword());
 
         userMapper.updateUserLoginTime(userAuth.getUserId());
         User user = requireUser(userAuth.getUserId());
@@ -121,11 +119,11 @@ public class AccountService {
     public AuthTokenResponse loginAdminByPassword(String email, String password, String deviceId,
                                                   AdminAccessService adminAccessService) {
         UserAuth userAuth = requireUserAuth(email);
-        String expectedHash = sha256(password + userAuth.getPasswordSalt());
-        if (!expectedHash.equals(userAuth.getPasswordHash())) {
+        if (!PasswordHashing.matches(password, userAuth.getPasswordHash(), userAuth.getPasswordSalt())) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED, "邮箱或密码错误");
         }
         adminAccessService.requireAdmin(userAuth.getUserId());
+        upgradePasswordHash(userAuth, password);
         User user = requireUser(userAuth.getUserId());
         UserProfile profile = requireProfile(userAuth.getUserId());
         userMapper.updateUserLoginTime(userAuth.getUserId());
@@ -189,7 +187,7 @@ public class AccountService {
 
         UserAuth userAuth = requireUserAuth(request.getEmail());
         String salt = UUID.randomUUID().toString().replace("-", "");
-        String hash = sha256(request.getNewPassword() + salt);
+        String hash = PasswordHashing.encode(request.getNewPassword());
         userMapper.updatePassword(userAuth.getUserId(), hash, salt);
         emailCodeService.clearCode(request.getEmail(), "reset");
     }
@@ -234,8 +232,7 @@ public class AccountService {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "注销账号需要密码或验证码");
         }
         if (hasPassword) {
-            String expectedHash = sha256(request.getPassword() + userAuth.getPasswordSalt());
-            if (!expectedHash.equals(userAuth.getPasswordHash())) {
+            if (!PasswordHashing.matches(request.getPassword(), userAuth.getPasswordHash(), userAuth.getPasswordSalt())) {
                 throw new BusinessException(ErrorCode.UNAUTHORIZED, "注销失败，密码错误");
             }
         }
@@ -389,12 +386,17 @@ public class AccountService {
         return switch (normalized) {
             case "android", "ios", "mobile", "phone" -> "android";
             case "windows", "desktop", "pc" -> "windows";
+            case "harmonyos", "ohos", "tablet" -> "harmonyos";
             default -> throw new BusinessException(ErrorCode.BAD_REQUEST, "当前只支持 android 和 windows 设备登录");
         };
     }
 
     private String normalizeDeviceSlot(String deviceType) {
-        return "windows".equals(deviceType) ? "desktop" : "mobile";
+        return switch (deviceType) {
+            case "windows" -> "desktop";
+            case "harmonyos" -> "tablet";
+            default -> "mobile";
+        };
     }
 
     private String normalizeDeviceId(String deviceId) {
@@ -426,13 +428,12 @@ public class AccountService {
         return time == null ? "" : time.toString();
     }
 
-    private String sha256(String content) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(content.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(hash);
-        } catch (NoSuchAlgorithmException exception) {
-            throw new IllegalStateException("SHA-256 not available", exception);
+    private void upgradePasswordHash(UserAuth userAuth, String password) {
+        if (PasswordHashing.needsUpgrade(userAuth.getPasswordHash())) {
+            int changed = userMapper.upgradePasswordHash(userAuth.getUserId(), userAuth.getPasswordHash(), PasswordHashing.encode(password));
+            if (changed != 1) {
+                throw new BusinessException(ErrorCode.UNAUTHORIZED, "账号凭据已更新，请重新登录");
+            }
         }
     }
 }

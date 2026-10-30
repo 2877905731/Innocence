@@ -12,6 +12,7 @@ planned_extensions:
     required_compatibility: "已新增共享dayRevision并接入旧保存/模板/导入；助手使用稳定实体新增，旧整日替换API保留兼容语义"
     connection_flow: "模型设置地址+Key→ChatServiceAddress同origin路径→GET /models→ChatModelCatalog严格映射→选择真实id→ChatProvider自动协议验证→成功后原生加密仓储；DEC-0052，第13节"
 topology:
+  device_sessions: "0132：android/mobile、windows/desktop、harmonyos/tablet各一个同时在线名额；同类upsert仅替换该类；Bearer解析owner，admin_web仍仅白名单管理员入口签发"
   nodes:
     - id: flutter_mobile
       name: "Flutter 手机端 App（Android）"
@@ -21,6 +22,9 @@ topology:
       owner: "Innocence"
     - id: admin_web
       name: "独立管理员网站（浏览器静态资源，经同域反向代理访问服务端）"
+      owner: "Innocence"
+    - id: flutter_tablet
+      name: "Flutter OH 鸿蒙平板（PC全屏布局，独立tablet会话）"
       owner: "Innocence"
     - id: user_model_service
       name: "用户自行配置的模型API（Chat Completions或Responses）"

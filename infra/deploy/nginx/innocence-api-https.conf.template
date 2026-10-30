@@ -1,0 +1,58 @@
+limit_req_zone $binary_remote_addr zone=innocence_api:2m rate=10r/s;
+limit_req_zone $binary_remote_addr zone=innocence_auth:2m rate=10r/m;
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name @SERVER_IP@;
+    ssl_certificate /etc/letsencrypt/live/innocence-api-ip/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/innocence-api-ip/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:InnocenceTLS:2m;
+    server_tokens off;
+    client_max_body_size 6m;
+    access_log off;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy no-referrer always;
+    error_page 429 = @rate_limited;
+
+    location @rate_limited {
+        default_type application/json;
+        return 429 '{"code":1002,"message":"Too many requests. Please retry later.","data":null,"requestId":"$request_id","serverTime":"$time_iso8601"}';
+    }
+
+    location ^~ /api/app/v1/auth/ {
+        limit_req zone=innocence_auth burst=5 nodelay;
+        limit_req_status 429;
+        client_max_body_size 16k;
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 30s;
+    }
+
+    location /api/app/v1/ {
+        limit_req zone=innocence_api burst=30 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 65s;
+    }
+
+    location /uploads/avatars/ {
+        limit_req zone=innocence_api burst=30 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+    }
+
+    location = /healthz {
+        proxy_pass http://127.0.0.1:8080/actuator/health;
+    }
+
+    # Admin and actuator remain accessible only through the SSH tunnel.
+    location / { return 404; }
+}

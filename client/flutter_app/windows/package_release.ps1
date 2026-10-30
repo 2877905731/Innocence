@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$InnoSetupCompiler,
+    [string]$ApiBaseUrl,
     [switch]$SkipVerification
 )
 
@@ -21,6 +22,8 @@ function Invoke-CheckedCommand {
 
 $windowsDirectory = [System.IO.Path]::GetFullPath($PSScriptRoot)
 $appDirectory = [System.IO.Path]::GetFullPath((Join-Path $windowsDirectory '..'))
+. (Join-Path $appDirectory 'tool/release_endpoint.ps1')
+$productionApiBaseUrl = Resolve-InnocenceReleaseApiBaseUrl -AppDirectory $appDirectory -RequestedUrl $ApiBaseUrl
 $pubspecPath = Join-Path $appDirectory 'pubspec.yaml'
 $pubspec = Get-Content -LiteralPath $pubspecPath -Raw
 $versionMatch = [regex]::Match(
@@ -48,7 +51,7 @@ Push-Location $appDirectory
 try {
     if (-not $SkipVerification) {
         Invoke-CheckedCommand -FilePath 'flutter' -Arguments @('pub', 'get')
-        Invoke-CheckedCommand -FilePath 'flutter' -Arguments @('analyze')
+        Invoke-CheckedCommand -FilePath 'dart' -Arguments @('analyze', 'lib', 'test')
         Invoke-CheckedCommand -FilePath 'flutter' -Arguments @('test')
     }
 
@@ -57,7 +60,9 @@ try {
         'windows',
         '--release',
         '--build-name', $versionName,
-        '--build-number', $buildNumber
+        '--build-number', $buildNumber,
+        '--dart-define=INNOCENCE_OFFLINE_ONLY=false',
+        "--dart-define=INNOCENCE_API_BASE_URL=$productionApiBaseUrl"
     )
 } finally {
     Pop-Location

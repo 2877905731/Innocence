@@ -930,3 +930,17 @@ checkpoints:
     status: complete
     path: progress/0131__20261030__P01__DONE__ssh-connected-and-local-admin-tunnel.md
     title: "专用SSH认证和只读健康核对通过，本机后台隧道可用"
+  - sequence: "0132"
+    created_at: "2026-10-30T23:15:00+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0132__20261030__P01__DECISION__three-platform-online-and-independent-tablet-session.md
+    title: "三端联网发行与鸿蒙独立平板会话名额"
+  - sequence: "0133"
+    created_at: "2026-10-30T23:43:45+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0133__20261030__P01__DONE__online-v130-production-and-three-platform-release-ready.md
+    title: "生产HTTPS、三类会话与1.3.0三端发行就绪，鸿蒙真机安装启动"

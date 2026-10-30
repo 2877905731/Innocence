@@ -8,20 +8,31 @@ param(
     [string]$Architecture = 'arm64',
     [ValidateSet('debug', 'release')]
     [string]$BuildMode = 'debug',
+    [ValidateSet('Offline', 'Online')]
+    [string]$Edition = 'Offline',
+    [string]$ApiBaseUrl = '',
     [switch]$Unsigned,
     [switch]$FocusNoticeProbe,
+    [switch]$OnlineProbe,
     [switch]$DirectGit,
     [string]$GitHelperPath = ''
 )
 $ErrorActionPreference = 'Stop'
 $appRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+. (Join-Path $PSScriptRoot 'release_endpoint.ps1')
+$onlineApi = if ($Edition -eq 'Online') { Resolve-InnocenceReleaseApiBaseUrl -AppDirectory $appRoot -RequestedUrl $ApiBaseUrl } else { '' }
 $workRoot = [IO.Path]::GetFullPath((Join-Path $appRoot 'build/harmonyos-h0'))
-if ($FocusNoticeProbe -and ($Architecture -ne 'x64' -or !$Unsigned -or $BuildMode -ne 'debug')) {
+if ($OnlineProbe -and ($Architecture -ne 'x64' -or !$Unsigned -or $BuildMode -ne 'debug' -or $Edition -ne 'Online' -or $FocusNoticeProbe)) {
+    throw '联网验证入口仅允许 x64 未签名 Online Debug 独立模拟器包。'
+}
+if ($FocusNoticeProbe -and ($Architecture -ne 'x64' -or !$Unsigned -or $BuildMode -ne 'debug' -or $Edition -ne 'Offline')) {
     throw '通知验证入口只允许 x64 未签名 Debug 模拟器包，不生成实体设备或发行包。'
 }
 $stageFolder = if ($Architecture -eq 'arm64') { 'app' } else { 'app-x64' }
 if ($BuildMode -eq 'release') { $stageFolder += '-release' }
+if ($Edition -eq 'Online') { $stageFolder += '-online' }
 if ($FocusNoticeProbe) { $stageFolder += '-focus-qa' }
+if ($OnlineProbe) { $stageFolder += '-online-qa' }
 $stageRoot = Join-Path $workRoot $stageFolder
 if (!$FlutterSdk) { $FlutterSdk = Join-Path $workRoot 'flutter-oh' }
 if (!$DevEcoHome -and (Test-Path -LiteralPath (Join-Path $workRoot 'tools/DevEcoStudio26/sdk'))) {
@@ -153,6 +164,14 @@ try {
     }
     Copy-Item -LiteralPath (Join-Path $appRoot 'pubspec.yaml') -Destination $stageRoot -Force
     Copy-Item -LiteralPath (Join-Path $appRoot 'harmonyos/pubspec_overrides.yaml') -Destination $stageRoot -Force
+    if ($OnlineProbe) {
+        Copy-Item -LiteralPath (Join-Path $appRoot 'tool/harmony_online_probe.dart') -Destination (Join-Path $stageRoot 'lib/harmony_online_probe.dart') -Force
+        $qaScopePath = Join-Path $stageRoot 'ohos/AppScope/app.json5'
+        $qaScope = [IO.File]::ReadAllText($qaScopePath)
+        $qaBundle = '"com.innocence.tablet.innocence_flutter"'
+        if ([regex]::Matches($qaScope, [regex]::Escape($qaBundle)).Count -ne 1) { throw '验证包原应用包名必须唯一。' }
+        [IO.File]::WriteAllText($qaScopePath, $qaScope.Replace($qaBundle, '"com.innocence.tablet.innocence_flutter.onlineqa"'), [Text.UTF8Encoding]::new($false))
+    }
     if ($FocusNoticeProbe) {
         Copy-Item -LiteralPath (Join-Path $appRoot 'tool/focus_notice_probe.dart') `
             -Destination (Join-Path $stageRoot 'lib/focus_notice_probe.dart') -Force
@@ -166,8 +185,8 @@ try {
             $probeScope.Replace($originalBundle, '"com.innocence.tablet.innocence_flutter.focusqa"'),
             [Text.UTF8Encoding]::new($false))
     }
-    if ($BuildMode -eq 'release') {
-        # This accepted edition is local-only. Do not ship the Debug template's network permission.
+    if ($Edition -eq 'Offline') {
+        # Offline editions cannot acquire network access from the native template.
         $stageModulePath = Join-Path $stageRoot 'ohos/entry/src/main/module.json5'
         $stageModule = [IO.File]::ReadAllText($stageModulePath)
         $internetPermission = '\{"name"\s*:\s*"ohos\.permission\.INTERNET"\},?'
@@ -196,13 +215,15 @@ try {
         Invoke-TaskFlutter @('pub', 'get')
         if ($Action -eq 'analyze') { Invoke-TaskFlutter @('analyze', '--no-pub'); return }
         if ($Action -eq 'build') {
-            # Native online/device-slot contracts and key vault are a later gate.
+            $offlineFlag = if ($Edition -eq 'Offline') { 'true' } else { 'false' }
             $hapArguments = @('build', 'hap', "--$BuildMode",
                 "--target-platform=ohos-$Architecture",
                 '--dart-define=INNOCENCE_TARGET_PLATFORM=harmonyos',
-                '--dart-define=INNOCENCE_OFFLINE_ONLY=true')
+                "--dart-define=INNOCENCE_OFFLINE_ONLY=$offlineFlag")
+            if ($Edition -eq 'Online') { $hapArguments += "--dart-define=INNOCENCE_API_BASE_URL=$onlineApi" }
             if ($Unsigned) { $hapArguments += '--no-codesign' }
             if ($FocusNoticeProbe) { $hapArguments += '--target=lib/focus_notice_probe.dart' }
+            if ($OnlineProbe) { $hapArguments += '--target=lib/harmony_online_probe.dart' }
             Invoke-TaskFlutter $hapArguments
         }
     } finally { Pop-Location }

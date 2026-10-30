@@ -62,6 +62,9 @@ public interface UserMapper {
 
     void updatePassword(@Param("userId") Long userId, @Param("passwordHash") String passwordHash, @Param("passwordSalt") String passwordSalt);
 
+    int upgradePasswordHash(@Param("userId") Long userId, @Param("expectedHash") String expectedHash,
+                            @Param("passwordHash") String passwordHash);
+
     void cancelAccount(@Param("userId") Long userId);
 
     void cancelSessions(@Param("userId") Long userId, @Param("logoutTime") java.time.LocalDateTime logoutTime);

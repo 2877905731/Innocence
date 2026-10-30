@@ -57,9 +57,15 @@ void main() {
   });
 
   final tabletRun = AppConfig.capabilities.isHarmonyTablet;
-  test('first Harmony build cannot call the account API', () {
-    expect(AppConfig.offlineOnlyBuild, isTrue);
-    expect(AppConfig.apiBaseUrl, isEmpty);
+  test('Harmony respects the explicit online or offline edition', () {
+    const offline = bool.fromEnvironment('INNOCENCE_OFFLINE_ONLY');
+    expect(AppConfig.offlineOnlyBuild, offline);
+    if (offline) {
+      expect(AppConfig.apiBaseUrl, isEmpty);
+    } else {
+      expect(AppConfig.apiBaseUrl, isNotEmpty);
+      expect(AppConfig.deviceType, 'harmonyos');
+    }
   }, skip: !tabletRun);
 
   testWidgets('rotation preserves PC destination and focus state',

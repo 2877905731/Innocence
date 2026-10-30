@@ -219,6 +219,14 @@
           and auth_type = 'email'
     </update>
 
+    <update id="upgradePasswordHash">
+        update user_auth
+        set password_hash = #{passwordHash}
+        where user_id = #{userId}
+          and auth_type = 'email'
+          and password_hash = #{expectedHash}
+    </update>
+
     <update id="cancelAccount">
         update app_user
         set status = 4

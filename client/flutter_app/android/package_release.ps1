@@ -1,6 +1,8 @@
 [CmdletBinding()]
 param(
     [string]$SigningDirectory = (Join-Path $env:LOCALAPPDATA 'Innocence/release-signing'),
+    [ValidateSet('Offline', 'Online')][string]$Edition = 'Offline',
+    [string]$ApiBaseUrl,
     [switch]$SkipVerification
 )
 
@@ -14,6 +16,10 @@ function Invoke-Checked {
 }
 
 $appDirectory = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+. (Join-Path $appDirectory 'tool/release_endpoint.ps1')
+$productionApiBaseUrl = if ($Edition -eq 'Online') {
+    Resolve-InnocenceReleaseApiBaseUrl -AppDirectory $appDirectory -RequestedUrl $ApiBaseUrl
+} else { '' }
 $pubspec = Get-Content -LiteralPath (Join-Path $appDirectory 'pubspec.yaml') -Raw
 $version = [regex]::Match($pubspec, '(?m)^version:\s*(?<name>\d+\.\d+\.\d+)\+(?<build>\d+)\s*$')
 if (-not $version.Success) { throw 'pubspec.yaml requires a semantic version and build number.' }
@@ -65,14 +71,24 @@ try {
     Push-Location $appDirectory
     try {
         if (-not $SkipVerification) {
-            Invoke-Checked 'flutter' @('analyze', '--no-pub')
+            Invoke-Checked 'dart' @('analyze', 'lib', 'test')
             Invoke-Checked 'flutter' @('test', '--no-pub')
             Invoke-Checked 'flutter' @('test', '--no-pub',
                 '--dart-define=INNOCENCE_OFFLINE_ONLY=true', 'test/app/offline_release_test.dart')
+            if ($Edition -eq 'Online') {
+                Invoke-Checked 'flutter' @('test', '--no-pub',
+                    '--dart-define=INNOCENCE_OFFLINE_ONLY=false',
+                    "--dart-define=INNOCENCE_API_BASE_URL=$productionApiBaseUrl", 'test/app/online_release_test.dart')
+            }
         }
-        Invoke-Checked 'flutter' @('build', 'apk', '--release', '--no-pub',
+        $offlineFlag = ($Edition -eq 'Offline').ToString().ToLowerInvariant()
+        $buildArguments = @('build', 'apk', '--release', '--no-pub',
             '--build-name', $versionName, '--build-number', $buildNumber,
-            '--dart-define=INNOCENCE_OFFLINE_ONLY=true')
+            "--dart-define=INNOCENCE_OFFLINE_ONLY=$offlineFlag")
+        if ($Edition -eq 'Online') {
+            $buildArguments += "--dart-define=INNOCENCE_API_BASE_URL=$productionApiBaseUrl"
+        }
+        Invoke-Checked 'flutter' $buildArguments
     } finally { Pop-Location }
 
     $apkPath = Join-Path $appDirectory 'build/app/outputs/flutter-apk/app-release.apk'
@@ -84,7 +100,9 @@ try {
         Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName 'apksigner.bat') } |
         Sort-Object Name -Descending | Select-Object -First 1
     if (-not $buildTools) { throw 'Android SDK build-tools are missing.' }
-    Invoke-Checked (Join-Path $buildTools.FullName 'apksigner.bat') @('verify', '--verbose', '--print-certs', $apkPath)
+    $signatureDetails = & (Join-Path $buildTools.FullName 'apksigner.bat') verify --verbose --print-certs $apkPath
+    if ($LASTEXITCODE -ne 0) { throw 'APK signature verification failed.' }
+    $signatureDetails | Where-Object { $_ -match 'certificate SHA-256 digest:' } | Write-Output
     $badging = & (Join-Path $buildTools.FullName 'aapt.exe') dump badging $apkPath
     if ($LASTEXITCODE -ne 0) { throw 'APK metadata verification failed.' }
     if (-not ($badging -match "versionCode='$buildNumber' versionName='$versionName'")) {
@@ -93,11 +111,15 @@ try {
     if ($badging -match '^application-debuggable') { throw 'Refusing to package a debuggable APK.' }
     $permissions = & (Join-Path $buildTools.FullName 'aapt.exe') dump permissions $apkPath
     if ($LASTEXITCODE -ne 0) { throw 'APK permission verification failed.' }
-    if ($permissions -match 'android.permission.INTERNET') {
+    if ($Edition -eq 'Offline' -and $permissions -match 'android.permission.INTERNET') {
         throw 'Offline Android release must not request INTERNET permission.'
     }
+    if ($Edition -eq 'Online' -and -not ($permissions -match 'android.permission.INTERNET')) {
+        throw 'Online Android release requires INTERNET permission.'
+    }
     New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
-    $artifact = Join-Path $outputDirectory "Innocence-v$versionName-android-offline.apk"
+    $editionName = $Edition.ToLowerInvariant()
+    $artifact = Join-Path $outputDirectory "Innocence-v$versionName-android-$editionName.apk"
     Copy-Item -LiteralPath $apkPath -Destination $artifact -Force
     $checksumLines = Get-ChildItem -LiteralPath $outputDirectory -File |
         Where-Object { $_.Extension -in @('.exe', '.zip', '.apk', '.aab') } |

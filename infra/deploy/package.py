@@ -18,6 +18,10 @@ SHA = lambda data: hashlib.sha256(data).hexdigest()
 FILES = (
     ".env.example", ".dockerignore", "Dockerfile", "compose.yaml",
     "nginx/innocence-local.conf", "prepare.sh", "start.sh", "README.zh-CN.md",
+    "nginx/innocence-acme.conf.template", "nginx/innocence-api-https.conf.template",
+    "prepare-ip-certificate.sh", "enable-public-api.sh", "backup-before-upgrade.sh",
+    "verify-backup-restore.sh", "upgrade-online-backend.sh",
+    "systemd/innocence-cert-renew.service", "systemd/innocence-cert-renew.timer",
 )
 
 
@@ -84,7 +88,7 @@ def main() -> None:
         "source_worktree_dirty": bool(subprocess.run(
             ["git", "status", "--porcelain", "--untracked-files=no"], cwd=ROOT,
             check=True, capture_output=True, text=True).stdout.strip()),
-        "scope": "First deployment through SSH tunnel; no public HTTPS or account migration performed",
+        "scope": "SSH admin and optional public IP HTTPS API; scripts never migrate a local account database",
         "original_jar_sha256": SHA(jar.read_bytes()),
         "deploy_jar_sha256": SHA((bundle / "backend" / "server.jar").read_bytes()),
         "excluded_jar_entries": [excluded],

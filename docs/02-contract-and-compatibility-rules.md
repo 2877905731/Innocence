@@ -66,7 +66,7 @@ sensitive_data:
     - request_id
   samples_must_be_redacted_or_synthetic: true
   secrets_storage: env_or_untracked_local_config
-  assistant_byok_storage: "DEC-0051/0092：按当前账号/本机owner分区，完整配置经Windows用户级DPAPI或Android Keystore AES-GCM加密后保存；无明文兜底，不上传Innocence服务端/同步，不进日志或聊天"
+  assistant_byok_storage: "DEC-0051/0092与0132：按当前账号/本机owner分区，完整配置经Windows用户级DPAPI、Android Keystore AES-GCM或鸿蒙HUKS AES-256-GCM加密后保存；无明文兜底，不上传Innocence服务端/同步，不进日志或聊天；鸿蒙INV1封套、随机12字节nonce/16字节tag，篡改与缺密钥拒绝"
   assistant_model_boundary: "ChatProvider专门适配Chat Completions/Responses；仅HTTPS或本机loopback HTTP端点，不重定向；当前对话及按需读取的软件资料直接发送至用户指定服务。工具严格白名单与字段/身份/修订校验，软件操作结果来自业务层"
   sync_logs_forbid:
     - token
@@ -91,7 +91,7 @@ compatibility:
 ## 统一接口约定（已确认）
 
 - 前台接口前缀：`/api/app/v1`；后台：`/api/admin/v1`；实时通道：`/ws/app`
-- 鉴权：登录返回 `accessToken`，请求头 `Authorization: Bearer {token}`；设备信息 `X-Device-Id`、`X-Device-Type`（`mobile` / `desktop`）
+- 鉴权：登录返回 `accessToken`，请求头 `Authorization: Bearer {token}`；设备信息 `X-Device-Id`、`X-Device-Type`。0132确认三端同时在线：`android`→`mobile`、`windows`→`desktop`、`harmonyos`→`tablet`，各独立一个名额；同类新登录只替换同类会话，其他两类保持有效。旧 `mobile/phone/ios`、`desktop/pc` 别名保留，`ohos/tablet` 归一为 `harmonyos`。普通账号接口不得申请 `admin_web`。
 - 独立管理员网页使用保留的 `X-Device-Type: admin_web` 与 `user_session.device_slot=admin_web`；仅 `/api/admin/v1/auth/login` 可在管理员白名单校验后签发该会话，普通用户登录路由不能申请此类型。当前后台 Controller 仍支持已有 Flutter 管理入口；网页请求以同域 `/api` 转发。
 - 统一返回结构：`{ code, message, data, requestId, serverTime }`，`code=0` 成功，非 0 为可读业务错误码（不裸抛 HTTP 500）
 - 分页结构：`{ pageNo, pageSize, total, list }`

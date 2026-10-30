@@ -90,7 +90,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File 'F:\springmvc1\Innocence
 
 此脚本在本机运行，不需要重新上传0127服务器包。原包及SHA256SUMS保持不变；不要直接修改已上传包里的README/脚本，否则启动前的完整性检查会拒绝。
 
-## 公网与后续工作
+## 首轮入口与后续工作（0127历史范围）
 
 这份配置提供 SSH 隧道自用入口。公开开放前继续处理密码哈希升级、注册/登录与验证码的完整限流、数据库及头像备份恢复、HTTPS 自动续期及真实访问验收。IP HTTPS 需支持 IP 证书的 ACME 客户端与续期后的 Nginx 重载，现阶段不修改公网入口。
 
@@ -102,3 +102,21 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File 'F:\springmvc1\Innocence
 - IP 证书及 Certbot：https://letsencrypt.org/2026/03/11/shorter-certs-certbot
 
 已发布 Android/鸿蒙仍保持既有离线边界；本次服务器包不改变客户端权限、API 地址或自动上传本机资料。
+
+## v1.3.0 公网 API 与升级
+
+0132用户决定Windows、Android、鸿蒙全联网，同账号允许手机/电脑/平板三类独立会话。生产地址为 `https://85.189.40.87/api/app/v1/`。管理网页仍经本机 `http://127.0.0.1:18080/` 的SSH隧道访问，不放开公网管理路径。
+
+后续部署包额外包含以下可审查脚本。既有数据库升级只更新backend，不再运行首轮数据库初始化，不覆盖 `.env` 或持久卷。
+
+1. 在服务器安装 `python3-venv`，在 `/opt/innocence-certbot` 建立venv并安装Certbot 5.9.0；本轮Debian13已有Docker/Compose/Nginx。
+2. `sh prepare-ip-certificate.sh 85.189.40.87`：配置80端口的ACME挑战，签发IP证书；脚本使用无联系邮箱账户，不读取SMTP邮箱作为ACME联系人。公网安全组须允许80/443。
+3. `sh backup-before-upgrade.sh`：生成服务器私有目录，保存一致性SQL、压缩SQL、头像、旧JAR及旧镜像标识；不把备份下载到仓库或发布资产。
+4. `sh verify-backup-restore.sh /opt/innocence/backups/pre-online-时间戳`：在网络隔离、512MiB的临时MySQL恢复，核对表数及六类业务行数；随后只停止该验证容器。比较期间避免业务写入，旧快照与当前库新增行不同会如实失败。
+5. 将新部署包及摘要放在 `/opt/innocence/online-staging/`，再执行 `sh upgrade-online-backend.sh 私有备份目录`。该脚本校验压缩包和文件摘要，仅重建backend，等待健康后返回。
+6. `sh enable-public-api.sh 85.189.40.87`：安装443的API配置；仅开放前台API、头像与 `/healthz`，管理/Actuator路径公网404，认证入口每IP限流10次/分钟、突发5次，超过返回JSON429。
+7. 将 `systemd/innocence-cert-renew.service` 和 `.timer` 安装至 `/etc/systemd/system/`，`systemctl daemon-reload` 后 `systemctl enable --now innocence-cert-renew.timer`。每日两次检查，续期成功后Nginx语法检查并重载。运行 `/opt/innocence-certbot/bin/certbot renew --dry-run` 验证续期流程。
+
+本轮已经执行证书签发、续期演练、隔离恢复、后端升级和外部可信HTTPS核对。IP证书采用短有效期，续期timer须持续运行，80端口挑战路径须可达。当前备份位于同服务器，尚无异地备份或长期负载证据。
+
+密码新建/重置使用PBKDF2-HMAC-SHA256（600000次、随机盐），旧SHA256在正确密码登录后以条件更新升级，防止并发重置被覆盖。服务器业务身份来自Bearer会话；新增tablet槽位不需要改表。客户端本机资料仍由用户确认导入。

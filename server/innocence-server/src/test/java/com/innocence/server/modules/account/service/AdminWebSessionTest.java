@@ -33,6 +33,7 @@ class AdminWebSessionTest {
         mapper = mock(UserMapper.class);
         access = mock(AdminAccessService.class);
         account = new AccountService(mapper, mock(EmailCodeService.class), mock(CheckInService.class), mock(FriendMapper.class));
+        when(mapper.upgradePasswordHash(anyLong(), anyString(), anyString())).thenReturn(1);
     }
 
     @Test
@@ -52,6 +53,9 @@ class AdminWebSessionTest {
         assertEquals("admin_web", result.getDeviceType());
         assertEquals("browser-tab", result.getDeviceId());
         verify(access).requireAdmin(7L);
+        ArgumentCaptor<String> upgraded = ArgumentCaptor.forClass(String.class);
+        verify(mapper).upgradePasswordHash(eq(7L), eq(auth.getPasswordHash()), upgraded.capture());
+        org.junit.jupiter.api.Assertions.assertTrue(PasswordHashing.matches("synthetic-password", upgraded.getValue(), "salt"));
     }
 
     @Test
@@ -65,6 +69,17 @@ class AdminWebSessionTest {
         assertEquals(ErrorCode.FORBIDDEN, error.getCode());
         verify(mapper, never()).upsertSession(any());
         verify(mapper, never()).updateUserLoginTime(anyLong());
+        verify(mapper, never()).upgradePasswordHash(anyLong(), anyString(), anyString());
+    }
+
+    @Test
+    void concurrentPasswordChangeCannotBeOverwrittenByMigration() throws Exception {
+        when(mapper.findAuthByEmail("admin@example.test")).thenReturn(auth());
+        when(mapper.upgradePasswordHash(anyLong(), anyString(), anyString())).thenReturn(0);
+        BusinessException error = assertThrows(BusinessException.class,
+                () -> account.loginAdminByPassword("admin@example.test", "synthetic-password", "browser-tab", access));
+        assertEquals(ErrorCode.UNAUTHORIZED, error.getCode());
+        verify(mapper, never()).upsertSession(any());
     }
 
     @Test
@@ -99,5 +114,23 @@ class AdminWebSessionTest {
         byte[] hash = MessageDigest.getInstance("SHA-256").digest("synthetic-passwordsalt".getBytes(StandardCharsets.UTF_8));
         auth.setPasswordHash(HexFormat.of().formatHex(hash));
         return auth;
+    }
+
+    @Test
+    void normalHarmonyLoginCreatesTabletSlotWithoutTouchingOtherSlots() throws Exception {
+        when(mapper.findAuthByEmail("admin@example.test")).thenReturn(auth());
+        User user = new User(); user.setId(7L);
+        UserProfile profile = new UserProfile(); profile.setUserId(7L);
+        when(mapper.findUserById(7L)).thenReturn(user);
+        when(mapper.findProfileByUserId(7L)).thenReturn(profile);
+        PasswordLoginRequest request = new PasswordLoginRequest();
+        request.setEmail("admin@example.test"); request.setPassword("synthetic-password");
+        request.setDeviceType("ohos"); request.setDeviceId("qa-tablet");
+        var response = account.loginByPassword(request);
+        ArgumentCaptor<UserSession> session = ArgumentCaptor.forClass(UserSession.class);
+        verify(mapper).upsertSession(session.capture());
+        assertEquals("tablet", session.getValue().getDeviceSlot());
+        assertEquals("harmonyos", session.getValue().getDeviceType());
+        assertEquals("harmonyos", response.getDeviceType());
     }
 }

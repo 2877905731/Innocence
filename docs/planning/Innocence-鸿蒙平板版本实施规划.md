@@ -214,3 +214,8 @@ API26独立模拟器TIMER胶囊实际由00:53变00:48，暂停冻结57秒、继�
 v1.2.4+9 Windows/Android正式与v1.2.4-harmonyos.1独立Release均公开，Release#412856784/#412858146，latest=v1.2.4；7资产远端摘要/正文及匿名200长度通过，源码623a321与两注释标签原子快进推送。214 Flutter/5跳过、19离线/10平板/80后端、分析及三端发行构建和签名/CRC/115 Dart一致性通过。API36正式v1.2.3覆盖Success/COLD1333ms/进程错误筛选0，系统桌面ANR影响业务UI，数据保留UI证据未取得；未把它当真机通过。鸿蒙公开ARM64 AOT未签名/无INTERNET，权益及后台接力/设备门禁保持；后端未部署。
 
 发行说明：[Windows/Android](../releases/v1.2.4.md)、[鸿蒙本机版](../releases/v1.2.4-harmonyos.1.md)。
+
+
+## 2026-10-30 三端联网与平板独立名额（0132/0133）
+
+用户要求Windows、Android、鸿蒙全部联网，并明确允许三端同时在线、平板独立名额。当前harmonyos/ohos/tablet归一为harmonyos并使用tablet槽位，同类新登录仅替换同类；既有android/mobile及windows/desktop保持，admin_web独立。v1.3.0+12的Online构建启用生产HTTPS与INTERNET，Offline仍明确关闭网络权限。HUKS AES-256-GCM通道接入；独立API26/x64模拟器的加密往返/随机nonce/篡改与格式拒绝/进程重启解密/可信HTTPS通过。真实公网宿主三类登录、计划读取及平板同类替换通过，专用QA账号已清理。本人连接LRT-W20后，私有签名Release验签/安装成功；解锁后进程及收件箱PC画面核对，无卸载或清数据。个人包/密钥/Profile仍仅F盘，公开包未签名。完整实体登录业务/资料恢复/性能、模型供应商及提醒权益与H5/G01保持待验。

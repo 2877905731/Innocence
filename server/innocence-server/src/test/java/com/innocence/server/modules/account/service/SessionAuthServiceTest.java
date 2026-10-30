@@ -136,4 +136,31 @@ class SessionAuthServiceTest {
         session.setSessionToken(token);
         return session;
     }
+
+    @Test
+    void tabletAliasesResolveOnlyTheIndependentTabletSlot() {
+        UserSession tablet = activeSession("tablet-token");
+        tablet.setUserId(7L);
+        when(userMapper.findActiveSessionByTokenAndSlot("tablet-token", "tablet")).thenReturn(tablet);
+        for (String type : new String[]{"harmonyos", "ohos", "tablet"}) {
+            assertSame(tablet, sessionAuthService.requireActiveSession(type, "tablet-token"));
+        }
+        assertThrows(BusinessException.class, () -> sessionAuthService.requireActiveSession("windows", "tablet-token"));
+        assertThrows(BusinessException.class, () -> sessionAuthService.requireActiveSession("android", "tablet-token"));
+        assertThrows(BusinessException.class, () -> sessionAuthService.requireActiveSession("admin_web", "tablet-token"));
+    }
+
+    @Test
+    void replacedTabletTokenCannotAffectTheOtherTwoSlots() {
+        UserSession tablet = activeSession("new-tablet");
+        UserSession desktop = activeSession("desktop");
+        UserSession mobile = activeSession("mobile");
+        when(userMapper.findSessionByUserIdAndSlot(7L, "tablet")).thenReturn(tablet);
+        when(userMapper.findSessionByUserIdAndSlot(7L, "desktop")).thenReturn(desktop);
+        when(userMapper.findSessionByUserIdAndSlot(7L, "mobile")).thenReturn(mobile);
+        assertThrows(BusinessException.class, () -> sessionAuthService.requireActiveSession(7L, "harmonyos", "old-tablet"));
+        assertSame(tablet, sessionAuthService.requireActiveSession(7L, "harmonyos", "new-tablet"));
+        assertSame(desktop, sessionAuthService.requireActiveSession(7L, "windows", "desktop"));
+        assertSame(mobile, sessionAuthService.requireActiveSession(7L, "android", "mobile"));
+    }
 }

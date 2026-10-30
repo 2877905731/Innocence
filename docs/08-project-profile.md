@@ -46,7 +46,7 @@ project_specific_rules:
     verification: "存档章节存在且含提示词原文"
   - id: RULE-005
     enabled: true
-    rule: "1 台手机 + 1 台电脑同时在线；超出时拒绝新设备或替换旧会话"
+    rule: "0132用户决定：1台Android手机 + 1台Windows电脑 + 1台鸿蒙平板同时在线，mobile/desktop/tablet各独立名额；同类新登录仅替换同类会话，admin_web仍独立"
     verification: "会话策略验收（G01）"
   - id: RULE-006
     enabled: true

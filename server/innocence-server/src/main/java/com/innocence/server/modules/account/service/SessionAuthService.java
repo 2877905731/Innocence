@@ -66,6 +66,7 @@ public class SessionAuthService {
         return switch (normalized) {
             case "android", "ios", "mobile", "phone" -> "android";
             case "windows", "desktop", "pc" -> "windows";
+            case "harmonyos", "ohos", "tablet" -> "harmonyos";
             case "admin_web" -> "admin_web";
             default -> throw new BusinessException(ErrorCode.UNAUTHORIZED, "不支持的设备类型");
         };
@@ -74,6 +75,7 @@ public class SessionAuthService {
     private String resolveDeviceSlot(String deviceType) {
         return switch (normalizeDeviceType(deviceType)) {
             case "windows" -> "desktop";
+            case "harmonyos" -> "tablet";
             case "admin_web" -> "admin_web";
             default -> "mobile";
         };

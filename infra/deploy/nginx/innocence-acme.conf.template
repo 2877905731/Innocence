@@ -1,0 +1,9 @@
+server {
+    listen 80;
+    server_name @SERVER_IP@;
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/lib/innocence-acme;
+        try_files $uri =404;
+    }
+    location / { return 404; }
+}

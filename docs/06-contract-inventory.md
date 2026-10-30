@@ -19,7 +19,7 @@ evidence_policy:
       - real_amount
       - email_address
 common_request_context:
-  base_url: "http://localhost:8080（本地；生产未定）"
+  base_url: "本地http://localhost:8080；生产https://85.189.40.87/api/app/v1/（v1.3.0联网构建显式注入，管理端仅SSH隧道）"
   authentication_method: "Authorization: Bearer {accessToken}"
   user_context_header: "X-User-Id（仅服务端从 token 解析，不作为请求入参）"
 external_model_discovery:
