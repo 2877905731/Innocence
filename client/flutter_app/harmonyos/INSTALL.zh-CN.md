@@ -1,8 +1,14 @@
 # GitHub 下载的鸿蒙 HAP 如何安装
 
-适用当前公开的 `v1.2.5-harmonyos.1` 平板本机版。GitHub 的
-`Innocence-v1.2.5-harmonyos-arm64-release-unsigned.hap` 是 **ARM64 未签名开发分发包**，
+适用 `v1.2.6-harmonyos.1` 平板本机版。GitHub 的
+`Innocence-v1.2.6-harmonyos-arm64-release-unsigned.hap` 是 **ARM64 未签名开发分发包**，
 不能在平板文件管理器里直接点击安装。`Release/AOT` 表示编译方式，不代表已经签名或上架。
+
+## 能否像 Android APK 一样下载后点文件安装
+
+Android 的正式签名 APK 可以从 GitHub 下载后交给系统安装器安装。当前原生 HarmonyOS 的官方开发安装路线是有效签名后通过 DevEco/HDC 安装，指定设备网页分发则由华为浏览器中的 Deeplink 触发系统下载和安装；不能把单纯的 GitHub HAP 下载当作这条分发链路。即使改为个人发布证书签名，也不等于文件管理器增加了 HAP 直装能力。改后缀为 `.app` 或 `.apk` 同样无效。
+
+此前的临时 HTTPS 安装页属于网页分发，与你要求的“Release 下载文件后直接点装”不是同一体验。应用市场或获准的测试分发可以提供常规用户安装入口；个人单设备 Profile 不是任意下载者的通用授权。当前公开 HAP 仍需接收者自己的设备 Profile／签名和电脑工具，不能声称它已经支持直接点击安装。官方依据：[Deeplink 分发规范](https://developer.huawei.com/consumer/cn/doc/doccenter-submission/agc-help-internal-test-release-app-0000002260691994)、[应用签名](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/ide-signing)、[HDC 工具](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/hdc)。
 
 ## 已确认目标：仅给自己平板使用（2026-10-24）
 

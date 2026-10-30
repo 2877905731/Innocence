@@ -21,17 +21,17 @@
 
 Innocence is built with Flutter and Spring Boot and currently targets Windows desktop and mobile devices.
 
-## Download v1.2.3
+## Downloads
 
 | Platform | Download | Scope |
 |---|---|---|
-| Windows x64 | [Installer](https://github.com/2877905731/Innocence/releases/download/v1.2.3/Innocence-v1.2.3-windows-x64-setup.exe) · [Portable ZIP](https://github.com/2877905731/Innocence/releases/download/v1.2.3/Innocence-v1.2.3-windows-x64-portable.zip) | Desktop edition; installer has no Authenticode signature |
-| Android 7.0+ | [Offline APK](https://github.com/2877905731/Innocence/releases/download/v1.2.3/Innocence-v1.2.3-android-offline.apk) | Dedicated release signature; improved focus layout; remains offline |
-| HarmonyOS tablet local edition | [ARM64 Release HAP](https://github.com/2877905731/Innocence/releases/tag/v1.2.3-harmonyos.1) | Unsigned AOT; recipients must provide their own matching device profile and signing |
+| Windows x64 · v1.2.5 | [Installer](https://github.com/2877905731/Innocence/releases/download/v1.2.5/Innocence-v1.2.5-windows-x64-setup.exe) · [Portable ZIP](https://github.com/2877905731/Innocence/releases/download/v1.2.5/Innocence-v1.2.5-windows-x64-portable.zip) | Desktop edition; installer has no Authenticode signature |
+| Android 7.0+ · v1.2.6 | [Offline APK](https://github.com/2877905731/Innocence/releases/download/v1.2.6/Innocence-v1.2.6-android-offline.apk) | Original release signature; bundled display fonts and smoother glass beams; install with the system package installer |
+| HarmonyOS tablet local edition · v1.2.6 | [ARM64 Release HAP](https://github.com/2877905731/Innocence/releases/tag/v1.2.6-harmonyos.1) | Unsigned AOT; requires a matching device profile, signing, and DevEco/HDC; opening the downloaded file does not install it |
 
-[Release notes](https://github.com/2877905731/Innocence/releases/tag/v1.2.3) · [SHA256 checksums](https://github.com/2877905731/Innocence/releases/download/v1.2.3/SHA256SUMS.txt) · [Changelog](CHANGELOG.md)
+[Android v1.2.6 release notes](https://github.com/2877905731/Innocence/releases/tag/v1.2.6) · [SHA256 checksums](https://github.com/2877905731/Innocence/releases/download/v1.2.6/SHA256SUMS.txt) · [Windows v1.2.5](https://github.com/2877905731/Innocence/releases/tag/v1.2.5) · [Changelog](CHANGELOG.md)
 
-v1.2.3 refreshes Minimal White, focus dials, and the Android focus card. Windows adds a bring-your-own-key chat assistant. Android retains the official release signature and supports an in-place upgrade from v1.2.2 while preserving local data; it remains an offline edition without INTERNET permission.
+v1.2.6 bundles real Wabi-Sabi display fonts and improves Liquid Glass beam edges on Android and HarmonyOS. Android retains its original release signature and local data when upgrading a compatible official release; it remains offline without INTERNET permission. The full Chinese font increases package size. Windows downloads remain at v1.2.5.
 
 Choose a language and explicitly enter offline mode on first launch. Android supports daily plans with a 24-hour clock picker, a full monthly calendar with batch templates, annual tasks and subtasks, focus, statistics, memos, and local settings. Data stays on the device and is removed by uninstalling or clearing app data. Earlier development APKs use a different signature and cannot be upgraded directly. Physical-device/OEM/Vulkan checks and online synchronization remain in progress.
 
@@ -44,7 +44,7 @@ Choose a language and explicitly enter offline mode on first launch. Android sup
 - Core interaction foundations for authentication, profiles, settings, memos, statistics, notifications, friends, and teams.
 - Backend business data is isolated by the currently authenticated user.
 - Windows chat supports model discovery from an address and key, plus confirmed local actions. Live-provider and complete device checks remain pending.
-- The user accepted the device-bound HarmonyOS Debug build. An [unsigned ARM64 Release local edition](https://github.com/2877905731/Innocence/releases/tag/v1.2.3-harmonyos.1) provides the full-screen PC layout without INTERNET permission; recipients must sign for their own device. Complete input, recovery, and device checks remain in progress.
+- The user accepted an earlier device-bound HarmonyOS Debug build. An [unsigned ARM64 Release local edition](https://github.com/2877905731/Innocence/releases/tag/v1.2.6-harmonyos.1) provides the full-screen PC layout without INTERNET permission; recipients must sign for their own device. Browser distribution and opening a downloaded HAP are different installation paths; see the [installation guide](client/flutter_app/harmonyos/INSTALL.zh-CN.md). Updated physical-device visuals, complete input, recovery, and device checks remain in progress.
 
 ## Repository Layout
 

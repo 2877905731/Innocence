@@ -3,14 +3,15 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-30"
-last_resumed_at: "2026-10-30T03:34:50+08:00"
-latest_checkpoint: "0124"
-next_sequence: "0125"
+last_resumed_at: "2026-10-30T13:53:58+08:00"
+latest_checkpoint: "0125"
+next_sequence: "0126"
 current_phase: P01
 current_gate: G01
-state: "harmonyos_temporary_installer_opened_30_minutes_with_consent_device_feedback_pending"
-current_goal: "0124用户确认同一具体Cloudflare链接/4文件开放30分钟，已按run_id/origin/HAP/全文件摘要绑定标记，北京时间2026-10-30 03:31:50至04:01:50（1800秒）。外部7项HTTPS健康/三小文件精确摘要/HAP HEAD53297721bytes/前后Range206及字节通过；浏览器公网页面和Deeplink可读，截图两次失败。签名HAP沿0122 SHA059af006…/1.2.5+10，真实平板安装/旧Debug覆盖/资料恢复、企业资格及权益仍待。到期文件拒绝/服务停止，隧道随停，不自动续期；续接先查当前时钟和私有状态。完整链接/设备材料/授权只F盘忽略目录，未共享私钥密码或改GitHub；G01保持开放。"
+state: "android_harmony_ui_v126_ready_explicit_github_publish_authorized"
+current_goal: "0125用户要求先重新发布更新UI的Android/鸿蒙，已明确GitHub远端授权；两端1.2.6+11本机包/5资产就绪。APK79727911bytes/701927a4…原证书/非Debug/离线，HAP53017333bytes/c9908a16…ARM64 AOT未签名/离线，暂存私人签名配置未变、仓库签名配置空，五字体许可/119Dart/CRC通过；本轮11通过/5条件跳过+Harmony13、分析无问题。待推源码/双注释标签并公开5资产、核对匿名下载。Windows沿v1.2.5。用户要HAP点文件直装，已明确其与Deeplink网页分发不同，公开HAP仍需签名/HDC；个人材料不上传。0124临时入口已停止不续期，真机/权益/G01继续待。"
 current_baseline:
+  - "2026-10-30 双端UI发行就绪（0125）：用户明确要求重新发布Android/鸿蒙；1.2.6+11两包/五资产白名单/说明齐备，APK原证书79727911bytes/701927a4…、未签名HAP53017333bytes/c9908a16…；CRC/五字体许可/119Dart及本轮11+13目标回归/分析通过。远端祖先和权限核对，待推送公开；个人签名材料不公开，HAP点文件直装不能由签名实现，网页分发另一路径。"
   - "2026-10-30 用户确认后临时入口开放（0124）：同一具体链接和4文件，经原子标记开放03:31:50→04:01:50/1800秒；外部7项健康/小文件字节摘要/HAP长度及两Range通过。公网页面/Deeplink可读，截图接口两次失败，无新公网截图。未实机安装，旧版/资料/企业资格待；到期关闭，不自动续期，完整链接不入Git。"
   - "2026-10-30 临时安装入口准备（0123）：本机4文件manifest官方签名/验签、新发布公钥及版本篡改拒绝通过；签名DTO覆盖和路由逐值/整文件摘要区分明确。Cloudflare2026.10.6官方摘要/Authenticode通过、临时HTTP2隧道连通，仅健康200/false；30项HEAD/Range/名单/路径/隔离开放标记负向通过，实际HAP/manifest公网404。浏览器预览截图F盘；待具体30分钟文件开放确认，未实机安装，不公开私有URL到Git。"
   - "2026-10-30 单设备签名候选与临时入口选择（0122）：独立Release配置沿用原密钥和编码字段，官方构建/verify-app及codesign/摘要/权限通过；HAP53297721bytes/059af006…，debug=false/tablet/API18→26/无INTERNET，Profile exact/三ELF/五字体许可/119 Dart通过。旧候选debug=true及app-identifier变化明确保留，未覆盖实体平板。用户没有，准备临时入口；尚无manifest签名或对外下载安装完成证据。官方网页指南企业限制待核对；签名工具官方链接仓库c71aa1a已固定，仅F盘，未公开个人文件。"
@@ -146,6 +147,9 @@ unfinished:
     item: "Android A0尚未通过：正式离线签名/发行与API36核心流程有0083/0086/0088证据，月/年手机页已进入v1.2.2正式包且通过API36正式版覆盖升级子集；仍须实体设备、SDK license、其余二级手机页、真实设备键盘/大字体和前后台性能。联网会话保护、真实同步、WebSocket/推送后续接入，不重复列发行签名或月年源码为未完成。"
     gate: Android-A0
 next_actions:
+  - id: NEXT-UI126-PUBLISH
+    action: "接0125：已获明确发布授权，推送源码/双注释标签，公开v1.2.6 Android两资产和v1.2.6-harmonyos.1三资产，验远端SHA/正文/匿名HEAD长度/latest后追加0126。个人签名材料仅本机；不再询问权限，不把未执行实机/权益门禁计完成"
+    inputs: ["docs/releases/v1.2.6.md", "docs/releases/v1.2.6-harmonyos.1.md", "client/flutter_app/build/qa/v1.2.6/verification-manifest.json", "client/flutter_app/build/qa/release126.py"]
   - id: NEXT-HARMONYOS-SELF-USE-SIGNING
     action: "接0124：人类已确认的同一链接4文件实际开放03:31:50→04:01:50，外部7项检查通过；交付用户在登记平板华为浏览器点击并按真实提示定位。先读当前时间/服务状态，过期不自动续期或重建域名公开；新授权才另开窗口。核对企业资格、旧Debug/新Release和app-identifier差异，保留旧应用/资料不卸载试错；不重问已完成证书/Profile授权，不共享私钥密码，不更改GitHub。"
     inputs: ["client/flutter_app/harmonyos/INSTALL.zh-CN.md", "client/flutter_app/build/harmonyos-h0/self-use/20261030/publication-readiness.json", "client/flutter_app/build/harmonyos-h0/self-use/20261030/server-readiness.json", "progress/0124__20261030__P01__DONE__harmonyos-temporary-download-opened-with-consent.md"]
@@ -248,6 +252,7 @@ history:
   checkpoint_0122: progress/0122__20261030__P01__DONE__harmonyos-self-use-signed-hap-and-temporary-entry-plan.md
   checkpoint_0123: progress/0123__20261030__P01__DONE__harmonyos-temporary-installer-prepared-and-gated.md
   checkpoint_0124: progress/0124__20261030__P01__DONE__harmonyos-temporary-download-opened-with-consent.md
+  checkpoint_0125: progress/0125__20261030__P01__DONE__android-harmony-ui-release-ready.md
 latest_android_run:
   requested_action: "专注的布局不太合理，你修改一下（附Android首页截图）"
   avd: Innocence_API36_Pixel7

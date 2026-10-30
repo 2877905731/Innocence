@@ -881,3 +881,10 @@ checkpoints:
     status: complete
     path: progress/0124__20261030__P01__DONE__harmonyos-temporary-download-opened-with-consent.md
     title: "用户确认后临时自用入口开放30分钟与外部下载校验"
+  - sequence: "0125"
+    created_at: "2026-10-30T13:53:58+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0125__20261030__P01__DONE__android-harmony-ui-release-ready.md
+    title: "用户授权重新发布Android/鸿蒙UI修正版，1.2.6双端本机包就绪"
