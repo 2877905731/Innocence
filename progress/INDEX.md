@@ -909,3 +909,10 @@ checkpoints:
     status: complete
     path: progress/0128__20261030__P01__DECISION__server-empty-database-and-private-smtp.md
     title: "用户选择服务器空库及自填SMTP，正常邮箱注册辅助就绪"
+  - sequence: "0129"
+    created_at: "2026-10-30T21:40:00+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0129__20261030__P01__DONE__server-loopback-startup-and-memory-pending.md
+    title: "用户服务器回环启动健康回执，1.8GB内存报告待实际指标核对"
