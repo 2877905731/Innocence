@@ -26,12 +26,12 @@ Innocence is built with Flutter and Spring Boot and currently targets Windows de
 | Platform | Download | Scope |
 |---|---|---|
 | Windows x64 · v1.3.0 | [Installer](https://github.com/2877905731/Innocence/releases/download/v1.3.0/Innocence-v1.3.0-windows-x64-setup.exe) · [Portable ZIP](https://github.com/2877905731/Innocence/releases/download/v1.3.0/Innocence-v1.3.0-windows-x64-portable.zip) | Online desktop edition; installer has no Authenticode signature |
-| Android 7.0+ · v1.3.1 | [Online APK](https://github.com/2877905731/Innocence/releases/download/v1.3.1/Innocence-v1.3.1-android-online.apk) | Restores the original Android glass rendering and retains Wabi-Sabi display fonts; original release signature |
+| Android 7.0+ · v1.3.2 | [Online APK](https://github.com/2877905731/Innocence/releases/download/v1.3.2/Innocence-v1.3.2-android-online.apk) | Remaining time directly in timer notifications; original glass rendering, Wabi-Sabi fonts, and release signature |
 | HarmonyOS tablet online edition · v1.3.0 | [ARM64 Release HAP](https://github.com/2877905731/Innocence/releases/tag/v1.3.0-harmonyos.1) | Unsigned AOT; requires a matching device profile, signing, and DevEco/HDC |
 
-[Android v1.3.1 release notes](https://github.com/2877905731/Innocence/releases/tag/v1.3.1) · [Android SHA256](https://github.com/2877905731/Innocence/releases/download/v1.3.1/SHA256SUMS.txt) · [Windows v1.3.0](https://github.com/2877905731/Innocence/releases/tag/v1.3.0) · [Changelog](CHANGELOG.md)
+[Android v1.3.2 release notes](https://github.com/2877905731/Innocence/releases/tag/v1.3.2) · [Android SHA256](https://github.com/2877905731/Innocence/releases/download/v1.3.2/SHA256SUMS.txt) · [Windows v1.3.0](https://github.com/2877905731/Innocence/releases/tag/v1.3.0) · [Changelog](CHANGELOG.md)
 
-Android v1.3.1 restores the original Liquid Glass blur and texture sampling while retaining the bundled Wabi-Sabi display fonts. It uses the original release signature and production HTTPS service. One Android phone, Windows computer, and HarmonyOS tablet can stay signed in simultaneously, with an independent session slot for each platform.
+Android v1.3.2 displays remaining focus and pomodoro time directly in notifications, freezes it when paused, and resumes the countdown when continued. It retains the original Liquid Glass rendering, bundled Wabi-Sabi display fonts, release signature, and production HTTPS service. One Android phone, Windows computer, and HarmonyOS tablet can stay signed in simultaneously, with an independent session slot for each platform.
 
 Sign in with a server account or choose local mode. Local data is uploaded only after previewing and confirming the target account. Keep the installed app and its data when updating. Physical-device/OEM/Vulkan checks and long-running performance remain in progress.
 

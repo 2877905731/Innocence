@@ -26,12 +26,12 @@ Innocence 当前以 Flutter + Spring Boot 为主线，覆盖 Windows 桌面端�
 | 平台 | 下载 | 范围 |
 |---|---|---|
 | Windows x64 · v1.3.0 | [安装器](https://github.com/2877905731/Innocence/releases/download/v1.3.0/Innocence-v1.3.0-windows-x64-setup.exe) · [便携 ZIP](https://github.com/2877905731/Innocence/releases/download/v1.3.0/Innocence-v1.3.0-windows-x64-portable.zip) | 联网版，安装器尚未代码签名 |
-| Android 7.0+ · v1.3.1 | [联网 APK](https://github.com/2877905731/Innocence/releases/download/v1.3.1/Innocence-v1.3.1-android-online.apk) | 恢复原液态玻璃，保留侘寂字体修正；原发行证书 |
+| Android 7.0+ · v1.3.2 | [联网 APK](https://github.com/2877905731/Innocence/releases/download/v1.3.2/Innocence-v1.3.2-android-online.apk) | 通知直接显示剩余时间，保留原玻璃和侘寂字体；原发行证书 |
 | 鸿蒙平板联网版 · v1.3.0 | [ARM64 Release HAP](https://github.com/2877905731/Innocence/releases/tag/v1.3.0-harmonyos.1) | 未签名 AOT，需自己的设备 Profile／签名及 DevEco/HDC |
 
-[Android v1.3.1 发布说明](https://github.com/2877905731/Innocence/releases/tag/v1.3.1) · [Android SHA256](https://github.com/2877905731/Innocence/releases/download/v1.3.1/SHA256SUMS.txt) · [Windows v1.3.0](https://github.com/2877905731/Innocence/releases/tag/v1.3.0) · [历史离线版](https://github.com/2877905731/Innocence/releases/tag/v1.2.6) · [更新日志](CHANGELOG.md)
+[Android v1.3.2 发布说明](https://github.com/2877905731/Innocence/releases/tag/v1.3.2) · [Android SHA256](https://github.com/2877905731/Innocence/releases/download/v1.3.2/SHA256SUMS.txt) · [Windows v1.3.0](https://github.com/2877905731/Innocence/releases/tag/v1.3.0) · [历史离线版](https://github.com/2877905731/Innocence/releases/tag/v1.2.6) · [更新日志](CHANGELOG.md)
 
-Android v1.3.1按用户纠正恢复液态玻璃原来的模糊光束与纹理采样，侘寂内置展示字修正保留；联网服务和本机资料规则沿v1.3.0。
+Android v1.3.2在通知里直接显示专注/番茄剩余时间，暂停冻结、继续恢复；原液态玻璃和侘寂内置展示字保留，联网服务和本机资料规则沿v1.3.0。
 
 v1.3.0 三端连接生产HTTPS服务，同账号允许手机、电脑、平板各一个名额同时在线。Android可用原发行签名覆盖正式旧版保留资料。登录后先预览目标账号并确认本机资料导入；服务器未迁移本机账号。鸿蒙HUKS密钥仓储已接入，公开HAP仍未签名，动态和后台阶段提醒仍有权益及预排窗口限制，详见发行说明。
 

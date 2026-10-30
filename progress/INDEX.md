@@ -993,3 +993,10 @@ checkpoints:
     status: complete
     path: progress/0140__20261031__P01__DONE__android-notice-remaining-countdown.md
     title: "Android通知主体直接显示剩余时间，原生与后台暂停画面验证"
+  - sequence: "0141"
+    created_at: "2026-10-31T01:56:26+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0141__20261031__P01__DONE__android-countdown-v132-release-ready.md
+    title: "Android通知剩余时间1.3.2原签名联网发行就绪"
