@@ -979,3 +979,10 @@ checkpoints:
     status: complete
     path: progress/0138__20261031__P01__CORRECTION__harmony-glass-regression-count.md
     title: "更正0137鸿蒙玻璃专项计数为3项"
+  - sequence: "0139"
+    created_at: "2026-10-31T01:10:27+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0139__20261031__P01__DONE__android-glass-restored-v131-published.md
+    title: "Android原液态玻璃恢复版1.3.1公开，原签名联网APK两资产核对通过"
