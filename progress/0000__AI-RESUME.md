@@ -3,19 +3,22 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-30"
-last_resumed_at: "2026-10-30T18:45:00+08:00"
-latest_checkpoint: "0127"
-next_sequence: "0128"
+last_resumed_at: "2026-10-30T19:05:00+08:00"
+latest_checkpoint: "0128"
+next_sequence: "0129"
 current_phase: P01
 current_gate: G01
-state: "server_first_deployment_bundle_ready_waiting_upload_and_database_scope"
-current_goal: "用户现有香港Debian13服务器部署管理网站与后端；面板截图Docker29.9.2/Compose5.6.1/Nginx1.26.3均active、配置检查及本机HTTP200；本机SSH TCP22可达。0127首轮SSH隧道部署包40193731bytes/37818eb0…已准备，80后端回归及管理网页构建、Compose解析/端口/内存/缺字段拒绝、脚本语法/JAR与归档字节核对通过。待用户上传、空库或迁移选择、服务器私有SMTP/管理员配置及真实启动登录；未SSH登录或修改远端、无公网后台/HTTPS完成证据。v1.2.6双端既有公开及离线/鸿蒙权益、G01边界保持。"
+state: "server_empty_database_and_smtp_selected_waiting_configuration_and_start"
+current_goal: "用户现有香港Debian13服务器部署管理网站与后端；0128明确从空库开始、不迁移本地数据，已有SMTP且自行在服务器填写。0127首轮SSH隧道包40193731bytes/37818eb0…保持原样；80后端回归、网页构建及Compose/脚本/归档核对保留。本机正常邮箱注册辅助脚本已准备，PowerShell7及WindowsPowerShell5.1各7个合成HTTP流程通过，不发真实邮件。待用户上传、服务器私有.env/SMTP/白名单配置、空库初始化及真实启动注册登录；未SSH登录或修改远端，无公网后台/HTTPS完成证据。既有客户端发行/离线/鸿蒙权益及G01边界保持。"
 server_deployment_consultation:
-  updated_at: "2026-10-30T18:45:00+08:00"
+  updated_at: "2026-10-30T19:05:00+08:00"
   user_scope: "用户将现有管理后台和后端部署至已有香港服务器，有公网IPv4/无域名；截图Debian13.7/x86_64/SSH22/可用1.7GiB及28GB/无swap，后续截图显示Docker29.9.2/Compose5.6.1/Nginx1.26.3均active和本机HTTP200。本机TCP22连接通过，未SSH认证。"
   local_findings: "已核对React/Vite管理端、Java21/Spring Boot后端、prod环境变量、MySQL8.4/Redis开发编排与Nginx示例。prod不自动初始化数据库；管理员白名单不创建账号。现有README列有登录限流、密码哈希升级及备份恢复待办；Android正式包与鸿蒙现行离线限制不随后端部署自动解除。"
-  next_step: "0127本机首轮包build/deployment/20261030-184445/innocence-deploy.tar.gz及摘要已生成。用户先SCP上传并在服务器生成私有.env；空库/迁移与SMTP有无已异步询问，未答，不擅自初始化或迁出本地数据。之后检查Compose/真实容器/邮件/管理员及备份，公开HTTPS/密码哈希升级另行完成；此包仅回环18081/SSH隧道入口。"
+  data_scope: "0128用户明确从空库开始，不迁移本地数据；允许在该新服务器按首轮脚本初始化新库，不导出本地账号或资料。"
+  mail_scope: "用户已有SMTP，凭据由用户直接填写服务器.env，不在聊天、日志或仓库接收。"
+  next_step: "0127原包及摘要不变，用户SCP上传并prepare生成私有.env，填写注册邮箱白名单和SMTP后执行sh start.sh --initialize-empty-database。真实健康通过后保持SSH隧道，在本机运行infra/deploy/register-admin.ps1经邮箱验证码注册并进入后台；未代发邮件/读凭据。公开HTTPS、恢复及加固继续待。"
 current_baseline:
+  - "2026-10-30 空库及SMTP选择（0128）：用户原文从空库开始，不迁移本地数据；已有SMTP，可在服务器填写配置。正常注册辅助脚本仅走SSH回环API、隐藏验证码/密码，成功后退出临时Windows会话；PowerShell7及5.1各7项本机合成HTTP/精确UTF8/失败拒绝/无令牌输出通过，非真实服务器或邮件证据。0127包不重建，真实初始化/注册登录待用户执行。"
   - "2026-10-30 首轮服务器部署包（0127）：本机16文件40193731bytes/SHA37818eb0bc7aba50cdde55e35f1f79a1ceb0f824e005ee0671afb13bb98cf1c7，排除JAR开发配置，余ZIP载荷/CRC/Boot分层读取及归档字节通过；80后端回归、网页生产构建、官方Compose5.6.1摘要/语义解析、端口/配额/缺管理员字段拒绝与POSIX语法通过。MySQL/Redis/头像持久卷及凭据服务器生成，首轮仅回环/SSH入口；实际启动登录/邮件/数据方案/HTTPS与恢复未完成。"
   - "2026-10-30 双端UI公开（0126）：v1.2.6+11 Android及v1.2.6-harmonyos.1已公开，Release#428699277/#428699913，latest=v1.2.6；5资产远端SHA/正文及匿名HEAD200长度通过，源码c20f84b与双注释标签精确同步。Android原发行证书/离线APK79727911bytes/701927a4…可交系统安装器；鸿蒙未签名ARM64 AOT53017333bytes/c9908a16…仍需接收者Profile/签名/HDC，个人材料不公开。内置字体/连续羽化均已进入新包，119Dart/五资源/CRC核对及11相关+13鸿蒙目标/分析通过；实体新画面/安装/性能/权益和G01仍待。Windows下载沿v1.2.5；旧临时入口已停止不续期。"
   - "2026-10-30 双端UI发行就绪（0125）：用户明确要求重新发布Android/鸿蒙；1.2.6+11两包/五资产白名单/说明齐备，APK原证书79727911bytes/701927a4…、未签名HAP53017333bytes/c9908a16…；CRC/五字体许可/119Dart及本轮11+13目标回归/分析通过。远端祖先和权限核对，待推送公开；个人签名材料不公开，HAP点文件直装不能由签名实现，网页分发另一路径。"
@@ -155,8 +158,8 @@ unfinished:
     gate: Android-A0
 next_actions:
   - id: NEXT-SERVER-FIRST-DEPLOYMENT
-    action: "用户SCP上传0127包和摘要，服务商终端核验并解包到新/opt/innocence，sh prepare.sh生成私有.env。先确认空库/迁移及SMTP；不自动导出本地账号/资料。仅在明确空库选择后执行初始化；通过SSH隧道18080→18081验实际健康、管理员登录/拒绝路径与持久化，再继续HTTPS和公网加固。"
-    inputs: ["infra/deploy/README.zh-CN.md", "build/deployment/20261030-184445/innocence-deploy.tar.gz", "build/deployment/20261030-184445/innocence-deploy.tar.gz.sha256", "progress/0127__20261030__P01__DONE__server-first-deployment-bundle-ready.md"]
+    action: "0128用户已选空库/不迁移且已有SMTP，不再重复询问。上传0127原包并prepare生成私有.env后，用户填写注册邮箱白名单及SMTP，执行sh start.sh --initialize-empty-database。经SSH隧道18080→18081核对真实健康，再运行本机register-admin.ps1通过真实邮件注册和网页登录；不自动导出本地账号/资料。继续拒绝路径/持久化/恢复及HTTPS和公网加固。"
+    inputs: ["infra/deploy/README.zh-CN.md", "infra/deploy/register-admin.ps1", "build/deployment/20261030-184445/innocence-deploy.tar.gz", "build/deployment/20261030-184445/innocence-deploy.tar.gz.sha256", "progress/0128__20261030__P01__DECISION__server-empty-database-and-private-smtp.md"]
   - id: NEXT-UI126-PHYSICAL
     action: "接0126：双端GitHub公开/5匿名下载已完成，交付链接并明确Android可交系统安装器、原生HAP点文件直装不由签名实现。保持旧资料，按真实反馈验两端字体/光束/安装/性能；个人签名材料不公开，旧临时入口已停，不自动续期"
     inputs: ["docs/releases/v1.2.6.md", "docs/releases/v1.2.6-harmonyos.1.md", "client/flutter_app/build/qa/v1.2.6/verification-manifest.json", "client/flutter_app/build/qa/release126.py"]

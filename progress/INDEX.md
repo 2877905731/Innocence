@@ -902,3 +902,10 @@ checkpoints:
     status: complete
     path: progress/0127__20261030__P01__DONE__server-first-deployment-bundle-ready.md
     title: "Debian13首轮SSH隧道部署包就绪，服务器启动与数据方案待验"
+  - sequence: "0128"
+    created_at: "2026-10-30T19:05:00+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0128__20261030__P01__DECISION__server-empty-database-and-private-smtp.md
+    title: "用户选择服务器空库及自填SMTP，正常邮箱注册辅助就绪"
