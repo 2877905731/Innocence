@@ -8,11 +8,11 @@ baseline:
   runtime: "Flutter + Java 21 + Spring Boot 3.5.16 + MyBatis + MySQL 8 + Redis"
   current_phase: P01
   current_gate: G01
-  evidence: "v1.2.6+11 Android及v1.2.6-harmonyos.1已公开，Release#428699277/#428699913，latest=v1.2.6；5资产远端SHA/正文及匿名HEAD200长度通过，源码c20f84b与双注释标签精确同步。Android原发行证书/离线APK79727911bytes/701927a4…可交系统安装器；鸿蒙未签名ARM64 AOT53017333bytes/c9908a16…仍需接收者Profile/签名/HDC，个人材料不公开。内置字体/连续羽化均已进入新包，119Dart/五资源/CRC核对及11相关+13鸿蒙目标/分析通过；实体新画面/安装/性能/权益和G01仍待。Windows下载沿v1.2.5；旧临时入口已停止不续期。"
+  evidence: "0134：v1.3.0 Windows/Android及v1.3.0-harmonyos.1已公开，Release#429211948/429217039；七资产远端SHA/正文及匿名200长度通过，latest=v1.3.0；源码5fabdb2及双标签精确同步。生产IP HTTPS、三类独立会话/PBKDF2已生效，备份隔离恢复与续期演练通过、QA已清理。鸿蒙原生HUKS/TLS子集及个人平板签名Release安装启动/PC画面通过，个人材料仅F盘；公开HAP未签名。完整实体业务/旧资料恢复/性能、真实模型与长期容量/G01仍待，交付链接后按用户实际反馈推进。"
 android_track:
   status: in_progress
   plan_path: docs/planning/Innocence-Android版本实施规划.md
-  current_step: "1.2.6+11 UI修正版正式离线APK已公开（0126），原发行证书/内置展示字体/玻璃连续羽化；5公开资产与11+13目标回归及分析通过，实体A0–A5/视觉性能继续待。"
+  current_step: "1.3.0+12联网APK原证书已公开（0134），生产HTTPS及真实三槽位/导入/负向通过；完整实体/OEM与视觉性能待验。"
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 harmonyos_tablet_track:
@@ -22,7 +22,7 @@ harmonyos_tablet_track:
   user_scope: "Air系列平板/HarmonyOS 7，全屏复用PC页面；不做Windows窗口尺寸调整。0098先规划、0099恢复核对，用户随后明确开始制作；0100首批实现"
   order: [H0_toolchain_and_minimal_hap, H1_fullscreen_pc_shell, H2_offline_storage, H3_page_and_touch_parity, H4_online_contract_and_assistant, H5_device_and_release]
   pending_decisions: "0132已确认三端联网及鸿蒙tablet独立名额；当前实现/验证v1.3.0，实际设备矩阵及H5/G01完整验收保持待。"
-  evidence_boundary: "1.2.6-harmonyos.1 ARM64 AOT未签名/无INTERNET已公开（0126），包内五字体许可/119Dart及离线/CRC/签名边界核对通过；未重新安装真实平板。个人签名材料仅F盘，公开HAP需接收者自己的Profile/签名/HDC；Live/代理权益、旧Debug覆盖/资料恢复、实际画面性能及H5/G01仍待。"
+  evidence_boundary: "0134公开ARM64联网AOT未签名HAP；本人签名Release仅F盘、安装启动及PC画面通过；独立原生HUKS/重启/TLS、宿主真实HTTPS/三槽位通过。完整实体业务/恢复/性能及权益/H5/G01仍待。"
 assistant_track:
   decision: "DEC-0050/0090采用B；DEC-0051/0092修正为自填API Key的全局聊天助手；DEC-0052/0093地址与密钥发现模型"
   status: byok_chat_discovery_implemented_fixture_verified_live_provider_and_device_pending

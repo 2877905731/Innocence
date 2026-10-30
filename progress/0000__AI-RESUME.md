@@ -3,13 +3,13 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-30"
-last_resumed_at: "2026-10-30T23:43:45+08:00"
-latest_checkpoint: "0133"
-next_sequence: "0134"
+last_resumed_at: "2026-10-30T23:56:13+08:00"
+latest_checkpoint: "0134"
+next_sequence: "0135"
 current_phase: P01
 current_gate: G01
-state: "online_v130_three_platform_ready_physical_harmony_installed_publish_next"
-current_goal: "0133：生产IP HTTPS/续期演练、PBKDF2与独立tablet已部署；真实HTTPS三类会话/导入/专注与负向通过，QA owner已清理，最新私有备份隔离恢复37表/六类行数通过。1.3.0+12三端候选/119源码/CRC/签名/HTTPS核对通过；鸿蒙独立原生HUKS与重启/TLS通过，用户解锁后实体签名Release已安装启动并有PC收件箱画面。尚未公开新Release，下一步匹配源码提交/标签及七资产上传验证；完整设备/恢复/模型/长期容量与G01边界保持。"
+state: "three_platform_online_v130_github_published"
+current_goal: "0134：v1.3.0 Windows/Android及v1.3.0-harmonyos.1已公开，Release#429211948/429217039；七资产远端SHA/正文及匿名200长度通过，latest=v1.3.0；源码5fabdb2及双标签精确同步。生产IP HTTPS、三类独立会话/PBKDF2已生效，备份隔离恢复与续期演练通过、QA已清理。鸿蒙原生HUKS/TLS子集及个人平板签名Release安装启动/PC画面通过，个人材料仅F盘；公开HAP未签名。完整实体业务/旧资料恢复/性能、真实模型与长期容量/G01仍待，交付链接后按用户实际反馈推进。"
 server_deployment_consultation:
   updated_at: "2026-10-30T22:04:00+08:00"
   user_scope: "用户将现有管理后台和后端部署至已有香港服务器，有公网IPv4/无域名；原截图Debian13.7/x86_64/SSH22/无swap及Docker29.9.2/Compose5.6.1/Nginx1.26.3。0130明确授权直接SSH，0131专用密钥认证及本人只读检查成功，用户不再需要手工复制一般状态命令。"
@@ -20,9 +20,10 @@ server_deployment_consultation:
   runtime_receipt: "0129用户截图：compose ps三容器healthy；start.sh的Nginx语法/health UP/静态页/无凭据admin401通过。后端127.0.0.1:8080，MySQL/Redis仅容器端口；用户报告面板内存1.8GB，未取得free/docker stats，不能推断OOM或容量已验收。"
   memory_receipt: "0131本人SSH free显示total1.9GiB/used940MiB/buff-cache1.1GiB/available1.0GiB/无swap；Docker backend251.4MiB、MySQL291.5MiB、Redis17.19MiB，合计约560MiB。当前有余量，持续负载门禁仍待。"
   ssh_control: "0131专用密钥已认证；0133按用户在线发行范围完成备份/隔离恢复、API证书/自动续期、后端升级与公开API限流，保留.env和卷。"
-  local_admin_tunnel: "本机127.0.0.1:18080→远端127.0.0.1:18081，exec session19569；ExitOnForwardFailure/ServerAlive及严格主机密钥检查启用，本机HTTP首页200、无凭据管理接口401。隧道依赖当前进程；若断开，以专用身份重建，不重置服务器。"
-  next_step: "0133三端候选已就绪、用户平板签名包安装启动和PC页面核对；匹配源码提交及双标签公开，检查七资产远端摘要/匿名下载。完整实体业务与长期容量继续待。"
+  local_admin_tunnel: "0134：旧session19569网络连接重置后已重建session56671，本机127.0.0.1:18080→远端127.0.0.1:18081；严格主机密钥/免交互/ServerAlive启用；新隧道静态200和匿名管理401通过。"
+  next_step: "0134三端联网发行已公开并逐资产匿名验证，交付链接；真实账号流程由用户本人操作，完整实体业务/恢复及长期容量继续按反馈验收。"
 current_baseline:
+  - "0134：v1.3.0 Windows/Android及v1.3.0-harmonyos.1已公开，Release#429211948/429217039；七资产远端SHA/正文及匿名200长度通过，latest=v1.3.0；源码5fabdb2及双标签精确同步。生产IP HTTPS、三类独立会话/PBKDF2已生效，备份隔离恢复与续期演练通过、QA已清理。鸿蒙原生HUKS/TLS子集及个人平板签名Release安装启动/PC画面通过，个人材料仅F盘；公开HAP未签名。完整实体业务/旧资料恢复/性能、真实模型与长期容量/G01仍待，交付链接后按用户实际反馈推进。"
   - "0133：生产IP HTTPS/续期演练、PBKDF2与独立tablet已部署；真实HTTPS三类会话/导入/专注与负向通过，QA owner已清理，最新私有备份隔离恢复37表/六类行数通过。1.3.0+12三端候选/119源码/CRC/签名/HTTPS核对通过；鸿蒙独立原生HUKS与重启/TLS通过，用户解锁后实体签名Release已安装启动并有PC收件箱画面。尚未公开新Release，下一步匹配源码提交/标签及七资产上传验证；完整设备/恢复/模型/长期容量与G01边界保持。"
   - "2026-10-30 专用SSH连接及本机后台入口（0131）：id-u0，三容器healthy/healthUP/远端及隧道HTTP200和无凭据401通过；当前available1.0GiB、容器约560MiB。隧道session19569/127.0.0.1:18080已就绪，仅只读远端核对；真实账号邮件/恢复/公开HTTPS和长期容量待验。"
   - "2026-10-30 SSH管理授权与内存回执（0130）：用户要求直接SSH控制；已有known_hosts但现有身份认证拒绝，专用本机密钥/用户专属ACL/配对准备完成，待控制台安装公钥。新截图available1.0GiB及三容器合计约543MiB，暂无当前内存不足证据；长期负载/账号邮件/恢复/公网待验，未认证或远端改动。"
@@ -167,7 +168,7 @@ unfinished:
     gate: Android-A0
 next_actions:
   - id: NEXT-ONLINE-V130-PUBLISH
-    action: "0133三端联网候选就绪，匹配源码/双标签后公开并检查七资产摘要和匿名下载；保持用户平板进程/资料，后续真实账号流程由用户本人操作。"
+    action: "0134三端联网包及双标签公开/七资产验证完成；交付下载链接，保持用户平板进程和资料，继续实体账号/导入/恢复与长期容量/真实模型验收。"
     inputs: [docs/releases/v1.3.0.md, docs/releases/v1.3.0-harmonyos.1.md, client/flutter_app/build/qa/release130.py]
   - id: NEXT-SERVER-FIRST-DEPLOYMENT
     action: "0131已专用密钥root认证并建立本机18080→远端18081隧道，HTTP200/401通过。交用户打开后台，如尚未注册则运行本机邮箱注册辅助后登录；真实邮件/账号由用户输入凭据，不在聊天接收。后续可直接SSH检查和维护，继续实际权限/持久化/恢复、负载与公网HTTPS加固；不重跑初始化或迁移本地资料。"
