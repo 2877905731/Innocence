@@ -958,3 +958,10 @@ checkpoints:
     status: complete
     path: progress/0135__20261031__P01__DECISION__admin-registration-user-deletion-and-team-error.md
     title: "后台注册控制与删除用户需求，团队MySQL字段歧义已定位"
+  - sequence: "0136"
+    created_at: "2026-10-31T00:50:12+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0136__20261031__P01__DONE__admin-controls-and-team-fix-deployed.md
+    title: "后台注册开关与删除用户上线，团队创建修复及隧道自动重连验证"

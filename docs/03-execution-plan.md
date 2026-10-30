@@ -9,6 +9,11 @@ baseline:
   current_phase: P01
   current_gate: G01
   evidence: "0134：v1.3.0 Windows/Android及v1.3.0-harmonyos.1已公开，Release#429211948/429217039；七资产远端SHA/正文及匿名200长度通过，latest=v1.3.0；源码5fabdb2及双标签精确同步。生产IP HTTPS、三类独立会话/PBKDF2已生效，备份隔离恢复与续期演练通过、QA已清理。鸿蒙原生HUKS/TLS子集及个人平板签名Release安装启动/PC画面通过，个人材料仅F盘；公开HAP未签名。完整实体业务/旧资料恢复/性能、真实模型与长期容量/G01仍待，交付链接后按用户实际反馈推进。"
+admin_controls_track:
+  checkpoint: "0136"
+  status: deployed_isolated_http_browser_and_production_team_verified
+  evidence: "0136：后台注册开关/预览删除已上线，当前注册true；管理员保护、事务清理与审计生效。团队MySQL1052字段歧义两处已修复；93后端/网页构建、完整独立MySQL/Redis HTTP及无界面Chrome页面通过，生产HTTPS创建/加入/读取/队友统计通过且两QA owner/团队已清理。干净源码7d5452c，27文件包8f5b9ad4…、JAR1b0a83db…及线上HTML精确一致；私有备份pre-online-20261030164442，healthy/HTTPS UP/续期active。18080自动重连监视PID23956已启用；PS7/5.1和18090断开恢复通过。无真实用户自动删除/无SMTP发送/无客户端重建；用户刷新后台即可用，原G01完整门禁保持。"
+  specification: docs/development/后台注册控制与用户删除.md
 android_track:
   status: in_progress
   plan_path: docs/planning/Innocence-Android版本实施规划.md

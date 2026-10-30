@@ -3,13 +3,13 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-31"
-last_resumed_at: "2026-10-31T00:41:50+08:00"
-latest_checkpoint: "0135"
-next_sequence: "0136"
+last_resumed_at: "2026-10-31T00:50:12+08:00"
+latest_checkpoint: "0136"
+next_sequence: "0137"
 current_phase: P01
 current_gate: G01
-state: "admin_registration_delete_and_team_fix_in_progress"
-current_goal: "0135：用户要求后台注册开关/删除用户及团队异常修复。MySQL1052字段歧义已定位并修正两处查询；93后端回归与网页生产构建通过。独立MySQL/Redis实际HTTP已验证注册两入口拦截/旧验证码/重启持久化/重新开放、团队创建加入与统计、管理员保护、删除事务回滚/关联清理/他人个人资料保留/令牌撤销；无界面Chrome页面确认/取消和390窄屏通过。隧道自动重连辅助已启用，18090断开恢复验证后清理。待私有备份并部署生产，不自动删除真实用户；现行三端客户端无需重建。"
+state: "admin_controls_team_fix_and_tunnel_reconnect_deployed"
+current_goal: "0136：后台注册开关/预览删除已上线，当前注册true；管理员保护、事务清理与审计生效。团队MySQL1052字段歧义两处已修复；93后端/网页构建、完整独立MySQL/Redis HTTP及无界面Chrome页面通过，生产HTTPS创建/加入/读取/队友统计通过且两QA owner/团队已清理。干净源码7d5452c，27文件包8f5b9ad4…、JAR1b0a83db…及线上HTML精确一致；私有备份pre-online-20261030164442，healthy/HTTPS UP/续期active。18080自动重连监视PID23956已启用；PS7/5.1和18090断开恢复通过。无真实用户自动删除/无SMTP发送/无客户端重建；用户刷新后台即可用，原G01完整门禁保持。"
 server_deployment_consultation:
   updated_at: "2026-10-30T22:04:00+08:00"
   user_scope: "用户将现有管理后台和后端部署至已有香港服务器，有公网IPv4/无域名；原截图Debian13.7/x86_64/SSH22/无swap及Docker29.9.2/Compose5.6.1/Nginx1.26.3。0130明确授权直接SSH，0131专用密钥认证及本人只读检查成功，用户不再需要手工复制一般状态命令。"
@@ -20,9 +20,10 @@ server_deployment_consultation:
   runtime_receipt: "0129用户截图：compose ps三容器healthy；start.sh的Nginx语法/health UP/静态页/无凭据admin401通过。后端127.0.0.1:8080，MySQL/Redis仅容器端口；用户报告面板内存1.8GB，未取得free/docker stats，不能推断OOM或容量已验收。"
   memory_receipt: "0131本人SSH free显示total1.9GiB/used940MiB/buff-cache1.1GiB/available1.0GiB/无swap；Docker backend251.4MiB、MySQL291.5MiB、Redis17.19MiB，合计约560MiB。当前有余量，持续负载门禁仍待。"
   ssh_control: "0131专用密钥已认证；0133按用户在线发行范围完成备份/隔离恢复、API证书/自动续期、后端升级与公开API限流，保留.env和卷。"
-  local_admin_tunnel: "0134：旧session19569网络连接重置后已重建session56671，本机127.0.0.1:18080→远端127.0.0.1:18081；严格主机密钥/免交互/ServerAlive启用；新隧道静态200和匿名管理401通过。"
-  next_step: "0134三端联网发行已公开并逐资产匿名验证，交付链接；真实账号流程由用户本人操作，完整实体业务/恢复及长期容量继续按反馈验收。"
+  local_admin_tunnel: "0136：127.0.0.1:18080→服务器127.0.0.1:18081；本机自动重连监视PID23956，专用身份/严格主机密钥，PS7/5.1入口及独立18090断开恢复通过并清理辅助。当前静态200/匿名管理401，电脑重启后运行打开管理后台.cmd。"
+  next_step: "0136后台注册控制、删除与团队修复已部署，交用户刷新页面操作；实际删除仅由用户选定并确认，继续原G01待验项目。"
 current_baseline:
+  - "0136：后台注册开关/预览删除已上线，当前注册true；管理员保护、事务清理与审计生效。团队MySQL1052字段歧义两处已修复；93后端/网页构建、完整独立MySQL/Redis HTTP及无界面Chrome页面通过，生产HTTPS创建/加入/读取/队友统计通过且两QA owner/团队已清理。干净源码7d5452c，27文件包8f5b9ad4…、JAR1b0a83db…及线上HTML精确一致；私有备份pre-online-20261030164442，healthy/HTTPS UP/续期active。18080自动重连监视PID23956已启用；PS7/5.1和18090断开恢复通过。无真实用户自动删除/无SMTP发送/无客户端重建；用户刷新后台即可用，原G01完整门禁保持。"
   - "0134：v1.3.0 Windows/Android及v1.3.0-harmonyos.1已公开，Release#429211948/429217039；七资产远端SHA/正文及匿名200长度通过，latest=v1.3.0；源码5fabdb2及双标签精确同步。生产IP HTTPS、三类独立会话/PBKDF2已生效，备份隔离恢复与续期演练通过、QA已清理。鸿蒙原生HUKS/TLS子集及个人平板签名Release安装启动/PC画面通过，个人材料仅F盘；公开HAP未签名。完整实体业务/旧资料恢复/性能、真实模型与长期容量/G01仍待，交付链接后按用户实际反馈推进。"
   - "0133：生产IP HTTPS/续期演练、PBKDF2与独立tablet已部署；真实HTTPS三类会话/导入/专注与负向通过，QA owner已清理，最新私有备份隔离恢复37表/六类行数通过。1.3.0+12三端候选/119源码/CRC/签名/HTTPS核对通过；鸿蒙独立原生HUKS与重启/TLS通过，用户解锁后实体签名Release已安装启动并有PC收件箱画面。尚未公开新Release，下一步匹配源码提交/标签及七资产上传验证；完整设备/恢复/模型/长期容量与G01边界保持。"
   - "2026-10-30 专用SSH连接及本机后台入口（0131）：id-u0，三容器healthy/healthUP/远端及隧道HTTP200和无凭据401通过；当前available1.0GiB、容器约560MiB。隧道session19569/127.0.0.1:18080已就绪，仅只读远端核对；真实账号邮件/恢复/公开HTTPS和长期容量待验。"
@@ -167,6 +168,9 @@ unfinished:
     item: "Android A0尚未通过：正式离线签名/发行与API36核心流程有0083/0086/0088证据，月/年手机页已进入v1.2.2正式包且通过API36正式版覆盖升级子集；仍须实体设备、SDK license、其余二级手机页、真实设备键盘/大字体和前后台性能。联网会话保护、真实同步、WebSocket/推送后续接入，不重复列发行签名或月年源码为未完成。"
     gate: Android-A0
 next_actions:
+  - id: NEXT-ADMIN-CONTROLS-USER-ACCEPTANCE
+    action: "0136已部署；用户Ctrl+F5刷新后台，注册设置控制新注册、用户管理选择后删除；直接在现有三端重试创建团队。保持真实数据，按反馈验收；电脑重启后运行一键后台入口。"
+    inputs: [docs/development/后台注册控制与用户删除.md, infra/deploy/打开管理后台.cmd]
   - id: NEXT-ONLINE-V130-PUBLISH
     action: "0134三端联网包及双标签公开/七资产验证完成；交付下载链接，保持用户平板进程和资料，继续实体账号/导入/恢复与长期容量/真实模型验收。"
     inputs: [docs/releases/v1.3.0.md, docs/releases/v1.3.0-harmonyos.1.md, client/flutter_app/build/qa/release130.py]
