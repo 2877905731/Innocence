@@ -923,3 +923,10 @@ checkpoints:
     status: complete
     path: progress/0130__20261030__P01__DECISION__direct-ssh-control-and-dedicated-key.md
     title: "用户授权直接SSH管理，专用密钥就绪待控制台安装公钥"
+  - sequence: "0131"
+    created_at: "2026-10-30T22:04:00+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0131__20261030__P01__DONE__ssh-connected-and-local-admin-tunnel.md
+    title: "专用SSH认证和只读健康核对通过，本机后台隧道可用"
