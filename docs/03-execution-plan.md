@@ -17,7 +17,7 @@ admin_controls_track:
 android_track:
   status: in_progress
   plan_path: docs/planning/Innocence-Android版本实施规划.md
-  current_step: "0141：按用户重新发布要求，1.3.2+14原签名联网APK就绪，通知主体直接显示剩余时间；233回归/6跳过、离线4/联网2/分析及版本/字体/三ABI地址/原生布局通过。待同步源码标签并公开两资产；0140原生后台/暂停证据保留，实体/OEM及G01待验。"
+  current_step: "0142：Android1.3.2+14通知主体剩余时间已公开，原证书联网APK/两资产SHA与匿名200/源码标签通过；233回归6跳过/离线4/联网2和分析通过。0140原生后台/暂停证据保留，系统折叠组、实体/OEM及G01仍待。"
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 harmonyos_tablet_track:

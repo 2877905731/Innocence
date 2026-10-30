@@ -1000,3 +1000,10 @@ checkpoints:
     status: complete
     path: progress/0141__20261031__P01__DONE__android-countdown-v132-release-ready.md
     title: "Android通知剩余时间1.3.2原签名联网发行就绪"
+  - sequence: "0142"
+    created_at: "2026-10-31T02:01:17+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0142__20261031__P01__DONE__android-countdown-v132-published.md
+    title: "Android通知剩余时间1.3.2公开，原签名联网APK与两资产下载核对"
