@@ -895,3 +895,10 @@ checkpoints:
     status: complete
     path: progress/0126__20261030__P01__DONE__android-harmony-ui-v126-published.md
     title: "Android与鸿蒙1.2.6 UI修正版公开、五项下载与安装范围核对"
+  - sequence: "0127"
+    created_at: "2026-10-30T18:45:00+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0127__20261030__P01__DONE__server-first-deployment-bundle-ready.md
+    title: "Debian13首轮SSH隧道部署包就绪，服务器启动与数据方案待验"

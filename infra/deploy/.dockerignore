@@ -1,0 +1,4 @@
+*
+!Dockerfile
+!backend/
+!backend/server.jar
