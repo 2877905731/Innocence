@@ -107,15 +107,11 @@ internal object PomodoroNotices {
         val title = if (chinese) "番茄 · ${if (resting) "休息" else "学习"}${if (paused) " · 已暂停" else ""}"
             else "Pomodoro · ${if (resting) "Break" else "Study"}${if (paused) " · Paused" else ""}"
         val seconds = (remaining + 999) / 1000
-        val label = if (seconds >= 3600) "%02d:%02d:%02d".format(seconds / 3600, seconds / 60 % 60, seconds % 60)
-            else "%02d:%02d".format(seconds / 60, seconds % 60)
-        val text = (if (chinese) "第 $cycle 轮" else "Cycle $cycle") + if (paused) " · $label" else ""
         val previous = saved.getString("stageToken", "") ?: ""
         check(saved.edit().putLong("deadline", deadline).putString("stageToken", token).commit())
         if (allowed(c)) {
-            val notice = builder(c, TIMER_CHANNEL).setContentTitle(title).setContentText(text)
-                .setOngoing(true).setOnlyAlertOnce(true).setWhen(deadline).setShowWhen(!paused).setUsesChronometer(!paused)
-            if (Build.VERSION.SDK_INT >= 24) notice.setChronometerCountDown(true)
+            val notice = TimerNoticeContent.apply(c, builder(c, TIMER_CHANNEL), title,
+                deadline, seconds, paused, chinese).setOngoing(true).setOnlyAlertOnce(true)
             manager(c).notify(TIMER_ID, notice.build())
             if (!paused && previous.isNotEmpty() && previous != token && previous.startsWith("$key/")) {
                 manager(c).notify(STAGE_ID, builder(c, STAGE_CHANNEL).setContentTitle(title)

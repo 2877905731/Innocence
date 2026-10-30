@@ -184,12 +184,9 @@ internal object FocusNotices {
         val chinese = saved.getBoolean("chinese", true)
         val title = if (chinese) "番茄 · ${if (stage == "break") "休息" else "学习"}${if (paused) " · 已暂停" else ""}"
             else "Pomodoro · ${if (stage == "break") "Break" else "Study"}${if (paused) " · Paused" else ""}"
-        val text = (if (chinese) "第 $cycle 轮" else "Cycle $cycle") +
-            if (paused) " · " + formatSeconds(saved.getInt("pomodoroRemaining", 0)) else ""
-        val notice = builder(context, RUNNING_CHANNEL).setContentTitle(title).setContentText(text)
-            .setOngoing(true).setOnlyAlertOnce(true).setWhen(deadline).setShowWhen(!paused)
-            .setUsesChronometer(!paused && Build.VERSION.SDK_INT >= 24)
-        if (Build.VERSION.SDK_INT >= 24) notice.setChronometerCountDown(true)
+        val notice = TimerNoticeContent.apply(context, builder(context, RUNNING_CHANNEL), title,
+            deadline, saved.getInt("pomodoroRemaining", 0).toLong(), paused, chinese)
+            .setOngoing(true).setOnlyAlertOnce(true)
         manager(context).notify(POMODORO_ID, notice.build())
         if (!paused && deadline < totalDeadline) {
             val alarm = pomodoroIntent(context, key, deadline)
@@ -240,14 +237,9 @@ internal object FocusNotices {
             complete(context, key, deadline)
             return "available"
         }
-        val text = if (paused) {
-            (if (chinese) "剩余 " else "Remaining ") + formatSeconds(remaining)
-        } else if (chinese) "点击返回专注" else "Tap to return to focus"
-        val notice = builder(context, RUNNING_CHANNEL)
-            .setContentTitle(if (chinese) (if (paused) "专注已暂停" else "专注倒计时") else (if (paused) "Focus paused" else "Focus countdown"))
-            .setContentText(text).setOngoing(true).setOnlyAlertOnce(true)
-            .setWhen(deadline).setShowWhen(!paused).setUsesChronometer(!paused && Build.VERSION.SDK_INT >= 24)
-        if (Build.VERSION.SDK_INT >= 24) notice.setChronometerCountDown(true)
+        val title = if (chinese) (if (paused) "专注已暂停" else "专注倒计时") else (if (paused) "Focus paused" else "Focus countdown")
+        val notice = TimerNoticeContent.apply(context, builder(context, RUNNING_CHANNEL), title,
+            deadline, remaining.toLong(), paused, chinese).setOngoing(true).setOnlyAlertOnce(true)
         manager(context).notify(RUNNING_ID, notice.build())
         updatePomodoro(context, key)
         if (!paused) {
@@ -286,9 +278,6 @@ internal object FocusNotices {
                 saved.getLong("pomodoroDeadline", 0), saved.getInt("pomodoroRemaining", 0)) else null)
     }
 
-    private fun formatSeconds(seconds: Int): String =
-        if (seconds >= 3600) "%02d:%02d:%02d".format(seconds / 3600, seconds / 60 % 60, seconds % 60)
-        else "%02d:%02d".format(seconds / 60, seconds % 60)
 }
 
 class FocusAlarmReceiver : BroadcastReceiver() {

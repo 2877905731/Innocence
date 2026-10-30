@@ -986,3 +986,10 @@ checkpoints:
     status: complete
     path: progress/0139__20261031__P01__DONE__android-glass-restored-v131-published.md
     title: "Android原液态玻璃恢复版1.3.1公开，原签名联网APK两资产核对通过"
+  - sequence: "0140"
+    created_at: "2026-10-31T01:30:18+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0140__20261031__P01__DONE__android-notice-remaining-countdown.md
+    title: "Android通知主体直接显示剩余时间，原生与后台暂停画面验证"

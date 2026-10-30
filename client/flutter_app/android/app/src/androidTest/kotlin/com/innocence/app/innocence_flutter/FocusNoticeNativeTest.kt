@@ -5,6 +5,11 @@ import android.app.NotificationManager
 import android.content.Context
 import android.app.Instrumentation
 import android.os.Bundle
+import android.os.SystemClock
+import android.view.View
+import android.widget.Chronometer
+import android.widget.FrameLayout
+import android.widget.TextView
 
 /** Device checks use private synthetic notification state, never business SQLite. */
 class FocusNoticeNativeTest : Instrumentation() {
@@ -30,8 +35,27 @@ class FocusNoticeNativeTest : Instrumentation() {
             "independent_stage_survives_focus_end" to ::testIndependentStageSurvivesFocusEnd,
             "independent_pause_restore_owner_cancel" to ::testIndependentPauseRestoreOwnerCancel,
             "independent_payload_validation" to ::testIndependentPayloadValidation,
+            "countdown_body_running_paused_hours_languages" to ::testCountdownBodyViews,
         )
         try {
+            if (mode in listOf("countdownPreview", "pausedPreview", "englishPreview", "cleanup")) {
+                app = targetContext
+                check(app.packageName.endsWith(".focusqa"))
+                manager = app.getSystemService(NotificationManager::class.java)
+                tearDown()
+                if (mode != "cleanup") {
+                    val paused = mode == "pausedPreview"
+                    val chinese = mode != "englishPreview"
+                    val now = System.currentTimeMillis()
+                    FocusNotices.sync(app, "qa", "qa/preview", true, paused, now + 5400000, 5400, false, chinese)
+                    PomodoroNotices.sync(app, IndependentPomodoro("qa", "qa/pomodoro/preview", true, paused,
+                        25, 5, 0, now, chinese))
+                    awaitNotice(7302)
+                    awaitNotice(7305)
+                }
+                finish(-1, Bundle().apply { putString("stream", "$mode: PASS\n") })
+                return
+            }
             if (mode == "backgroundArm") {
                 setUp()
                 FocusNotices.sync(app, "qa", "qa/background", true, false, System.currentTimeMillis() + 10000, 10, false, true)
@@ -46,7 +70,7 @@ class FocusNoticeNativeTest : Instrumentation() {
                 assertEquals("permissionRequired", FocusNotices.sync(app, "qa", "qa/denied", true, false, System.currentTimeMillis() + 60000, 60, false, true))
                 assertEquals("permissionRequired", PomodoroNotices.sync(app, IndependentPomodoro("qa", "qa/pomodoro/denied", true,
                     false, 1, 1, 0, System.currentTimeMillis(), true)))
-                awaitAbsent(7302, 7303)
+                awaitAbsent(7302, 7303, 7304, 7305, 7306)
                 tearDown()
                 finish(-1, Bundle().apply { putString("stream", "Denied notification permission: PASS\n") })
                 return
@@ -130,13 +154,15 @@ class FocusNoticeNativeTest : Instrumentation() {
         PomodoroNotices.sync(app, IndependentPomodoro("qa", "qa/pomodoro/pause", true, true, 1, 0, 59000,
             System.currentTimeMillis(), true))
         val pause = awaitNotice(7305) { !it.extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER) }.notification
-        assertEquals("第 1 轮 · 00:01", pause.extras.getString(Notification.EXTRA_TEXT))
+        assertEquals("剩余 00:01", pause.extras.getString(Notification.EXTRA_TEXT))
         Thread.sleep(1500)
         PomodoroNotices.update(app)
-        assertEquals("第 1 轮 · 00:01", awaitNotice(7305).notification.extras.getString(Notification.EXTRA_TEXT))
+        assertEquals("剩余 00:01", awaitNotice(7305).notification.extras.getString(Notification.EXTRA_TEXT))
         PomodoroNotices.sync(app, IndependentPomodoro("qa", "qa/pomodoro/pause", true, false, 1, 0, 59000,
             System.currentTimeMillis(), true))
-        awaitNotice(7305) { it.extras.getString(Notification.EXTRA_TEXT) == "第 2 轮" }
+        awaitNotice(7305) { it.`when` > System.currentTimeMillis() + 50000 }
+        assertEquals("2", app.getSharedPreferences("independent_pomodoro", Context.MODE_PRIVATE)
+            .getString("stageToken", "")?.split("/")?.get(3))
         val saved = app.getSharedPreferences("independent_pomodoro", Context.MODE_PRIVATE)
         val stale = saved.getLong("deadline", 0)
         PomodoroNotices.sync(app, IndependentPomodoro("other", "other/pomodoro/new", true, false, 25, 5, 0,
@@ -218,15 +244,16 @@ class FocusNoticeNativeTest : Instrumentation() {
             PomodoroNotice(1, 1, "break", 1, System.currentTimeMillis() + 3000, 3))
         val paused = awaitNotice(7304) { it.extras.getString(Notification.EXTRA_TITLE) == "番茄 · 休息 · 已暂停" }.notification
         assertFalse(paused.extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER))
-        assertEquals("第 1 轮 · 00:03", paused.extras.getString(Notification.EXTRA_TEXT))
+        assertEquals("剩余 00:03", paused.extras.getString(Notification.EXTRA_TEXT))
         Thread.sleep(3500)
         FocusNotices.restore(app)
-        assertEquals("第 1 轮 · 00:03", awaitNotice(7304).notification.extras.getString(Notification.EXTRA_TEXT))
+        assertEquals("剩余 00:03", awaitNotice(7304).notification.extras.getString(Notification.EXTRA_TEXT))
         val resumed = System.currentTimeMillis() + 2500
         FocusNotices.sync(app, "qa", "qa/pomodoro", true, false, System.currentTimeMillis() + 80000, 80, false, true,
             PomodoroNotice(1, 1, "break", 1, resumed, 3))
         awaitNotice(7304) { it.extras.getString(Notification.EXTRA_TITLE) == "番茄 · 学习" }
-        assertEquals("第 2 轮", awaitNotice(7304).notification.extras.getString(Notification.EXTRA_TEXT))
+        assertTrue(awaitNotice(7304).notification.extras.getString(Notification.EXTRA_TEXT)?.startsWith("剩余 ") == true)
+        assertEquals(2, app.getSharedPreferences("focus_notice", Context.MODE_PRIVATE).getInt("pomodoroCycle", 0))
         FocusNotices.sync(app, "qa", "qa/pomodoro", true, false, System.currentTimeMillis() + 60000, 60, false, true)
         awaitAbsent(7304)
         awaitNotice(7302)
@@ -252,5 +279,37 @@ class FocusNoticeNativeTest : Instrumentation() {
         awaitNotice(7304)
         awaitNotice(7303)
         awaitAbsent(7302, 7304)
+    }
+
+    fun testCountdownBodyViews() {
+        for (chinese in listOf(true, false)) {
+            for (paused in listOf(false, true)) {
+                val deadline = System.currentTimeMillis() + 5400000
+                val title = if (chinese) "专注倒计时" else "Focus countdown"
+                val builder = Notification.Builder(app, "focus_timer").setSmallIcon(R.drawable.ic_focus_notice)
+                val notice = TimerNoticeContent.apply(app, builder, title, deadline, 3661, paused, chinese).build()
+                val text = notice.extras.getString(Notification.EXTRA_TEXT) ?: ""
+                assertTrue(text.startsWith(if (chinese) "剩余 " else "Remaining "))
+                assertFalse(text.contains("轮") || text.contains("Cycle"))
+                if (paused) assertTrue(text.endsWith("01:01:01"))
+                runOnMainSync {
+                    for (remote in listOf(notice.contentView, notice.bigContentView)) {
+                        check(remote != null)
+                        val view = remote.apply(app, FrameLayout(app))
+                        assertEquals(title, view.findViewById<TextView>(R.id.timer_notice_title).text.toString())
+                        val countdown = view.findViewById<Chronometer>(R.id.timer_notice_countdown)
+                        val frozen = view.findViewById<TextView>(R.id.timer_notice_paused)
+                        assertEquals(if (paused) View.GONE else View.VISIBLE, countdown.visibility)
+                        assertEquals(if (paused) View.VISIBLE else View.GONE, frozen.visibility)
+                        if (paused) assertEquals("01:01:01", frozen.text.toString())
+                        else {
+                            assertTrue(countdown.isCountDown)
+                            val expected = SystemClock.elapsedRealtime() + deadline - System.currentTimeMillis()
+                            assertTrue(kotlin.math.abs(countdown.base - expected) < 250)
+                        }
+                    }
+                }
+            }
+        }
     }
 }

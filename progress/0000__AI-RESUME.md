@@ -3,13 +3,13 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-31"
-last_resumed_at: "2026-10-31T01:10:27+08:00"
-latest_checkpoint: "0139"
-next_sequence: "0140"
+last_resumed_at: "2026-10-31T01:24:39+08:00"
+latest_checkpoint: "0140"
+next_sequence: "0141"
 current_phase: P01
 current_gate: G01
-state: "android_glass_original_restored_v131_github_published"
-current_goal: "0139：Android v1.3.1+13原玻璃恢复版已公开，Release#429289413，源码0c4d332及标签同步、latest=v1.3.1；两资产远端SHA/正文/匿名200长度通过。APK81022823bytes/SHA321d197f…原正式证书、INTERNET/三ABI生产URL/五字体许可CRC通过，侘寂字体保持。原175338f光场golden逐像素一致；Android7/鸿蒙3专项、全量233通过6平台跳过/分析/离线4/联网2通过，发行构建127.1秒。未操作真实设备或服务器，Windows/鸿蒙下载沿1.3.0；交付APK保资料覆盖，原实体GPU/性能与G01待。0136管理功能和主隧道自动重连保持。"
+state: "android_notice_remaining_body_verified_local"
+current_goal: "0140：按用户要求，Android专注/旧绑定番茄/独立番茄通知改为阶段旁直接显示剩余时间，轮次不再作为正文；系统Chronometer后台倒数、暂停固定文本。JDK21本机QA构建33秒、API36串行10组原生/拒绝权限及20项Flutter回归通过，实际24:44→24:19及1:29:44→1:29:19，进程空仍继续；暂停两张PNG逐字节相同，英文1.5倍深色展开画面通过。自动合并组的折叠摘要仍为系统模板/快照，非厂商状态栏胶囊。仅本机源码和独立QA，无新正式APK/版本/远端发布；公开Android仍v1.3.1，真实手机/OEM及原G01待。"
 server_deployment_consultation:
   updated_at: "2026-10-30T22:04:00+08:00"
   user_scope: "用户将现有管理后台和后端部署至已有香港服务器，有公网IPv4/无域名；原截图Debian13.7/x86_64/SSH22/无swap及Docker29.9.2/Compose5.6.1/Nginx1.26.3。0130明确授权直接SSH，0131专用密钥认证及本人只读检查成功，用户不再需要手工复制一般状态命令。"
@@ -23,6 +23,7 @@ server_deployment_consultation:
   local_admin_tunnel: "0136：127.0.0.1:18080→服务器127.0.0.1:18081；本机自动重连监视PID23956，专用身份/严格主机密钥，PS7/5.1入口及独立18090断开恢复通过并清理辅助。当前静态200/匿名管理401，电脑重启后运行打开管理后台.cmd。"
   next_step: "0136后台注册控制、删除与团队修复已部署，交用户刷新页面操作；实际删除仅由用户选定并确认，继续原G01待验项目。"
 current_baseline:
+  - "0140：Android三类计时通知主内容显示剩余时间，新增共享RemoteViews/系统Chronometer及暂停冻结文本；保留原阶段闹钟/身份/完成语义。原生10组/拒绝权限与20项Flutter通过，API36进程退出后的两时钟持续递减、暂停PNG字节相同，深色/大字体英文展开通过。系统自动折叠组仅快照摘要；真实手机/厂商胶囊未验，未重建正式发行或推送，公开包仍0139。证据build/qa/android-notice-countdown。"
   - "0139：Android v1.3.1+13原玻璃恢复版已公开，Release#429289413，源码0c4d332及标签同步、latest=v1.3.1；两资产远端SHA/正文/匿名200长度通过。APK81022823bytes/SHA321d197f…原正式证书、INTERNET/三ABI生产URL/五字体许可CRC通过，侘寂字体保持。原175338f光场golden逐像素一致；Android7/鸿蒙3专项、全量233通过6平台跳过/分析/离线4/联网2通过，发行构建127.1秒。未操作真实设备或服务器，Windows/鸿蒙下载沿1.3.0；交付APK保资料覆盖，原实体GPU/性能与G01待。0136管理功能和主隧道自动重连保持。"
   - "0136：后台注册开关/预览删除已上线，当前注册true；管理员保护、事务清理与审计生效。团队MySQL1052字段歧义两处已修复；93后端/网页构建、完整独立MySQL/Redis HTTP及无界面Chrome页面通过，生产HTTPS创建/加入/读取/队友统计通过且两QA owner/团队已清理。干净源码7d5452c，27文件包8f5b9ad4…、JAR1b0a83db…及线上HTML精确一致；私有备份pre-online-20261030164442，healthy/HTTPS UP/续期active。18080自动重连监视PID23956已启用；PS7/5.1和18090断开恢复通过。无真实用户自动删除/无SMTP发送/无客户端重建；用户刷新后台即可用，原G01完整门禁保持。"
   - "0134：v1.3.0 Windows/Android及v1.3.0-harmonyos.1已公开，Release#429211948/429217039；七资产远端SHA/正文及匿名200长度通过，latest=v1.3.0；源码5fabdb2及双标签精确同步。生产IP HTTPS、三类独立会话/PBKDF2已生效，备份隔离恢复与续期演练通过、QA已清理。鸿蒙原生HUKS/TLS子集及个人平板签名Release安装启动/PC画面通过，个人材料仅F盘；公开HAP未签名。完整实体业务/旧资料恢复/性能、真实模型与长期容量/G01仍待，交付链接后按用户实际反馈推进。"
@@ -169,6 +170,9 @@ unfinished:
     item: "Android A0尚未通过：正式离线签名/发行与API36核心流程有0083/0086/0088证据，月/年手机页已进入v1.2.2正式包且通过API36正式版覆盖升级子集；仍须实体设备、SDK license、其余二级手机页、真实设备键盘/大字体和前后台性能。联网会话保护、真实同步、WebSocket/推送后续接入，不重复列发行签名或月年源码为未完成。"
     gate: Android-A0
 next_actions:
+  - id: NEXT-ANDROID-COUNTDOWN-DELIVERY
+    action: "0140源码与独立QA验证完成；下一次Android发行纳入通知主体剩余时间，沿原发行签名/生产HTTPS构建并保资料覆盖；核对用户实际手机上的通知紧凑/展开、暂停/继续/阶段切换与后台。当前公开v1.3.1尚无本轮改动，不自动推送或公开新版本。"
+    inputs: [docs/development/独立番茄闹钟.md, progress/0140__20261031__P01__DONE__android-notice-remaining-countdown.md]
   - id: NEXT-ANDROID-V131-ACCEPTANCE
     action: "0139已公开Android原液态玻璃恢复包；交付原签名联网APK，用户覆盖正式旧版后核对玻璃和侘寂字体，按实体反馈继续。"
     inputs: [docs/releases/v1.3.1.md]
