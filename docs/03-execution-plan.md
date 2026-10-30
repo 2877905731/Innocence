@@ -8,21 +8,21 @@ baseline:
   runtime: "Flutter + Java 21 + Spring Boot 3.3.2 + MyBatis + MySQL 8 + Redis"
   current_phase: P01
   current_gate: G01
-  evidence: "2026-10-14 三端v1.2.4发行（0115）：v1.2.4+9 Windows/Android正式与v1.2.4-harmonyos.1独立Release均公开，Release#412856784/#412858146，latest=v1.2.4；7资产远端摘要/正文及匿名200长度通过，源码623a321与两注释标签原子快进推送。214 Flutter/5跳过、19离线/10平板/80后端、分析及三端发行构建和签名/CRC/115 Dart一致性通过。API36正式v1.2.3覆盖Success/COLD1333ms/进程错误筛选0，系统桌面ANR影响业务UI，数据保留UI证据未取得；未把它当真机通过。鸿蒙公开ARM64 AOT未签名/无INTERNET，权益及后台接力/设备门禁保持；后端未部署。"
+  evidence: "v1.2.6+11 Android及v1.2.6-harmonyos.1已公开，Release#428699277/#428699913，latest=v1.2.6；5资产远端SHA/正文及匿名HEAD200长度通过，源码c20f84b与双注释标签精确同步。Android原发行证书/离线APK79727911bytes/701927a4…可交系统安装器；鸿蒙未签名ARM64 AOT53017333bytes/c9908a16…仍需接收者Profile/签名/HDC，个人材料不公开。内置字体/连续羽化均已进入新包，119Dart/五资源/CRC核对及11相关+13鸿蒙目标/分析通过；实体新画面/安装/性能/权益和G01仍待。Windows下载沿v1.2.5；旧临时入口已停止不续期。"
 android_track:
   status: in_progress
   plan_path: docs/planning/Innocence-Android版本实施规划.md
-  current_step: "v1.2.4+9正式离线APK已公开，同发行证书/无INTERNET。0115记录API36覆盖/冷启动及7公开资产核对；系统ANR影响本轮数据UI收据，实体设备与完整A0–A5继续待。"
+  current_step: "1.2.6+11 UI修正版正式离线APK已公开（0126），原发行证书/内置展示字体/玻璃连续羽化；5公开资产与11+13目标回归及分析通过，实体A0–A5/视觉性能继续待。"
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 harmonyos_tablet_track:
-  status: v1_2_4_release_aot_published_device_gates_open
+  status: v1_2_6_release_aot_published_device_gates_open
   plan_path: docs/planning/Innocence-鸿蒙平板版本实施规划.md
-  checkpoint: "0115"
+  checkpoint: "0126"
   user_scope: "Air系列平板/HarmonyOS 7，全屏复用PC页面；不做Windows窗口尺寸调整。0098先规划、0099恢复核对，用户随后明确开始制作；0100首批实现"
   order: [H0_toolchain_and_minimal_hap, H1_fullscreen_pc_shell, H2_offline_storage, H3_page_and_touch_parity, H4_online_contract_and_assistant, H5_device_and_release]
   pending_decisions: "真实设备型号代码已核对LRT-W20/HarmonyOS7/API26，具体市场年款与方向策略继续核实；平板槽位在H4前确认；正式联网包范围及H5公开分发仍待完整验收"
-  evidence_boundary: "v1.2.4-harmonyos.1/Release#412858146独立公开，ARM64 AOT未签名/无INTERNET；x64仅私有构建。本轮未执行Release设备安装/冷启动，旧0111 Debug真机竖屏/资料恢复证据保留；Live/代理权益与后台连续阶段、真实升级/输入/HUKS/槽位/联网/H5/G01仍待。"
+  evidence_boundary: "1.2.6-harmonyos.1 ARM64 AOT未签名/无INTERNET已公开（0126），包内五字体许可/119Dart及离线/CRC/签名边界核对通过；未重新安装真实平板。个人签名材料仅F盘，公开HAP需接收者自己的Profile/签名/HDC；Live/代理权益、旧Debug覆盖/资料恢复、实际画面性能及H5/G01仍待。"
 assistant_track:
   decision: "DEC-0050/0090采用B；DEC-0051/0092修正为自填API Key的全局聊天助手；DEC-0052/0093地址与密钥发现模型"
   status: byok_chat_discovery_implemented_fixture_verified_live_provider_and_device_pending
@@ -236,3 +236,7 @@ v1.2.5+10 Windows/Android及v1.2.5-harmonyos.1已公开，Release#414997721/4149
 ## 2026-10-30 Android／鸿蒙UI修正版准备（0125）
 
 用户明确要求重新发布Android/鸿蒙UI修正版；1.2.6+11 APK与ARM64 Release/AOT未签名HAP已构建核对，五字体许可/119Dart/CRC通过，11相关与13鸿蒙目标回归、分析通过。GitHub双发行与5资产待公开核对；Windows下载沿v1.2.5。个人签名材料不公开，HAP点文件直装与网页Deeplink区分，实体安装/字体/光场/性能及权益、H5/G01保持待验。
+
+## 2026-10-30 双端UI修正版公开（0126）
+
+v1.2.6+11 Android及v1.2.6-harmonyos.1已公开，Release#428699277/#428699913，latest=v1.2.6；5资产远端SHA/正文及匿名HEAD200长度通过，源码c20f84b与双注释标签精确同步。Android原发行证书/离线APK79727911bytes/701927a4…可交系统安装器；鸿蒙未签名ARM64 AOT53017333bytes/c9908a16…仍需接收者Profile/签名/HDC，个人材料不公开。内置字体/连续羽化均已进入新包，119Dart/五资源/CRC核对及11相关+13鸿蒙目标/分析通过；实体新画面/安装/性能/权益和G01仍待。Windows下载沿v1.2.5；旧临时入口已停止不续期。

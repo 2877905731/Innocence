@@ -888,3 +888,10 @@ checkpoints:
     status: complete
     path: progress/0125__20261030__P01__DONE__android-harmony-ui-release-ready.md
     title: "用户授权重新发布Android/鸿蒙UI修正版，1.2.6双端本机包就绪"
+  - sequence: "0126"
+    created_at: "2026-10-30T14:02:29+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0126__20261030__P01__DONE__android-harmony-ui-v126-published.md
+    title: "Android与鸿蒙1.2.6 UI修正版公开、五项下载与安装范围核对"

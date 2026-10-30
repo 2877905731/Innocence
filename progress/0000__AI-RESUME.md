@@ -3,14 +3,15 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-30"
-last_resumed_at: "2026-10-30T13:53:58+08:00"
-latest_checkpoint: "0125"
-next_sequence: "0126"
+last_resumed_at: "2026-10-30T14:02:29+08:00"
+latest_checkpoint: "0126"
+next_sequence: "0127"
 current_phase: P01
 current_gate: G01
-state: "android_harmony_ui_v126_ready_explicit_github_publish_authorized"
-current_goal: "0125用户要求先重新发布更新UI的Android/鸿蒙，已明确GitHub远端授权；两端1.2.6+11本机包/5资产就绪。APK79727911bytes/701927a4…原证书/非Debug/离线，HAP53017333bytes/c9908a16…ARM64 AOT未签名/离线，暂存私人签名配置未变、仓库签名配置空，五字体许可/119Dart/CRC通过；本轮11通过/5条件跳过+Harmony13、分析无问题。待推源码/双注释标签并公开5资产、核对匿名下载。Windows沿v1.2.5。用户要HAP点文件直装，已明确其与Deeplink网页分发不同，公开HAP仍需签名/HDC；个人材料不上传。0124临时入口已停止不续期，真机/权益/G01继续待。"
+state: "android_harmony_ui_v126_published_github_hap_direct_file_install_not_available"
+current_goal: "v1.2.6+11 Android及v1.2.6-harmonyos.1已公开，Release#428699277/#428699913，latest=v1.2.6；5资产远端SHA/正文及匿名HEAD200长度通过，源码c20f84b与双注释标签精确同步。Android原发行证书/离线APK79727911bytes/701927a4…可交系统安装器；鸿蒙未签名ARM64 AOT53017333bytes/c9908a16…仍需接收者Profile/签名/HDC，个人材料不公开。内置字体/连续羽化均已进入新包，119Dart/五资源/CRC核对及11相关+13鸿蒙目标/分析通过；实体新画面/安装/性能/权益和G01仍待。Windows下载沿v1.2.5；旧临时入口已停止不续期。"
 current_baseline:
+  - "2026-10-30 双端UI公开（0126）：v1.2.6+11 Android及v1.2.6-harmonyos.1已公开，Release#428699277/#428699913，latest=v1.2.6；5资产远端SHA/正文及匿名HEAD200长度通过，源码c20f84b与双注释标签精确同步。Android原发行证书/离线APK79727911bytes/701927a4…可交系统安装器；鸿蒙未签名ARM64 AOT53017333bytes/c9908a16…仍需接收者Profile/签名/HDC，个人材料不公开。内置字体/连续羽化均已进入新包，119Dart/五资源/CRC核对及11相关+13鸿蒙目标/分析通过；实体新画面/安装/性能/权益和G01仍待。Windows下载沿v1.2.5；旧临时入口已停止不续期。"
   - "2026-10-30 双端UI发行就绪（0125）：用户明确要求重新发布Android/鸿蒙；1.2.6+11两包/五资产白名单/说明齐备，APK原证书79727911bytes/701927a4…、未签名HAP53017333bytes/c9908a16…；CRC/五字体许可/119Dart及本轮11+13目标回归/分析通过。远端祖先和权限核对，待推送公开；个人签名材料不公开，HAP点文件直装不能由签名实现，网页分发另一路径。"
   - "2026-10-30 用户确认后临时入口开放（0124）：同一具体链接和4文件，经原子标记开放03:31:50→04:01:50/1800秒；外部7项健康/小文件字节摘要/HAP长度及两Range通过。公网页面/Deeplink可读，截图接口两次失败，无新公网截图。未实机安装，旧版/资料/企业资格待；到期关闭，不自动续期，完整链接不入Git。"
   - "2026-10-30 临时安装入口准备（0123）：本机4文件manifest官方签名/验签、新发布公钥及版本篡改拒绝通过；签名DTO覆盖和路由逐值/整文件摘要区分明确。Cloudflare2026.10.6官方摘要/Authenticode通过、临时HTTP2隧道连通，仅健康200/false；30项HEAD/Range/名单/路径/隔离开放标记负向通过，实际HAP/manifest公网404。浏览器预览截图F盘；待具体30分钟文件开放确认，未实机安装，不公开私有URL到Git。"
@@ -147,15 +148,15 @@ unfinished:
     item: "Android A0尚未通过：正式离线签名/发行与API36核心流程有0083/0086/0088证据，月/年手机页已进入v1.2.2正式包且通过API36正式版覆盖升级子集；仍须实体设备、SDK license、其余二级手机页、真实设备键盘/大字体和前后台性能。联网会话保护、真实同步、WebSocket/推送后续接入，不重复列发行签名或月年源码为未完成。"
     gate: Android-A0
 next_actions:
-  - id: NEXT-UI126-PUBLISH
-    action: "接0125：已获明确发布授权，推送源码/双注释标签，公开v1.2.6 Android两资产和v1.2.6-harmonyos.1三资产，验远端SHA/正文/匿名HEAD长度/latest后追加0126。个人签名材料仅本机；不再询问权限，不把未执行实机/权益门禁计完成"
+  - id: NEXT-UI126-PHYSICAL
+    action: "接0126：双端GitHub公开/5匿名下载已完成，交付链接并明确Android可交系统安装器、原生HAP点文件直装不由签名实现。保持旧资料，按真实反馈验两端字体/光束/安装/性能；个人签名材料不公开，旧临时入口已停，不自动续期"
     inputs: ["docs/releases/v1.2.6.md", "docs/releases/v1.2.6-harmonyos.1.md", "client/flutter_app/build/qa/v1.2.6/verification-manifest.json", "client/flutter_app/build/qa/release126.py"]
   - id: NEXT-HARMONYOS-SELF-USE-SIGNING
-    action: "接0124：人类已确认的同一链接4文件实际开放03:31:50→04:01:50，外部7项检查通过；交付用户在登记平板华为浏览器点击并按真实提示定位。先读当前时间/服务状态，过期不自动续期或重建域名公开；新授权才另开窗口。核对企业资格、旧Debug/新Release和app-identifier差异，保留旧应用/资料不卸载试错；不重问已完成证书/Profile授权，不共享私钥密码，不更改GitHub。"
-    inputs: ["client/flutter_app/harmonyos/INSTALL.zh-CN.md", "client/flutter_app/build/harmonyos-h0/self-use/20261030/publication-readiness.json", "client/flutter_app/build/harmonyos-h0/self-use/20261030/server-readiness.json", "progress/0124__20261030__P01__DONE__harmonyos-temporary-download-opened-with-consent.md"]
+    action: "0124临时入口原授权已到期且实际停止，不续期；0126用户强调GitHub下载后点文件安装，已区分HAP原生安装机制与Deeplink网页分发，不再把临时页当该目标完成。个人签名材料仅F盘，覆盖/资格/资料恢复仍待；用户后续选择合资格正式/测试分发或电脑HDC后再按范围执行，不擅自公开个人包"
+    inputs: ["client/flutter_app/harmonyos/INSTALL.zh-CN.md", "progress/0126__20261030__P01__DONE__android-harmony-ui-v126-published.md"]
   - id: NEXT-THEME-ARTWORK-DEVICE
-    action: "0118本机候选和安装说明就绪，公开GitHub仍旧v1.2.5。保持原资料，用同发行签名Android候选覆盖；鸿蒙需有效设备Profile/原应用签名后覆盖，不能直接点装未签名HAP。核对侘寂英文斜体/中文标题与品牌、玻璃运动和折射边缘，以及DPR/旋转/后台/持续帧率功耗；本轮HDC目标0，宿主图不能代替真实平板验收。新版本或正式分发按用户后续范围处理。"
-    inputs: ["client/flutter_app/build/qa/theme-artwork/candidate-manifest.json", "client/flutter_app/build/qa/theme-artwork/Innocence-artwork-android-offline.apk", "client/flutter_app/build/qa/theme-artwork/Innocence-artwork-harmonyos-arm64-release-unsigned.hap", "client/flutter_app/harmonyos/INSTALL.zh-CN.md", "progress/0118__20261024__P01__CORRECTION__bundled-display-fonts-and-smooth-glass.md"]
+    action: "0126已发布1.2.6+11 Android/鸿蒙UI修正版。保持旧资料，Android同发行签名覆盖；鸿蒙须自己的有效签名及合适安装路线。核对侘寂英文原生斜体/中文标题品牌、玻璃边缘与DPR/旋转/后台/持续性能，宿主图不代替实际设备验收"
+    inputs: ["docs/releases/v1.2.6.md", "docs/releases/v1.2.6-harmonyos.1.md", "client/flutter_app/harmonyos/INSTALL.zh-CN.md"]
   - id: NEXT-ANDROID-FOCUS-PHYSICAL
     action: "0113用户确认鸿蒙4手机并选择后续Android复验；0117正式v1.2.5+10同发行证书离线APK已公开，保留0112兼容修复与0116独立番茄，覆盖时勿卸载旧版，核对资料/开始/暂停/继续/结束及独立番茄开始/暂停/继续/结束与后台通知。真实手机型号、SQLite异常及覆盖效果仍待；鸿蒙7双TIMER权益及后台接力另验，不把受限FFI/API36当实体手机验收。"
     inputs: ["client/flutter_app/build/releases/v1.2.5/Innocence-v1.2.5-android-offline.apk", "docs/releases/v1.2.5.md", "docs/development/独立番茄闹钟.md", "progress/0112__20261012__P01__CORRECTION__android-offline-focus-sqlite-compatibility.md"]
@@ -253,6 +254,7 @@ history:
   checkpoint_0123: progress/0123__20261030__P01__DONE__harmonyos-temporary-installer-prepared-and-gated.md
   checkpoint_0124: progress/0124__20261030__P01__DONE__harmonyos-temporary-download-opened-with-consent.md
   checkpoint_0125: progress/0125__20261030__P01__DONE__android-harmony-ui-release-ready.md
+  checkpoint_0126: progress/0126__20261030__P01__DONE__android-harmony-ui-v126-published.md
 latest_android_run:
   requested_action: "专注的布局不太合理，你修改一下（附Android首页截图）"
   avd: Innocence_API36_Pixel7
