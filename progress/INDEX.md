@@ -5,6 +5,7 @@ project_name: "Innocence"
 ordering: ascending
 append_only_entries: true
 resume_path: progress/0000__AI-RESUME.md
+lookup_hint: "按sequence或关键词定位；0001–0131已归档，0132起保留近期正文；不要把旧完成事件当当前待办"
 checkpoints:
   - sequence: "0000"
     created_at: "2026-08-07T12:00:00+08:00"
@@ -416,519 +417,519 @@ checkpoints:
     created_at: "2026-09-23T12:16:06+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0058__20260923__P01__DONE__windows-v1.1.0-release-published.md
+    status: archived
+    path: progress/archive/0058__20260923__P01__DONE__windows-v1.1.0-release-published.md
     title: "Windows v1.1.0 柔彩主题与年度任务正式发布"
   - sequence: "0059"
     created_at: "2026-09-26T19:54:56+08:00"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0059__20260926__P01__CORRECTION__glass-annual-sticky-surface.md
+    status: archived
+    path: progress/archive/0059__20260926__P01__CORRECTION__glass-annual-sticky-surface.md
     title: "玻璃态年度任务吸顶月份栏与进度槽表面纠偏"
   - sequence: "0060"
     created_at: "2026-09-26T20:13:30+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0060__20260926__P01__DONE__windows-v1.1.1-glass-annual-release.md
+    status: archived
+    path: progress/archive/0060__20260926__P01__DONE__windows-v1.1.1-glass-annual-release.md
     title: "Windows v1.1.1 玻璃态年度任务修复正式发布"
   - sequence: "0061"
     created_at: "2026-09-26T22:27:41+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0061__20260926__P01__DONE__progress-compression-and-android-plan-draft.md
+    status: archived
+    path: progress/archive/0061__20260926__P01__DONE__progress-compression-and-android-plan-draft.md
     title: "进度检查点压缩归档与 Android 版本规划初稿"
   - sequence: "0062"
     created_at: "2026-09-26T22:46:07+08:00"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0062__20260926__P01__DECISION__android-md3-first-themes-later.md
+    status: archived
+    path: progress/archive/0062__20260926__P01__DECISION__android-md3-first-themes-later.md
     title: "Android 首版采用 MD3，四主题移动适配后置"
   - sequence: "0063"
     created_at: "2026-09-26T23:26:38+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0063__20260926__P01__DONE__android-a0-source-and-debug-build-baseline.md
+    status: archived
+    path: progress/archive/0063__20260926__P01__DONE__android-a0-source-and-debug-build-baseline.md
     title: "Android A0 源码盘点与 Debug APK 构建基线"
   - sequence: "0064"
     created_at: "2026-09-27T00:49:39+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0064__20260927__P01__DONE__android-api36-emulator-smoke.md
+    status: archived
+    path: progress/archive/0064__20260927__P01__DONE__android-api36-emulator-smoke.md
     title: "Android 16 Pixel 7 模拟器与 Debug APK 启动冒烟"
   - sequence: "0065"
     created_at: "2026-09-27T01:22:19+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0065__20260927__P01__DONE__android-md3-entry-and-c-drive-cleanup-audit.md
+    status: archived
+    path: progress/archive/0065__20260927__P01__DONE__android-md3-entry-and-c-drive-cleanup-audit.md
     title: "Android MD3 语言与认证入口、C 盘安装残留核对"
   - sequence: "0066"
     created_at: "2026-09-27T11:18:26+08:00"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0066__20260927__P01__DECISION__android-ellipsis-navigation-drawer.md
+    status: archived
+    path: progress/archive/0066__20260927__P01__DECISION__android-ellipsis-navigation-drawer.md
     title: "Android 主导航采用左上角三点按钮与侧边栏"
   - sequence: "0067"
     created_at: "2026-09-27T11:19:06+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0067__20260927__P01__DONE__android-md3-navigation-drawer-shell.md
+    status: archived
+    path: progress/archive/0067__20260927__P01__DONE__android-md3-navigation-drawer-shell.md
     title: "Android MD3 三点侧边栏 Shell 模拟器验证"
   - sequence: "0068"
     created_at: "2026-09-27T11:43:45+08:00"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0068__20260927__P01__DECISION__android-offline-first-release.md
+    status: archived
+    path: progress/archive/0068__20260927__P01__DECISION__android-offline-first-release.md
     title: "Android 首发保留未登录本机离线入口"
   - sequence: "0069"
     created_at: "2026-09-27T11:43:46+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0069__20260927__P01__DONE__android-offline-cold-start-restore.md
+    status: archived
+    path: progress/archive/0069__20260927__P01__DONE__android-offline-cold-start-restore.md
     title: "Android 本机离线资料冷启动恢复子集"
   - sequence: "0070"
     created_at: "2026-09-29"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0070__20260929__P01__DECISION__two-theme-web-reference-redesign.md
+    status: archived
+    path: progress/archive/0070__20260929__P01__DECISION__two-theme-web-reference-redesign.md
     title: "液态玻璃与简约白色重新设计，先交付两份网页参考"
   - sequence: "0071"
     created_at: "2026-09-29"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0071__20260929__P01__CORRECTION__space-glass-reference-calibration.md
+    status: archived
+    path: progress/archive/0071__20260929__P01__CORRECTION__space-glass-reference-calibration.md
     title: "按本地第九张参考纠正液态玻璃网页视觉方向"
   - sequence: "0072"
     created_at: "2026-09-29"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0072__20260929__P01__DECISION__neutral-frosted-glass-live-background.md
+    status: archived
+    path: progress/archive/0072__20260929__P01__DECISION__neutral-frosted-glass-live-background.md
     title: "整组参考的中性磨砂材质与动态背景透光"
   - sequence: "0073"
     created_at: "2026-09-29"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0073__20260929__P01__CORRECTION__vivid-light-glass-transmission.md
+    status: archived
+    path: progress/archive/0073__20260929__P01__CORRECTION__vivid-light-glass-transmission.md
     title: "增强动态光场饱和度与玻璃透光色偏"
   - sequence: "0074"
     created_at: "2026-09-29"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0074__20260929__P01__CORRECTION__citrus-white-local-reference.md
+    status: archived
+    path: progress/archive/0074__20260929__P01__CORRECTION__citrus-white-local-reference.md
     title: "读取19张本地白色参考并重设计柑橘磨砂网页"
   - sequence: "0075"
     created_at: "2026-09-30T12:47:49+08:00"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0075__20260930__P01__DECISION__two-themes-client-and-android-now.md
+    status: archived
+    path: progress/archive/0075__20260930__P01__DECISION__two-themes-client-and-android-now.md
     title: "两套参考风格立即覆盖客户端并应用于 Android"
   - sequence: "0076"
     created_at: "2026-09-30T13:02:25+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0076__20260930__P01__DONE__two-theme-client-foundation.md
+    status: archived
+    path: progress/archive/0076__20260930__P01__DONE__two-theme-client-foundation.md
     title: "两主题客户端基础覆盖与双端视觉核对"
   - sequence: "0077"
     created_at: "2026-09-30T13:21:32+08:00"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0077__20260930__P01__CORRECTION__preview-glass-beams-on-client.md
+    status: archived
+    path: progress/archive/0077__20260930__P01__CORRECTION__preview-glass-beams-on-client.md
     title: "液态玻璃客户端光束按网页预览重建"
   - sequence: "0078"
     created_at: "2026-09-30"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0078__20260930__P01__CORRECTION__glass-panel-light-refraction.md
+    status: archived
+    path: progress/archive/0078__20260930__P01__CORRECTION__glass-panel-light-refraction.md
     title: "共享光场纹理与组件光束折射，Windows Debug画面核对"
   - sequence: "0079"
     created_at: "2026-09-30"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0079__20260930__P01__CORRECTION__minimal-white-frosted-home.md
+    status: archived
+    path: progress/archive/0079__20260930__P01__CORRECTION__minimal-white-frosted-home.md
     title: "简约白首页独立磨砂浮窗、柑橘小点缀及Android画面核对"
   - sequence: "0080"
     created_at: "2026-09-30"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0080__20260930__P01__CORRECTION__glass-frosted-dialog-and-month-ruler.md
+    status: archived
+    path: progress/archive/0080__20260930__P01__CORRECTION__glass-frosted-dialog-and-month-ruler.md
     title: "液态玻璃中性月份栏、二级磨砂弹层与双端弹窗画面核对"
   - sequence: "0081"
     created_at: "2026-10-01T14:03:18+08:00"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0081__20261001__P01__DECISION__android-short-plan-clock.md
+    status: archived
+    path: progress/archive/0081__20261001__P01__DECISION__android-short-plan-clock.md
     title: "Android 短计划圆盘时钟与凌晨单日边界"
   - sequence: "0082"
     created_at: "2026-10-01"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0082__20261001__P01__DECISION__v1.2.0-android-offline-release-scope.md
+    status: archived
+    path: progress/archive/0082__20261001__P01__DECISION__v1.2.0-android-offline-release-scope.md
     title: "v1.2.0 双端小版本与 Android 本机离线发行范围"
   - sequence: "0083"
     created_at: "2026-10-01T14:47:40+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0083__20261001__P01__DONE__v1.2.0-windows-and-android-offline-release.md
+    status: archived
+    path: progress/archive/0083__20261001__P01__DONE__v1.2.0-windows-and-android-offline-release.md
     title: "v1.2.0 双端正式发布与 Android 本机离线安装验证"
   - sequence: "0084"
     created_at: "2026-10-02T20:54:00+08:00"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0084__20261002__P01__CORRECTION__android-glass-clock-and-daily-slogans.md
+    status: archived
+    path: progress/archive/0084__20261002__P01__CORRECTION__android-glass-clock-and-daily-slogans.md
     title: "Android玻璃纹理方向、圆盘手柄误滚动与双端每日标语纠正"
   - sequence: "0085"
     created_at: "2026-10-02T21:05:53+08:00"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0085__20261002__P01__CORRECTION__android-adaptive-launcher-icon-fill.md
+    status: archived
+    path: progress/archive/0085__20261002__P01__CORRECTION__android-adaptive-launcher-icon-fill.md
     title: "Android自适应启动图标留白与填充比例纠正"
   - sequence: "0086"
     created_at: "2026-10-03T16:20:38+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0086__20261003__P01__DONE__v1.2.1-patch-release.md
+    status: archived
+    path: progress/archive/0086__20261003__P01__DONE__v1.2.1-patch-release.md
     title: "v1.2.1双端修正小版本正式发布与升级下载核对"
   - sequence: "0087"
     created_at: "2026-10-03T17:29:29+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0087__20261003__P01__DONE__android-month-year-mobile-plans.md
+    status: archived
+    path: progress/archive/0087__20261003__P01__DONE__android-month-year-mobile-plans.md
     title: "Android月计划与年度任务独立手机页及离线保存恢复验证"
   - sequence: "0088"
     created_at: "2026-10-04T01:20:34+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0088__20261004__P01__DONE__v1.2.2-patch-release.md
+    status: archived
+    path: progress/archive/0088__20261004__P01__DONE__v1.2.2-patch-release.md
     title: "v1.2.2双端离线小版本正式发布、资产下载与升级核验"
   - sequence: "0089"
     created_at: "2026-10-04T15:12:58+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0089__20261004__P01__DONE__ai-assistant-options-review-draft.md
+    status: archived
+    path: progress/archive/0089__20261004__P01__DONE__ai-assistant-options-review-draft.md
     title: "AI智能助手三套方案评审稿，新增模块范围待用户选择"
   - sequence: "0090"
     created_at: "2026-10-04T15:31:58+08:00"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0090__20261004__P01__DECISION__ai-assistant-b-adopted.md
+    status: archived
+    path: progress/archive/0090__20261004__P01__DECISION__ai-assistant-b-adopted.md
     title: "用户采用智能助手B，模块范围及首批开发契约落档"
   - sequence: "0091"
     created_at: "2026-10-04T17:22:41+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0091__20261004__P01__DONE__ai-assistant-b1-implementation.md
+    status: archived
+    path: progress/archive/0091__20261004__P01__DONE__ai-assistant-b1-implementation.md
     title: "B1智能助手首批实现、真实存储回归与双端本机构建"
   - sequence: "0092"
     created_at: "2026-10-04T21:16:32+08:00"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0092__20261004__P01__CORRECTION__byok-chat-assistant.md
+    status: archived
+    path: progress/archive/0092__20261004__P01__CORRECTION__byok-chat-assistant.md
     title: "按用户修正实现自填密钥的聊天助手、软件工具与新版启动"
   - sequence: "0093"
     created_at: "2026-10-04T22:14:27+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0093__20261004__P01__DONE__model-discovery-and-simple-connection.md
+    status: archived
+    path: progress/archive/0093__20261004__P01__DONE__model-discovery-and-simple-connection.md
     title: "地址与密钥自动获取模型、协议验证及新版启动"
   - sequence: "0094"
     created_at: "2026-10-04T22:40:09+08:00"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0094__20261004__P01__CORRECTION__white-home-timer-dial-and-surfaces.md
+    status: archived
+    path: progress/archive/0094__20261004__P01__CORRECTION__white-home-timer-dial-and-surfaces.md
     title: "双端同步专注表盘、白色面板和几何图形及标语标签修正"
   - sequence: "0095"
     created_at: "2026-10-04T23:22:44+08:00"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0095__20261004__P01__CORRECTION__original-minimal-white-rebuild.md
+    status: archived
+    path: progress/archive/0095__20261004__P01__CORRECTION__original-minimal-white-rebuild.md
     title: "按最早简约白重建双端黑白排版、字体标识和进度细节"
   - sequence: "0096"
     created_at: "2026-10-04T23:48:16+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0096__20261004__P01__DONE__android-startup-and-centered-emulator.md
+    status: archived
+    path: progress/archive/0096__20261004__P01__DONE__android-startup-and-centered-emulator.md
     title: "Android API36覆盖安装、冷启动核对与模拟器窗口居中"
   - sequence: "0097"
     created_at: "2026-10-05T00:10:02+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0097__20261005__P01__DONE__android-focus-card-layout.md
+    status: archived
+    path: progress/archive/0097__20261005__P01__DONE__android-focus-card-layout.md
     title: "Android专注数字与表盘布局修正、回归和实际新版启动"
   - sequence: "0098"
     created_at: "2026-10-05T20:07:14+08:00"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0098__20261005__P01__DECISION__harmonyos-tablet-pc-layout-plan.md
+    status: archived
+    path: progress/archive/0098__20261005__P01__DECISION__harmonyos-tablet-pc-layout-plan.md
     title: "鸿蒙Air平板全屏复用PC页面的实施规划，用户要求先做计划"
   - sequence: "0099"
     created_at: "2026-10-05T20:19:40+08:00"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0099__20261005__P01__CORRECTION__tablet-trial-rollback-source-recovery.md
+    status: archived
+    path: progress/archive/0099__20261005__P01__CORRECTION__tablet-trial-rollback-source-recovery.md
     title: "更正平板试改首次撤回证据，完整恢复原源码并通过静态分析"
   - sequence: "0100"
     created_at: "2026-10-05T21:13:25+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0100__20261005__P01__DONE__harmonyos-scaffold-and-dart-kernel.md
+    status: archived
+    path: progress/archive/0100__20261005__P01__DONE__harmonyos-scaffold-and-dart-kernel.md
     title: "鸿蒙原生宿主与PC平板能力首批实现，ARM64 Dart kernel通过，原生SDK待接"
   - sequence: "0101"
     created_at: "2026-10-05T21:33:32+08:00"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0101__20261005__P01__DECISION__harmonyos-f-drive-storage.md
+    status: archived
+    path: progress/archive/0101__20261005__P01__DECISION__harmonyos-f-drive-storage.md
     title: "用户指定鸿蒙文件全放F盘，构建临时目录与缓存落实，官方下载控制仍受阻"
   - sequence: "0102"
     created_at: "2026-10-06T18:05:39+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0102__20261006__P01__DONE__harmonyos-sdk-and-unsigned-hap.md
+    status: archived
+    path: progress/archive/0102__20261006__P01__DONE__harmonyos-sdk-and-unsigned-hap.md
     title: "F盘官方鸿蒙SDK与ARM64/x64未签名原生HAP通过，签名及设备运行待验"
   - sequence: "0103"
     created_at: "2026-10-06T22:51:59+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0103__20261006__P01__DONE__harmonyos-tablet-image-and-device.md
+    status: archived
+    path: progress/archive/0103__20261006__P01__DONE__harmonyos-tablet-image-and-device.md
     title: "鸿蒙7平板镜像与F盘设备实例就绪，模拟器启动未形成窗口或连接"
   - sequence: "0104"
     created_at: "2026-10-06T23:36:13+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0104__20261006__P01__DONE__harmonyos-emulator-install-and-pc-shell.md
+    status: archived
+    path: progress/archive/0104__20261006__P01__DONE__harmonyos-emulator-install-and-pc-shell.md
     title: "鸿蒙模拟器HAP安装与全屏PC页面启动，四主题及原生存储初始化有证据"
   - sequence: "0105"
     created_at: "2026-10-07T00:38:13+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0105__20261007__P01__DONE__v1.2.3-patch-release.md
+    status: archived
+    path: progress/archive/0105__20261007__P01__DONE__v1.2.3-patch-release.md
     title: "v1.2.3双端小版本正式发布与覆盖升级核对"
   - sequence: "0106"
     created_at: "2026-10-07T00:54:24+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0106__20261007__P01__DONE__harmonyos-unsigned-preview-release.md
+    status: archived
+    path: progress/archive/0106__20261007__P01__DONE__harmonyos-unsigned-preview-release.md
     title: "鸿蒙平板1.2.3未签名开发预览独立发布，真机签名仍待"
   - sequence: "0107"
     created_at: "2026-10-07T13:51:50+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0107__20261007__P01__DONE__harmonyos-physical-signed-install-and-start.md
+    status: archived
+    path: progress/archive/0107__20261007__P01__DONE__harmonyos-physical-signed-install-and-start.md
     title: "鸿蒙实体平板单设备签名、安装启动与全屏PC页面核对"
   - sequence: "0108"
     created_at: "2026-10-07T13:59:39+08:00"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0108__20261007__P01__DECISION__harmonyos-user-acceptance-and-github-release.md
+    status: archived
+    path: progress/archive/0108__20261007__P01__DECISION__harmonyos-user-acceptance-and-github-release.md
     title: "用户验收鸿蒙平板版本并明确授权GitHub发布"
   - sequence: "0109"
     created_at: "2026-10-07T14:36:57+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0109__20261007__P01__DONE__harmonyos-release-aot-github-published.md
+    status: archived
+    path: progress/archive/0109__20261007__P01__DONE__harmonyos-release-aot-github-published.md
     title: "鸿蒙平板Release本机包GitHub分发与公开下载核对"
   - sequence: "0110"
     created_at: "2026-10-11T16:14:27+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0110__20261011__P01__DONE__portrait-and-focus-system-notices.md
+    status: archived
+    path: progress/archive/0110__20261011__P01__DONE__portrait-and-focus-system-notices.md
     title: "鸿蒙竖屏与三端专注系统提醒适配、Android原生提醒及本机签名候选"
   - sequence: "0111"
     created_at: "2026-10-12T16:57:58+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0111__20261012__P01__DONE__focus-runtime-and-harmony-rights.md
+    status: archived
+    path: progress/archive/0111__20261012__P01__DONE__focus-runtime-and-harmony-rights.md
     title: "真机竖屏升级与实况窗权益定位、Android重启和Windows系统通知回执"
   - sequence: "0112"
     created_at: "2026-10-12T18:27:04+08:00"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0112__20261012__P01__CORRECTION__android-offline-focus-sqlite-compatibility.md
+    status: archived
+    path: progress/archive/0112__20261012__P01__CORRECTION__android-offline-focus-sqlite-compatibility.md
     title: "Android离线专注SQLite兼容性修复及同证书本机安装包"
   - sequence: "0113"
     created_at: "2026-10-12T20:07:41+08:00"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0113__20261012__P01__DECISION__harmony4-phone-and-android-retest.md
+    status: archived
+    path: progress/archive/0113__20261012__P01__DECISION__harmony4-phone-and-android-retest.md
     title: "用户补充鸿蒙4手机环境并选择后续安卓系统复验"
   - sequence: "0114"
     created_at: "2026-10-12T20:51:13+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0114__20261012__P01__DONE__focus-pomodoro-tabs-and-mobile-notices.md
+    status: archived
+    path: progress/archive/0114__20261012__P01__DONE__focus-pomodoro-tabs-and-mobile-notices.md
     title: "全平台专注番茄分页、活动会话设置与Android系统通知"
   - sequence: "0115"
     created_at: "2026-10-14T23:17:40+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0115__20261014__P01__DONE__v1.2.4-three-platform-release.md
+    status: archived
+    path: progress/archive/0115__20261014__P01__DONE__v1.2.4-three-platform-release.md
     title: "v1.2.4三端小版本GitHub公开与下载核验"
   - sequence: "0116"
     created_at: "2026-10-16T21:28:29+08:00"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0116__20261016__P01__CORRECTION__independent-pomodoro-and-release-ready.md
+    status: archived
+    path: progress/archive/0116__20261016__P01__CORRECTION__independent-pomodoro-and-release-ready.md
     title: "番茄独立计时范围纠正、三端实现与v1.2.5发行就绪"
   - sequence: "0117"
     created_at: "2026-10-16T21:34:09+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0117__20261016__P01__DONE__v1.2.5-independent-pomodoro-published.md
+    status: archived
+    path: progress/archive/0117__20261016__P01__DONE__v1.2.5-independent-pomodoro-published.md
     title: "v1.2.5独立番茄三端公开与七项下载核验"
   - sequence: "0118"
     created_at: "2026-10-24T15:37:24+08:00"
     phase: P01
     type: CORRECTION
-    status: complete
-    path: progress/0118__20261024__P01__CORRECTION__bundled-display-fonts-and-smooth-glass.md
+    status: archived
+    path: progress/archive/0118__20261024__P01__CORRECTION__bundled-display-fonts-and-smooth-glass.md
     title: "侘寂内置展示字体、玻璃光束连续羽化与鸿蒙HAP安装说明"
   - sequence: "0119"
     created_at: "2026-10-24T16:20:31+08:00"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0119__20261024__P01__DECISION__harmonyos-personal-use-and-real-name-pending.md
+    status: archived
+    path: progress/archive/0119__20261024__P01__DECISION__harmonyos-personal-use-and-real-name-pending.md
     title: "鸿蒙仅供本人使用，账号已注册但实名认证待完成"
   - sequence: "0120"
     created_at: "2026-10-24T22:17:05+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0120__20261024__P01__DONE__harmonyos-app-id-and-release-certificate-draft.md
+    status: archived
+    path: progress/archive/0120__20261024__P01__DONE__harmonyos-app-id-and-release-certificate-draft.md
     title: "鸿蒙同包名APP ID创建、指定设备选项核对与发布证书草稿"
   - sequence: "0121"
     created_at: "2026-10-29T15:36:28+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0121__20261029__P01__DONE__harmonyos-release-certificate-and-device-profile.md
+    status: archived
+    path: progress/archive/0121__20261029__P01__DONE__harmonyos-release-certificate-and-device-profile.md
     title: "个人发布证书、单设备指定发布Profile签发与官方验证"
   - sequence: "0122"
     created_at: "2026-10-30T02:29:34+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0122__20261030__P01__DONE__harmonyos-self-use-signed-hap-and-temporary-entry-plan.md
+    status: archived
+    path: progress/archive/0122__20261030__P01__DONE__harmonyos-self-use-signed-hap-and-temporary-entry-plan.md
     title: "单设备Release签名HAP验签、离线资源核对与临时入口选择"
   - sequence: "0123"
     created_at: "2026-10-30T02:52:50+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0123__20261030__P01__DONE__harmonyos-temporary-installer-prepared-and-gated.md
+    status: archived
+    path: progress/archive/0123__20261030__P01__DONE__harmonyos-temporary-installer-prepared-and-gated.md
     title: "自用网页描述签名、临时HTTPS健康入口与受控下载准备"
   - sequence: "0124"
     created_at: "2026-10-30T03:34:50+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0124__20261030__P01__DONE__harmonyos-temporary-download-opened-with-consent.md
+    status: archived
+    path: progress/archive/0124__20261030__P01__DONE__harmonyos-temporary-download-opened-with-consent.md
     title: "用户确认后临时自用入口开放30分钟与外部下载校验"
   - sequence: "0125"
     created_at: "2026-10-30T13:53:58+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0125__20261030__P01__DONE__android-harmony-ui-release-ready.md
+    status: archived
+    path: progress/archive/0125__20261030__P01__DONE__android-harmony-ui-release-ready.md
     title: "用户授权重新发布Android/鸿蒙UI修正版，1.2.6双端本机包就绪"
   - sequence: "0126"
     created_at: "2026-10-30T14:02:29+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0126__20261030__P01__DONE__android-harmony-ui-v126-published.md
+    status: archived
+    path: progress/archive/0126__20261030__P01__DONE__android-harmony-ui-v126-published.md
     title: "Android与鸿蒙1.2.6 UI修正版公开、五项下载与安装范围核对"
   - sequence: "0127"
     created_at: "2026-10-30T18:45:00+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0127__20261030__P01__DONE__server-first-deployment-bundle-ready.md
+    status: archived
+    path: progress/archive/0127__20261030__P01__DONE__server-first-deployment-bundle-ready.md
     title: "Debian13首轮SSH隧道部署包就绪，服务器启动与数据方案待验"
   - sequence: "0128"
     created_at: "2026-10-30T19:05:00+08:00"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0128__20261030__P01__DECISION__server-empty-database-and-private-smtp.md
+    status: archived
+    path: progress/archive/0128__20261030__P01__DECISION__server-empty-database-and-private-smtp.md
     title: "用户选择服务器空库及自填SMTP，正常邮箱注册辅助就绪"
   - sequence: "0129"
     created_at: "2026-10-30T21:40:00+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0129__20261030__P01__DONE__server-loopback-startup-and-memory-pending.md
+    status: archived
+    path: progress/archive/0129__20261030__P01__DONE__server-loopback-startup-and-memory-pending.md
     title: "用户服务器回环启动健康回执，1.8GB内存报告待实际指标核对"
   - sequence: "0130"
     created_at: "2026-10-30T21:48:00+08:00"
     phase: P01
     type: DECISION
-    status: complete
-    path: progress/0130__20261030__P01__DECISION__direct-ssh-control-and-dedicated-key.md
+    status: archived
+    path: progress/archive/0130__20261030__P01__DECISION__direct-ssh-control-and-dedicated-key.md
     title: "用户授权直接SSH管理，专用密钥就绪待控制台安装公钥"
   - sequence: "0131"
     created_at: "2026-10-30T22:04:00+08:00"
     phase: P01
     type: DONE
-    status: complete
-    path: progress/0131__20261030__P01__DONE__ssh-connected-and-local-admin-tunnel.md
+    status: archived
+    path: progress/archive/0131__20261030__P01__DONE__ssh-connected-and-local-admin-tunnel.md
     title: "专用SSH认证和只读健康核对通过，本机后台隧道可用"
   - sequence: "0132"
     created_at: "2026-10-30T23:15:00+08:00"
@@ -1028,3 +1029,10 @@ checkpoints:
     status: complete
     path: progress/0145__20261031__P01__DONE__harmony-timer-service-under-review.md
     title: "用户自行提交TIMER调测申请，控制台确认实况窗服务审核中"
+  - sequence: "0146"
+    created_at: "2026-11-01T00:07:46+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0146__20261101__P01__DONE__documentation-compression-and-review-guide.md
+    title: "记录TIMER审核预计日期与结果入口，压缩当前文档并原样归档历史"

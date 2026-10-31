@@ -1,0 +1,572 @@
+{
+  "date": "2026-11-01",
+  "checkpoint": "0146",
+  "snapshots": [
+    {
+      "source": "progress/0000__AI-RESUME.md",
+      "archive": "progress/archive/0000__AI-RESUME__before-20261101-compression.md",
+      "bytes": 89762,
+      "sha256_at_archive": "5ce0aec8adc1227e6c321e036b3d5e67236b9fd6674771feb212dcfea72e3f28"
+    },
+    {
+      "source": "progress/INDEX.md",
+      "archive": "progress/archive/INDEX__before-20261101-compression.md",
+      "bytes": 42877,
+      "sha256_at_archive": "8b984d7a16b5ec8f8187d7c17cc642b38b3d548a02c55b75ef98562e10fb258f"
+    },
+    {
+      "source": "docs/planning/Innocence-鸿蒙平板版本实施规划.md",
+      "archive": "docs/archive/Innocence-鸿蒙平板版本实施规划-20261101.md",
+      "bytes": 32744,
+      "sha256_at_archive": "97136c3961630854e50b6cf9f7d43b5a4cb012cb719b51d3aad2102e96af3097"
+    },
+    {
+      "source": "docs/development/鸿蒙专注提醒权益接入.md",
+      "archive": "docs/archive/鸿蒙专注提醒权益接入-20261101.md",
+      "bytes": 16744,
+      "sha256_at_archive": "50bb4c34c3ae6a67a461155f6410d3a6061ff9f3cf586f3190b6fa9a02da0883"
+    }
+  ],
+  "checkpoint_moves": [
+    {
+      "source": "progress/0058__20260923__P01__DONE__windows-v1.1.0-release-published.md",
+      "archive": "progress/archive/0058__20260923__P01__DONE__windows-v1.1.0-release-published.md",
+      "bytes": 5731,
+      "sha256_at_move": "8120251893abb4920f21952b09c352734eb6dc40241bef706e73d70fd84702b7"
+    },
+    {
+      "source": "progress/0059__20260926__P01__CORRECTION__glass-annual-sticky-surface.md",
+      "archive": "progress/archive/0059__20260926__P01__CORRECTION__glass-annual-sticky-surface.md",
+      "bytes": 3527,
+      "sha256_at_move": "308303bd26188f37dd667cf64810291f84c3a1e67256cb7559b5abfe8d12e6fb"
+    },
+    {
+      "source": "progress/0060__20260926__P01__DONE__windows-v1.1.1-glass-annual-release.md",
+      "archive": "progress/archive/0060__20260926__P01__DONE__windows-v1.1.1-glass-annual-release.md",
+      "bytes": 5014,
+      "sha256_at_move": "0a1b74d41c69e0098111ffbfda54bbec090aad29668ec8af1bd22cf58f7cf7e0"
+    },
+    {
+      "source": "progress/0061__20260926__P01__DONE__progress-compression-and-android-plan-draft.md",
+      "archive": "progress/archive/0061__20260926__P01__DONE__progress-compression-and-android-plan-draft.md",
+      "bytes": 5168,
+      "sha256_at_move": "2dc312492e52f8eb7f8c60054845eebb30fc093613df499e6e9720bc10348545"
+    },
+    {
+      "source": "progress/0062__20260926__P01__DECISION__android-md3-first-themes-later.md",
+      "archive": "progress/archive/0062__20260926__P01__DECISION__android-md3-first-themes-later.md",
+      "bytes": 4924,
+      "sha256_at_move": "9e73d01c9bd704b2259e5db09dd7e68a068b6156b5c5e4a75478d93ea6a864e6"
+    },
+    {
+      "source": "progress/0063__20260926__P01__DONE__android-a0-source-and-debug-build-baseline.md",
+      "archive": "progress/archive/0063__20260926__P01__DONE__android-a0-source-and-debug-build-baseline.md",
+      "bytes": 4862,
+      "sha256_at_move": "34ec621ba26be2635fcb2905aba3d1923d4a8ffe6a871d0b9bf6d2803bc1cf6e"
+    },
+    {
+      "source": "progress/0064__20260927__P01__DONE__android-api36-emulator-smoke.md",
+      "archive": "progress/archive/0064__20260927__P01__DONE__android-api36-emulator-smoke.md",
+      "bytes": 5825,
+      "sha256_at_move": "fd7997ebfb526ef4925142f08e4cc9456c716764a747d95d346d771a76b6f1f4"
+    },
+    {
+      "source": "progress/0065__20260927__P01__DONE__android-md3-entry-and-c-drive-cleanup-audit.md",
+      "archive": "progress/archive/0065__20260927__P01__DONE__android-md3-entry-and-c-drive-cleanup-audit.md",
+      "bytes": 6483,
+      "sha256_at_move": "d919ebfff1ff5ef1e499eb1534c496593d534a7e6cb77eb3afa1fabaa7f8707e"
+    },
+    {
+      "source": "progress/0066__20260927__P01__DECISION__android-ellipsis-navigation-drawer.md",
+      "archive": "progress/archive/0066__20260927__P01__DECISION__android-ellipsis-navigation-drawer.md",
+      "bytes": 3381,
+      "sha256_at_move": "54798218ccb8065c21d4b9c7c2177090c248a17b419650ffbdc092c362da7079"
+    },
+    {
+      "source": "progress/0067__20260927__P01__DONE__android-md3-navigation-drawer-shell.md",
+      "archive": "progress/archive/0067__20260927__P01__DONE__android-md3-navigation-drawer-shell.md",
+      "bytes": 6409,
+      "sha256_at_move": "40f812dec26a6141aba6651daf6324e9b3758f5e332df9fcf46ba216d263669f"
+    },
+    {
+      "source": "progress/0068__20260927__P01__DECISION__android-offline-first-release.md",
+      "archive": "progress/archive/0068__20260927__P01__DECISION__android-offline-first-release.md",
+      "bytes": 2682,
+      "sha256_at_move": "28a151ad44b4fa74d5f8e5da68f501148eae685bdd6d26dd82f25fba3bc1e4f0"
+    },
+    {
+      "source": "progress/0069__20260927__P01__DONE__android-offline-cold-start-restore.md",
+      "archive": "progress/archive/0069__20260927__P01__DONE__android-offline-cold-start-restore.md",
+      "bytes": 5784,
+      "sha256_at_move": "e9cf6e1e27bf667d192a46c974e3dacee65a0fed3b15a5630cad2860eb7f2a10"
+    },
+    {
+      "source": "progress/0070__20260929__P01__DECISION__two-theme-web-reference-redesign.md",
+      "archive": "progress/archive/0070__20260929__P01__DECISION__two-theme-web-reference-redesign.md",
+      "bytes": 4118,
+      "sha256_at_move": "a87eea23ea141db9d6a3e12db70a6f90f843e1a1a7a8340640c20dc50f96ea96"
+    },
+    {
+      "source": "progress/0071__20260929__P01__CORRECTION__space-glass-reference-calibration.md",
+      "archive": "progress/archive/0071__20260929__P01__CORRECTION__space-glass-reference-calibration.md",
+      "bytes": 3430,
+      "sha256_at_move": "f123c80d7f0c0d26046f3726ee9b0416fce9a4555be1c4ddbbc87d7eb5306c27"
+    },
+    {
+      "source": "progress/0072__20260929__P01__DECISION__neutral-frosted-glass-live-background.md",
+      "archive": "progress/archive/0072__20260929__P01__DECISION__neutral-frosted-glass-live-background.md",
+      "bytes": 3122,
+      "sha256_at_move": "540170eac06a93451199fcbf56bba0fd7e2dc9a61826fc3d2d8e0055e07f97d9"
+    },
+    {
+      "source": "progress/0073__20260929__P01__CORRECTION__vivid-light-glass-transmission.md",
+      "archive": "progress/archive/0073__20260929__P01__CORRECTION__vivid-light-glass-transmission.md",
+      "bytes": 2201,
+      "sha256_at_move": "0261c76d8378ec955ac85ba1bed3abe764da777cb099684e1754cb9b7bd5c292"
+    },
+    {
+      "source": "progress/0074__20260929__P01__CORRECTION__citrus-white-local-reference.md",
+      "archive": "progress/archive/0074__20260929__P01__CORRECTION__citrus-white-local-reference.md",
+      "bytes": 2983,
+      "sha256_at_move": "fce9a3fbf9d377f17f887e803dbf1719ba2ac57d10d85e48cd3bd27d781acffb"
+    },
+    {
+      "source": "progress/0075__20260930__P01__DECISION__two-themes-client-and-android-now.md",
+      "archive": "progress/archive/0075__20260930__P01__DECISION__two-themes-client-and-android-now.md",
+      "bytes": 2756,
+      "sha256_at_move": "6efe950d8c135dddd077204fb049a30405b38fd57d23176e033256c320f4d22d"
+    },
+    {
+      "source": "progress/0076__20260930__P01__DONE__two-theme-client-foundation.md",
+      "archive": "progress/archive/0076__20260930__P01__DONE__two-theme-client-foundation.md",
+      "bytes": 7948,
+      "sha256_at_move": "9e1730bc60f23216047d4577bed7351d7271bca29d9286a0c5de3d8aebd32a6b"
+    },
+    {
+      "source": "progress/0077__20260930__P01__CORRECTION__preview-glass-beams-on-client.md",
+      "archive": "progress/archive/0077__20260930__P01__CORRECTION__preview-glass-beams-on-client.md",
+      "bytes": 4225,
+      "sha256_at_move": "5b16d4d579afe8cd2c7ee26a585321c97b920e2a707b897ef530109e5706db72"
+    },
+    {
+      "source": "progress/0078__20260930__P01__CORRECTION__glass-panel-light-refraction.md",
+      "archive": "progress/archive/0078__20260930__P01__CORRECTION__glass-panel-light-refraction.md",
+      "bytes": 5524,
+      "sha256_at_move": "6940f0fd8d8074a76dc3ac17d1d141ad071d0c54928b2bf549dfda83ca83de87"
+    },
+    {
+      "source": "progress/0079__20260930__P01__CORRECTION__minimal-white-frosted-home.md",
+      "archive": "progress/archive/0079__20260930__P01__CORRECTION__minimal-white-frosted-home.md",
+      "bytes": 6474,
+      "sha256_at_move": "29a4f7baceceefd52f4fe9cfd2bfd2b75fb7f8c6ce959590f1dece844a0375ab"
+    },
+    {
+      "source": "progress/0080__20260930__P01__CORRECTION__glass-frosted-dialog-and-month-ruler.md",
+      "archive": "progress/archive/0080__20260930__P01__CORRECTION__glass-frosted-dialog-and-month-ruler.md",
+      "bytes": 7961,
+      "sha256_at_move": "3093cf2267cbf8b3c0fe221b57695349ea0fa19172f6b2af5cf619b98030ef29"
+    },
+    {
+      "source": "progress/0081__20261001__P01__DECISION__android-short-plan-clock.md",
+      "archive": "progress/archive/0081__20261001__P01__DECISION__android-short-plan-clock.md",
+      "bytes": 7086,
+      "sha256_at_move": "0e6311b1307afc5930970cc57ca8c6cdf05a85fc5fa868ef97a4b44d623b3d0f"
+    },
+    {
+      "source": "progress/0082__20261001__P01__DECISION__v1.2.0-android-offline-release-scope.md",
+      "archive": "progress/archive/0082__20261001__P01__DECISION__v1.2.0-android-offline-release-scope.md",
+      "bytes": 4425,
+      "sha256_at_move": "c70bfb3526317ff35ff7948fce816d16f7b56141a3f329e97fcfba594357e84e"
+    },
+    {
+      "source": "progress/0083__20261001__P01__DONE__v1.2.0-windows-and-android-offline-release.md",
+      "archive": "progress/archive/0083__20261001__P01__DONE__v1.2.0-windows-and-android-offline-release.md",
+      "bytes": 10375,
+      "sha256_at_move": "a228674bcdf2f146157674a36a93356adda8dc75e06a3a773ea2e018be446292"
+    },
+    {
+      "source": "progress/0084__20261002__P01__CORRECTION__android-glass-clock-and-daily-slogans.md",
+      "archive": "progress/archive/0084__20261002__P01__CORRECTION__android-glass-clock-and-daily-slogans.md",
+      "bytes": 9387,
+      "sha256_at_move": "15e96306035a82bdeaa4f45c8aa6f233969967747cf3ca45837b7936e3125255"
+    },
+    {
+      "source": "progress/0085__20261002__P01__CORRECTION__android-adaptive-launcher-icon-fill.md",
+      "archive": "progress/archive/0085__20261002__P01__CORRECTION__android-adaptive-launcher-icon-fill.md",
+      "bytes": 6259,
+      "sha256_at_move": "23a8983daff4db733f92dbd6f46cff5fab18f6359fe8829fdcdf28044d0147a8"
+    },
+    {
+      "source": "progress/0086__20261003__P01__DONE__v1.2.1-patch-release.md",
+      "archive": "progress/archive/0086__20261003__P01__DONE__v1.2.1-patch-release.md",
+      "bytes": 8249,
+      "sha256_at_move": "e623e5af899b5e8f90e85b9a4017eafaed0f875738e7ab03c1adb6a1e8df3533"
+    },
+    {
+      "source": "progress/0087__20261003__P01__DONE__android-month-year-mobile-plans.md",
+      "archive": "progress/archive/0087__20261003__P01__DONE__android-month-year-mobile-plans.md",
+      "bytes": 12317,
+      "sha256_at_move": "39a7181a60876254e9c62f02771a27bde09cffd3a3019a60ea21e431c2d5077d"
+    },
+    {
+      "source": "progress/0088__20261004__P01__DONE__v1.2.2-patch-release.md",
+      "archive": "progress/archive/0088__20261004__P01__DONE__v1.2.2-patch-release.md",
+      "bytes": 6571,
+      "sha256_at_move": "11c04d57bb61cf80c3a590b63977be1b8a9d1508301bce2709f1ee0a9f117c05"
+    },
+    {
+      "source": "progress/0089__20261004__P01__DONE__ai-assistant-options-review-draft.md",
+      "archive": "progress/archive/0089__20261004__P01__DONE__ai-assistant-options-review-draft.md",
+      "bytes": 4888,
+      "sha256_at_move": "30815705e36f65eeea9e3a211ad9e426a9afeb9f5b046dc59965370f50d311e5"
+    },
+    {
+      "source": "progress/0090__20261004__P01__DECISION__ai-assistant-b-adopted.md",
+      "archive": "progress/archive/0090__20261004__P01__DECISION__ai-assistant-b-adopted.md",
+      "bytes": 7379,
+      "sha256_at_move": "a5f5dc098cd489f63de4b94b117851c9497c02a79604cb0415c2918275c75ded"
+    },
+    {
+      "source": "progress/0091__20261004__P01__DONE__ai-assistant-b1-implementation.md",
+      "archive": "progress/archive/0091__20261004__P01__DONE__ai-assistant-b1-implementation.md",
+      "bytes": 14076,
+      "sha256_at_move": "62a54b3b37b8f5b7c1eb5c23eb47715692afbee047a60bcaf05a442e5f4d10d3"
+    },
+    {
+      "source": "progress/0092__20261004__P01__CORRECTION__byok-chat-assistant.md",
+      "archive": "progress/archive/0092__20261004__P01__CORRECTION__byok-chat-assistant.md",
+      "bytes": 15884,
+      "sha256_at_move": "28cbf2afde0be6b00e8ca06b005dfb2fe8aec29c137b0f69c4335fbe84e14684"
+    },
+    {
+      "source": "progress/0093__20261004__P01__DONE__model-discovery-and-simple-connection.md",
+      "archive": "progress/archive/0093__20261004__P01__DONE__model-discovery-and-simple-connection.md",
+      "bytes": 10170,
+      "sha256_at_move": "5aa9a53f38fcfb6d87a5c2252668c978432744ff1b0e1f525ba13b8b6e03e4ab"
+    },
+    {
+      "source": "progress/0094__20261004__P01__CORRECTION__white-home-timer-dial-and-surfaces.md",
+      "archive": "progress/archive/0094__20261004__P01__CORRECTION__white-home-timer-dial-and-surfaces.md",
+      "bytes": 9705,
+      "sha256_at_move": "c0465a88f5ff9d6b5317fbf8426dc0ffef519dc725df3eac83bdd7cb8054cc16"
+    },
+    {
+      "source": "progress/0095__20261004__P01__CORRECTION__original-minimal-white-rebuild.md",
+      "archive": "progress/archive/0095__20261004__P01__CORRECTION__original-minimal-white-rebuild.md",
+      "bytes": 8390,
+      "sha256_at_move": "2ebb9636cae174f60408c53af25a4c5ef1f8121ea2596f0e653bfca5e2adfe96"
+    },
+    {
+      "source": "progress/0096__20261004__P01__DONE__android-startup-and-centered-emulator.md",
+      "archive": "progress/archive/0096__20261004__P01__DONE__android-startup-and-centered-emulator.md",
+      "bytes": 4642,
+      "sha256_at_move": "a6366bc75edf97e291594f1b6f6bade8740b9c74b75a59c5b74931ebd6a44e52"
+    },
+    {
+      "source": "progress/0097__20261005__P01__DONE__android-focus-card-layout.md",
+      "archive": "progress/archive/0097__20261005__P01__DONE__android-focus-card-layout.md",
+      "bytes": 5276,
+      "sha256_at_move": "833d5a994563139479ba6c36621383d8e3df3f72491ebd86fff2247c703564bd"
+    },
+    {
+      "source": "progress/0098__20261005__P01__DECISION__harmonyos-tablet-pc-layout-plan.md",
+      "archive": "progress/archive/0098__20261005__P01__DECISION__harmonyos-tablet-pc-layout-plan.md",
+      "bytes": 4949,
+      "sha256_at_move": "d1de7dd96b6ffa21d1a5417db2a726dadb3f4a8decfb7ce234d5b2a995992af2"
+    },
+    {
+      "source": "progress/0099__20261005__P01__CORRECTION__tablet-trial-rollback-source-recovery.md",
+      "archive": "progress/archive/0099__20261005__P01__CORRECTION__tablet-trial-rollback-source-recovery.md",
+      "bytes": 4565,
+      "sha256_at_move": "86facc54ea5fc73137b67ef1a0eae587b29d619c261c3e69310e8594ec53d3c9"
+    },
+    {
+      "source": "progress/0100__20261005__P01__DONE__harmonyos-scaffold-and-dart-kernel.md",
+      "archive": "progress/archive/0100__20261005__P01__DONE__harmonyos-scaffold-and-dart-kernel.md",
+      "bytes": 9378,
+      "sha256_at_move": "0bb6c7615e959315ad8a52162f2cf8bae92803713e31dcccdcf653aba925b6ba"
+    },
+    {
+      "source": "progress/0101__20261005__P01__DECISION__harmonyos-f-drive-storage.md",
+      "archive": "progress/archive/0101__20261005__P01__DECISION__harmonyos-f-drive-storage.md",
+      "bytes": 3501,
+      "sha256_at_move": "15cce6c027780273fa93bff7aeb76a5b66bc29978b9a2331f801089522de14f2"
+    },
+    {
+      "source": "progress/0102__20261006__P01__DONE__harmonyos-sdk-and-unsigned-hap.md",
+      "archive": "progress/archive/0102__20261006__P01__DONE__harmonyos-sdk-and-unsigned-hap.md",
+      "bytes": 7200,
+      "sha256_at_move": "e7ce79c7fd3392a9854eda70c9ffe80950748419346eeb94d8d279841c113b84"
+    },
+    {
+      "source": "progress/0103__20261006__P01__DONE__harmonyos-tablet-image-and-device.md",
+      "archive": "progress/archive/0103__20261006__P01__DONE__harmonyos-tablet-image-and-device.md",
+      "bytes": 5655,
+      "sha256_at_move": "0fd09471407c61238404a942dc9f8cd17e5d56f5fc1d63c0607b7b78bcedfb54"
+    },
+    {
+      "source": "progress/0104__20261006__P01__DONE__harmonyos-emulator-install-and-pc-shell.md",
+      "archive": "progress/archive/0104__20261006__P01__DONE__harmonyos-emulator-install-and-pc-shell.md",
+      "bytes": 6553,
+      "sha256_at_move": "9a2d9f76f6f80a594f9447d8b9d67060b71abae18f74ed95ac4d216dba75e1c9"
+    },
+    {
+      "source": "progress/0105__20261007__P01__DONE__v1.2.3-patch-release.md",
+      "archive": "progress/archive/0105__20261007__P01__DONE__v1.2.3-patch-release.md",
+      "bytes": 7170,
+      "sha256_at_move": "a707fc323e24241e85ec52086206eec55ce6f3129b0cf6da7f6a90a3af6fe573"
+    },
+    {
+      "source": "progress/0106__20261007__P01__DONE__harmonyos-unsigned-preview-release.md",
+      "archive": "progress/archive/0106__20261007__P01__DONE__harmonyos-unsigned-preview-release.md",
+      "bytes": 7571,
+      "sha256_at_move": "74b5b966588b192e6378d8bb0c2e06f333aa51ef60c06e19358c6af94a2629c1"
+    },
+    {
+      "source": "progress/0107__20261007__P01__DONE__harmonyos-physical-signed-install-and-start.md",
+      "archive": "progress/archive/0107__20261007__P01__DONE__harmonyos-physical-signed-install-and-start.md",
+      "bytes": 6504,
+      "sha256_at_move": "53c63e701196cc0b9bac1590a728ad361569ab381712adca1bde343603513ea3"
+    },
+    {
+      "source": "progress/0108__20261007__P01__DECISION__harmonyos-user-acceptance-and-github-release.md",
+      "archive": "progress/archive/0108__20261007__P01__DECISION__harmonyos-user-acceptance-and-github-release.md",
+      "bytes": 2576,
+      "sha256_at_move": "116318cf95c55a107b463fca532f01ccd0f6f95a70626d0f2f391c754b5d9abc"
+    },
+    {
+      "source": "progress/0109__20261007__P01__DONE__harmonyos-release-aot-github-published.md",
+      "archive": "progress/archive/0109__20261007__P01__DONE__harmonyos-release-aot-github-published.md",
+      "bytes": 7387,
+      "sha256_at_move": "c67bb6ca639bbe1309bc5a97441142b2c7375979e53f42736927e5fdffdf67b9"
+    },
+    {
+      "source": "progress/0110__20261011__P01__DONE__portrait-and-focus-system-notices.md",
+      "archive": "progress/archive/0110__20261011__P01__DONE__portrait-and-focus-system-notices.md",
+      "bytes": 10810,
+      "sha256_at_move": "c2826493403739a4c5add6f98e163531857d42199fbb3048fa964cff1c4ae17d"
+    },
+    {
+      "source": "progress/0111__20261012__P01__DONE__focus-runtime-and-harmony-rights.md",
+      "archive": "progress/archive/0111__20261012__P01__DONE__focus-runtime-and-harmony-rights.md",
+      "bytes": 12195,
+      "sha256_at_move": "c8701431c6ec4ceef84795d0de14745b2f4bb6799ea6dbe7b35c460f20708072"
+    },
+    {
+      "source": "progress/0112__20261012__P01__CORRECTION__android-offline-focus-sqlite-compatibility.md",
+      "archive": "progress/archive/0112__20261012__P01__CORRECTION__android-offline-focus-sqlite-compatibility.md",
+      "bytes": 7204,
+      "sha256_at_move": "00203ea7c89b2018fdb23de6043447f96e77e634789c1695355c6e7f7fdc574b"
+    },
+    {
+      "source": "progress/0113__20261012__P01__DECISION__harmony4-phone-and-android-retest.md",
+      "archive": "progress/archive/0113__20261012__P01__DECISION__harmony4-phone-and-android-retest.md",
+      "bytes": 2789,
+      "sha256_at_move": "9c3aa74d8a3a8a12b7936ae6bb3825dada8ec1ecf8feed418bcc889714c5f0ee"
+    },
+    {
+      "source": "progress/0114__20261012__P01__DONE__focus-pomodoro-tabs-and-mobile-notices.md",
+      "archive": "progress/archive/0114__20261012__P01__DONE__focus-pomodoro-tabs-and-mobile-notices.md",
+      "bytes": 13487,
+      "sha256_at_move": "6725cd24e050a43a88ed28e72ec1eed682b597c29ce009b1e617e6b438cb0e00"
+    },
+    {
+      "source": "progress/0115__20261014__P01__DONE__v1.2.4-three-platform-release.md",
+      "archive": "progress/archive/0115__20261014__P01__DONE__v1.2.4-three-platform-release.md",
+      "bytes": 8627,
+      "sha256_at_move": "1d6009b6e40f5dfe231577e0c1d684daf5c3ed9b1fb6cf74834395dc135ca075"
+    },
+    {
+      "source": "progress/0116__20261016__P01__CORRECTION__independent-pomodoro-and-release-ready.md",
+      "archive": "progress/archive/0116__20261016__P01__CORRECTION__independent-pomodoro-and-release-ready.md",
+      "bytes": 5310,
+      "sha256_at_move": "998490b624669a3c1f91187ee57c72c843f2342f164305defd82ae235e2787e1"
+    },
+    {
+      "source": "progress/0117__20261016__P01__DONE__v1.2.5-independent-pomodoro-published.md",
+      "archive": "progress/archive/0117__20261016__P01__DONE__v1.2.5-independent-pomodoro-published.md",
+      "bytes": 3957,
+      "sha256_at_move": "df1a8a6f0c24e07cb0d187841105196cdfe8cb33e446958b5459cbba7cb65d47"
+    },
+    {
+      "source": "progress/0118__20261024__P01__CORRECTION__bundled-display-fonts-and-smooth-glass.md",
+      "archive": "progress/archive/0118__20261024__P01__CORRECTION__bundled-display-fonts-and-smooth-glass.md",
+      "bytes": 8392,
+      "sha256_at_move": "1a07d0041d301dddd6c32cb2d64a3ea33a125213ec7543eb21fce77abcd1d2bf"
+    },
+    {
+      "source": "progress/0119__20261024__P01__DECISION__harmonyos-personal-use-and-real-name-pending.md",
+      "archive": "progress/archive/0119__20261024__P01__DECISION__harmonyos-personal-use-and-real-name-pending.md",
+      "bytes": 3844,
+      "sha256_at_move": "f722b5bd1e7397367a0f0403aa48d948cc61d455fb2783d962290b65b130a02b"
+    },
+    {
+      "source": "progress/0120__20261024__P01__DONE__harmonyos-app-id-and-release-certificate-draft.md",
+      "archive": "progress/archive/0120__20261024__P01__DONE__harmonyos-app-id-and-release-certificate-draft.md",
+      "bytes": 5709,
+      "sha256_at_move": "e259a4a7df9fb36992a4a4a06e027349fe3b4a30dd5476c48323519df73c93fc"
+    },
+    {
+      "source": "progress/0121__20261029__P01__DONE__harmonyos-release-certificate-and-device-profile.md",
+      "archive": "progress/archive/0121__20261029__P01__DONE__harmonyos-release-certificate-and-device-profile.md",
+      "bytes": 5993,
+      "sha256_at_move": "a8581e5d1d8d0bac0ab0a0c914d0befff0ba7090be3208e8692672f993499779"
+    },
+    {
+      "source": "progress/0122__20261030__P01__DONE__harmonyos-self-use-signed-hap-and-temporary-entry-plan.md",
+      "archive": "progress/archive/0122__20261030__P01__DONE__harmonyos-self-use-signed-hap-and-temporary-entry-plan.md",
+      "bytes": 5680,
+      "sha256_at_move": "0cb13f6a81b143eac3c2eee209d05adb17147a0a23476b2b4fcd33bdd2d3dea7"
+    },
+    {
+      "source": "progress/0123__20261030__P01__DONE__harmonyos-temporary-installer-prepared-and-gated.md",
+      "archive": "progress/archive/0123__20261030__P01__DONE__harmonyos-temporary-installer-prepared-and-gated.md",
+      "bytes": 5853,
+      "sha256_at_move": "06972e6ab223ce4d5a4d3f484dedbc6442affc717857bd1f027b73d910031553"
+    },
+    {
+      "source": "progress/0124__20261030__P01__DONE__harmonyos-temporary-download-opened-with-consent.md",
+      "archive": "progress/archive/0124__20261030__P01__DONE__harmonyos-temporary-download-opened-with-consent.md",
+      "bytes": 4532,
+      "sha256_at_move": "b6359143647b6f830428ebdc305340b9261e45e0a66bfc447b9300e4a78a57f2"
+    },
+    {
+      "source": "progress/0125__20261030__P01__DONE__android-harmony-ui-release-ready.md",
+      "archive": "progress/archive/0125__20261030__P01__DONE__android-harmony-ui-release-ready.md",
+      "bytes": 6400,
+      "sha256_at_move": "aeeb9a2073d4d32aa505f13de932bdf214e2b348a26ba9e73fd8da3fffd3e6cb"
+    },
+    {
+      "source": "progress/0126__20261030__P01__DONE__android-harmony-ui-v126-published.md",
+      "archive": "progress/archive/0126__20261030__P01__DONE__android-harmony-ui-v126-published.md",
+      "bytes": 4325,
+      "sha256_at_move": "1a0f0a3ae686744fc4739cbd9268cd69417151ee90d98ffedaf5588547fabf6e"
+    },
+    {
+      "source": "progress/0127__20261030__P01__DONE__server-first-deployment-bundle-ready.md",
+      "archive": "progress/archive/0127__20261030__P01__DONE__server-first-deployment-bundle-ready.md",
+      "bytes": 5383,
+      "sha256_at_move": "2186b0ad07860a2a3fea609675fe3189084ed306d31d70fe6338dc1280c6ee07"
+    },
+    {
+      "source": "progress/0128__20261030__P01__DECISION__server-empty-database-and-private-smtp.md",
+      "archive": "progress/archive/0128__20261030__P01__DECISION__server-empty-database-and-private-smtp.md",
+      "bytes": 3879,
+      "sha256_at_move": "269c2ebf70d6481e15239353aa4b8f80c22479023ae6bf93aba6c4b542a1a35a"
+    },
+    {
+      "source": "progress/0129__20261030__P01__DONE__server-loopback-startup-and-memory-pending.md",
+      "archive": "progress/archive/0129__20261030__P01__DONE__server-loopback-startup-and-memory-pending.md",
+      "bytes": 2822,
+      "sha256_at_move": "f1c50ce3b02c41e11dedb8467ab656c7663517ebfd57af0bcfa6789847a602e9"
+    },
+    {
+      "source": "progress/0130__20261030__P01__DECISION__direct-ssh-control-and-dedicated-key.md",
+      "archive": "progress/archive/0130__20261030__P01__DECISION__direct-ssh-control-and-dedicated-key.md",
+      "bytes": 3118,
+      "sha256_at_move": "33c36348451fb6bdb9de98e4080244e5860fce4f4ed5ec7b1b4942fbe94b9cd8"
+    },
+    {
+      "source": "progress/0131__20261030__P01__DONE__ssh-connected-and-local-admin-tunnel.md",
+      "archive": "progress/archive/0131__20261030__P01__DONE__ssh-connected-and-local-admin-tunnel.md",
+      "bytes": 3020,
+      "sha256_at_move": "0ac1bff410c9722aceb64f332fcf3bf822b6d38141ba838818a014ac5809bbe0"
+    }
+  ],
+  "active_reference_updates": [
+    "docs/design/logo/README.md",
+    "docs/development/平板竖屏与专注系统提醒.md"
+  ],
+  "old_next_action_mapping": {
+    "NEXT-ANDROID-V132-ACCEPTANCE": "NEXT-ANDROID-PHYSICAL",
+    "NEXT-ADMIN-CONTROLS-USER-ACCEPTANCE": "NEXT-ADMIN-FEEDBACK",
+    "NEXT-ONLINE-V130-PUBLISH": "completed_0134_not_pending",
+    "NEXT-SERVER-FIRST-DEPLOYMENT": "NEXT-ADMIN-FEEDBACK; initial_deployment_completed_0133_0136",
+    "NEXT-UI126-PHYSICAL": "NEXT-PLATFORM-UI",
+    "NEXT-HARMONYOS-SELF-USE-SIGNING": "NEXT-HARMONYOS-TABLET-RUNTIME; installation_boundary_in_guide",
+    "NEXT-THEME-ARTWORK-DEVICE": "NEXT-PLATFORM-UI",
+    "NEXT-ANDROID-FOCUS-PHYSICAL": "NEXT-ANDROID-PHYSICAL",
+    "NEXT-FOCUS-HARMONY-RIGHTS": "NEXT-FOCUS-HARMONY-RIGHTS",
+    "NEXT-HARMONYOS-TABLET-RUNTIME": "NEXT-HARMONYOS-TABLET-RUNTIME; installation_boundary_in_guide",
+    "NEXT-AI-CHAT-LIVE": "NEXT-AI-CHAT-LIVE",
+    "NEXT-ANDROID-MONTH-YEAR-DEVICE": "NEXT-ANDROID-PHYSICAL",
+    "NEXT-V1-2-2-PHYSICAL-DEVICE": "NEXT-ANDROID-PHYSICAL",
+    "NEXT-ANDROID-PLAN-CLOCK-RUNTIME": "NEXT-ANDROID-PHYSICAL",
+    "NEXT-GLASS-MODAL-RULER-RUNTIME": "NEXT-WINDOWS-MATRIX",
+    "NEXT-WHITE-HOME-RUNTIME": "NEXT-PLATFORM-UI",
+    "NEXT-GLASS-REFRACTION-RUNTIME": "NEXT-PLATFORM-UI",
+    "NEXT-TWO-THEME-DETAILS": "NEXT-PLATFORM-UI",
+    "NEXT-ANDROID-OFFLINE-INTEGRATION": "NEXT-SYNC-HTTP",
+    "NEXT-ANDROID-BASELINE": "NEXT-ANDROID-PHYSICAL",
+    "NEXT-ANDROID-A1": "NEXT-ANDROID-PHYSICAL",
+    "NEXT-ANDROID-KEYBOARD": "NEXT-ANDROID-PHYSICAL",
+    "NEXT-WINDOWS-VERIFY": "NEXT-WINDOWS-MATRIX"
+  },
+  "unfinished_ids_retained": [
+    "TODO-HARMONYOS-TABLET",
+    "TODO-AI-CHAT-LIVE-VERIFICATION",
+    "TODO-ANDROID-PLAN-CLOCK-RUNTIME",
+    "TODO-GLASS-MODAL-RULER-RUNTIME",
+    "TODO-WHITE-HOME-RUNTIME",
+    "TODO-TWO-THEME-DETAILS",
+    "TODO-WINDOWS-VISUAL",
+    "TODO-SYNC-HTTP",
+    "TODO-AVATAR-DEVICE",
+    "TODO-WINDOWS-RELEASE",
+    "TODO-ANDROID-BASELINE"
+  ],
+  "active_document_sizes": {
+    "progress/0000__AI-RESUME.md": {
+      "before": 89762,
+      "after": 8814
+    },
+    "docs/planning/Innocence-鸿蒙平板版本实施规划.md": {
+      "before": 32744,
+      "after": 6572
+    },
+    "docs/development/鸿蒙专注提醒权益接入.md": {
+      "before": 16744,
+      "after": 6068
+    }
+  },
+  "calendar": {
+    "submitted": "2026-10-31",
+    "submitted_weekday": "Saturday",
+    "business_days": [
+      "2026-11-02",
+      "2026-11-03",
+      "2026-11-04"
+    ],
+    "estimated_feedback": "2026-11-04",
+    "timezone": "UTC+08:00",
+    "is_guarantee": false
+  },
+  "immutable_scope": "all pre-existing tracked checkpoints retain exact working-tree bytes; historical paths resolved using current INDEX",
+  "ui_prompt_file_sha256": "36dd8103d1b45c406f01d1e2aa51b37f40bbb72ab3ddcdca4e8fa74754d60aa5",
+  "rule": "archive without delete; byte digests refer to worktree bytes at compression, Git newline-normalized blobs separately verified",
+  "verification": {
+    "integrity": {
+      "immutable_tracked_records_verified": 146,
+      "checkpoint_moves_verified": 74,
+      "snapshot_bytes_verified": 4,
+      "active_files_link_checked": 9,
+      "new_broken_links": 0,
+      "ui_prompt_bytes_unchanged": true,
+      "agent_policy_unchanged_except_project_facts": true,
+      "unfinished_ids_accounted_for": 11,
+      "old_actions_accounted_for": 23,
+      "active_three_documents_before_bytes": 139250,
+      "active_three_documents_after_bytes": 21454,
+      "active_three_documents_reduction_percent": 84.59
+    },
+    "staged_blobs": {
+      "staged_paths": 165,
+      "checkpoint_git_blobs_unchanged": 74,
+      "snapshot_git_blobs_match_originals": 4,
+      "unrelated_untracked_files_staged": false,
+      "diff_check": "pass"
+    },
+    "structured_documents": "PASS: 9 strict UTF8/YAML front matters, 147 ordered index rows/paths, original metadata, 0146/0147 pointers, review dates/state, 11 pending gates/input paths, five negative paths",
+    "application_source_changed": false
+  }
+}

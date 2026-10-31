@@ -21,9 +21,10 @@ android_track:
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 harmonyos_tablet_track:
-  status: v1_2_6_release_aot_published_device_gates_open
+  status: v1_3_0_published_timer_development_service_under_review
   plan_path: docs/planning/Innocence-鸿蒙平板版本实施规划.md
-  checkpoint: "0126"
+  checkpoint: "0145"
+  liveview_guide: docs/development/鸿蒙专注提醒权益接入.md
   user_scope: "Air系列平板/HarmonyOS 7，全屏复用PC页面；不做Windows窗口尺寸调整。0098先规划、0099恢复核对，用户随后明确开始制作；0100首批实现"
   order: [H0_toolchain_and_minimal_hap, H1_fullscreen_pc_shell, H2_offline_storage, H3_page_and_touch_parity, H4_online_contract_and_assistant, H5_device_and_release]
   pending_decisions: "0132已确认三端联网及鸿蒙tablet独立名额；当前实现/验证v1.3.0，实际设备矩阵及H5/G01完整验收保持待。"

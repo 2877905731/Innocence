@@ -41,12 +41,16 @@ archive:
 
 ## 使用规则
 
-1. **RESUME（0000__AI-RESUME.md）**：每次接手的第一份文档，三区制（状态 YAML / 增量基线 / 下一步）。阶段推进或用户决策后更新。
-2. **INDEX.md**：检查点索引，只追加、不回改；归档时标记 `archived`。
-3. **检查点**：不可变。命名 `NNNN__yyyyMMddHHmm__Pxx__TYPE__slug.md`，仅以下时机创建：
+1. **RESUME（0000__AI-RESUME.md）**：每次接手的第一份文档，只保留当前状态、能力边界、未完门禁和下一步。阶段推进或用户决策后更新。
+2. **INDEX.md**：检查点索引，保留全量条目并升序追加；归档仅改位置和 `archived`，标题/序号与历史事实不改。
+3. **检查点**：不可变。命名 `NNNN__yyyyMMdd[HHmm]__Pxx__TYPE__slug.md`，仅以下时机创建：
    - 可独立验证的里程碑（DONE）
    - 用户决策（DECISION）
    - 持续阻塞（BLOCKED）
    - 历史纠正（CORRECTION）
 4. **普通代码变更**：只记 git 和 RESUME，不建检查点。
 5. **证据纪律**：检查点必须记录 command / result / changed_files，禁止用「已测试」代替真实结果。
+
+## 当前压缩规则
+
+RESUME不继续累积旧PID、构建日志和已结束的发行任务；每条未完事项保留门禁及专档指针，已完成/被覆盖的动作移至历史。INDEX按序号或关键词定位，不要求全量读取。归档前保留RESUME/INDEX完整快照，逐文件校验正文不变，更新活动引用；旧检查点的历史路径按INDEX解析，不能修改不可变正文。2026-11-01批次归档0058–0131，当前根目录保留0132起的近期检查点。详见[归档清单](../docs/archive/documentation-compression-20261101.json)。
