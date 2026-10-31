@@ -1014,3 +1014,10 @@ checkpoints:
     status: complete
     path: progress/0143__20261031__P01__CORRECTION__harmony-liveview-device-trial-preparation.md
     title: "鸿蒙真机联调前置核对，补充官方PushToken设备调测名单路径"
+  - sequence: "0144"
+    created_at: "2026-10-31T23:13:06+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0144__20261031__P01__CORRECTION__harmony-timer-application-ready.md
+    title: "推送已由本人开通，TIMER开发调测申请附件可审阅并纠正前置范围"
