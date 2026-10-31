@@ -219,3 +219,7 @@ v1.2.4+9 Windows/Android正式与v1.2.4-harmonyos.1独立Release均公开，Rele
 ## 2026-10-30 三端联网与平板独立名额（0132/0133）
 
 用户要求Windows、Android、鸿蒙全部联网，并明确允许三端同时在线、平板独立名额。当前harmonyos/ohos/tablet归一为harmonyos并使用tablet槽位，同类新登录仅替换同类；既有android/mobile及windows/desktop保持，admin_web独立。v1.3.0+12的Online构建启用生产HTTPS与INTERNET，Offline仍明确关闭网络权限。HUKS AES-256-GCM通道接入；独立API26/x64模拟器的加密往返/随机nonce/篡改与格式拒绝/进程重启解密/可信HTTPS通过。真实公网宿主三类登录、计划读取及平板同类替换通过，专用QA账号已清理。本人连接LRT-W20后，私有签名Release验签/安装成功；解锁后进程及收件箱PC画面核对，无卸载或清数据。个人包/密钥/Profile仍仅F盘，公开包未签名。完整实体登录业务/资料恢复/性能、模型供应商及提醒权益与H5/G01保持待验。
+
+## 2026-10-31 自用实况窗联调前置（0143）
+
+本人已连接LRT-W20/API26并解锁，现有1.3.0+12 Release启动成功、单设备Profile匹配，未覆盖/卸载/改资料。TIMER通知卡片与顶部计时胶囊共用系统实况窗；当前Profile无entry，推送服务尚未开通，等待本人服务协议决策。补充官方PushToken调测名单路径：名单设备不校验本地构建实况窗权限、最多24小时生效，不能把新Profile当唯一联调前置。已备TIMER场景与明确标为设计预览的PNG，未取得/上传Token或提交申请。真实两处逐秒显示、后台阶段/锁屏/代理权益及H5/G01仍待，详见权益接入文档。

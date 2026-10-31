@@ -1007,3 +1007,10 @@ checkpoints:
     status: complete
     path: progress/0142__20261031__P01__DONE__android-countdown-v132-published.md
     title: "Android通知剩余时间1.3.2公开，原签名联网APK与两资产下载核对"
+  - sequence: "0143"
+    created_at: "2026-10-31T16:54:30+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0143__20261031__P01__CORRECTION__harmony-liveview-device-trial-preparation.md
+    title: "鸿蒙真机联调前置核对，补充官方PushToken设备调测名单路径"

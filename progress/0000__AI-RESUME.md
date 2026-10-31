@@ -3,13 +3,13 @@ schema_version: 1
 document_type: ai_resume
 project_name: "Innocence"
 updated_at: "2026-10-31"
-last_resumed_at: "2026-10-31T02:01:17+08:00"
-latest_checkpoint: "0142"
-next_sequence: "0143"
+last_resumed_at: "2026-10-31T16:54:30+08:00"
+latest_checkpoint: "0143"
+next_sequence: "0144"
 current_phase: P01
 current_gate: G01
-state: "android_notice_remaining_v132_github_published"
-current_goal: "0142：Android通知剩余时间v1.3.2+14已公开，Release#429332577，源码aece258与注释标签同步、latest=v1.3.2；两资产摘要/大小/正文/匿名200长度和校验和精确字节通过。APK81023831bytes/SHA5e1a4a69…、原证书/INTERNET/三ABI生产HTTPS/五字体许可CRC/倒计时布局DEX通过；233回归6条件跳过/离线4/联网2及分析通过，发行构建53.2秒。0140原生后台递减/暂停冻结证据保留；无实体或服务器操作，Windows/鸿蒙下载沿1.3.0。交付原签名覆盖包，系统折叠组/OEM/省电及原G01待。"
+state: "harmony_liveview_device_checked_waiting_user_push_activation"
+current_goal: "0143：本人平板已连接，用户解锁后启动现有1.3.0+12/非Debug成功，API26/LRT-W20，原单设备Profile内存匹配且无liveView entry。现有代码有TIMER卡片/胶囊；普通通知仍快照。已由本人登录AGC，推送服务仍未开通，正等待本人审阅服务协议/开通回复。官方另有PushToken设备调测名单路径，名单设备不校验本地构建实况窗权益、最多24h生效；不把新Profile当唯一调测路径。TIMER说明和284373bytes设计预览PNG已准备、未上传/提交，Token未取得；不改应用/资料、未构建安装/远端操作，真机实时显示/跨阶段/代理权益及G01待。"
 server_deployment_consultation:
   updated_at: "2026-10-30T22:04:00+08:00"
   user_scope: "用户将现有管理后台和后端部署至已有香港服务器，有公网IPv4/无域名；原截图Debian13.7/x86_64/SSH22/无swap及Docker29.9.2/Compose5.6.1/Nginx1.26.3。0130明确授权直接SSH，0131专用密钥认证及本人只读检查成功，用户不再需要手工复制一般状态命令。"
@@ -23,6 +23,7 @@ server_deployment_consultation:
   local_admin_tunnel: "0136：127.0.0.1:18080→服务器127.0.0.1:18081；本机自动重连监视PID23956，专用身份/严格主机密钥，PS7/5.1入口及独立18090断开恢复通过并清理辅助。当前静态200/匿名管理401，电脑重启后运行打开管理后台.cmd。"
   next_step: "0136后台注册控制、删除与团队修复已部署，交用户刷新页面操作；实际删除仅由用户选定并确认，继续原G01待验项目。"
 current_baseline:
+  - "2026-10-31 自用实况窗联调前置（0143）：0143：本人平板已连接，用户解锁后启动现有1.3.0+12/非Debug成功，API26/LRT-W20，原单设备Profile内存匹配且无liveView entry。现有代码有TIMER卡片/胶囊；普通通知仍快照。已由本人登录AGC，推送服务仍未开通，正等待本人审阅服务协议/开通回复。官方另有PushToken设备调测名单路径，名单设备不校验本地构建实况窗权益、最多24h生效；不把新Profile当唯一调测路径。TIMER说明和284373bytes设计预览PNG已准备、未上传/提交，Token未取得；不改应用/资料、未构建安装/远端操作，真机实时显示/跨阶段/代理权益及G01待。"
   - "0142：Android通知剩余时间v1.3.2+14已公开，Release#429332577，源码aece258与注释标签同步、latest=v1.3.2；两资产摘要/大小/正文/匿名200长度和校验和精确字节通过。APK81023831bytes/SHA5e1a4a69…、原证书/INTERNET/三ABI生产HTTPS/五字体许可CRC/倒计时布局DEX通过；233回归6条件跳过/离线4/联网2及分析通过，发行构建53.2秒。0140原生后台递减/暂停冻结证据保留；无实体或服务器操作，Windows/鸿蒙下载沿1.3.0。交付原签名覆盖包，系统折叠组/OEM/省电及原G01待。"
   - "0141：Android通知倒计时1.3.2+14原签名联网候选81023831bytes/SHA5e1a4a69…就绪；53.2秒构建、分析/233回归6跳过/离线4/联网2及签名/包内布局DEX/字体/三ABI地址通过。用户明确重新发布，GitHubmain祖先/权限/无标签冲突通过；尚未公开，下一步同步源码和两资产，实体及G01边界沿0140。"
   - "0140：Android三类计时通知主内容显示剩余时间，新增共享RemoteViews/系统Chronometer及暂停冻结文本；保留原阶段闹钟/身份/完成语义。原生10组/拒绝权限与20项Flutter通过，API36进程退出后的两时钟持续递减、暂停PNG字节相同，深色/大字体英文展开通过。系统自动折叠组仅快照摘要；真实手机/厂商胶囊未验，未重建正式发行或推送，公开包仍0139。证据build/qa/android-notice-countdown。"
@@ -197,8 +198,8 @@ next_actions:
     action: "0113用户确认鸿蒙4手机并选择后续Android复验；0117正式v1.2.5+10同发行证书离线APK已公开，保留0112兼容修复与0116独立番茄，覆盖时勿卸载旧版，核对资料/开始/暂停/继续/结束及独立番茄开始/暂停/继续/结束与后台通知。真实手机型号、SQLite异常及覆盖效果仍待；鸿蒙7双TIMER权益及后台接力另验，不把受限FFI/API36当实体手机验收。"
     inputs: ["client/flutter_app/build/releases/v1.2.5/Innocence-v1.2.5-android-offline.apk", "docs/releases/v1.2.5.md", "docs/development/独立番茄闹钟.md", "progress/0112__20261012__P01__CORRECTION__android-offline-focus-sqlite-compatibility.md"]
   - id: NEXT-FOCUS-HARMONY-RIGHTS
-    action: "接0111/0120：最终ARM64修正版此前已覆盖，用户竖屏确认及新权益回执保留；同包名AGC应用现已创建，TIMER调测权益和代理提醒尚未申请。自用发布证书/Profile就绪后，按接入材料独立核对两项权益，不能用应用登记/签名成功代替权益通过。实名和协议由用户本人处理，权益申请按具体授权，不发送申请邮件。新Profile官方验签后核对保资料覆盖，真机动态、暂停/继续、锁屏/进程回收与到点分别取证；完整Windows到点/免打扰和实体Android/OEM/Doze/强行停止仍待。"
-    inputs: ["docs/development/鸿蒙专注提醒权益接入.md", "docs/development/平板竖屏与专注系统提醒.md", "progress/0111__20261012__P01__DONE__focus-runtime-and-harmony-rights.md", "client/flutter_app/build/harmonyos-h0/signed-device/0111/Innocence-portrait-focus-arm64-device-debug.hap"]
+    action: "接0143：当前设备/1.3.0应用已核对且Profile无entry。用户已解锁/登录，等待本人处理推送服务协议及开通；先验开通状态，再精确配置client_id并获取本应用PushToken，私有F盘不日志输出。官方调测设备管理可按Token加单设备、最多24h生效；具体应用/Token/范围可审阅后按操作时确认。标准权益与新Profile另一路径，不能把缺entry当名单路径不可用。保资料不卸载，验证通知/胶囊真实递减及暂停继续/结束；TIMER与代理提醒分别验证，不发送申请邮件、不改公开资产"
+    inputs: ["docs/development/鸿蒙专注提醒权益接入.md", "client/flutter_app/build/qa/harmony-live-20261031/device-inspection.json", "client/flutter_app/build/qa/harmony-live-20261031/TIMER-application-draft.md", "progress/0143__20261031__P01__CORRECTION__harmony-liveview-device-trial-preparation.md"]
   - id: NEXT-HARMONYOS-TABLET-RUNTIME
     action: "接0109：GitHub鸿蒙Release分发/公开下载已完成。保持用户实际平板进程和资料，公开包仍需接收者自行签名，个人Profile/HAP仅F盘。用户后续需要升级时在app-release配置本机签名，保留原身份/业务资料核对ARM64覆盖/冷启动/恢复；继续完整软键盘/触控/四主题/性能、IME2和HUKS/槽位/联网契约。用户验收不能代填未执行自动化负向，整体H5/G01开放。"
     inputs: ["client/flutter_app/harmonyos/README.md", "client/flutter_app/tool/harmonyos.ps1", "progress/0109__20261007__P01__DONE__harmonyos-release-aot-github-published.md"]
@@ -291,6 +292,7 @@ history:
   checkpoint_0124: progress/0124__20261030__P01__DONE__harmonyos-temporary-download-opened-with-consent.md
   checkpoint_0125: progress/0125__20261030__P01__DONE__android-harmony-ui-release-ready.md
   checkpoint_0126: progress/0126__20261030__P01__DONE__android-harmony-ui-v126-published.md
+  checkpoint_0143: progress/0143__20261031__P01__CORRECTION__harmony-liveview-device-trial-preparation.md
 latest_android_run:
   requested_action: "专注的布局不太合理，你修改一下（附Android首页截图）"
   avd: Innocence_API36_Pixel7
