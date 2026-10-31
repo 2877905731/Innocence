@@ -1021,3 +1021,10 @@ checkpoints:
     status: complete
     path: progress/0144__20261031__P01__CORRECTION__harmony-timer-application-ready.md
     title: "推送已由本人开通，TIMER开发调测申请附件可审阅并纠正前置范围"
+  - sequence: "0145"
+    created_at: "2026-10-31T23:52:28+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0145__20261031__P01__DONE__harmony-timer-service-under-review.md
+    title: "用户自行提交TIMER调测申请，控制台确认实况窗服务审核中"
