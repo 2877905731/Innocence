@@ -3,13 +3,14 @@ schema_version: 1
 document_type: ai_resume
 project_name: Innocence
 updated_at: "2026-11-01"
-last_resumed_at: "2026-11-01T00:05:19+08:00"
+last_resumed_at: "2026-11-01T18:50:00+08:00"
 latest_checkpoint: "0146"
 next_sequence: "0147"
 current_phase: P01
 current_gate: G01
 state: harmony_timer_service_application_submitted_under_review
 current_goal: "TIMER调测服务0145已由用户提交、控制台审核中；0146记录预计日期/结果入口并压缩文档。等待实际审核结果，再核对授权和实体卡片/胶囊；不重复申请、不将待审当获批。"
+active_feedback: "2026-11-01用户要求登录验证码发送前拦截未注册邮箱，明确显示没有该账号。服务端及契约已修改，mvn -q verify为104项/0失败/0错误；正在隔离HTTP验收及部署，不改变用户当前注册开关。"
 review:
   submitted_date: "2026-10-31"
   last_verified_status: 审核中

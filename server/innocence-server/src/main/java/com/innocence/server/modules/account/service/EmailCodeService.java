@@ -2,6 +2,7 @@ package com.innocence.server.modules.account.service;
 
 import com.innocence.server.common.exception.BusinessException;
 import com.innocence.server.common.exception.ErrorCode;
+import com.innocence.server.modules.account.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.MailException;
@@ -28,17 +29,20 @@ public class EmailCodeService {
     private final SecureRandom secureRandom = new SecureRandom();
     private final String fromAddress;
     private final RegistrationPolicyService registrationPolicy;
+    private final UserMapper userMapper;
 
     public EmailCodeService(
             StringRedisTemplate stringRedisTemplate,
             JavaMailSender javaMailSender,
             @Value("${spring.mail.username}") String fromAddress,
-            RegistrationPolicyService registrationPolicy
+            RegistrationPolicyService registrationPolicy,
+            UserMapper userMapper
     ) {
         this.stringRedisTemplate = stringRedisTemplate;
         this.javaMailSender = javaMailSender;
         this.fromAddress = fromAddress;
         this.registrationPolicy = registrationPolicy;
+        this.userMapper = userMapper;
     }
 
     @Transactional(readOnly = true)
@@ -48,6 +52,9 @@ public class EmailCodeService {
     }
 
     public Map<String, Object> sendLoginCode(String email) {
+        if (userMapper.findAuthByEmail(email) == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "没有该账号");
+        }
         return sendCode(email, "login", "Innocence 登录验证码");
     }
 

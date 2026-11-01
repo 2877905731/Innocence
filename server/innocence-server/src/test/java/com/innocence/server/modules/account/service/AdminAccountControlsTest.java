@@ -23,8 +23,8 @@ class AdminAccountControlsTest {
         RegistrationPolicyService policy=new RegistrationPolicyService(store);
         JavaMailSender mail=mock(JavaMailSender.class);
         StringRedisTemplate redis=mock(StringRedisTemplate.class);
-        EmailCodeService codes=new EmailCodeService(redis, mail, "synthetic@example.invalid", policy);
         UserMapper users=mock(UserMapper.class);
+        EmailCodeService codes=new EmailCodeService(redis, mail, "synthetic@example.invalid", policy, users);
         AccountService account=new AccountService(users, codes, mock(CheckInService.class), mock(FriendMapper.class), policy);
         assertEquals(ErrorCode.FORBIDDEN, assertThrows(BusinessException.class, () -> codes.sendRegisterCode("synthetic@example.invalid")).getCode());
         EmailRegisterRequest request=new EmailRegisterRequest();
