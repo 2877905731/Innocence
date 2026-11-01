@@ -1036,3 +1036,10 @@ checkpoints:
     status: complete
     path: progress/0146__20261101__P01__DONE__documentation-compression-and-review-guide.md
     title: "记录TIMER审核预计日期与结果入口，压缩当前文档并原样归档历史"
+  - sequence: "0147"
+    created_at: "2026-11-01T18:54:57+08:00"
+    phase: P01
+    type: DECISION
+    status: complete
+    path: progress/0147__20261101__P01__DECISION__login-code-account-check-deployed.md
+    title: "按用户要求在发送登录验证码前拦截未注册邮箱，已部署并保留关闭注册状态"

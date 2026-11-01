@@ -35,7 +35,7 @@ endpoints:
     specification: "docs/development/后台注册控制与用户删除.md 登录验证码账号校验；2026-11-01用户要求发送前拦截未注册账号"
     source_behavior: "JSON {email}；先查询邮箱认证记录，不存在404/4004/没有该账号，不调用SMTP或Redis；注册开关不限制已有账号；成功仍返回cooldownSeconds=60/expireSeconds=600"
     failures: "缺少/非法邮箱400/1001；未知账号404/4004；发送冷却429/1002；邮件失败500/9000；不返回账号资料"
-    evidence_status: service_and_mockmvc_verified_104_backend_checks_passed_isolated_http_and_deployment_pending
+    evidence_status: service_mockmvc_104_checks_isolated_mysql_redis_smtp_http_and_production_https_verified_0147
   - id: UAI-01
     method: POST
     path: "/api/app/v1/assistant/proposals"

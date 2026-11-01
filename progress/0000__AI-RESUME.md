@@ -3,14 +3,14 @@ schema_version: 1
 document_type: ai_resume
 project_name: Innocence
 updated_at: "2026-11-01"
-last_resumed_at: "2026-11-01T18:50:00+08:00"
-latest_checkpoint: "0146"
-next_sequence: "0147"
+last_resumed_at: "2026-11-01T18:54:57+08:00"
+latest_checkpoint: "0147"
+next_sequence: "0148"
 current_phase: P01
 current_gate: G01
 state: harmony_timer_service_application_submitted_under_review
 current_goal: "TIMER调测服务0145已由用户提交、控制台审核中；0146记录预计日期/结果入口并压缩文档。等待实际审核结果，再核对授权和实体卡片/胶囊；不重复申请、不将待审当获批。"
-active_feedback: "2026-11-01用户要求登录验证码发送前拦截未注册邮箱，明确显示没有该账号。服务端及契约已修改，mvn -q verify为104项/0失败/0错误；正在隔离HTTP验收及部署，不改变用户当前注册开关。"
+active_feedback: "0147：按用户要求，登录验证码发送前拦截未注册邮箱，404/4004/没有该账号已上线。104项后端回归及隔离MySQL/Redis/SMTP HTTP通过，生产HTTPS/运行JAR精确核对通过；注册关闭状态保留，三端无需重装。"
 review:
   submitted_date: "2026-10-31"
   last_verified_status: 审核中
@@ -25,7 +25,7 @@ current_baseline:
   android: "1.3.2+14已公开（0142）；原正式签名联网APK，系统Chronometer后台递减/暂停冻结有API36证据，OEM/实体手机/折叠组待验。"
   windows: "1.3.0+12已公开（0134）；四主题、L/M/S与主动Focus Orb保留，完整DPI/输入/性能矩阵待验。"
   harmonyos: "1.3.0+12公开ARM64 AOT联网HAP未签名；本人LRT-W20/API26原证书Release安装启动/PC画面有0133证据，个人包/Profile仅F盘。实况窗待审，真实两处递减未验。"
-  server_admin: "0133生产HTTPS/续期、PBKDF2、mobile/desktop/tablet独立会话与备份隔离恢复；0136后台注册控制、审计删除和团队修复已部署。验收是记录时状态，不证明当前进程或长期负载。"
+  server_admin: "0133生产HTTPS/续期、PBKDF2、mobile/desktop/tablet独立会话与备份隔离恢复；0136后台注册控制、审计删除和团队修复，0147登录验证码账号预检均已部署。当前注册关闭，既有账号仍可验证码登录；验收不证明长期负载。"
   assistant: "BYOK多轮聊天、地址+Key发现模型/协议验证、14工具已实现（0092/0093）；真实供应商、完整HTTP/同步与设备门禁待，原任务编辑/月历批量等未接工具。"
 active_constraints:
   - "现行授权与最新人类指令优先；一般设备调测已授权，已提交申请不重问旧承诺。新设备标识上传/新协议按具体范围确认，不代发邮件。"
@@ -104,13 +104,13 @@ next_actions:
     action: "真实供应商/14工具和密钥原生存储/设备验收，未接工具按契约扩展；不在聊天索取Key或自动启用持续规则。"
     inputs: [docs/development/AI对话助手配置与验收.md, docs/planning/Innocence-AI智能助手B方案实施与契约.md]
   - id: NEXT-ADMIN-FEEDBACK
-    action: "0136已上线，依用户实际反馈继续；本机后台入口可重连。真实删除由用户选择确认，真实邮件/长期容量待；不重初始化或迁移资料。"
+    action: "0136/0147已上线，依用户实际反馈继续；当前注册关闭，未注册邮箱发送登录验证码返回没有该账号。本机后台入口可重连。真实删除由用户选择确认，真实SMTP/长期容量待；不重初始化或迁移资料。"
     inputs: [docs/development/后台注册控制与用户删除.md, infra/deploy/打开管理后台.cmd]
 history:
   index: progress/INDEX.md
   pre_compression_resume: progress/archive/0000__AI-RESUME__before-20261101-compression.md
   archive_manifest: docs/archive/documentation-compression-20261101.json
-  latest_event: progress/0146__20261101__P01__DONE__documentation-compression-and-review-guide.md
+  latest_event: progress/0147__20261101__P01__DECISION__login-code-account-check-deployed.md
 ---
 
 # 恢复说明
