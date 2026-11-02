@@ -358,6 +358,12 @@ public class SyncImportService {
         LocalDateTime startTime = parseDateTime(operation.createdAt());
         LocalDateTime endTime = parseDateTime(asText(operation.payload().get("endTime")));
         boolean bindPomodoro = Boolean.TRUE.equals(operation.payload().get("bindPomodoro"));
+        if (Boolean.TRUE.equals(operation.payload().get("manualPomodoro"))) {
+            if (!bindPomodoro) throw new IllegalArgumentException("Manual pomodoro must be bound.");
+            return String.valueOf(focusSessionService.importOfflineManualSession(userId, startTime, endTime,
+                    asText(operation.payload().get("taskName")), asInt(operation.payload().get("pomodoroStudyMinutes")),
+                    asInt(operation.payload().get("pomodoroBreakMinutes"))));
+        }
         Long serverId = focusSessionService.importOfflineSession(
                 userId,
                 startTime,

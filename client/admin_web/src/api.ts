@@ -11,6 +11,8 @@ export type Team = { teamId: number; teamName: string; inviteCode: string; owner
 export type TeamDetail = Team & { memberLimit: number; latestChatPreview: string; members: { userId: number; userNo: string; nickname: string; role: string; owner: boolean; activeStudy: boolean }[] }
 export type Announcement = { announcementId: number; title: string; content: string; recipientCount: number; createTime: string }
 
+export type ReleaseInput = { platform: string; arch: string; version: string; build: number; notes: string; installMethod: string }
+export type Release = ReleaseInput & { id: string; state: string; size: number; sha256: string; publishedAt?: string; history: { actorId: number; action: string; at: string }[] }
 type Envelope<T> = { code: number; message: string; data: T }
 export class ApiError extends Error { constructor(message: string, public status: number) { super(message) } }
 
@@ -44,6 +46,18 @@ const query = (values: Record<string, string | number | undefined>) => `?${new U
 const post = <T>(path: string, session: Session, body?: object) => request<T>(path, { method: 'POST', ...(body ? { body: JSON.stringify(body) } : {}) }, session)
 
 export const api = {
+  releases: (session: Session) => request<Release[]>('/releases', {}, session),
+  changeRelease: (session: Session, id: string, publish: boolean) => post<Release>(`/releases/${id}/${publish ? 'publish' : 'withdraw'}`, session),
+  uploadRelease: (session: Session, metadata: ReleaseInput, file: File, progress: (percent: number) => void) => new Promise<Release>((resolve, reject) => {
+    if (file.size < 1 || file.size > 300 * 1048576) { reject(new ApiError('安装包不能为空，且不能超过 300 MiB。', 400)); return }
+    const form = new FormData(); form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); form.append('file', file)
+    const xhr = new XMLHttpRequest(); xhr.open('POST', `${API}/releases`); xhr.timeout = 15 * 60 * 1000
+    xhr.setRequestHeader('Authorization', `Bearer ${session.accessToken}`); xhr.setRequestHeader('X-Device-Type', 'admin_web'); xhr.setRequestHeader('X-Device-Id', session.deviceId)
+    xhr.upload.onprogress = event => { if (event.lengthComputable) progress(Math.round(event.loaded / event.total * 100)) }
+    xhr.onerror = () => reject(new ApiError('上传连接失败，请检查网络后重试。', 0)); xhr.ontimeout = () => reject(new ApiError('上传超时，请重试。', 0))
+    xhr.onload = () => { try { const value = JSON.parse(xhr.responseText) as Envelope<Release>; if (xhr.status === 401) window.dispatchEvent(new Event('innocence-admin-session-expired')); if (xhr.status < 200 || xhr.status >= 300 || value.code !== 0) reject(new ApiError(value.message || '上传失败', xhr.status)); else resolve(value.data) } catch { reject(new ApiError('上传响应无效', xhr.status)) } }
+    xhr.send(form)
+  }),
   login: (email: string, password: string, deviceId: string) => request<Session>('/auth/login', { method: 'POST', body: JSON.stringify({ email, password, deviceId }) }),
   me: (session: Session) => request<{ userId: number }>('/auth/me', {}, session),
   logout: (session: Session) => post<{ success: boolean }>('/auth/logout', session),

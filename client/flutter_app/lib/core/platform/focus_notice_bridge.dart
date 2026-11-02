@@ -76,7 +76,8 @@ class FocusNoticeBridge {
             'deadlineMs': deadline,
             'completed': completed,
             'isChinese': isChinese,
-            'bindPomodoro': session.bindPomodoro && active,
+            'bindPomodoro':
+                session.bindPomodoro && !session.manualPomodoro && active,
             'pomodoroStudyMinutes': session.pomodoroStudyMinutes,
             'pomodoroBreakMinutes': session.pomodoroBreakMinutes,
             'pomodoroStage': session.stageName,

@@ -130,3 +130,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File 'F:\springmvc1\Innocence
 本机入口依赖SSH隧道。双击仓库 `infra/deploy/打开管理后台.cmd` 或执行 `pwsh -File infra/deploy/open-admin.ps1`，会启动隐藏的本机自动重连进程并打开18080入口。仅绑定127.0.0.1，沿用专用身份和严格主机密钥检查；不会把管理站公开到公网。电脑重启后再次运行入口即可；后台监视只重启它自己创建的SSH子进程。
 
 本轮升级使用 `upgrade-admin-controls.sh`：先校验候选包及候选镜像JAR一致性，私有备份数据库/头像/旧JAR/镜像及管理网页，再应用 `database/20261031-admin-account-controls.sql` 的两个新增表，切换候选后端，健康通过后更新静态页。失败时恢复旧镜像、JAR和网页；迁移仅新增表，不删除旧表或资料。候选包固定放 `/opt/innocence/admin-controls-candidate`，候选镜像标记 `innocence-server:admin-controls-candidate`。
+# 在线账号版本发布（1.3.4 起）
+
+在本机执行 Flutter Windows/Android/鸿蒙构建，服务器只保存和传输已有安装包。通过原 SSH 后台入口打开“版本发布”，选择平台、填写版本号/递增构建号和更新说明，上传安装包。上传完成得到草稿，核对摘要/大小/平台后点击发布；下架立即阻止新的下载。当前公开后台路径仍不可用，离线客户端不显示更新入口。
+
+Windows 上传带四段版本资源的 Inno 安装器（exe），Android 上传原签名的通用 APK。当前鸿蒙 HAP 是需要电脑签名覆盖的开发分发，不是通用应用内安装包，严禁上传个人签名/Profile材料。1.3.3 及以前没有更新入口，需先手动覆盖到 1.3.4 一次。
+
+数据目录 `/opt/innocence/updates` 持久挂载给后端，packages 中每个文件不可变，catalog.json 原子替换。首次准备目录使用 `install -d -o 10001 -g 33 -m 750 /opt/innocence/updates`；Nginx 通过 internal alias读取包，外部不能直接访问该目录。单包300MiB、存储预算3GiB、空闲小于8GiB拒绝上传；全局最多5个下载连接、单连接2MiB/s。维护时先下架再做离线归档，不能直接改已发布包。供应商月流量需在主机后台关注。
+
+升级前的备份脚本会另外保存 updates.tar.gz 并核对归档结构；恢复时同时恢复包目录和对应 catalog，保留 10001 所有权及 Nginx 的可读权限。数据库隔离恢复验证仍沿用原流程，不把归档结构检查当作全套更新恢复演练。

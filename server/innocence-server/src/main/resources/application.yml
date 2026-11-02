@@ -5,8 +5,9 @@ spring:
     active: local
   servlet:
     multipart:
-      max-file-size: 5242880B
-      max-request-size: 6291456B
+      max-file-size: 314572800B
+      max-request-size: 315621376B
+      file-size-threshold: 0B
 
 server:
   port: 8080

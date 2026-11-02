@@ -1,4 +1,5 @@
 import 'package:innocence_flutter/features/focus/application/pomodoro_controller.dart';
+import 'package:innocence_flutter/features/updates/update_controller.dart';
 import 'dart:async';
 import 'package:innocence_flutter/core/platform/focus_notice_bridge.dart';
 import '../features/assistant/application/assistant_controller.dart';
@@ -106,8 +107,20 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
         owner: () => _focusOwner,
         chinese: () => _isChineseLanguage,
         focusWindow: _pomodoroFocusWindow,
+        onBoundPause: toggleFocusPause,
+        onBoundFinish: finishFocusSession,
+        boundFocus: () => _focusSession.active ? _focusSession : null,
         onRecorded: _recordPomodoroStudies);
     WidgetsBinding.instance.addObserver(this);
+    updates = UpdateController(
+        session: () => _status == SessionStatus.authenticated &&
+                !isOffline &&
+                !AppConfig.offlineOnlyBuild
+            ? _session
+            : null,
+        hasActiveTimer: () => _focusSession.active || pomodoro.timer.active,
+        prepareInstall: pomodoro.checkpoint);
+    addListener(updates.identityChanged);
     _languageController.addListener(_refreshFocusNotices);
     assistant = AssistantController(
         identity: this,
@@ -135,6 +148,7 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   late final PomodoroController pomodoro;
+  late final UpdateController updates;
   late final AssistantController assistant;
   final FocusNoticeBridge _focusNoticeBridge;
   FocusNoticeStatus _focusNoticeStatus = FocusNoticeStatus.available;
@@ -1631,6 +1645,9 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
     int pomodoroBreakMinutes = 0,
   }) async {
     await pomodoro.checkpoint();
+    if (bindPomodoro && pomodoro.timer.active) {
+      await pomodoro.finish(fromFocus: true);
+    }
     final ownerScope = localOwnerScope;
     if (isOffline && ownerScope != null) {
       await _runBusyAction(() async {
@@ -1639,6 +1656,7 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
           endTime: endTime,
           taskName: taskName,
           bindPomodoro: bindPomodoro,
+          manualPomodoro: bindPomodoro,
           pomodoroStudyMinutes: pomodoroStudyMinutes,
           pomodoroBreakMinutes: pomodoroBreakMinutes,
         );
@@ -1651,6 +1669,7 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
           fallbackMessage:
               _message('开始离线专注失败。', 'Failed to start offline focus.'));
       if (_focusSession.active) {
+        if (bindPomodoro) await _startBoundPomodoro();
         await _syncFocusNotice(requestPermission: true);
       }
       return;
@@ -1684,12 +1703,14 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
         fallbackMessage:
             _message('开始专注失败。', 'Failed to start the focus session.'));
     if (_focusSession.active) {
+      if (bindPomodoro) await _startBoundPomodoro();
       await _syncFocusNotice(requestPermission: true);
     }
   }
 
   Future<void> finishFocusSession() async {
     await pomodoro.checkpoint();
+    if (_focusSession.manualPomodoro) await pomodoro.finish(fromFocus: true);
     final ownerScope = localOwnerScope;
     if (isOffline && ownerScope != null) {
       await _runBusyAction(() async {
@@ -3475,6 +3496,7 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void _syncFocusTicker() {
+    unawaited(pomodoro.syncBoundFocus(_focusSession));
     unawaited(pomodoro.updateFocusCoverage());
     if (_focusSession.active) _naturalCompletionKey = null;
     if (_focusSession.active && !_focusSession.paused) {
@@ -3502,7 +3524,11 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
           : null;
 
   List<int> _pomodoroFocusWindow() {
-    if (!_focusSession.active || _focusSession.paused) return [0, 0];
+    if (!_focusSession.active ||
+        _focusSession.paused ||
+        _focusSession.manualPomodoro) {
+      return [0, 0];
+    }
     final start =
         DateTime.tryParse(_focusSession.startTime)?.millisecondsSinceEpoch ??
             _focusSession.referenceTime.millisecondsSinceEpoch;
@@ -3542,10 +3568,21 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  Future<void> _startBoundPomodoro() async {
+    final focus = _focusSession;
+    if (!focus.active || !focus.manualPomodoro) return;
+    await pomodoro.start(
+        focus.pomodoroStudyMinutes, focus.pomodoroBreakMinutes, true,
+        boundSessionId: focus.sessionId,
+        boundUntilMs: focus.referenceTime.millisecondsSinceEpoch +
+            focus.remainingSeconds * 1000);
+  }
+
   void _advanceFocus() {
     if (!_focusSession.active || _focusSession.paused) return;
     _focusSession = _focusSession.advanceTo(DateTime.now());
     if (!_focusSession.active) {
+      unawaited(pomodoro.syncBoundFocus(_focusSession));
       _naturalCompletionKey = '$_focusOwner/${_focusSession.sessionId}';
       _stopFocusTicker();
       unawaited(pomodoro.updateFocusCoverage());
@@ -3994,6 +4031,8 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
     _languageController.removeListener(_refreshFocusNotices);
     _stopFocusTicker();
     pomodoro.dispose();
+    removeListener(updates.identityChanged);
+    updates.dispose();
     assistant.dispose();
     chat.dispose();
     unawaited(_offlineStore.close());

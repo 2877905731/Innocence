@@ -1,6 +1,9 @@
 package com.innocence.server.modules.focus.dto.response;
 
 public class FocusSessionResponse {
+    private boolean manualPomodoro;
+    public boolean isManualPomodoro() { return manualPomodoro; }
+    public void setManualPomodoro(boolean value) { manualPomodoro = value; }
     private int pomodoroElapsedOffsetSeconds;
     private int pomodoroCompletedBaseCount;
     public int getPomodoroElapsedOffsetSeconds() { return pomodoroElapsedOffsetSeconds; }

@@ -117,4 +117,40 @@ void main() {
         inInclusiveRange(2219, 2221));
     expect(result!.bindPomodoro, isFalse);
   });
+  testWidgets(
+      'new focus can bind one manual pomodoro with custom study and break',
+      (tester) async {
+    tester.view.physicalSize = const Size(520, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    FocusSessionDraft? result;
+    await tester.pumpWidget(MaterialApp(
+        home: Builder(
+            builder: (context) => Scaffold(
+                body: TextButton(
+                    onPressed: () async {
+                      result = await showDialog<FocusSessionDraft>(
+                          context: context,
+                          builder: (_) => const StartFocusSessionDialog());
+                    },
+                    child: const Text('open'))))));
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester
+        .ensureVisible(find.byKey(const ValueKey('bind-focus-pomodoro')));
+    await tester.tap(find.byKey(const ValueKey('bind-focus-pomodoro')));
+    await tester.pumpAndSettle();
+    final study = find.byKey(const ValueKey('bound-study-minutes'));
+    await tester.ensureVisible(study);
+    await tester.enterText(study, '40');
+    final rest = find.byKey(const ValueKey('bound-break-minutes'));
+    await tester.ensureVisible(rest);
+    await tester.enterText(rest, '8');
+    await tester.tap(find.text('Start'));
+    await tester.pumpAndSettle();
+    expect(result?.bindPomodoro, isTrue);
+    expect(result?.pomodoroStudyMinutes, 40);
+    expect(result?.pomodoroBreakMinutes, 8);
+  });
 }

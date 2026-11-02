@@ -141,13 +141,20 @@ class _FocusSessionTabsState extends State<FocusSessionTabs> {
         PomodoroTimerPanel(
             controller: widget.pomodoroController!,
             isChinese: widget.isChinese),
-        if (session.active && session.bindPomodoro) ...[
+        if (session.active &&
+            session.bindPomodoro &&
+            !session.manualPomodoro) ...[
           const SizedBox(height: 16),
           Text(text('原专注仍绑定番茄（${session.stageRemainingLabel}）；可解除，独立闹钟不受影响。',
               'The focus session has a legacy bound pomodoro (${session.stageRemainingLabel}). Unbinding will not affect the independent timer.')),
           TextButton(
               onPressed: enabled ? () => _save(false) : null,
               child: Text(text('解除原专注绑定', 'Unbind from focus'))),
+        ],
+        if (!session.manualPomodoro) ...[
+          const SizedBox(height: 12),
+          Text(text('要与专注共用计时，请在「开始专注」中开启「绑定番茄闹钟」。',
+              'Enable “Bind pomodoro” when starting a focus session to share one timer.')),
         ],
       ] else
         GlassPanel(

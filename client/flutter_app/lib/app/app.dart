@@ -248,6 +248,7 @@ class _InnocenceAppState extends State<InnocenceApp> {
                 onRefresh: widget.sessionController.refreshProfile,
                 onLogout: widget.sessionController.logout,
                 onStartFocusSession: widget.sessionController.startFocusSession,
+                updateController: widget.sessionController.updates,
                 onConfigureFocusPomodoro:
                     widget.sessionController.configureFocusPomodoro,
                 onFinishFocusSession:

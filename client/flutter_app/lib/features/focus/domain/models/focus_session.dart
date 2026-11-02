@@ -20,6 +20,7 @@ class FocusSession {
     required this.referenceTime,
     this.pomodoroElapsedOffsetSeconds = 0,
     this.pomodoroCompletedBaseCount = 0,
+    this.manualPomodoro = false,
   });
 
   final int sessionId;
@@ -34,6 +35,7 @@ class FocusSession {
   final int elapsedSeconds;
   final int remainingSeconds;
   final bool bindPomodoro;
+  final bool manualPomodoro;
   final int pomodoroStudyMinutes;
   final int pomodoroBreakMinutes;
   final int currentCycleNo;
@@ -72,7 +74,8 @@ class FocusSession {
     final offset = _toInt(json['pomodoroElapsedOffsetSeconds']);
     final base = _toInt(json['pomodoroCompletedBaseCount']);
     final stage = _resolveStageState(
-      bindPomodoro: json['bindPomodoro'] == true,
+      bindPomodoro:
+          json['bindPomodoro'] == true && json['manualPomodoro'] != true,
       elapsedSeconds: (elapsed - offset).clamp(0, elapsed),
       remainingSeconds: _toInt(json['remainingSeconds']),
       pomodoroStudyMinutes: _toInt(json['pomodoroStudyMinutes']),
@@ -91,6 +94,7 @@ class FocusSession {
       elapsedSeconds: _toInt(json['elapsedSeconds']),
       remainingSeconds: _toInt(json['remainingSeconds']),
       bindPomodoro: json['bindPomodoro'] == true,
+      manualPomodoro: json['manualPomodoro'] == true,
       pomodoroStudyMinutes: _toInt(json['pomodoroStudyMinutes']),
       pomodoroBreakMinutes: _toInt(json['pomodoroBreakMinutes']),
       currentCycleNo:
@@ -122,7 +126,7 @@ class FocusSession {
     final nextRemainingSeconds = remainingSeconds - consumed;
     final nextElapsedSeconds = elapsedSeconds + consumed;
     final nextStageState = _resolveStageState(
-      bindPomodoro: bindPomodoro,
+      bindPomodoro: bindPomodoro && !manualPomodoro,
       elapsedSeconds: (nextElapsedSeconds - pomodoroElapsedOffsetSeconds)
           .clamp(0, nextElapsedSeconds),
       remainingSeconds: nextRemainingSeconds,
@@ -143,6 +147,7 @@ class FocusSession {
       elapsedSeconds: nextElapsedSeconds,
       remainingSeconds: nextRemainingSeconds,
       bindPomodoro: bindPomodoro,
+      manualPomodoro: manualPomodoro,
       pomodoroStudyMinutes: pomodoroStudyMinutes,
       pomodoroBreakMinutes: pomodoroBreakMinutes,
       currentCycleNo: nextRemainingSeconds > 0

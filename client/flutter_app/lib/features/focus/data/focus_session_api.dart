@@ -49,6 +49,7 @@ class FocusSessionApi {
         'endTime': endTime.toIso8601String(),
         'durationMinutes': duration,
         'bindPomodoro': bindPomodoro,
+        'manualPomodoro': bindPomodoro,
         'pomodoroStudyMinutes': pomodoroStudyMinutes,
         'pomodoroBreakMinutes': pomodoroBreakMinutes,
       },

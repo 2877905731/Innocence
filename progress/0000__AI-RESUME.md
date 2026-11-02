@@ -3,13 +3,13 @@ schema_version: 1
 document_type: ai_resume
 project_name: Innocence
 updated_at: "2026-11-03"
-last_resumed_at: "2026-11-03T00:13:29+08:00"
-latest_checkpoint: "0152"
-next_sequence: "0153"
+last_resumed_at: "2026-11-03T01:24:55+08:00"
+latest_checkpoint: "0153"
+next_sequence: "0154"
 current_phase: P01
 current_gate: G01
-state: v133_three_platform_releases_published_and_full_downloads_verified
-current_goal: "0152已按授权推送源码并公开三端1.3.3+15，七资产匿名完整下载/摘要及双标签通过；交付下载链接后按实际反馈继续，原实体/同步/真实模型/TIMER门禁保持。"
+state: v134_local_verified_pending_deployment_and_publication
+current_goal: "按用户新授权完成后台发布与在线账号更新，恢复专注绑定手动番茄并统一学习入账，再部署、推送和重新发行三端；0152旧发行不改写，原实体/同步/模型/TIMER门禁保持。"
 active_feedback: "0152：v1.3.3（Release#431690582）与v1.3.3-harmonyos.1（#431693216）已公开，latest=v1.3.3；双注释标签固定0dadcfca2e5a48d0042e2b07bc268a832fe229bb。七资产远端大小/摘要/正文及匿名完整下载SHA通过，267客户端/6跳过/离线4/联网2、三端构建/原APK签名/公开未签名HAP/125Dart/4ArkTS核对通过。0150本人平板覆盖和依赖后端上线保留，无重复部署或安装；个人包/Profile不公开，在线更新模块仍仅评估。"
 review:
   submitted_date: "2026-10-31"
@@ -40,7 +40,7 @@ unfinished:
   - id: TODO-MANUAL-TIMER-RUNTIME
     priority: P0
     gate: G01/G02/G06
-    item: "0152三端1.3.3已公开、0150本人鸿蒙和依赖后端已更新，不重复发行/安装或一次性迁移。补真实计时/后台/断网补传/离线确认导入和完整矩阵；TIMER无新通过证据，长于8小时不调用Live View，在线更新模块仅评估未实现。"
+    item: "0152三端1.3.3已公开、0150本人鸿蒙和依赖后端已更新，不重复发行/安装或一次性迁移。补真实计时/后台/断网补传/离线确认导入和完整矩阵；TIMER无新通过证据，长于8小时不调用Live View，1.3.4在线更新本机实现验证，待生产上线与发行。"
   - id: TODO-HARMONYOS-TABLET
     priority: P1
     gate: HarmonyOS-H0-H5
@@ -90,7 +90,7 @@ next_actions:
     action: "三端1.3.3及依赖后端已公开/上线，按实际反馈补普通专注/独立番茄阶段、后台到点、断网补传、重叠去重/跨日和离线导入；不重复发行、安装本人平板或执行迁移，个人签名包不公开。"
     inputs: [docs/releases/v1.3.3.md, docs/releases/v1.3.3-harmonyos.1.md, docs/development/计时阶段与学习入账.md]
   - id: NEXT-ONLINE-UPDATE-IMPLEMENTATION
-    action: "本轮评估已完成，需实施时按在线账号鉴权、后台上传已签名包和Nginx内部下载的首期闭环推进；当前无发布模块，不在2GB主机编译。"
+    action: "0153本机后台/在线更新与手动绑定已实现，275客户端/127后端与三端1.3.4构建通过；待备份隔离恢复、生产上传/鉴权下载和双Release发布。本机编译，服务器只发布传输。"
     inputs: [docs/planning/Innocence-在线账号版本发布与更新评估.md]
   - id: NEXT-FOCUS-HARMONY-RIGHTS
     action: "先核对同一应用实况窗审核结果。通过后按实际权限/Profile或名单路径保原签名和资料联调；退回先读原因再改，不扩大场景或重复申请。单设备Token上传另按具体范围确认。"
@@ -120,7 +120,7 @@ history:
   index: progress/INDEX.md
   pre_compression_resume: progress/archive/0000__AI-RESUME__before-20261101-compression.md
   archive_manifest: docs/archive/documentation-compression-20261101.json
-  latest_event: progress/0152__20261103__P01__DONE__v133-three-platform-github-published.md
+  latest_event: progress/0153__20261103__P01__DONE__online-updates-and-bound-pomodoro-local.md
 ---
 
 # 恢复说明

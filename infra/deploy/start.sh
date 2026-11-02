@@ -33,6 +33,7 @@ if [ -e "$target" ] && ! cmp -s nginx/innocence-local.conf "$target"; then
     exit 1
 fi
 docker compose pull mysql redis
+install -d -o 10001 -g 33 -m 750 /opt/innocence/updates
 docker compose build backend
 docker compose up -d --wait --wait-timeout 300
 

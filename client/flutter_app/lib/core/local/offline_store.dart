@@ -1115,6 +1115,9 @@ class OfflineStore {
           limit: 1);
       if (rows.isEmpty) throw StateError('No matching active focus session');
       final row = rows.first;
+      if (row['bind_pomodoro'] == 2) {
+        throw StateError('End this session before changing its mode');
+      }
       final now = DateTime.now();
       final progress = _resolveLocalFocusProgress(row, now);
       if (progress.remainingSeconds <= 0) {
@@ -1167,6 +1170,7 @@ class OfflineStore {
     required DateTime endTime,
     String? taskName,
     bool bindPomodoro = false,
+    bool manualPomodoro = false,
     int pomodoroStudyMinutes = 0,
     int pomodoroBreakMinutes = 0,
   }) async {
@@ -1197,7 +1201,7 @@ class OfflineStore {
         'planned_end_time': endTime.toIso8601String(),
         'actual_end_time': '',
         'planned_minutes': plannedMinutes,
-        'bind_pomodoro': bindPomodoro ? 1 : 0,
+        'bind_pomodoro': bindPomodoro ? (manualPomodoro ? 2 : 1) : 0,
         'pomodoro_study_minutes': pomodoroStudyMinutes,
         'pomodoro_break_minutes': pomodoroBreakMinutes,
         'current_cycle_no': 1,
@@ -1217,6 +1221,7 @@ class OfflineStore {
           'endTime': endTime.toIso8601String(),
           'taskName': taskName?.trim() ?? '',
           'bindPomodoro': bindPomodoro,
+          'manualPomodoro': manualPomodoro,
           'pomodoroStudyMinutes': pomodoroStudyMinutes,
           'pomodoroBreakMinutes': pomodoroBreakMinutes,
         },
@@ -1236,6 +1241,7 @@ class OfflineStore {
       'elapsedSeconds': 0,
       'remainingSeconds': remainingSeconds,
       'bindPomodoro': bindPomodoro,
+      'manualPomodoro': manualPomodoro,
       'pomodoroStudyMinutes': pomodoroStudyMinutes,
       'pomodoroBreakMinutes': pomodoroBreakMinutes,
       'currentCycleNo': 1,
@@ -1373,7 +1379,7 @@ class OfflineStore {
         operationType: 'finish',
         payload: {
           'actualEndTime': nowText,
-          'durationSeconds': elapsedSeconds,
+          'durationSeconds': row['bind_pomodoro'] == 2 ? 0 : elapsedSeconds,
           'completedPomodoroCount': completedCount,
         },
         createdAt: now.toUtc().toIso8601String(),
@@ -1391,7 +1397,8 @@ class OfflineStore {
       'plannedMinutes': row['planned_minutes'],
       'elapsedSeconds': elapsedSeconds,
       'remainingSeconds': 0,
-      'bindPomodoro': row['bind_pomodoro'] == 1,
+      'bindPomodoro': row['bind_pomodoro'] != 0,
+      'manualPomodoro': row['bind_pomodoro'] == 2,
       'pomodoroStudyMinutes': row['pomodoro_study_minutes'],
       'pomodoroBreakMinutes': row['pomodoro_break_minutes'],
       'currentCycleNo': row['current_cycle_no'],
@@ -1454,7 +1461,8 @@ class OfflineStore {
       'plannedMinutes': row['planned_minutes'],
       'elapsedSeconds': progress.elapsedSeconds,
       'remainingSeconds': progress.remainingSeconds,
-      'bindPomodoro': row['bind_pomodoro'] == 1,
+      'bindPomodoro': row['bind_pomodoro'] != 0,
+      'manualPomodoro': row['bind_pomodoro'] == 2,
       'pomodoroStudyMinutes': row['pomodoro_study_minutes'],
       'pomodoroBreakMinutes': row['pomodoro_break_minutes'],
       'currentCycleNo': row['current_cycle_no'],
@@ -2047,6 +2055,7 @@ class OfflineStore {
     Map<String, Object?> row,
     DateTime now,
   ) {
+    if (row['bind_pomodoro'] == 2) return 0;
     final storedElapsed = row['elapsed_seconds'] as int? ?? 0;
     if (row['paused'] == 1 || row['active'] == 0) {
       return storedElapsed ~/ 60;

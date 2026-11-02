@@ -96,6 +96,7 @@ if ([string]::IsNullOrWhiteSpace($InnoSetupCompiler) -or
 $installerScript = Join-Path $windowsDirectory 'installer.iss'
 Invoke-CheckedCommand -FilePath $InnoSetupCompiler -Arguments @(
     "/DMyAppVersion=$versionName",
+    "/DMyAppBuild=$buildNumber",
     "/DMySourceDir=$releaseDirectory",
     "/DMyOutputDir=$outputDirectory",
     $installerScript

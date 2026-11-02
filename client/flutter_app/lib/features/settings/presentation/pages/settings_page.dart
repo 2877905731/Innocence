@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:innocence_flutter/features/updates/update_controller.dart';
+import 'package:innocence_flutter/features/updates/update_panel.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -41,6 +43,7 @@ enum _SettingsSectionId {
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
+    this.updateController,
     super.key,
     required this.isOfflineMode,
     required this.onChangeLanguage,
@@ -80,6 +83,7 @@ class SettingsPage extends StatefulWidget {
   });
 
   final bool isOfflineMode;
+  final UpdateController? updateController;
   final Future<void> Function(
     AppLanguage language, {
     bool confirmStartup,
@@ -1654,6 +1658,11 @@ class _SettingsPageState extends State<SettingsPage> {
                 spacing: 12,
                 runSpacing: 12,
                 children: [
+                  if (!widget.isOfflineMode && widget.updateController != null)
+                    SizedBox(
+                        width: double.infinity,
+                        child:
+                            UpdatePanel(controller: widget.updateController!)),
                   if (!widget.isOfflineMode)
                     OutlinedButton.icon(
                       onPressed: _isLoading ? null : _clearCache,

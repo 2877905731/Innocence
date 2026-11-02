@@ -9,6 +9,10 @@ gzip -c "$directory/innocence.sql" > "$directory/innocence.sql.gz"
 gzip -t "$directory/innocence.sql.gz"
 docker compose exec -T backend tar -czf - -C /app/data/uploads/avatars . > "$directory/avatars.tar.gz"
 tar -tzf "$directory/avatars.tar.gz" >/dev/null
+if [ -d updates ]; then
+    tar --exclude='*.part' --exclude='*.tmp' -czf "$directory/updates.tar.gz" -C updates .
+    tar -tzf "$directory/updates.tar.gz" >/dev/null
+fi
 cp -p backend/server.jar "$directory/server.jar"
 docker image inspect innocence-server:local --format '{{.Id}}' > "$directory/previous-image-id.txt"
 docker image tag innocence-server:local "innocence-server:before-online-$(date +%Y%m%d%H%M%S)"

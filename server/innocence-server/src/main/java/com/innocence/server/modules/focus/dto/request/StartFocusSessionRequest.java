@@ -19,6 +19,9 @@ public class StartFocusSessionRequest {
     public void setDurationMinutes(Integer value) { durationMinutes = value; }
 
     private Boolean bindPomodoro;
+    private Boolean manualPomodoro;
+    public Boolean getManualPomodoro() { return manualPomodoro; }
+    public void setManualPomodoro(Boolean value) { manualPomodoro = value; }
     private Integer pomodoroStudyMinutes;
     private Integer pomodoroBreakMinutes;
 

@@ -1078,3 +1078,10 @@ checkpoints:
     status: complete
     path: progress/0152__20261103__P01__DONE__v133-three-platform-github-published.md
     title: "三端1.3.3正式公开，七资产匿名完整下载SHA与源码双标签核对通过"
+  - sequence: "0153"
+    created_at: "2026-11-03T01:24:55+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0153__20261103__P01__DONE__online-updates-and-bound-pomodoro-local.md
+    title: "在线更新与手动绑定番茄本机实现，三端1.3.4及275客户端/127后端验证"

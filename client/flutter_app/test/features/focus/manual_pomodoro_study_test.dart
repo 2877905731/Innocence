@@ -7,6 +7,83 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  test('bound focus credits only study and caps recovery at its total deadline',
+      () {
+    final start = DateTime(2026, 11, 3, 9).millisecondsSinceEpoch;
+    final t = PomodoroTimer(
+        id: 'bound',
+        active: true,
+        studyMinutes: 2,
+        breakMinutes: 1,
+        referenceMs: start,
+        boundSessionId: 7,
+        boundUntilMs: start + 90000,
+        coveredFromMs: start,
+        coveredUntilMs: start + 90000);
+    final recovered =
+        PomodoroTimer.fromJson(t.toJson()).advance(start + 3600000);
+    expect(recovered.active, isFalse);
+    expect(recovered.records.single.studyMs, 90000);
+    expect(recovered.records.single.creditedMs, 90000);
+    expect(recovered.completed, 0);
+    expect(recovered.advance(start + 999999999).records.single.studyMs, 90000);
+  });
+  test('bound waiting and incomplete break never manufacture study or a round',
+      () {
+    final start = DateTime(2026, 11, 3, 9).millisecondsSinceEpoch;
+    final t = PomodoroTimer(
+        id: 'bound',
+        active: true,
+        studyMinutes: 1,
+        breakMinutes: 1,
+        referenceMs: start,
+        boundSessionId: 7,
+        boundUntilMs: start + 180000);
+    final study = t.advance(start + 90000);
+    expect(study.awaitingNext, isTrue);
+    expect(study.records.single.studyMs, 60000);
+    final rest = study.beginNextStage(start + 150000).advance(start + 900000);
+    expect(rest.active, isFalse);
+    expect(rest.records.single.studyMs, 60000);
+    expect(rest.completed, 0);
+    expect(study.advance(start + 900000).active, isFalse);
+  });
+  test('offline bound focus envelope is excluded from stats and import credit',
+      () async {
+    sqfliteFfiInit();
+    final folder = await Directory.systemTemp.createTemp('bound-focus-qa-');
+    final store = OfflineStore(
+        databaseFactory: databaseFactoryFfi,
+        databasePathProvider: () async => '${folder.path}/qa.db');
+    try {
+      final focus = await store.startFocusSession('local:bound',
+          endTime: DateTime.now().add(const Duration(hours: 1)),
+          bindPomodoro: true,
+          manualPomodoro: true,
+          pomodoroStudyMinutes: 1,
+          pomodoroBreakMinutes: 1);
+      expect(focus.manualPomodoro, isTrue);
+      final db = await databaseFactoryFfi.openDatabase('${folder.path}/qa.db');
+      await db.update('local_focus_session',
+          {'elapsed_seconds': 240, 'remaining_seconds': 3360, 'paused': 1},
+          where: 'session_id=?', whereArgs: [focus.sessionId]);
+      expect(
+          (await store.loadStatsOverview('local:bound'))
+              .totalStudyDurationMinutes,
+          0);
+      final restored = await store.loadActiveFocusSession('local:bound');
+      expect(restored.manualPomodoro, isTrue);
+      expect(restored.completedPomodoroCount, 0);
+      await store.finishFocusSession('local:bound', focus.sessionId);
+      expect(
+          (await store.loadStatsOverview('local:bound'))
+              .totalStudyDurationMinutes,
+          0);
+    } finally {
+      await store.close();
+      await folder.delete(recursive: true);
+    }
+  });
   test(
       'new focus coverage is applied to the pending interval before study is saved',
       () async {

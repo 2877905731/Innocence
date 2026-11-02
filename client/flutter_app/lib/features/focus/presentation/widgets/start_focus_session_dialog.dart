@@ -16,6 +16,9 @@ class _StartFocusSessionDialogState extends State<StartFocusSessionDialog> {
   late final TextEditingController _durationController;
   int get _durationMinutes => int.tryParse(_durationController.text) ?? 0;
   String? _validationMessage;
+  bool _bindPomodoro = false;
+  final _studyController = TextEditingController(text: '25');
+  final _restController = TextEditingController(text: '5');
 
   String _text(String zh, String en) {
     return localizedText(context, zh, en);
@@ -32,6 +35,8 @@ class _StartFocusSessionDialogState extends State<StartFocusSessionDialog> {
   void dispose() {
     _taskNameController.dispose();
     _durationController.dispose();
+    _studyController.dispose();
+    _restController.dispose();
     super.dispose();
   }
 
@@ -43,12 +48,20 @@ class _StartFocusSessionDialogState extends State<StartFocusSessionDialog> {
       });
       return;
     }
+    final study = int.tryParse(_studyController.text) ?? 0;
+    final rest = int.tryParse(_restController.text) ?? -1;
+    if (_bindPomodoro &&
+        (study < 1 || study > 1440 || rest < 0 || rest > 1440)) {
+      setState(() => _validationMessage = _text('学习请输入 1–1440，休息请输入 0–1440 分钟。',
+          'Study: 1–1440 minutes; break: 0–1440 minutes.'));
+      return;
+    }
     final draft = FocusSessionDraft(
       taskName: _taskNameController.text.trim(),
       endTime: DateTime.now().add(Duration(minutes: _durationMinutes)),
-      bindPomodoro: false,
-      pomodoroStudyMinutes: 0,
-      pomodoroBreakMinutes: 0,
+      bindPomodoro: _bindPomodoro,
+      pomodoroStudyMinutes: _bindPomodoro ? study : 0,
+      pomodoroBreakMinutes: _bindPomodoro ? rest : 0,
     );
     Navigator.of(context).pop(draft);
   }
@@ -125,8 +138,46 @@ class _StartFocusSessionDialogState extends State<StartFocusSessionDialog> {
                 style: textTheme.bodyMedium,
               ),
               const SizedBox(height: 18),
-              Text(_text('到点结束并提醒。番茄学习与休息可在番茄分页分别开始。',
-                  'Stops and alerts at the deadline. Start study and break stages in the pomodoro tab.')),
+              SwitchListTile(
+                key: const ValueKey('bind-focus-pomodoro'),
+                contentPadding: EdgeInsets.zero,
+                title: Text(_text('绑定番茄闹钟', 'Bind pomodoro')),
+                subtitle: Text(_text('学习只计一次，阶段到点后手动继续',
+                    'Count study once. Start each new stage manually.')),
+                value: _bindPomodoro,
+                onChanged: (v) => setState(() => _bindPomodoro = v),
+              ),
+              if (_bindPomodoro) ...[
+                TextField(
+                    controller: _studyController,
+                    key: const ValueKey('bound-study-minutes'),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(4)
+                    ],
+                    decoration: InputDecoration(
+                        labelText:
+                            _text('每轮学习（分钟）', 'Study minutes per round'))),
+                const SizedBox(height: 12),
+                TextField(
+                    controller: _restController,
+                    key: const ValueKey('bound-break-minutes'),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(4)
+                    ],
+                    decoration: InputDecoration(
+                        labelText:
+                            _text('每轮休息（分钟）', 'Break minutes per round'))),
+                const SizedBox(height: 12),
+                Text(_text(
+                    '专注时长是本次总窗口，包含休息与等待；仅实际学习计入学习时间。总窗口到点结束。已有独立番茄会先保存并结束。',
+                    'The focus duration includes breaks and waiting. Only study counts toward learning. The timer ends at the focus deadline. Any independent pomodoro is saved and ended first.')),
+              ] else
+                Text(_text('到点结束并提醒。也可绑定番茄，统一管理学习与休息。',
+                    'Stops and alerts at the deadline. Bind pomodoro to manage study and breaks together.')),
               if (_validationMessage != null) ...[
                 const SizedBox(height: 14),
                 Text(

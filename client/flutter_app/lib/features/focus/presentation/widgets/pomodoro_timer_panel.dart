@@ -78,7 +78,11 @@ class _PomodoroTimerPanelState extends State<PomodoroTimerPanel> {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(text('独立番茄闹钟', 'Independent pomodoro'),
+                      Text(
+                          t.bound
+                              ? text(
+                                  '已绑定专注 · 番茄闹钟', 'Pomodoro · Bound to focus')
+                              : text('独立番茄闹钟', 'Independent pomodoro'),
                           style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 12),
                       Text(
@@ -188,7 +192,9 @@ class _PomodoroTimerPanelState extends State<PomodoroTimerPanel> {
                             FilledButton.icon(
                                 key:
                                     const ValueKey('independent-pomodoro-next'),
-                                onPressed: c.busy ? null : c.startNextStage,
+                                onPressed: c.busy || t.paused
+                                    ? null
+                                    : c.startNextStage,
                                 icon: const Icon(Icons.play_arrow),
                                 label: Text(!t.resting && t.breakMinutes > 0
                                     ? text('开始休息', 'Start break')
@@ -208,7 +214,9 @@ class _PomodoroTimerPanelState extends State<PomodoroTimerPanel> {
                               key:
                                   const ValueKey('independent-pomodoro-finish'),
                               onPressed: c.busy ? null : c.finish,
-                              child: Text(text('结束番茄闹钟', 'End pomodoro'))),
+                              child: Text(t.bound
+                                  ? text('结束本次专注', 'End focus session')
+                                  : text('结束番茄闹钟', 'End pomodoro'))),
                         ],
                       ]),
                     ])));

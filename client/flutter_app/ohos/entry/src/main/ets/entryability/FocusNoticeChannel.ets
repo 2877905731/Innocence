@@ -360,7 +360,9 @@ export class FocusNoticeChannel implements MethodCallHandler {
     }
     const now = Date.now();
     const effective = Math.min(duration, elapsed + (paused || awaiting ? 0 : Math.max(0, now - reference)));
-    const remainingMs = duration - effective;
+    const stopAt = args.get('stopAtMs') as number | undefined;
+    const remainingMs = Math.max(0, Math.min(duration - effective,
+      typeof stopAt === 'number' && stopAt > 0 && !paused ? stopAt - now : duration));
     const done = awaiting || (!paused && remainingMs === 0);
     const deadline = now + remainingMs;
     const click = await wantAgent.getWantAgent({

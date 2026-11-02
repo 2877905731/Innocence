@@ -25,13 +25,13 @@ Innocence is built with Flutter and Spring Boot and currently targets Windows de
 
 | Platform | Download | Scope |
 |---|---|---|
-| Windows x64 · v1.3.3 | [Installer](https://github.com/2877905731/Innocence/releases/download/v1.3.3/Innocence-v1.3.3-windows-x64-setup.exe) · [Portable ZIP](https://github.com/2877905731/Innocence/releases/download/v1.3.3/Innocence-v1.3.3-windows-x64-portable.zip) | Online desktop edition; installer has no Authenticode signature |
-| Android 7.0+ · v1.3.3 | [Online APK](https://github.com/2877905731/Innocence/releases/download/v1.3.3/Innocence-v1.3.3-android-online.apk) | Custom timers, credited manual pomodoro stages, multiple chats, and new wordmarks; original release signature |
-| HarmonyOS tablet online edition · v1.3.3 | [ARM64 Release HAP](https://github.com/2877905731/Innocence/releases/tag/v1.3.3-harmonyos.1) | Unsigned AOT; requires a matching device profile, signing, and DevEco/HDC |
+| Windows x64 · v1.3.4 | [Installer](https://github.com/2877905731/Innocence/releases/download/v1.3.4/Innocence-v1.3.4-windows-x64-setup.exe) · [Portable ZIP](https://github.com/2877905731/Innocence/releases/download/v1.3.4/Innocence-v1.3.4-windows-x64-portable.zip) | Online desktop edition; installer has no Authenticode signature |
+| Android 7.0+ · v1.3.4 | [Online APK](https://github.com/2877905731/Innocence/releases/download/v1.3.4/Innocence-v1.3.4-android-online.apk) | Custom timers, credited manual pomodoro stages, multiple chats, and new wordmarks; original release signature |
+| HarmonyOS tablet online edition · v1.3.4 | [ARM64 Release HAP](https://github.com/2877905731/Innocence/releases/tag/v1.3.4-harmonyos.1) | Unsigned AOT; requires a matching device profile, signing, and DevEco/HDC |
 
-[Android v1.3.3 release notes](https://github.com/2877905731/Innocence/releases/tag/v1.3.3) · [Android SHA256](https://github.com/2877905731/Innocence/releases/download/v1.3.3/SHA256SUMS.txt) · [Windows v1.3.3](https://github.com/2877905731/Innocence/releases/tag/v1.3.3) · [Changelog](CHANGELOG.md)
+[Android v1.3.4 release notes](https://github.com/2877905731/Innocence/releases/tag/v1.3.4) · [Android SHA256](https://github.com/2877905731/Innocence/releases/download/v1.3.4/SHA256SUMS.txt) · [Windows v1.3.4](https://github.com/2877905731/Innocence/releases/tag/v1.3.4) · [Changelog](CHANGELOG.md)
 
-v1.3.3 adds custom focus durations, manually started pomodoro stages with study credit, annual-task assistant fixes, multiple deletable chats, and original Innocence theme wordmarks. The required study-credit and request-tracing backend is deployed. Independent device sessions and confirmed local-data import remain in place; an in-app update service is not included.
+v1.3.4 restores focus-bound manual pomodoro stages with one study ledger. Administrators can upload, publish, or withdraw locally built packages; authenticated online accounts can check and download updates in Settings. Windows/Android open the system installer after integrity and package checks. HarmonyOS development packages require computer signing and installation. Versions through 1.3.3 need one manual upgrade first. Annual-task fixes, multiple chats, theme wordmarks, and confirmed local-data import remain available.
 
 Sign in with a server account or choose local mode. Local data is uploaded only after previewing and confirming the target account. Keep the installed app and its data when updating. Physical-device/OEM/Vulkan checks and long-running performance remain in progress.
 
@@ -44,7 +44,7 @@ Sign in with a server account or choose local mode. Local data is uploaded only 
 - Core interaction foundations for authentication, profiles, settings, memos, statistics, notifications, friends, and teams.
 - Backend business data is isolated by the currently authenticated user.
 - Windows chat supports model discovery from an address and key, plus confirmed local actions. Live-provider and complete device checks remain pending.
-- HarmonyOS provides an [unsigned ARM64 online Release](https://github.com/2877905731/Innocence/releases/tag/v1.3.3-harmonyos.1). The owner’s tablet has received the matching private signed 1.3.3 update; public recipients still need their own signing/profile. Full device, background-rights, and live-model checks remain pending.
+- HarmonyOS provides an [unsigned ARM64 online Release](https://github.com/2877905731/Innocence/releases/tag/v1.3.4-harmonyos.1). The owner’s tablet previously received the matching private signed 1.3.3 update; public recipients still need their own signing/profile. Full device, background-rights, and live-model checks remain pending.
 
 ## Repository Layout
 

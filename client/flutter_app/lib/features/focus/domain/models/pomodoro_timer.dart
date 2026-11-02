@@ -17,7 +17,9 @@ class PomodoroTimer {
       this.awaitingNext = false,
       this.records = const [],
       this.coveredFromMs = 0,
-      this.coveredUntilMs = 0});
+      this.coveredUntilMs = 0,
+      this.boundSessionId = 0,
+      this.boundUntilMs = 0});
 
   final String id, stage;
   final bool active, paused, notices, awaitingNext;
@@ -29,6 +31,8 @@ class PomodoroTimer {
       completed;
   final List<PomodoroStudyRecord> records;
   final int coveredFromMs, coveredUntilMs;
+  final int boundSessionId, boundUntilMs;
+  bool get bound => boundSessionId > 0;
   int get studyMs => studyMinutes * 60000;
   int get cycleMs => (studyMinutes + breakMinutes) * 60000;
   bool get resting => stage == 'break';
@@ -45,7 +49,12 @@ class PomodoroTimer {
 
   PomodoroTimer advance(int now,
       {int Function(int start, int end)? coveredMs}) {
-    if (!running || now <= referenceMs) return this;
+    final expired = bound && !paused && now >= boundUntilMs;
+    if (expired && !running) return copy(active: false);
+    if (bound && now > boundUntilMs) now = boundUntilMs;
+    if (!running || now <= referenceMs) {
+      return expired ? copy(active: false) : this;
+    }
     final consumed = (now - referenceMs).clamp(0, remainingMs);
     final end = referenceMs + consumed;
     final ledger = [...records];
@@ -59,9 +68,10 @@ class PomodoroTimer {
         final overlapStart = cursor > coveredFromMs ? cursor : coveredFromMs;
         final overlapEnd = until < coveredUntilMs ? until : coveredUntilMs;
         final overlap = (overlapEnd - overlapStart).clamp(0, until - cursor);
-        final credit =
-            (until - cursor - (coveredMs?.call(cursor, until) ?? overlap))
-                .clamp(0, until - cursor);
+        final credit = (until -
+                cursor -
+                (bound ? 0 : (coveredMs?.call(cursor, until) ?? overlap)))
+            .clamp(0, until - cursor);
         _append(ledger, cursor, until, credit);
         cursor = until;
       }
@@ -70,6 +80,7 @@ class PomodoroTimer {
     final roundDone = done && (resting || breakMinutes == 0);
     if (roundDone) _append(ledger, end, end, 0, round: 1);
     return copy(
+        active: expired ? false : null,
         elapsedMs: elapsedMs + consumed,
         referenceMs: end,
         awaitingNext: done,
@@ -119,7 +130,8 @@ class PomodoroTimer {
           bool? awaitingNext,
           List<PomodoroStudyRecord>? records,
           int? coveredFromMs,
-          int? coveredUntilMs}) =>
+          int? coveredUntilMs,
+          int? boundUntilMs}) =>
       PomodoroTimer(
           id: id,
           active: active ?? this.active,
@@ -135,7 +147,9 @@ class PomodoroTimer {
           awaitingNext: awaitingNext ?? this.awaitingNext,
           records: records ?? this.records,
           coveredFromMs: coveredFromMs ?? this.coveredFromMs,
-          coveredUntilMs: coveredUntilMs ?? this.coveredUntilMs);
+          coveredUntilMs: coveredUntilMs ?? this.coveredUntilMs,
+          boundSessionId: boundSessionId,
+          boundUntilMs: boundUntilMs ?? this.boundUntilMs);
 
   Map<String, dynamic> toJson() => {
         'version': 2,
@@ -153,7 +167,9 @@ class PomodoroTimer {
         'awaitingNext': awaitingNext,
         'records': records.map((r) => r.toJson()).toList(),
         'coveredFromMs': coveredFromMs,
-        'coveredUntilMs': coveredUntilMs
+        'coveredUntilMs': coveredUntilMs,
+        'boundSessionId': boundSessionId,
+        'boundUntilMs': boundUntilMs
       };
 
   factory PomodoroTimer.fromJson(Map<String, dynamic> j) {
@@ -206,6 +222,14 @@ class PomodoroTimer {
     if (from is! int || until is! int || from < 0 || until < from) {
       throw const FormatException('Invalid focus coverage');
     }
+    final boundId = j['boundSessionId'] ?? 0, boundEnd = j['boundUntilMs'] ?? 0;
+    if (boundId is! int ||
+        boundEnd is! int ||
+        boundId < 0 ||
+        boundEnd < 0 ||
+        (boundId > 0 && boundEnd == 0)) {
+      throw const FormatException('Invalid focus binding');
+    }
     return PomodoroTimer(
         id: j['id'],
         active: j['active'],
@@ -221,6 +245,8 @@ class PomodoroTimer {
         awaitingNext: awaiting,
         coveredFromMs: from,
         coveredUntilMs: until,
+        boundSessionId: boundId,
+        boundUntilMs: boundEnd,
         records: legacy
             ? []
             : (j['records'] as List)

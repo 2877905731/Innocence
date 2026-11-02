@@ -5,10 +5,12 @@ import { window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { FocusNoticeChannel } from './FocusNoticeChannel';
 import { AssistantVaultChannel } from './AssistantVaultChannel';
+import { UpdateChannel } from './UpdateChannel';
 
 export default class EntryAbility extends FlutterAbility {
   private focusNotices?: FocusNoticeChannel;
   private assistantVault?: AssistantVaultChannel;
+  private updates?: UpdateChannel;
   onWindowStageCreate(windowStage: window.WindowStage): void {
     super.onWindowStageCreate(windowStage);
     windowStage.getMainWindow().then(async (mainWindow: window.Window) => {
@@ -25,11 +27,13 @@ export default class EntryAbility extends FlutterAbility {
     GeneratedPluginRegistrant.registerWith(flutterEngine)
     this.focusNotices = new FocusNoticeChannel(this.context, flutterEngine);
     this.assistantVault = new AssistantVaultChannel(flutterEngine);
+    this.updates = new UpdateChannel(flutterEngine);
   }
 
   cleanUpFlutterEngine(flutterEngine: FlutterEngine): void {
     this.focusNotices?.detach();
     this.assistantVault?.detach();
+    this.updates?.detach();
     super.cleanUpFlutterEngine(flutterEngine);
   }
 }

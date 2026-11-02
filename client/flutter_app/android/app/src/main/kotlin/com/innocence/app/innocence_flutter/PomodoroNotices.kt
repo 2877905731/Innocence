@@ -13,7 +13,7 @@ import android.os.Build
 
 internal data class IndependentPomodoro(val owner: String, val key: String, val active: Boolean,
     val paused: Boolean, val study: Int, val rest: Int, val elapsed: Long, val reference: Long, val chinese: Boolean,
-    val stage: String = "study", val cycle: Int = 1, val awaitingNext: Boolean = false) {
+    val stage: String = "study", val cycle: Int = 1, val awaitingNext: Boolean = false, val stopAt: Long = 0) {
     companion object {
         fun parse(value: Any?): IndependentPomodoro {
             val map = value as? Map<*, *> ?: throw IllegalArgumentException()
@@ -40,7 +40,7 @@ internal data class IndependentPomodoro(val owner: String, val key: String, val 
             val stageMs = (if (stage == "break") rest else study) * 60000L
             require(elapsed <= stageMs && (!awaiting || elapsed == stageMs))
             return IndependentPomodoro(owner, key, active, paused, study.toInt(), rest.toInt(), elapsed, reference, chinese,
-                stage, cycle.toInt(), awaiting)
+                stage, cycle.toInt(), awaiting, (map["stopAtMs"] as? Number)?.toLong()?.coerceAtLeast(0) ?: 0)
         }
     }
 }
@@ -89,7 +89,7 @@ internal object PomodoroNotices {
         check(saved.edit().putString("owner", timer.owner).putString("key", timer.key).putBoolean("active", timer.active)
             .putBoolean("paused", timer.paused).putInt("study", timer.study).putInt("rest", timer.rest)
             .putLong("elapsed", timer.elapsed).putLong("reference", timer.reference).putBoolean("chinese", timer.chinese)
-            .putString("stage", timer.stage).putInt("cycle", timer.cycle).putBoolean("awaitingNext", timer.awaitingNext).commit())
+            .putString("stage", timer.stage).putInt("cycle", timer.cycle).putBoolean("awaitingNext", timer.awaitingNext).putLong("stopAt", timer.stopAt).commit())
         if (!timer.active) return "available"
         update(c)
         return if (!allowed(c)) "permissionRequired" else if (!timer.paused && !exact(c)) "exactPermissionRequired" else "available"
@@ -115,9 +115,11 @@ internal object PomodoroNotices {
         val duration = if (resting) rest else study
         val reference = saved.getLong("reference", now)
         val elapsed = minOf(duration, base + if (paused || waiting) 0 else maxOf(0, now - reference))
-        val done = waiting || (!paused && elapsed >= duration)
-        val remaining = maxOf(0, duration - elapsed)
-        val deadline = if (paused || waiting) now + remaining else reference + duration - base
+        val stopAt = saved.getLong("stopAt", 0)
+        val boundDone = stopAt > 0 && !paused && now >= stopAt
+        val done = waiting || (!paused && elapsed >= duration) || boundDone
+        val remaining = maxOf(0, minOf(duration - elapsed, if (stopAt > 0 && !paused) stopAt - now else Long.MAX_VALUE))
+        val deadline = if (paused || waiting) now + remaining else minOf(reference + duration - base, if (stopAt > 0) stopAt else Long.MAX_VALUE)
         val token = "$key/$cycle/$resting"
         val chinese = saved.getBoolean("chinese", true)
         val title = if (chinese) "番茄 · ${if (resting) "休息" else "学习"}${if (done) "完成" else if (paused) " · 已暂停" else ""}"

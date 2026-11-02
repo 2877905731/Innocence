@@ -1,6 +1,7 @@
 import 'package:innocence_flutter/features/focus/presentation/widgets/start_focus_session_dialog.dart';
 import 'package:innocence_flutter/features/focus/application/pomodoro_controller.dart';
 import 'dart:async';
+import 'package:innocence_flutter/features/updates/update_controller.dart';
 
 import 'package:innocence_flutter/features/plans/presentation/pages/android_plans_view.dart';
 import 'package:flutter/material.dart';
@@ -381,6 +382,7 @@ class HomePage extends StatelessWidget {
     required this.onStartFocusSession,
     this.onConfigureFocusPomodoro,
     this.pomodoroController,
+    this.updateController,
     required this.onFinishFocusSession,
     required this.onToggleFocusPause,
     required this.onSubmitCheckIn,
@@ -496,6 +498,7 @@ class HomePage extends StatelessWidget {
   final FocusSession focusSession;
   final ConfigureFocusPomodoro? onConfigureFocusPomodoro;
   final PomodoroController? pomodoroController;
+  final UpdateController? updateController;
   final CheckInStatus checkInStatus;
   final StatsOverview statsOverview;
   final TeamOverview teamOverview;
@@ -954,6 +957,7 @@ class HomePage extends StatelessWidget {
       MaterialPageRoute<void>(
         builder: (context) {
           return SettingsPage(
+            updateController: updateController,
             isOfflineMode: isOfflineMode,
             onChangeLanguage: onChangeLanguage,
             visualTheme: currentVisualTheme,

@@ -1,5 +1,6 @@
 #include "flutter_window.h"
 #include "assistant_vault.h"
+#include "update_channel.h"
 
 #include <optional>
 #include <string>
@@ -37,6 +38,7 @@ bool FlutterWindow::OnCreate() {
   RegisterPlugins(flutter_controller_->engine());
   RegisterDesktopWidgetChannel();
   assistant_vault_channel_ = CreateAssistantVault(flutter_controller_->engine()->messenger());
+  update_channel_ = CreateUpdateChannel(flutter_controller_->engine()->messenger());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
@@ -55,6 +57,7 @@ bool FlutterWindow::OnCreate() {
 void FlutterWindow::OnDestroy() {
   desktop_widget_channel_.reset();
   assistant_vault_channel_.reset();
+  update_channel_.reset();
   if (flutter_controller_) {
     flutter_controller_ = nullptr;
   }

@@ -74,6 +74,8 @@ services:
       INNOCENCE_REDIS_HOST: redis
       INNOCENCE_REDIS_PASSWORD: ${REDIS_PASSWORD:?Run prepare.sh first}
       INNOCENCE_ADMIN_EMAILS: ${INNOCENCE_ADMIN_EMAILS:?Fill INNOCENCE_ADMIN_EMAILS in .env}
+      INNOCENCE_UPDATES_STORAGE_DIR: /app/data/updates
+      INNOCENCE_UPDATES_X_ACCEL: "true"
       INNOCENCE_MAIL_HOST: ${INNOCENCE_MAIL_HOST:-smtp.invalid}
       INNOCENCE_MAIL_PORT: ${INNOCENCE_MAIL_PORT:-465}
       INNOCENCE_MAIL_USERNAME: ${INNOCENCE_MAIL_USERNAME:-not-configured@example.invalid}
@@ -95,6 +97,7 @@ services:
       - "127.0.0.1:8080:8080"
     volumes:
       - avatars:/app/data/uploads/avatars
+      - ./updates:/app/data/updates
     depends_on:
       mysql:
         condition: service_healthy

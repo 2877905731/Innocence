@@ -16,6 +16,7 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         focusNotices = FocusNoticeChannel(this, flutterEngine.dartExecutor.binaryMessenger)
+        UpdateChannel(this, flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "innocence/assistant_vault")
             .setMethodCallHandler { call, result ->
                 if (call.method !in listOf("encrypt", "decrypt")) { result.notImplemented(); return@setMethodCallHandler }

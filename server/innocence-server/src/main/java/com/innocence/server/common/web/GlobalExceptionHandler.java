@@ -17,7 +17,9 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
+    @ExceptionHandler({org.springframework.web.bind.MissingServletRequestParameterException.class,
+            org.springframework.web.multipart.support.MissingServletRequestPartException.class,
+            org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
             org.springframework.http.converter.HttpMessageNotReadableException.class})
     public ResponseEntity<ApiResponse<Void>> handleMalformedRequest(Exception exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -62,7 +64,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleMaxUploadSize(MaxUploadSizeExceededException exception) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "头像文件不能超过 5 MiB"));
+                .body(ApiResponse.fail(ErrorCode.BAD_REQUEST, "上传文件超过允许大小。头像上限 5 MiB，版本包上限 300 MiB。"));
     }
 
     @ExceptionHandler(Exception.class)

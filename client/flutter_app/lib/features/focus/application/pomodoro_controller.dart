@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/local/offline_store.dart';
 import '../domain/models/pomodoro_timer.dart';
+import '../domain/models/focus_session.dart';
 
 class PomodoroController extends ChangeNotifier with WidgetsBindingObserver {
   PomodoroController(
@@ -14,6 +15,9 @@ class PomodoroController extends ChangeNotifier with WidgetsBindingObserver {
       this.coveredMs,
       this.focusWindow,
       this.onRecorded,
+      this.onBoundPause,
+      this.onBoundFinish,
+      this.boundFocus,
       String? platform,
       int Function()? now})
       : platform = platform ?? AppConfig.deviceType,
@@ -26,6 +30,8 @@ class PomodoroController extends ChangeNotifier with WidgetsBindingObserver {
   final int Function(int start, int end)? coveredMs;
   final List<int> Function()? focusWindow;
   final Future<void> Function(String owner)? onRecorded;
+  final Future<void> Function()? onBoundPause, onBoundFinish;
+  final FocusSession? Function()? boundFocus;
   final String platform;
   final int Function() _now;
   PomodoroTimer timer = const PomodoroTimer();
@@ -76,11 +82,19 @@ class PomodoroController extends ChangeNotifier with WidgetsBindingObserver {
         busy = false;
         notifyListeners();
         await _sync(force: true, transition: recoveredCompletion);
+        final focus = boundFocus?.call();
+        if (focus != null) await syncBoundFocus(focus);
       }
     }
   }
 
-  Future<void> start(int study, int rest, bool notices) async {
+  Future<void> start(int study, int rest, bool notices,
+      {int boundSessionId = 0, int boundUntilMs = 0}) async {
+    if (boundSessionId == 0 &&
+        boundFocus?.call()?.manualPomodoro == true &&
+        boundFocus?.call()?.active == true) {
+      return;
+    }
     if (study < 1 || study > 1440 || rest < 0 || rest > 1440) {
       throw ArgumentError('Invalid durations');
     }
@@ -96,11 +110,17 @@ class PomodoroController extends ChangeNotifier with WidgetsBindingObserver {
             coveredFromMs: window[0],
             coveredUntilMs: window[1],
             referenceMs: now,
+            boundSessionId: boundSessionId,
+            boundUntilMs: boundUntilMs,
             notices: notices),
         requestPermission: notices);
   }
 
   Future<void> togglePause() async {
+    if (timer.bound) {
+      await onBoundPause?.call();
+      return;
+    }
     if (!timer.active || timer.awaitingNext) return;
     final now = _now();
     final current = _at(now);
@@ -113,7 +133,7 @@ class PomodoroController extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> startNextStage() async {
     await checkpoint();
-    if (!timer.active || !timer.awaitingNext) return;
+    if (!timer.active || !timer.awaitingNext || timer.paused) return;
     await _save(timer.beginNextStage(_now()));
   }
 
@@ -153,6 +173,24 @@ class PomodoroController extends ChangeNotifier with WidgetsBindingObserver {
         transition: !current.awaitingNext && next.awaitingNext);
   }
 
+  Future<void> syncBoundFocus(FocusSession focus) async {
+    if (busy) await _writing?.future;
+    if (_disposed || !timer.active || !timer.bound) return;
+    if (!focus.active ||
+        !focus.manualPomodoro ||
+        timer.boundSessionId != focus.sessionId) {
+      await finish(fromFocus: true);
+      return;
+    }
+    final now = _now();
+    final end = focus.referenceTime.millisecondsSinceEpoch +
+        focus.remainingSeconds * 1000;
+    final current = _at(now);
+    if (current.paused == focus.paused && current.boundUntilMs == end) return;
+    await _save(current.copy(
+        paused: focus.paused, referenceMs: now, boundUntilMs: end));
+  }
+
   Future<void> _report(String captured) async {
     try {
       await onRecorded?.call(captured);
@@ -173,7 +211,11 @@ class PomodoroController extends ChangeNotifier with WidgetsBindingObserver {
     if (!_disposed) notifyListeners();
   }
 
-  Future<void> finish() async {
+  Future<void> finish({bool fromFocus = false}) async {
+    if (timer.bound && !fromFocus) {
+      await onBoundFinish?.call();
+      return;
+    }
     if (!timer.active) return;
     await checkpoint();
     await _save(timer.copy(active: false, paused: false));
@@ -226,7 +268,8 @@ class PomodoroController extends ChangeNotifier with WidgetsBindingObserver {
     final old = timer;
     timer = _at(_now());
     notifyListeners();
-    if (!old.awaitingNext && timer.awaitingNext) {
+    if ((old.active && !timer.active) ||
+        (!old.awaitingNext && timer.awaitingNext)) {
       _ticker?.cancel();
       unawaited(_save(timer, transition: true));
     }
@@ -278,6 +321,8 @@ class PomodoroController extends ChangeNotifier with WidgetsBindingObserver {
       'stage': snapshot.stage,
       'cycle': snapshot.cycle,
       'awaitingNext': snapshot.awaitingNext,
+      'stopAtMs':
+          snapshot.bound && !snapshot.paused ? snapshot.boundUntilMs : 0,
       'isChinese': chinese()
     };
     final signature =

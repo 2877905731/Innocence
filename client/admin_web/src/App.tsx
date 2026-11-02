@@ -1,8 +1,9 @@
 import { useEffect, useState, type DependencyList, type FormEvent, type ReactNode } from 'react'
+import { ReleasesPage } from './ReleasesPage'
 import { Bell, BookOpenText, ChevronRight, CircleHelp, ClipboardList, DoorOpen, LayoutDashboard, LoaderCircle, Menu, RefreshCw, Search, ShieldCheck, Users, UsersRound, X } from 'lucide-react'
 import { api, type Announcement, type Overview, type Punishment, type Report, type ReportDetail, type Session, type Team, type TeamDetail, type User, type UserDetail, type RegistrationPolicy, type DeletionPreview } from './api'
 
-type Page = 'overview' | 'reports' | 'users' | 'teams' | 'announcements' | 'registration'
+type Page = 'overview' | 'reports' | 'users' | 'teams' | 'announcements' | 'registration' | 'releases'
 type Confirm = { title: string; body: string; tone?: 'danger'; action: () => Promise<unknown> }
 type Ask = (confirm: Confirm) => void
 const sessionKey = 'innocence.admin.session'
@@ -177,6 +178,7 @@ function RegistrationPage({ session, ask, notify }: { session: Session; ask: Ask
 }
 
 const nav: { id: Page; label: string; icon: typeof LayoutDashboard }[] = [
+  { id: 'releases', label: '版本发布', icon: BookOpenText },
   { id: 'overview', label: '工作概览', icon: LayoutDashboard },
   { id: 'reports', label: '举报审核', icon: ClipboardList },
   { id: 'users', label: '用户管理', icon: Users },
@@ -201,6 +203,7 @@ function Shell({ session, onLogout }: { session: Session; onLogout: () => void }
     finally { setConfirmBusy(false) }
   }
   const pageContent: Record<Page, ReactNode> = {
+    releases: <ReleasesPage session={session} />,
     overview: <OverviewPage session={session} navigate={navigate} />,
     reports: <ReportsPage session={session} ask={setConfirm} notify={notify} />,
     users: <UsersPage session={session} ask={setConfirm} notify={notify} />,

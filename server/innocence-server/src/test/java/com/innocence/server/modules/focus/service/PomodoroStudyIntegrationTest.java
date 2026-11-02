@@ -33,6 +33,21 @@ class PomodoroStudyIntegrationTest {
     PomodoroStudyRequest request(int credit, int rounds) {
         return new PomodoroStudyRequest(key, start, start.plusMinutes(2), 120, credit, rounds);
     }
+    @Test void manualBoundEnvelopeNeverAddsWallTimeOrDuplicatesPomodoroStudy() {
+        var input = new StartFocusSessionRequest(); input.setDurationMinutes(60);
+        input.setEndTime(LocalDateTime.now().plusHours(1)); input.setBindPomodoro(true); input.setManualPomodoro(true);
+        input.setPomodoroStudyMinutes(1); input.setPomodoroBreakMinutes(1);
+        var current = focus.startSession(owner, input);
+        assertTrue(current.isManualPomodoro()); assertTrue(current.isBindPomodoro());
+        db.update("UPDATE study_timer_record SET create_time=DATE_SUB(NOW(), INTERVAL 4 MINUTE) WHERE id=?",current.getSessionId());
+        focus.recordPomodoroStudy(owner, request(120, 1));
+        var finish = new com.innocence.server.modules.focus.dto.request.FinishFocusSessionRequest(); finish.setSessionId(current.getSessionId());
+        focus.finishSession(owner, finish);
+        focus.recordPomodoroStudy(owner, request(120, 1));
+        assertEquals(0, db.queryForObject("SELECT duration_seconds FROM study_timer_record WHERE id=?", Integer.class, current.getSessionId()));
+        assertEquals(2, stats.getOverview(owner, 7).getTotalStudyDurationMinutes());
+        assertEquals(1, stats.getOverview(owner, 7).getTotalPomodoroCompleted());
+    }
     @Test void retriesAndOlderSnapshotsNeverDoubleCountAndBreakCompletesOnlyTheRound() {
         focus.recordPomodoroStudy(owner, request(60, 0));
         focus.recordPomodoroStudy(owner, request(60, 0));

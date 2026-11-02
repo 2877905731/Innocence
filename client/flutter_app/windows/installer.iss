@@ -2,6 +2,10 @@
   #define MyAppVersion "1.2.5"
 #endif
 
+#ifndef MyAppBuild
+  #define MyAppBuild "0"
+#endif
+
 #ifndef MySourceDir
   #error MySourceDir must point to the Flutter Windows Release directory.
 #endif
@@ -41,11 +45,11 @@ ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0.17763
 CloseApplications=yes
 RestartApplications=no
-VersionInfoVersion={#MyAppVersion}
+VersionInfoVersion={#MyAppVersion}.{#MyAppBuild}
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoDescription=Innocence Windows Installer
 VersionInfoProductName={#MyAppName}
-VersionInfoProductVersion={#MyAppVersion}
+VersionInfoProductVersion={#MyAppVersion}.{#MyAppBuild}
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
