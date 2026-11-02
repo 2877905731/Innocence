@@ -1,5 +1,7 @@
 # Innocence Flutter Client
 
+2026-11-03（0152）：三端联网1.3.3+15已公开，整合自定义计时/手动番茄入账、年度助手修复/多对话和主题品牌字标。主发行见 [v1.3.3](https://github.com/2877905731/Innocence/releases/tag/v1.3.3)，公开未签名平板包见 [v1.3.3-harmonyos.1](https://github.com/2877905731/Innocence/releases/tag/v1.3.3-harmonyos.1)。个人签名/Profile不公开，后台在线更新分发模块未包含。
+
 这里是 `Innocence` 的 Flutter 主工程，也是当前移动端与 Windows 桌面端联动开发的核心目录。
 
 v1.3.0+12新增三端生产联网构建，`config/production.json`保存无凭据HTTPS地址。Windows执行 `windows/package_release.ps1`，Android执行 `android/package_release.ps1 -Edition Online`，鸿蒙执行 `tool/harmonyos.ps1 -Action build -BuildMode release -Edition Online -Unsigned`。Android/鸿蒙脚本默认仍为Offline，避免隐式改变历史构建方式。三类设备各独立会话，账号本机资料确认后才导入；模型密钥走Windows DPAPI/Android Keystore/鸿蒙HUKS，未配置模型不会自动获得服务额度。详见 `docs/releases/v1.3.0.md` 和鸿蒙独立说明。

@@ -9,7 +9,7 @@ decision: "DEC-0050 / 0090；DEC-0051 / 0092用户修正为BYOK聊天助手；DE
 user_selection: "采用b方案"
 selected_option: B
 implementation_status: "BYOK模型发现/协议验证与14项工具保留；已修复联网年度任务误走PUT及错误吞没，并增加按身份隔离的多对话新建/切换/删除/草稿和旧历史迁移。隔离年度HTTP/MySQL与宿主布局通过，真实供应商/完整同步/实体矩阵仍待；原日任务编辑和年度已有子任务编辑尚未接工具。"
-release_baseline: "0150本人鸿蒙1.3.3+15已覆盖并部署依赖后端；公开Android1.3.2及Windows/鸿蒙1.3.0仍不变，P01/G01保持开放"
+release_baseline: "0152三端1.3.3+15已公开；0150本人鸿蒙已覆盖且依赖后端已部署，真实模型/完整设备同步及P01/G01保持开放"
 comparison_document: docs/planning/Innocence-AI智能助手与自动化系统方案评审.md
 ---
 

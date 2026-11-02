@@ -8,33 +8,33 @@ baseline:
   runtime: "Flutter + Java 21 + Spring Boot 3.5.16 + MyBatis + MySQL 8 + Redis"
   current_phase: P01
   current_gate: G01
-  evidence: "0134：v1.3.0 Windows/Android及v1.3.0-harmonyos.1已公开，Release#429211948/429217039；七资产远端SHA/正文及匿名200长度通过，latest=v1.3.0；源码5fabdb2及双标签精确同步。生产IP HTTPS、三类独立会话/PBKDF2已生效，备份隔离恢复与续期演练通过、QA已清理。鸿蒙原生HUKS/TLS子集及个人平板签名Release安装启动/PC画面通过，个人材料仅F盘；公开HAP未签名。完整实体业务/旧资料恢复/性能、真实模型与长期容量/G01仍待，交付链接后按用户实际反馈推进。"
+  evidence: "0152：三端1.3.3+15已公开，Release#431690582/431693216，latest=v1.3.3，双注释标签固定0dadcfca2e5a48d0042e2b07bc268a832fe229bb；七资产远端摘要/正文/大小及匿名完整下载SHA均通过。267客户端/6条件跳过、离线4/联网2、三端构建与原APK签名/公开未签名HAP/125Dart通过。0150依赖后端和本人平板覆盖保留，原完整实体/同步/模型/TIMER及G01门禁继续开放。"
 admin_controls_track:
   checkpoint: "0136"
   status: deployed_isolated_http_browser_and_production_team_verified
-  evidence: "0136：后台注册开关/预览删除已上线，当前注册true；管理员保护、事务清理与审计生效。团队MySQL1052字段歧义两处已修复；93后端/网页构建、完整独立MySQL/Redis HTTP及无界面Chrome页面通过，生产HTTPS创建/加入/读取/队友统计通过且两QA owner/团队已清理。干净源码7d5452c，27文件包8f5b9ad4…、JAR1b0a83db…及线上HTML精确一致；私有备份pre-online-20261030164442，healthy/HTTPS UP/续期active。18080自动重连监视PID23956已启用；PS7/5.1和18090断开恢复通过。无真实用户自动删除/无SMTP发送/无客户端重建；用户刷新后台即可用，原G01完整门禁保持。"
+  evidence: "0136：后台注册开关/预览删除已上线，当时注册true（0147后关闭，0152只读仍为0）；管理员保护、事务清理与审计生效。团队MySQL1052字段歧义两处已修复；93后端/网页构建、完整独立MySQL/Redis HTTP及无界面Chrome页面通过，生产HTTPS创建/加入/读取/队友统计通过且两QA owner/团队已清理。干净源码7d5452c，27文件包8f5b9ad4…、JAR1b0a83db…及线上HTML精确一致；私有备份pre-online-20261030164442，healthy/HTTPS UP/续期active。18080自动重连监视PID23956已启用；PS7/5.1和18090断开恢复通过。无真实用户自动删除/无SMTP发送/无客户端重建；用户刷新后台即可用，原G01完整门禁保持。"
   specification: docs/development/后台注册控制与用户删除.md
 android_track:
   status: in_progress
   plan_path: docs/planning/Innocence-Android版本实施规划.md
-  current_step: "0142：Android1.3.2+14通知主体剩余时间已公开，原证书联网APK/两资产SHA与匿名200/源码标签通过；233回归6跳过/离线4/联网2和分析通过。0140原生后台/暂停证据保留，系统折叠组、实体/OEM及G01仍待。"
+  current_step: "0152：Android1.3.3+15原证书联网APK已公开；自定义计时/手动番茄入账、助手修复/多对话及已开放主题新字标，267回归6跳过/离线4/联网2、分析/签名/三ABI地址与完整下载SHA通过。实体/OEM及原G01仍待。"
   ui_system: "Material Design 3 交互基础 + 简约白色／液态玻璃两套视觉（2026-09-29 用户新决定覆盖移动适配后置）"
   note: "Android 首发已确认左上角三点侧边栏（首页／计划／专注／陪伴／收件箱）及未登录本机离线入口；两主题使用同一会话和业务模型。主题接入不代表全部详情页或实体手机验收，真实导入回放仍须单独验证。规划不改变 P01/G01 状态"
 harmonyos_tablet_track:
-  status: v1_3_0_published_timer_development_service_under_review
+  status: v133_public_and_self_use_timer_evidence_pending
   plan_path: docs/planning/Innocence-鸿蒙平板版本实施规划.md
-  checkpoint: "0145"
+  checkpoint: "0152"
   liveview_guide: docs/development/鸿蒙专注提醒权益接入.md
   user_scope: "Air系列平板/HarmonyOS 7，全屏复用PC页面；不做Windows窗口尺寸调整。0098先规划、0099恢复核对，用户随后明确开始制作；0100首批实现"
   order: [H0_toolchain_and_minimal_hap, H1_fullscreen_pc_shell, H2_offline_storage, H3_page_and_touch_parity, H4_online_contract_and_assistant, H5_device_and_release]
-  pending_decisions: "0132已确认三端联网及鸿蒙tablet独立名额；当前实现/验证v1.3.0，实际设备矩阵及H5/G01完整验收保持待。"
-  evidence_boundary: "0134公开ARM64联网AOT未签名HAP；本人签名Release仅F盘、安装启动及PC画面通过；独立原生HUKS/重启/TLS、宿主真实HTTPS/三槽位通过。完整实体业务/恢复/性能及权益/H5/G01仍待。"
+  pending_decisions: "0132已确认三端联网及鸿蒙tablet独立名额；当前公开1.3.3+15；本人平板已覆盖，完整设备矩阵及H5/G01仍待。"
+  evidence_boundary: "0152公开ARM64联网AOT未签名HAP；0150本人原签名1.3.3仅F盘、覆盖/启动/原资料可见恢复及三主题PC画面通过；独立原生HUKS/重启/TLS、宿主真实HTTPS/三槽位通过。完整实体业务/恢复/性能及权益/H5/G01仍待。"
 assistant_track:
   decision: "DEC-0050/0090采用B；DEC-0051/0092修正为自填API Key的全局聊天助手；DEC-0052/0093地址与密钥发现模型"
-  status: harmony_self_use_v133_installed_backend_live_other_clients_pending
+  status: v133_three_platform_public_backend_live_runtime_matrix_pending
   plan_path: docs/planning/Innocence-AI智能助手B方案实施与契约.md
   order: [byok_multiturn_chat, app_tool_registry, live_provider_and_device_verification, remaining_plan_and_template_tools]
-  next_step: "0150本人鸿蒙1.3.3已覆盖并上线依赖后端；补真实供应商生成/工具/费用及实体完整业务/同步，其他公开客户端按发行指令更新；不在聊天索取Key或重跑真实任务"
+  next_step: "0150本人鸿蒙1.3.3已覆盖并上线依赖后端；补真实供应商生成/工具/费用及实体完整业务/同步，0152三端公开包已更新，按实际使用反馈继续；不在聊天索取Key或重跑真实任务"
   evidence_boundary: "267客户端/6条件跳过、120后端同源记录、三端构建及本人平板三个字标/旧对话可见恢复；生产合成账号年度最小创建/重复、番茄幂等/隔离及负向通过并清理，备份恢复/健康/摘要通过。未公开个人包、未发送真实模型请求，完整矩阵及P01/G01保持开放"
 home_visual_refinement:
   decision: "DEC-0054/0095覆盖DEC-0053视觉：用户要求包括橙色阶梯图形在内按最早minimalism.html重做简约白，当前方案归为废案；面板与背景明确区分"

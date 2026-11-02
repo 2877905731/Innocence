@@ -1071,3 +1071,10 @@ checkpoints:
     status: complete
     path: progress/0151__20261103__P01__DONE__v133-three-platform-release-ready.md
     title: "三端1.3.3联网发行就绪，原签名APK与公开未签名HAP七资产核对"
+  - sequence: "0152"
+    created_at: "2026-11-03T00:34:54+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0152__20261103__P01__DONE__v133-three-platform-github-published.md
+    title: "三端1.3.3正式公开，七资产匿名完整下载SHA与源码双标签核对通过"
