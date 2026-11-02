@@ -1085,3 +1085,17 @@ checkpoints:
     status: complete
     path: progress/0153__20261103__P01__DONE__online-updates-and-bound-pomodoro-local.md
     title: "在线更新与手动绑定番茄本机实现，三端1.3.4及275客户端/127后端验证"
+  - sequence: "0154"
+    created_at: "2026-11-03T01:38:02+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0154__20261103__P01__DONE__online-update-backend-and-catalog-deployed.md
+    title: "在线更新后台与三平台版本目录上线，真实鉴权完整下载和单一学习账本验证"
+  - sequence: "0155"
+    created_at: "2026-11-03T01:38:02+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0155__20261103__P01__DONE__v134-three-platform-release-published.md
+    title: "三端1.3.4已公开，七资产匿名完整下载和双标签核对"

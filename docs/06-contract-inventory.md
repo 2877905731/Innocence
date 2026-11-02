@@ -34,12 +34,12 @@ endpoints:
     method: "GET/POST"
     path: "/api/admin/v1/releases；/{id}/publish；/{id}/withdraw"
     specification: "docs/development/在线更新与绑定番茄.md；multipart metadata+file，管理员授权，原子持久化草稿与审计"
-    evidence_status: implementation_and_verification_in_progress
+    evidence_status: live_https_admin_publish_withdraw_auth_full_download_range_verified_0154
   - id: U-ONLINE-UPDATE
     method: GET
     path: "/api/app/v1/updates/latest；/{id}；/{id}/download"
     specification: "docs/development/在线更新与绑定番茄.md；认证账号与设备平台约束，整数build比较，完整性校验，内部下载支持Range"
-    evidence_status: implementation_and_verification_in_progress
+    evidence_status: live_https_admin_publish_withdraw_auth_full_download_range_verified_0154
   - id: U-AUTH-LOGIN-CODE
     method: POST
     path: "/api/app/v1/auth/email/send-login-code"
