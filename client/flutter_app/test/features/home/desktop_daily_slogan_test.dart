@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/core/widgets/theme_brand_wordmark.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
@@ -109,7 +110,11 @@ void main() {
               findsOneWidget);
           expect(find.text(slogan.subtitle(isChinese: language.isChinese)),
               findsOneWidget);
-          expect(find.text('INNOCENCE'), findsOneWidget);
+          if (theme == AppVisualTheme.minimalism) {
+            expect(find.text('INNOCENCE'), findsOneWidget);
+          } else {
+            expect(find.byType(ThemeBrandWordmark), findsOneWidget);
+          }
           expect(find.textContaining('每日标语'), findsNothing);
           expect(find.textContaining('DAILY INSPIRATION'), findsNothing);
           expect(find.text('Synthetic focus'), findsWidgets);

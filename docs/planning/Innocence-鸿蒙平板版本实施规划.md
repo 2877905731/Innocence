@@ -4,11 +4,11 @@ document_type: platform_implementation_plan
 project_name: Innocence
 platform: HarmonyOS_tablet
 created_at: "2026-10-05"
-updated_at: "2026-11-01"
-status: v130_published_timer_development_service_under_review
+updated_at: "2026-11-02"
+status: v133_self_use_installed_backend_updated_public_v130_timer_evidence_pending
 authority: "用户要求鸿蒙平板全屏复用PC页面，已明确开始制作及联网"
 target_device: "LRT-W20 / HarmonyOS7 / API26 / aarch64，实际已核对；不推测市场年款"
-related_checkpoint: "0145"
+related_checkpoint: "0150"
 related_gate: "P01/G01及HarmonyOS H0-H5；未封闭完整门禁"
 history_archive: docs/archive/Innocence-鸿蒙平板版本实施规划-20261101.md
 ---
@@ -18,6 +18,8 @@ history_archive: docs/archive/Innocence-鸿蒙平板版本实施规划-20261101.
 本页保留现行范围、阶段和待验。逐次工具安装/构建/模拟器/发布过程已[原样归档](../archive/Innocence-鸿蒙平板版本实施规划-20261101.md)，完整证据按[检查点索引](../../progress/INDEX.md)定位。
 
 ## 当前交付与下一步
+
+0150：用户连接原平板并授权直接更新，1.3.3+15个人原签名ARM64联网Release已覆盖安装启动；签名/应用标识/UID/首次安装时间一致，已有登录资料与旧助手对话恢复可见。三个主题的原创Innocence字标有实际2800×1840画面；每日文案退为次要层级。0148学习入账及0149请求追踪后端完成备份/隔离恢复后部署，线上合成账号最小年度创建、幂等入账和认证/权限/跨租户负向通过并清理。个人包不公开，完整升级保资料、长时计时/后台/权益、真实模型及完整H5仍未因此关闭，范围见[1.3.3个人更新](../releases/v1.3.3-harmonyos-self-use.md)。
 
 当前公开包为 **1.3.0+12 ARM64 Release/AOT联网HAP**（0134），公开包未签名；本人原证书/有效单设备Profile的私有Release在LRT-W20已安装启动、PC画面核对（0133），不公开个人包。横竖屏自动重排保留，竖屏有用户确认。共享源码与插件/原生HUKS/重启解密/TLS、真实HTTPS/独立tablet槽位已有子集证据；不能代替完整实体业务、恢复和性能。
 

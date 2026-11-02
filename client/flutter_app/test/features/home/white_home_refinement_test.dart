@@ -180,7 +180,9 @@ void main() {
       expect(find.text('每日标语'), findsNothing);
       expect(find.text('Daily inspiration'), findsNothing);
       await capture(tester, root, 'android-${theme.name}-top');
-      final slogan = find.byKey(const ValueKey('android-daily-slogan'));
+      final slogan = find.byKey(ValueKey(theme == AppVisualTheme.minimalism
+          ? 'android-daily-slogan'
+          : 'theme-cover-glass'));
       await tester.scrollUntilVisible(slogan, 180,
           scrollable: find.byType(Scrollable).first);
       await tester.pump();

@@ -562,13 +562,12 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
         ThemeCoverHero(
           theme: _visualTheme,
           isChinese: _zh,
-          eyebrow: _text('TODAY / 今日', 'TODAY'),
-          title: _text('你好，${widget.profile.displayName}',
+          eyebrow: _text('你好，${widget.profile.displayName}',
               'Hello, ${widget.profile.displayName}'),
+          title: slogan.title(isChinese: _zh),
           description: widget.isOfflineMode
-              ? _text('本机资料 · 数据尚未绑定账号',
-                  'On-device profile · data is not linked to an account')
-              : _text('今天从一个清晰的步骤开始。', 'Start today with one clear next step.'),
+              ? '${slogan.subtitle(isChinese: _zh)}\n${_text('本机资料 · 数据尚未绑定账号', 'On-device profile · data is not linked to an account')}'
+              : slogan.subtitle(isChinese: _zh),
           indexLabel:
               '${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().day.toString().padLeft(2, '0')}',
         ),
@@ -581,24 +580,25 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
                 label:
                     Text(_text('让助手规划一天', 'Plan a day with the assistant')))),
       const SizedBox(height: 20),
-      _themedCard(
-        key: const ValueKey('android-daily-slogan'),
-        frosted: true,
-        padding: const EdgeInsets.all(20),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(slogan.title(isChinese: _zh),
-                style: _visualTheme == AppVisualTheme.wabiSabi
-                    ? WabiSabiTypography.slogan(
-                        Theme.of(context).textTheme.headlineSmall!)
-                    : Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 8),
-            Text(slogan.subtitle(isChinese: _zh),
-                style: Theme.of(context).textTheme.bodyMedium),
-          ],
+      if (_visualTheme == AppVisualTheme.minimalism)
+        _themedCard(
+          key: const ValueKey('android-daily-slogan'),
+          frosted: true,
+          padding: const EdgeInsets.all(20),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(slogan.title(isChinese: _zh),
+                  style: _visualTheme == AppVisualTheme.wabiSabi
+                      ? WabiSabiTypography.slogan(
+                          Theme.of(context).textTheme.headlineSmall!)
+                      : Theme.of(context).textTheme.headlineSmall),
+              const SizedBox(height: 8),
+              Text(slogan.subtitle(isChinese: _zh),
+                  style: Theme.of(context).textTheme.bodyMedium),
+            ],
+          ),
         ),
-      ),
       _sectionCard(
         title: _text('今日计划', 'Today’s plan'),
         body: _text('已完成 ${plan.completedCount}/${plan.totalCount} 项',

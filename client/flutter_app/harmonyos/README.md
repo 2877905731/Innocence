@@ -1,5 +1,7 @@
 # Innocence 鸿蒙平板开发工程
 
+2026-11-02（0150）：本人 LRT-W20 已沿原发布证书从1.3.0+12覆盖更新至 **1.3.3+15 ARM64联网Release**，官方HAP/Profile验签、签名/应用标识/UID/首次安装时间一致，未卸载或清资料。三主题原创Innocence字标有2800×1840真机画面，登录资料及原对话/模型配置恢复可见。番茄学习入账和安全请求追踪后端已部署，独立合成账号线上幂等/隔离与备份恢复通过；个人HAP/Profile仍仅F盘。公开下载仍为1.3.0，完整实体业务/真实模型/TIMER权益门禁保持。详见[本次更新范围](../../../docs/releases/v1.3.3-harmonyos-self-use.md)。
+
 2026-10-30（0132）：用户确认Windows、Android、鸿蒙都联网，同账号三端同时在线、平板独立名额。v1.3.0+12通过 `-Edition Online` 显式启用生产HTTPS和原生INTERNET权限；离线构建继续移除权限。`harmonyos`映射`tablet`，不占PC名额。HUKS AES-256-GCM加密仓储及独立模拟器加密/重启解密/篡改拒绝/可信HTTPS子项通过，个人Release已在连接平板安装；公开包仍未签名。以下首轮离线说明为历史基线，完整实体业务矩阵仍待。
 
 2026-10-16：[鸿蒙本机版 v1.2.5-harmonyos.1](https://github.com/2877905731/Innocence/releases/tag/v1.2.5-harmonyos.1)，应用版本 1.2.5+10，新增独立番茄计时。公开 ARM64 Release/AOT 未签名、无 INTERNET，需接收者自行签名。后台有限预排 8 阶段，实况窗/代理权益与真机门禁保持，见[发行范围](../../../docs/releases/v1.2.5-harmonyos.1.md)。

@@ -125,7 +125,11 @@ void main() {
     final store = OfflineStore(
         databaseFactory: databaseFactoryFfi,
         databasePathProvider: () async => '${folder.path}/qa.db');
-    var now = DateTime.now().millisecondsSinceEpoch;
+    final today = DateTime.now();
+    // Keep this same-day persistence case independent of the wall-clock hour;
+    // the explicit midnight cases above verify date splitting separately.
+    var now =
+        DateTime(today.year, today.month, today.day, 12).millisecondsSinceEpoch;
     final c = PomodoroController(
         store: store,
         owner: () => 'local:qa',

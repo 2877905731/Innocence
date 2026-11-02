@@ -114,7 +114,9 @@ void main() {
           }),
         ));
         await tester.pump(const Duration(milliseconds: 350));
-        final card = find.byKey(const ValueKey('android-daily-slogan'));
+        final card = find.byKey(ValueKey(theme == AppVisualTheme.minimalism
+            ? 'android-daily-slogan'
+            : 'theme-cover-glass'));
         final scroll = find.byType(Scrollable).first;
         tester.state<ScrollableState>(scroll).position.jumpTo(0);
         await tester.pump();

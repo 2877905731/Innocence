@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/core/widgets/theme_cover_hero.dart';
+import 'package:innocence_flutter/core/widgets/theme_brand_wordmark.dart';
 import 'package:innocence_flutter/features/focus/presentation/widgets/start_focus_session_dialog.dart';
 import 'android_home_shell_test.dart' show androidHomeFixture;
 import 'desktop_daily_slogan_test.dart' show desktopSloganFixture;
@@ -32,41 +33,49 @@ void main() {
       in AppVisualTheme.values.where((t) => t != AppVisualTheme.minimalism)) {
     for (final width in [320.0, 1360.0]) {
       testWidgets(
-          'themed cover ${theme.name} at $width retains identity in both languages',
+          'themed brand ${theme.name} at $width leads the cover in both languages',
           (tester) async {
-        tester.view.physicalSize = Size(width, width == 320 ? 1200 : 1000);
-        tester.view.devicePixelRatio = 1;
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
-        for (final language in AppLanguage.values) {
-          final root = GlobalKey();
-          final fixture = width == 320
-              ? androidHomeFixture(
-                  visualTheme: theme,
-                  language: language,
-                  fontFamily: 'CoverQa',
-                  textScale: 1.5)
-              : desktopSloganFixture(theme, language, fontFamily: 'CoverQa');
-          await tester.pumpWidget(RepaintBoundary(key: root, child: fixture));
-          await tester.pump(const Duration(milliseconds: 400));
-          expect(find.byType(ThemeCoverHero), findsOneWidget);
-          expect(find.byKey(ValueKey('theme-cover-title-${theme.name}')),
-              findsOneWidget);
-          expect(tester.takeException(), isNull);
-          await tester.runAsync(() async {
-            final image = await (root.currentContext!.findRenderObject()
-                    as RenderRepaintBoundary)
-                .toImage();
-            final data = await image.toByteData(format: ui.ImageByteFormat.png);
-            final folder = Directory('build/qa/theme-covers');
-            await folder.create(recursive: true);
-            await File(
-                    '${folder.path}/${theme.name}-${width.toInt()}-${language.storageValue}.png')
-                .writeAsBytes(data!.buffer.asUint8List());
-            image.dispose();
-          });
+        final semantics = tester.ensureSemantics();
+        try {
+          tester.view.physicalSize = Size(width, width == 320 ? 1200 : 1000);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          for (final language in AppLanguage.values) {
+            final root = GlobalKey();
+            final fixture = width == 320
+                ? androidHomeFixture(
+                    visualTheme: theme,
+                    language: language,
+                    fontFamily: 'CoverQa',
+                    textScale: 1.5)
+                : desktopSloganFixture(theme, language, fontFamily: 'CoverQa');
+            await tester.pumpWidget(RepaintBoundary(key: root, child: fixture));
+            await tester.pump(const Duration(milliseconds: 400));
+            expect(find.byType(ThemeCoverHero), findsOneWidget);
+            expect(find.byType(ThemeBrandWordmark), findsOneWidget);
+            expect(find.bySemanticsLabel('Innocence'), findsOneWidget);
+            expect(find.byKey(ValueKey('theme-cover-title-${theme.name}')),
+                findsOneWidget);
+            expect(tester.takeException(), isNull);
+            await tester.runAsync(() async {
+              final image = await (root.currentContext!.findRenderObject()
+                      as RenderRepaintBoundary)
+                  .toImage();
+              final data =
+                  await image.toByteData(format: ui.ImageByteFormat.png);
+              final folder = Directory('build/qa/theme-covers');
+              await folder.create(recursive: true);
+              await File(
+                      '${folder.path}/${theme.name}-${width.toInt()}-${language.storageValue}.png')
+                  .writeAsBytes(data!.buffer.asUint8List());
+              image.dispose();
+            });
+          }
+          await tester.pumpWidget(const SizedBox.shrink());
+        } finally {
+          semantics.dispose();
         }
-        await tester.pumpWidget(const SizedBox.shrink());
       });
     }
   }
