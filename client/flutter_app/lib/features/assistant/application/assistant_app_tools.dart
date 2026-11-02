@@ -90,15 +90,25 @@ class AssistantAppTools implements ChatToolHost {
         }),
         chatTool('delete_memo', '删除指定本人备忘录，需要确认。', {'memoId': chatInteger}),
         chatTool(
-            'save_annual_task', '新建或修改独立年度任务。id为空表示新建；不改变进度；subtasks只用于新任务。', {
-          'id': chatString,
-          'year': chatInteger,
-          'title': chatString,
-          'startMonth': chatInteger,
-          'endMonth': chatInteger,
-          'note': chatString,
-          'subtasks': {'type': 'array', 'maxItems': 40, 'items': chatString}
-        }),
+            'save_annual_task',
+            '新建或修改独立年度任务。id省略或为空表示新建；修改使用读取返回的id；保留既有进度；修改时subtasks传空数组保留原子任务。',
+            {
+              'id': chatString,
+              'year': chatInteger,
+              'title': chatString,
+              'startMonth': chatInteger,
+              'endMonth': chatInteger,
+              'note': chatString,
+              'subtasks': {'type': 'array', 'maxItems': 40, 'items': chatString}
+            },
+            required: [
+              'year',
+              'title',
+              'startMonth',
+              'endMonth',
+              'note',
+              'subtasks'
+            ]),
         chatTool('delete_annual_task', '删除指定年度任务，须先读取并确认。',
             {'year': chatInteger, 'id': chatString}),
         chatTool('control_focus', '开始/暂停或继续/结束本人专注。开始使用minutes和taskName。', {
@@ -448,13 +458,23 @@ class AssistantAppTools implements ChatToolHost {
         });
       case 'save_annual_task':
       case 'delete_annual_task':
-        final year = a['year'] as int, id = a['id'] as String;
+        final traceId = assistantId();
+        ChatToolFailure failure(String fallback, {String? clientEntityId}) {
+          final error = session.lastOperationError;
+          return ChatToolFailure(error?.code ?? 'ANNUAL_OPERATION_FAILED',
+              error?.message ?? session.bannerMessage ?? fallback,
+              requestId: error?.requestId ?? traceId,
+              clientEntityId: clientEntityId,
+              statusCode: error?.statusCode,
+              source: error?.requestId != null ? 'http' : 'client');
+        }
+        final year = a['year'] as int, id = (a['id'] as String? ?? '').trim();
         if (year < 1 || year > 9999) throw const FormatException('年份无效。');
         await session.loadAnnualOverview(year);
         check(own);
         if (session.bannerMessage != null ||
             session.annualPlanOverview.year != year) {
-          throw const FormatException('年度资料读取失败。');
+          throw failure('年度资料读取失败。');
         }
         final old = session.annualPlanOverview.segments
             .where((s) => s.id == id)
@@ -480,16 +500,16 @@ class AssistantAppTools implements ChatToolHost {
           throw const FormatException('现有年度任务的子任务保留；新增子任务请在年度页编辑。');
         }
         final draft = AnnualPlanSegment(
-            id: old?.id ?? uid,
+            id: old?.id ?? (session.isOffline ? uid : ''),
             clientEntityId: uid,
             year: year,
-            title: title,
+            title: title.trim(),
             startMonth: start,
             endMonth: end,
             colorKey: old?.colorKey ?? 'accent',
             sortOrder:
                 old?.sortOrder ?? session.annualPlanOverview.segments.length,
-            note: a['note'] as String? ?? old!.note,
+            note: (a['note'] as String? ?? old?.note ?? '').trim(),
             progressPercent: old?.progressPercent ?? 0,
             revision: old?.revision ?? 0,
             updateTime: old?.updateTime ?? '',
@@ -510,7 +530,7 @@ class AssistantAppTools implements ChatToolHost {
           check(own);
           if (session.bannerMessage != null ||
               session.annualPlanOverview.year != year) {
-            throw const FormatException('年度资料读取失败，未保存。');
+            throw failure('年度资料读取失败，未保存。', clientEntityId: uid);
           }
           final current = session.annualPlanOverview.segments
               .where((s) => s.id == id)
@@ -520,13 +540,38 @@ class AssistantAppTools implements ChatToolHost {
             throw const FormatException('年度任务已变化，请重试。');
           }
           if (deleting) {
-            await session.deleteAnnualSegment(old!);
+            await session.deleteAnnualSegment(old!, requestId: traceId);
+            if (session.annualPlanOverview.segments.any((s) => s.id == id)) {
+              throw failure('删除年度任务失败。', clientEntityId: uid);
+            }
             return {
-              'ok': !session.annualPlanOverview.segments.any((s) => s.id == id)
+              'ok': true,
+              'id': id,
+              'clientEntityId': uid,
+              'requestId': traceId
             };
           }
-          final ok = await session.saveAnnualSegment(draft);
-          return {'ok': ok, 'clientEntityId': uid};
+          final ok = await session.saveAnnualSegment(draft, requestId: traceId);
+          if (!ok) throw failure('保存年度任务失败。', clientEntityId: uid);
+          final saved = session.annualPlanOverview.segments
+              .where((s) => s.clientEntityId == uid)
+              .firstOrNull;
+          if (saved == null ||
+              saved.title != draft.title ||
+              saved.startMonth != start ||
+              saved.endMonth != end ||
+              saved.note != draft.note ||
+              saved.progressPercent != draft.progressPercent) {
+            throw ChatToolFailure(
+                'ANNUAL_RESULT_UNCONFIRMED', '保存返回的年度任务与请求不一致，请先读取核对，不要自动重试。',
+                requestId: traceId, clientEntityId: uid);
+          }
+          return {
+            'ok': true,
+            'id': saved.id,
+            'clientEntityId': uid,
+            'requestId': traceId
+          };
         });
       case 'control_focus':
         final old = session.focusSession;

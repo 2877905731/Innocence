@@ -14,6 +14,30 @@ abstract class ChatToolHost {
   Future<PreparedChatTool> prepare(ChatToolCall call);
 }
 
+class ChatToolFailure extends FormatException {
+  const ChatToolFailure(this.errorCode, String message,
+      {required this.requestId,
+      this.clientEntityId,
+      this.statusCode,
+      String source = 'client'})
+      : failureSource = source,
+        super(message);
+  final Object errorCode;
+  final String requestId, failureSource;
+  final String? clientEntityId;
+  final int? statusCode;
+  Map<String, dynamic> toJson() => {
+        'ok': false,
+        'reason': 'OPERATION_FAILED',
+        'errorCode': errorCode,
+        'message': message,
+        'requestId': requestId,
+        'source': failureSource,
+        if (clientEntityId != null) 'clientEntityId': clientEntityId,
+        if (statusCode != null) 'statusCode': statusCode
+      };
+}
+
 Map<String, dynamic> chatTool(
         String name, String description, Map<String, dynamic> properties,
         {List<String>? required}) =>

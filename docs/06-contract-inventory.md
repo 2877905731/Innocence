@@ -22,6 +22,7 @@ common_request_context:
   base_url: "本地http://localhost:8080；生产https://85.189.40.87/api/app/v1/（v1.3.0联网构建显式注入，管理端仅SSH隧道）"
   authentication_method: "Authorization: Bearer {accessToken}"
   user_context_header: "X-User-Id（仅服务端从 token 解析，不作为请求入参）"
+  request_trace: "0149：业务ApiClient产生UUID X-Request-ID；后端校验/重建并以响应头和公共requestId回传。年度写入可带X-Client-Entity-ID，日志仅接受合法UUID作关联；均不授予身份/权限。非法路径参数和不可读JSON返回400/1001。候选未部署。"
 external_model_discovery:
   specification: "docs/planning/Innocence-AI智能助手B方案实施与契约.md 第13节；DEC-0052/0093"
   request: "客户端直连用户指定服务GET {apiBase}/models，Bearer模型Key；同origin有限/v1回退，不新增Innocence业务接口"
@@ -302,6 +303,8 @@ admin_web_contract:
 `focus/session/start` 新增可选 `durationMinutes:1..1440`，存在时从服务器接收时刻起算，旧 `endTime` 请求保持兼容。新增认证 `POST focus/session/pomodoro-study`，只取登录身份，按用户+设备随机计时ID/轮次/日期幂等写 finished 学习记录；`studySeconds`、`creditedSeconds` 与整轮完成数严格校验，重复/旧快照不重复累计。同步导入新增 `pomodoro_study/upsert`，仍需原目标账号预览确认。详细字段与迁移见 [计时阶段与学习入账](development/计时阶段与学习入账.md)。本轮为本机构建验证，生产部署状态以 RESUME 为准。
 
 # 契约清单说明
+
+0149助手年度新建/编辑继续使用原 `POST /api/app/v1/plans/annual-segments` 与 `PUT /api/app/v1/plans/annual-segments/{segmentId}`，不新增年度写权限。新建在线id留空，clientEntityId按账号幂等；编辑保持进度和现有子任务。工具失败保留errorCode/message/requestId/source及可用HTTP状态，多对话集合为本机owner分区的ChatWorkspace v2，不新增聊天云接口。字段/迁移与120项后端、267项客户端等验收边界见 [助手年度任务修复与多对话](development/助手年度任务修复与多对话.md) 和 RESUME。
 
 本文件为接口清单草案（`docs/planning/Innocence-接口清单草案.md`）的治理层索引：
 

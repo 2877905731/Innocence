@@ -157,20 +157,27 @@ class StudyPlanApi {
   }
 
   Future<AnnualPlanOverview> saveAnnualSegment(
-    AppSession session,
-    AnnualPlanSegment segment,
-  ) async {
+      AppSession session, AnnualPlanSegment segment,
+      {String? requestId}) async {
     final creating = segment.id.trim().isEmpty;
     final data = creating
         ? await _apiClient.post(
             'plans/annual-segments',
             body: segment.toSaveJson(),
-            headers: session.authHeaders,
+            headers: {
+              ...session.authHeaders,
+              if (requestId != null) 'X-Request-ID': requestId,
+              'X-Client-Entity-ID': segment.clientEntityId
+            },
           )
         : await _apiClient.put(
             'plans/annual-segments/${segment.id}',
             body: segment.toSaveJson(),
-            headers: session.authHeaders,
+            headers: {
+              ...session.authHeaders,
+              if (requestId != null) 'X-Request-ID': requestId,
+              'X-Client-Entity-ID': segment.clientEntityId
+            },
           );
     if (data is Map<String, dynamic> && data.containsKey('year')) {
       return AnnualPlanOverview.fromJson(data);
@@ -179,12 +186,15 @@ class StudyPlanApi {
   }
 
   Future<AnnualPlanOverview> deleteAnnualSegment(
-    AppSession session,
-    AnnualPlanSegment segment,
-  ) async {
+      AppSession session, AnnualPlanSegment segment,
+      {String? requestId}) async {
     await _apiClient.delete(
       'plans/annual-segments/${segment.id}',
-      headers: session.authHeaders,
+      headers: {
+        ...session.authHeaders,
+        if (requestId != null) 'X-Request-ID': requestId,
+        'X-Client-Entity-ID': segment.clientEntityId
+      },
     );
     return getAnnualPlanOverview(session, year: segment.year);
   }

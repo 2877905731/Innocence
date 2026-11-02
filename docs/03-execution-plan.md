@@ -31,11 +31,11 @@ harmonyos_tablet_track:
   evidence_boundary: "0134公开ARM64联网AOT未签名HAP；本人签名Release仅F盘、安装启动及PC画面通过；独立原生HUKS/重启/TLS、宿主真实HTTPS/三槽位通过。完整实体业务/恢复/性能及权益/H5/G01仍待。"
 assistant_track:
   decision: "DEC-0050/0090采用B；DEC-0051/0092修正为自填API Key的全局聊天助手；DEC-0052/0093地址与密钥发现模型"
-  status: byok_chat_discovery_implemented_fixture_verified_live_provider_and_device_pending
+  status: annual_http_fix_and_multiple_conversations_verified_live_provider_device_pending
   plan_path: docs/planning/Innocence-AI智能助手B方案实施与契约.md
   order: [byok_multiturn_chat, app_tool_registry, live_provider_and_device_verification, remaining_plan_and_template_tools]
-  next_step: "聊天主入口与14项工具、地址与密钥获取模型/自动协议验证已实现；用户在软件填真实服务地址和Key、选择返回模型并保存连接，核对实际发现/生成与函数调用，再补完整登录HTTP/同步/未接工具与设备矩阵"
-  evidence_boundary: "七项端点、真实SQL/SQLite、双协议loopback fixture、原生Windows DPAPI与双端开发构建有证据；真实模型/完整登录HTTP/Android Keystore设备及Windows运行画面未验；C持续规则不包含，正式离线发行与原G01门禁保持"
+  next_step: "0149年度新建路由与错误诊断、多对话管理已本机实现；后续正式发行时整合0148候选并保原签名，补真实供应商生成/函数调用、实体多对话/年度操作及完整同步；不在聊天索取Key或重跑真实任务"
+  evidence_boundary: "0149：267客户端/6条件跳过、120后端，真实客户端TCP与MySQL事务、Android/鸿蒙配置各21专项和三端构建通过；仅隔离合成资料，未安装主应用/部署/推送/发布。真实供应商、实体与完整同步仍待，C持续规则不包含，P01/G01保持开放"
 home_visual_refinement:
   decision: "DEC-0054/0095覆盖DEC-0053视觉：用户要求包括橙色阶梯图形在内按最早minimalism.html重做简约白，当前方案归为废案；面板与背景明确区分"
   implementation: "MinimalWhiteHero与MinimalWhiteBackdrop重建黑白灰排版和中性画布，WhiteSurfacePanel实色白/1px边界/直角/无阴影；窗口/侧栏/计划页签/共享表面同步。FocusTimerDial继续读取现有计时源；业务/四主题存储/Focus Orb行为及正式发行保持"

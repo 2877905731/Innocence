@@ -46,6 +46,7 @@ void main() {
             provider: FixtureChatProvider(),
             offlineOnly: false);
         await c.configure(fixtureConnection);
+        await c.initialize();
         c.entries.addAll([
           const ChatEntry('user', '看看今天的计划，帮我安排明天'),
           const ChatEntry('assistant', '我会先读取现有安排，再根据可用时间提出建议。保存前会请你确认具体任务。')

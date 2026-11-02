@@ -16,6 +16,7 @@ import 'package:innocence_flutter/features/assistant/application/chat_tools.dart
 import 'package:innocence_flutter/features/assistant/data/chat_provider.dart';
 import 'package:innocence_flutter/features/assistant/data/chat_discovery.dart';
 import 'package:innocence_flutter/features/assistant/data/chat_repository.dart';
+import 'package:innocence_flutter/features/assistant/domain/chat_conversation.dart';
 import 'package:innocence_flutter/features/plans/domain/models/today_plan.dart';
 
 const fixtureConnection = ChatConnection(
@@ -26,6 +27,26 @@ const fixtureConnection = ChatConnection(
 class MemoryChatRepository implements ChatRepository {
   final settings = <String, ChatConnection>{};
   final history = <String, List<Map<String, dynamic>>>{};
+  final workspaces = <String, ChatWorkspace>{};
+  @override
+  Future<ChatWorkspace> loadWorkspace(String owner) async =>
+      workspaces[owner] ?? ChatWorkspace.fromLegacy(history[owner] ?? []);
+  @override
+  Future<void> saveWorkspace(String owner, ChatWorkspace workspace) async {
+    workspaces[owner] = workspace;
+    history[owner] = workspace.conversations
+        .firstWhere((c) => c.id == workspace.activeId)
+        .messages
+        .map((m) => m.toJson())
+        .toList();
+  }
+
+  @override
+  Future<void> deleteWorkspace(String owner) async {
+    workspaces.remove(owner);
+    history[owner] = [];
+  }
+
   @override
   Future<ChatConnection?> loadConnection(String owner) async => settings[owner];
   @override
@@ -87,6 +108,19 @@ class FixtureToolHost extends ChatToolHost {
       });
 }
 
+class DiagnosticToolHost extends FixtureToolHost {
+  @override
+  Future<PreparedChatTool> prepare(ChatToolCall call) async => PreparedChatTool(
+      summary: 'annual fixture',
+      confirm: true,
+      execute: () async => throw const ChatToolFailure(
+          4004, 'fixture task missing',
+          requestId: '11111111-1111-4111-8111-111111111111',
+          clientEntityId: '22222222-2222-4222-8222-222222222222',
+          statusCode: 404,
+          source: 'http'));
+}
+
 ChatReply textReply(String text) =>
     ChatReply(text, [], {'role': 'assistant', 'content': text});
 ChatReply toolReply([String id = 'call-fixture']) => ChatReply('', [
@@ -142,6 +176,43 @@ void main() {
     expect(repo.history['owner-a']!.length, 4);
     c.dispose();
     identity.dispose();
+  });
+  test('typed HTTP tool diagnostics reach the model and visible history intact',
+      () async {
+    final identity = ValueNotifier('a'), host = DiagnosticToolHost();
+    final provider = FixtureChatProvider()
+      ..replies.addAll([toolReply(), textReply('failed')]);
+    final c = AssistantChatController(
+        identity: identity,
+        owner: () => identity.value,
+        host: host,
+        repository: MemoryChatRepository(),
+        provider: provider,
+        offlineOnly: false);
+    try {
+      await c.configure(fixtureConnection);
+      final running = c.send('save one fixture');
+      await eventually(() => c.pending != null);
+      c.decide(true);
+      await running;
+      final tool =
+          provider.requests.last.firstWhere((m) => m['role'] == 'tool');
+      final result = jsonDecode(tool['content'] as String) as Map;
+      expect(result['ok'], false);
+      expect(result['errorCode'], 4004);
+      expect(result['statusCode'], 404);
+      expect(result['message'], 'fixture task missing');
+      expect(result['requestId'], '11111111-1111-4111-8111-111111111111');
+      expect(result['clientEntityId'], '22222222-2222-4222-8222-222222222222');
+      expect(
+          c.entries.any((e) =>
+              e.role == 'action' && e.text.contains('fixture task missing')),
+          true);
+      expect(host.writes, 0);
+    } finally {
+      c.dispose();
+      identity.dispose();
+    }
   });
   test(
       'write requires a decision; decline is returned to model; approved executes once',
@@ -636,6 +707,19 @@ void main() {
       expect(annual['ok'], true);
       expect(session.annualPlanOverview.segments.single.subtasks.length, 2);
       expect(session.annualPlanOverview.segments.single.progressPercent, 0);
+      final prepared = await session.assistantTools
+          .prepare(ChatToolCall('retry', 'save_annual_task', {
+        'year': DateTime.now().year,
+        'title': 'Stable local ID',
+        'startMonth': 1,
+        'endMonth': 1,
+        'note': '',
+        'subtasks': <String>[]
+      }));
+      final firstSave = await prepared.execute();
+      final repeatSave = await prepared.execute();
+      expect(firstSave['id'], repeatSave['id']);
+      expect(session.annualPlanOverview.segments, hasLength(2));
       expect(
           (await run('control_focus', {
             'action': 'start',

@@ -187,6 +187,8 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
   bool _didInitialize = false;
   bool _isReconcilingFocusCompletion = false;
   String? _bannerMessage;
+  ApiException? _lastOperationError;
+  ApiException? get lastOperationError => _lastOperationError;
   Timer? _focusTicker;
   OfflineImportPreview? _offlineImportPreview;
 
@@ -3825,7 +3827,8 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> loadNextYear() =>
       loadAnnualOverview(_annualPlanOverview.year + 1);
 
-  Future<bool> saveAnnualSegment(AnnualPlanSegment segment) async {
+  Future<bool> saveAnnualSegment(AnnualPlanSegment segment,
+      {String? requestId}) async {
     final ownerScope = localOwnerScope;
     if (isOffline && ownerScope != null) {
       return _runBusyAction(() async {
@@ -3844,15 +3847,16 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
       return false;
     }
     return _runBusyAction(() async {
-      _annualPlanOverview =
-          await _studyPlanApi.saveAnnualSegment(currentSession, segment);
+      _annualPlanOverview = await _studyPlanApi
+          .saveAnnualSegment(currentSession, segment, requestId: requestId);
       _bannerMessage = _message('年度任务已保存。', 'Annual task saved.');
     },
         fallbackMessage:
             _message('保存年度任务失败。', 'Failed to save the annual task.'));
   }
 
-  Future<void> deleteAnnualSegment(AnnualPlanSegment segment) async {
+  Future<void> deleteAnnualSegment(AnnualPlanSegment segment,
+      {String? requestId}) async {
     final ownerScope = localOwnerScope;
     if (isOffline && ownerScope != null) {
       await _runBusyAction(() async {
@@ -3872,8 +3876,8 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
       return;
     }
     await _runBusyAction(() async {
-      _annualPlanOverview =
-          await _studyPlanApi.deleteAnnualSegment(currentSession, segment);
+      _annualPlanOverview = await _studyPlanApi
+          .deleteAnnualSegment(currentSession, segment, requestId: requestId);
       _bannerMessage = _message('年度任务已删除。', 'Annual task deleted.');
     },
         fallbackMessage:
@@ -3963,6 +3967,7 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
     final resolvedFallbackMessage = fallbackMessage.isEmpty
         ? _message('操作失败，请稍后重试。', 'Operation failed. Please try again.')
         : fallbackMessage;
+    _lastOperationError = null;
     _isBusy = true;
     notifyListeners();
 
@@ -3971,6 +3976,7 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
       return true;
     } on ApiException catch (error) {
       _bannerMessage = error.message;
+      _lastOperationError = error;
       return false;
     } catch (_) {
       _bannerMessage = resolvedFallbackMessage;

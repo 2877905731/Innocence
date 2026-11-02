@@ -1,17 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import '../../../core/config/app_config.dart';
+import '../../../core/utils/request_id.dart';
 import '../data/chat_provider.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_discovery.dart';
 import 'chat_tools.dart';
-
-class ChatEntry {
-  const ChatEntry(this.role, this.text);
-  final String role, text;
-  Map<String, dynamic> toJson() => {'role': role, 'text': text};
-}
+import '../domain/chat_conversation.dart';
+export '../domain/chat_conversation.dart' show ChatEntry, ChatConversation;
 
 class ChatPendingAction {
   ChatPendingAction(this.call, this.tool);
@@ -20,7 +17,8 @@ class ChatPendingAction {
   final decision = Completer<bool>();
 }
 
-class AssistantChatController extends ChangeNotifier {
+class AssistantChatController extends ChangeNotifier
+    with WidgetsBindingObserver {
   AssistantChatController(
       {required this.identity,
       required this.owner,
@@ -33,6 +31,7 @@ class AssistantChatController extends ChangeNotifier {
         offlineOnly = offlineOnly ?? AppConfig.offlineOnlyBuild {
     _owner = owner();
     identity.addListener(_identityChanged);
+    WidgetsBinding.instance.addObserver(this);
   }
   final Listenable identity;
   final String? Function() owner;
@@ -42,13 +41,29 @@ class AssistantChatController extends ChangeNotifier {
   final bool offlineOnly;
   ChatConnection? connection;
   final entries = <ChatEntry>[];
+  final _conversations = <ChatConversation>[];
+  List<ChatConversation> get conversations => List.unmodifiable(_conversations);
+  String? activeConversationId;
   final _wire = <Map<String, dynamic>>[];
   ChatPendingAction? pending;
   bool busy = false, configuring = false, agentMode = true;
+  bool loading = false, managing = false;
+  bool get ready => _loaded;
+  bool get canManageConversations =>
+      _loaded &&
+      _owner == owner() &&
+      !busy &&
+      !configuring &&
+      !loading &&
+      !managing;
   String? error;
   String? _owner;
   int _epoch = 0;
   bool _disposed = false, _loaded = false;
+  bool _modeSelectedBeforeLoad = false;
+  Future<void>? _initialization;
+  Future<void> _writes = Future.value();
+  Timer? _draftTimer;
   dynamic _canonical(dynamic value) => value is Map
       ? {
           for (final key
@@ -70,54 +85,206 @@ class AssistantChatController extends ChangeNotifier {
             }));
   }
 
-  String draft = '';
+  String _draft = '';
+  String get draft => _draft;
+  set draft(String value) {
+    _draft = value;
+    _scheduleDraftSave();
+  }
+
+  void _scheduleDraftSave() {
+    _draftTimer?.cancel();
+    final own = _owner, epoch = _epoch;
+    if (!_loaded || own == null || managing || _disposed) return;
+    _draftTimer = Timer(const Duration(milliseconds: 350), () {
+      if (!_current(own, epoch)) return;
+      unawaited(flushDraft());
+    });
+  }
+
+  Future<void> flushDraft() async {
+    _draftTimer?.cancel();
+    final own = _owner;
+    if (!_loaded || own == null || managing) return;
+    try {
+      await _persist(own);
+    } catch (_) {
+      if (!_disposed && own == owner()) {
+        error = '草稿保存失败，请重试。';
+        _emit();
+      }
+    }
+  }
+
+  ChatWorkspace _snapshot() {
+    final index =
+        _conversations.indexWhere((c) => c.id == activeConversationId);
+    if (index < 0) throw const FormatException('当前对话尚未恢复。');
+    _conversations[index] = _conversations[index].copyWith(
+        messages: List.of(entries),
+        draft: _draft,
+        agentMode: agentMode,
+        updatedAt: DateTime.now().millisecondsSinceEpoch);
+    return ChatWorkspace(
+        activeId: activeConversationId!,
+        conversations: List.of(_conversations));
+  }
+
+  void _applyWorkspace(ChatWorkspace workspace) {
+    _conversations
+      ..clear()
+      ..addAll(workspace.conversations);
+    activeConversationId = workspace.activeId;
+    final active = _conversations.firstWhere((c) => c.id == workspace.activeId);
+    entries
+      ..clear()
+      ..addAll(active.messages);
+    _draft = active.draft;
+    agentMode = active.agentMode;
+    _restoreWire();
+  }
+
+  Future<void> _queueWorkspace(String own, ChatWorkspace workspace) {
+    final safe = ChatWorkspace(activeId: workspace.activeId, conversations: [
+      for (final c in workspace.conversations)
+        c.copyWith(title: _safe(c.title), draft: _safe(c.draft), messages: [
+          for (final m in c.messages) ChatEntry(m.role, _safe(m.text))
+        ])
+    ]);
+    final task = _writes.then((_) => repository.saveWorkspace(own, safe));
+    _writes = task.catchError((Object _) {});
+    return task;
+  }
+
+  Future<bool> _changeWorkspace(ChatWorkspace workspace) async {
+    final own = owner();
+    if (own == null || !canManageConversations) return false;
+    final epoch = _epoch;
+    _draftTimer?.cancel();
+    managing = true;
+    error = null;
+    _emit();
+    try {
+      await _queueWorkspace(own, workspace);
+      if (!_current(own, epoch)) return false;
+      _applyWorkspace(workspace);
+      return true;
+    } catch (_) {
+      if (_current(own, epoch)) error = '对话保存失败，当前记录已保留，请重试。';
+      return false;
+    } finally {
+      if (_current(own, epoch)) {
+        managing = false;
+        _emit();
+      }
+    }
+  }
+
+  Future<bool> createConversation() async {
+    if (!canManageConversations) return false;
+    final workspace = _snapshot(), fresh = ChatConversation.empty();
+    return _changeWorkspace(ChatWorkspace(
+        activeId: fresh.id,
+        conversations: [fresh, ...workspace.conversations]));
+  }
+
+  Future<bool> selectConversation(String id) async {
+    if (!canManageConversations || !_conversations.any((c) => c.id == id)) {
+      return false;
+    }
+    if (id == activeConversationId) return true;
+    final workspace = _snapshot();
+    return _changeWorkspace(
+        ChatWorkspace(activeId: id, conversations: workspace.conversations));
+  }
+
+  Future<bool> deleteConversation(String id) async {
+    if (!canManageConversations || !_conversations.any((c) => c.id == id)) {
+      return false;
+    }
+    final workspace = _snapshot();
+    final index = workspace.conversations.indexWhere((c) => c.id == id);
+    final rest = workspace.conversations.where((c) => c.id != id).toList();
+    if (rest.isEmpty) rest.add(ChatConversation.empty());
+    final nextId = workspace.activeId == id
+        ? rest[index < rest.length ? index : rest.length - 1].id
+        : workspace.activeId;
+    return _changeWorkspace(
+        ChatWorkspace(activeId: nextId, conversations: rest));
+  }
+
   bool _current(String own, int epoch) =>
-      !_disposed && own == owner() && epoch == _epoch;
+      !_disposed && own == _owner && own == owner() && epoch == _epoch;
   void _emit() {
     if (!_disposed) notifyListeners();
   }
 
   void _identityChanged() {
     if (_owner == owner()) return;
+    if (_loaded && _owner != null) {
+      unawaited(_persist(_owner!).catchError((Object _) {}));
+    }
+    _draftTimer?.cancel();
     stop();
     _owner = owner();
     connection = null;
     entries.clear();
+    _conversations.clear();
+    activeConversationId = null;
     _wire.clear();
-    draft = '';
+    _draft = '';
     error = null;
     _loaded = false;
+    _modeSelectedBeforeLoad = false;
+    agentMode = true;
+    loading = false;
+    managing = false;
+    _initialization = null;
     _emit();
   }
 
-  Future<void> initialize() async {
+  Future<void> initialize() {
+    if (_owner != owner()) _identityChanged();
     final own = owner();
-    if (own == null || _loaded) return;
+    if (own == null || _loaded || _disposed) return Future.value();
+    if (_initialization != null) return _initialization!;
+    late final Future<void> task;
+    task = _loadWorkspace(own).whenComplete(() {
+      if (identical(_initialization, task)) _initialization = null;
+    });
+    _initialization = task;
+    return task;
+  }
+
+  Future<void> _loadWorkspace(String own) async {
     final epoch = _epoch;
-    _loaded = true;
+    loading = true;
+    _emit();
     try {
       final settings = await repository.loadConnection(own);
-      final history = await repository.loadHistory(own);
+      final workspace = await repository.loadWorkspace(own);
       if (!_current(own, epoch)) return;
       connection = settings;
-      for (final entry in history) {
-        if (['user', 'assistant', 'action', 'notice'].contains(entry['role']) &&
-            entry['text'] is String) {
-          entries
-              .add(ChatEntry(entry['role'] as String, entry['text'] as String));
-        }
-      }
+      final selectedMode = _modeSelectedBeforeLoad ? agentMode : null;
+      _applyWorkspace(workspace);
+      if (selectedMode != null) agentMode = selectedMode;
+      _modeSelectedBeforeLoad = false;
+      _loaded = true;
+      error = null;
       // Restored actions are context only; they never resume a write.
       _restoreWire();
     } catch (_) {
-      if (_current(own, epoch)) error = '本机连接或会话读取失败，请重新配置。';
+      if (_current(own, epoch)) error = '本机连接或对话读取失败，原记录已保留，请重试。';
     }
-    if (_current(own, epoch)) _emit();
+    if (_current(own, epoch)) {
+      loading = false;
+      _emit();
+    }
   }
 
   Future<void> configure(ChatConnection value) async {
     final own = owner();
-    if (own == null || busy || configuring) return;
+    if (own == null || busy || configuring || loading || managing) return;
     final epoch = _epoch;
     configuring = true;
     error = null;
@@ -238,34 +405,28 @@ class AssistantChatController extends ChangeNotifier {
     return false;
   }
 
-  Future<void> _persist(String own) async {
-    final key = connection?.apiKey;
-    final data = entries
-        .map((e) => {
-              'role': e.role,
-              'text': key == null || key.isEmpty
-                  ? e.text
-                  : e.text.replaceAll(key, '[已隐藏密钥]')
-            })
-        .toList();
-    await repository.saveHistory(own, data);
-  }
+  Future<void> _persist(String own) => _queueWorkspace(own, _snapshot());
 
   void setAgentMode(bool value) {
-    if (!busy) {
+    if (!busy && !loading && !managing) {
       agentMode = value;
+      if (!_loaded) _modeSelectedBeforeLoad = true;
+      _scheduleDraftSave();
       _emit();
     }
   }
 
   Future<void> clearHistory() async {
-    final own = owner();
-    if (busy || own == null) return;
-    entries.clear();
-    _wire.clear();
-    error = null;
-    await repository.saveHistory(own, []);
-    _emit();
+    if (!canManageConversations) return;
+    final workspace = _snapshot();
+    await _changeWorkspace(
+        ChatWorkspace(activeId: workspace.activeId, conversations: [
+      for (final c in workspace.conversations)
+        if (c.id == workspace.activeId)
+          c.copyWith(title: '', messages: [], draft: '')
+        else
+          c
+    ]));
   }
 
   String _safe(String text) {
@@ -274,6 +435,10 @@ class AssistantChatController extends ChangeNotifier {
   }
 
   Future<void> send(String text) async {
+    final startingOwner = owner(), startingEpoch = _epoch;
+    if (startingOwner == null || busy || configuring || managing) return;
+    await initialize();
+    if (!_current(startingOwner, startingEpoch) || !_loaded) return;
     final own = owner();
     final config = connection;
     if (own == null || busy || configuring || text.trim().isEmpty) return;
@@ -297,8 +462,15 @@ class AssistantChatController extends ChangeNotifier {
     final writeResults = <String, Map<String, dynamic>>{};
     busy = true;
     error = null;
-    draft = '';
+    _draftTimer?.cancel();
+    _draft = '';
     entries.add(ChatEntry('user', text.trim()));
+    final index =
+        _conversations.indexWhere((c) => c.id == activeConversationId);
+    if (index >= 0 && _conversations[index].title.isEmpty) {
+      _conversations[index] = _conversations[index]
+          .copyWith(title: ChatConversation.titleFrom(text));
+    }
     _wire.add({'role': 'user', 'content': text.trim()});
     _emit();
     try {
@@ -336,6 +508,20 @@ class AssistantChatController extends ChangeNotifier {
         for (final call in reply.calls) {
           if (!_current(own, epoch)) return;
           Map<String, dynamic> result;
+          final diagnosticId = newRequestId();
+          Map<String, dynamic> diagnostic(Map<String, dynamic> value) =>
+              value['ok'] != false
+                  ? value
+                  : {
+                      ...value,
+                      'errorCode': value['errorCode'] ??
+                          value['reason'] ??
+                          'OPERATION_FAILED',
+                      'message':
+                          value['message'] ?? '软件未确认操作成功，请读取实际状态核对，不要自动重试写入。',
+                      'requestId': value['requestId'] ?? diagnosticId,
+                      'source': value['source'] ?? 'client'
+                    };
           final signature =
               '${call.name}:${jsonEncode(_canonical(call.arguments))}';
           bool write = false;
@@ -365,6 +551,9 @@ class AssistantChatController extends ChangeNotifier {
                 result = {
                   'ok': false,
                   'reason': 'USER_DECLINED',
+                  'errorCode': 'USER_DECLINED',
+                  'requestId': diagnosticId,
+                  'source': 'client',
                   'message': '用户取消，未执行。'
                 };
               } else {
@@ -378,22 +567,32 @@ class AssistantChatController extends ChangeNotifier {
               result = await tool.execute();
             }
             if (!_current(own, epoch)) return;
+            result = diagnostic(result);
             entries.add(ChatEntry(
                 'action', _safe('${tool.summary}\n${jsonEncode(result)}')));
+          } on ChatToolFailure catch (e) {
+            result = e.toJson();
           } on FormatException catch (e) {
             result = {
               'ok': false,
               'reason': 'INVALID_OR_CONFLICT',
+              'errorCode': 'INVALID_OR_CONFLICT',
+              'requestId': diagnosticId,
+              'source': 'client',
               'message': _safe(e.message)
             };
           } catch (_) {
             result = {
               'ok': false,
               'reason': 'EXECUTION_FAILURE',
+              'errorCode': 'EXECUTION_FAILURE',
+              'requestId': diagnosticId,
+              'source': 'client',
               'message': '操作失败或结果不明；检查实际软件状态，不能自动重试写操作。'
             };
           }
           if (!_current(own, epoch)) return;
+          result = diagnostic(result);
           if (write) writeResults[signature] = result;
           if (result['ok'] == false &&
               !entries.last.text.contains(jsonEncode(result))) {
@@ -445,16 +644,40 @@ class AssistantChatController extends ChangeNotifier {
   }
 
   Future<void> eraseIdentityData(String own) async {
-    if (own == owner()) stop();
+    if (own == owner()) {
+      stop();
+      _draftTimer?.cancel();
+      _loaded = false;
+      entries.clear();
+      _wire.clear();
+      _conversations.clear();
+      activeConversationId = null;
+      _draft = '';
+      _emit();
+    }
+    await _writes;
     await repository.deleteConnection(own);
-    await repository.saveHistory(own, []);
+    await repository.deleteWorkspace(own);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
+      unawaited(flushDraft());
+    }
   }
 
   @override
   void dispose() {
+    _draftTimer?.cancel();
+    if (_loaded && _owner != null) {
+      unawaited(_persist(_owner!).catchError((Object _) {}));
+    }
     stop();
     _disposed = true;
     identity.removeListener(_identityChanged);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }

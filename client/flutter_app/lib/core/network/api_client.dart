@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:innocence_flutter/core/config/app_config.dart';
 
 import 'api_exception.dart';
+import '../utils/request_id.dart';
 
 class ApiClient {
   ApiClient({
@@ -132,6 +133,11 @@ class ApiClient {
     Map<String, String> headers = const {},
   }) async {
     _requireNetworkEnabled();
+    final requestId = headers.entries
+            .where((e) => e.key.toLowerCase() == 'x-request-id')
+            .map((e) => e.value)
+            .firstOrNull ??
+        newRequestId();
     try {
       final request = await _httpClient.openUrl(
         method,
@@ -139,6 +145,7 @@ class ApiClient {
       );
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
       headers.forEach(request.headers.set);
+      request.headers.set('X-Request-ID', requestId);
       if (body != null) {
         request.headers.set(
           HttpHeaders.contentTypeHeader,
@@ -147,19 +154,20 @@ class ApiClient {
         request.add(utf8.encode(jsonEncode(body)));
       }
 
-      return _readResponse(await request.close());
+      return _readResponse(await request.close(), requestId: requestId);
     } on SocketException {
-      throw const ApiException('暂时无法连接本地服务，请先启动后端服务。');
+      throw ApiException('暂时无法连接服务，请检查网络。', requestId: requestId);
     } on HandshakeException {
-      throw const ApiException('建立安全连接失败。');
+      throw ApiException('建立安全连接失败。', requestId: requestId);
     } on FormatException {
-      throw const ApiException('服务器返回内容格式不正确。');
+      throw ApiException('服务器返回内容格式不正确。', requestId: requestId);
     } on HttpException catch (error) {
-      throw ApiException(error.message);
+      throw ApiException(error.message, requestId: requestId);
     }
   }
 
-  Future<dynamic> _readResponse(HttpClientResponse response) async {
+  Future<dynamic> _readResponse(HttpClientResponse response,
+      {String? requestId}) async {
     final rawResponse = await utf8.decoder.bind(response).join();
     final payload =
         rawResponse.isEmpty ? <String, dynamic>{} : jsonDecode(rawResponse);
@@ -178,6 +186,10 @@ class ApiClient {
         message,
         code: apiCode,
         statusCode: response.statusCode,
+        requestId: (payload['requestId'] is String &&
+                (payload['requestId'] as String).isNotEmpty)
+            ? payload['requestId'] as String
+            : response.headers.value('X-Request-ID') ?? requestId,
       );
     }
 

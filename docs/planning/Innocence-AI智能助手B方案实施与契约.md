@@ -3,17 +3,19 @@ schema_version: 1
 document_type: implementation_scope_and_contract
 project_name: "Innocence"
 module: "智能助手（第16个产品模块）"
-status: byok_chat_discovery_implemented_fixture_verified_live_provider_and_device_pending
-updated_at: "2026-10-04"
-decision: "DEC-0050 / 0090；DEC-0051 / 0092用户修正为BYOK聊天助手；DEC-0052 / 0093简化模型接入"
+status: annual_http_fix_and_multiple_conversations_verified_live_provider_device_pending
+updated_at: "2026-11-02"
+decision: "DEC-0050 / 0090；DEC-0051 / 0092用户修正为BYOK聊天助手；DEC-0052 / 0093简化模型接入；0149年度工具修复与多对话用户需求"
 user_selection: "采用b方案"
 selected_option: B
-implementation_status: "多轮聊天、地址与密钥获取真实模型列表、选择模型并验证协议后加密保存、两协议及14项软件工具已实现；高级设置保留手动模型与协议。真实供应商/完整登录HTTP/同步/实体设备未验，月历批量重排及原任务编辑尚未接聊天工具。"
-release_baseline: "v1.2.2+7；未改变现行离线发行与P01/G01"
+implementation_status: "BYOK模型发现/协议验证与14项工具保留；已修复联网年度任务误走PUT及错误吞没，并增加按身份隔离的多对话新建/切换/删除/草稿和旧历史迁移。隔离年度HTTP/MySQL与宿主布局通过，真实供应商/完整同步/实体矩阵仍待；原日任务编辑和年度已有子任务编辑尚未接工具。"
+release_baseline: "Android1.3.2+14、Windows/鸿蒙1.3.0+12现行发行不变；0148/0149均为未发布候选，P01/G01保持开放"
 comparison_document: docs/planning/Innocence-AI智能助手与自动化系统方案评审.md
 ---
 
 # Innocence AI 智能助手 B 方案实施与契约
+
+> 2026-11-02（0149）：第14节为年度工具与多对话的当前行为，覆盖旧单对话操作说明；旧章节中的版本、开发构建及验收数量为当时证据，当前发布/部署状态以 RESUME 为准。
 
 > 2026-10-04接入简化（DEC-0052/0093）：第13节覆盖第12节的手动完整端点/模型/协议主流程；现只填地址与Key、获取模型、选择并验证连接，高级设置保留手动入口。168项Flutter/analyze与双端开发构建通过；真实供应商和原生设备继续待验。
 
@@ -252,3 +254,15 @@ P01/G01、Android A0–A5与v1.2.2+7正式发行基线保留。此次为本机�
 没有/models接口的兼容服务可展开高级设置手动填写模型；模型名不自动猜测、不用固定过期目录替代。DeepSeek Chat Completions返回的reasoning_content在当前请求上下文内按官方要求回传，不显示、记录或保存到可见历史；恢复会话时若历史缺少该字段，则仅对DeepSeek官方Chat端点明确采用非思考模式完成工具交互，避免缺字段400。Responses仍回传完整output项。
 
 配置旧数据无需迁移；仍以最终endpoint/model/protocol的原结构加密保存，重新进入可从endpoint还原服务地址。模型发现不调用Innocence后端，不新增业务接口、不改变owner/工具/执行规则，正式Android离线包仍禁止联网。官方来源：[DeepSeek模型列表](https://api-docs.deepseek.com/api/list-models/)、[DeepSeek思考模式](https://api-docs.deepseek.com/guides/thinking_mode/)、[OpenAI API认证与模型列表](https://developers.openai.com/api/reference/overview)。真实供应商列表和连接需用户在软件中配置后核验，本轮不读取或复制真实密钥。
+
+## 14. 年度工具修复与多个对话（0149）
+
+用户反馈鸿蒙助手年度任务持续失败，并明确要求多个可删除的对话。此路径为三端共享Dart代码：联网新建年度草稿的id必须为空，UUID clientEntityId只用于当前账号内幂等，StudyPlanApi走POST；编辑使用读取出的服务端ID走PUT。本机资料继续用稳定UUID主键。新建默认进度0、字符串子任务显式映射为未完成对象；编辑保留原进度与现有子任务，subtasks=[]不表示清空。未新增模型推断进度、修改已有子任务或额外年度权限。
+
+年度工具成功返回真实任务ID/clientEntityId/requestId，失败保留errorCode/message/requestId/source与可用的statusCode。ApiClient产生UUID诊断头；后端验证并回传，路径类型/JSON错误按400/1001返回。客户端诊断ID不等于服务器接收证明。日志只记验证后的标识、静态路由模板、状态及耗时，不存正文、查询或凭据；未知执行结果仍禁止自动重试。
+
+ChatWorkspace v2按在线账号或本机owner保存独立对话集合和当前选择，每个对话有稳定ID、首条消息标题、可见历史、输入草稿及模式。新建保留原聊天，切换恢复对应上下文；界面确认删除只删指定聊天及草稿，已保存业务资料保留。最后一个对话删除后建立空对话。生成/待确认时禁用切换删除，停止或完成后才能管理；身份变化停止旧请求并清空内存，历史恢复不重放工具动作。
+
+首次加载旧单对话历史时，先完整保存为新格式再清理旧键；损坏格式或持久化失败保留旧记录并允许重试。每个对话沿用最近120条可见记录上限，草稿在短暂防抖、后台或退出页面时保存。密钥继续按身份原生加密保存，不进入聊天索引/标题/草稿；聊天正文仍为本机未加密数据，不增加云同步。
+
+0149证据：267项Flutter/6条件跳过、120项后端、Android/鸿蒙配置各21专项、分析和三端构建通过；隔离最小创建、编辑保留70%及子任务、幂等、认证/权限/跨租户/缺字段和多对话持久化均有验证。未调用真实供应商、未操作用户计划、未部署或发布新版，实体与完整同步门禁继续开放。详细范围见[助手年度任务修复与多对话](../development/助手年度任务修复与多对话.md)。

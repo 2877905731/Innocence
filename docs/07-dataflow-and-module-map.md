@@ -1,20 +1,18 @@
 ---
-
-## 2026-11-02 手动番茄学习数据流
-
-PomodoroTimer 当前阶段封顶并进入等待 → PomodoroController 结算学习/整轮完成 → SQLite v9 按 ownerScope 保存累计记录 → 在线账号用既有认证提交 pomodoro-study（幂等 finished study_timer_record），断网待重试；本机离线资料进入原导入预览与目标账号确认，再经 pomodoro_study/upsert 同步。普通专注重叠区间保存在时钟快照中，休息/等待/暂停不产生学习片段。平台通知只安排当前阶段，无自动跨阶段。三主题封面为共享呈现组件，不修改业务数据流。规则和状态见 [计时阶段与学习入账](development/计时阶段与学习入账.md) 与 RESUME。
 schema_version: 1
 document_type: dataflow_and_module_map
 project_name: "Innocence"
 contract_inventory_path: docs/06-contract-inventory.md
 planned_extensions:
   - id: assistant_b
-    status: byok_chat_discovery_implemented_fixture_verified_live_provider_pending
+    status: annual_http_fix_and_multiple_conversations_verified_live_provider_device_pending
     specification: docs/planning/Innocence-AI智能助手B方案实施与契约.md
     flow: "AssistantChatPage→按owner加密的连接配置→ChatProvider(Chat Completions/Responses)→AssistantChatController多轮工具调用→AssistantAppTools确定性校验/确认→原Session/SQLite或Bearer API→实际结果；日计划走client-proposals/validate/execute/query/undo"
     boundary: "DEC-0051允许当前本机资料经BYOK按需发往指定模型；本机ownerScope独立，凭据不上传Innocence。身份变化/停止取消后续动作；线上服务端写入后刷新；原本地排程为次级入口，C调度不包含"
     required_compatibility: "已新增共享dayRevision并接入旧保存/模板/导入；助手使用稳定实体新增，旧整日替换API保留兼容语义"
     connection_flow: "模型设置地址+Key→ChatServiceAddress同origin路径→GET /models→ChatModelCatalog严格映射→选择真实id→ChatProvider自动协议验证→成功后原生加密仓储；DEC-0052，第13节"
+    conversation_flow: "0149：原身份历史→ChatWorkspace v2安全迁移→独立对话消息/草稿/模式→保存成功后切换或删除；生成/待确认时禁止管理，身份变化取消旧动作，恢复只读可见上下文"
+    annual_flow: "AssistantAppTools联网新建id空/clientEntityId UUID→StudyPlanApi POST→当前Bearer用户MySQL→返回真实id并刷新核对；编辑用真实id PUT，保留原进度/子任务；本机沿用稳定UUID，HTTP错误穿过Session bool包装保留诊断"
 topology:
   device_sessions: "0132：android/mobile、windows/desktop、harmonyos/tablet各一个同时在线名额；同类upsert仅替换该类；Bearer解析owner，admin_web仍仅白名单管理员入口签发"
   nodes:
@@ -173,3 +171,11 @@ fixtures:
   - path: "暂无（契约样本未收，P01 起回放收样）"
     contract: "U01-U13"
 ---
+
+## 2026-11-02 手动番茄学习数据流
+
+PomodoroTimer 当前阶段封顶并进入等待 → PomodoroController 结算学习/整轮完成 → SQLite v9 按 ownerScope 保存累计记录 → 在线账号用既有认证提交 pomodoro-study（幂等 finished study_timer_record），断网待重试；本机离线资料进入原导入预览与目标账号确认，再经 pomodoro_study/upsert 同步。普通专注重叠区间保存在时钟快照中，休息/等待/暂停不产生学习片段。平台通知只安排当前阶段，无自动跨阶段。三主题封面为共享呈现组件，不修改业务数据流。规则和状态见 [计时阶段与学习入账](development/计时阶段与学习入账.md) 与 RESUME。
+
+## 2026-11-02 年度工具与多对话
+
+共享客户端调用、隔离TCP/MySQL与按owner多对话仓储的边界见 [助手年度任务修复与多对话](development/助手年度任务修复与多对话.md)。RequestTraceFilter只传播验证后的请求标识和记录静态路由/状态，不接收客户端身份；ChatController切换只替换当前对话上下文，不重放待确认操作。本轮为本机实现，现网无新日志追踪或新聊天界面。

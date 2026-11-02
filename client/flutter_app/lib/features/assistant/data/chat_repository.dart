@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../domain/chat_conversation.dart';
 
 class ChatConnection {
   const ChatConnection(
@@ -61,12 +62,57 @@ abstract class ChatRepository {
   Future<void> deleteConnection(String owner);
   Future<List<Map<String, dynamic>>> loadHistory(String owner);
   Future<void> saveHistory(String owner, List<Map<String, dynamic>> messages);
+  Future<ChatWorkspace> loadWorkspace(String owner);
+  Future<void> saveWorkspace(String owner, ChatWorkspace workspace);
+  Future<void> deleteWorkspace(String owner);
 }
 
 class NativeChatRepository implements ChatRepository {
   static const _channel = MethodChannel('innocence/assistant_vault');
   String _key(String owner, String kind) =>
       'assistant.$kind.${base64Url.encode(utf8.encode(owner))}';
+
+  @override
+  Future<ChatWorkspace> loadWorkspace(String owner) async {
+    if (owner.isEmpty) throw ArgumentError('Owner is required');
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_key(owner, 'conversations'));
+    final workspace = raw == null
+        ? ChatWorkspace.fromLegacy(await loadHistory(owner))
+        : ChatWorkspace.fromJson(
+            Map<String, dynamic>.from(jsonDecode(raw) as Map));
+    if (raw == null) await saveWorkspace(owner, workspace);
+    // Never remove the legacy history until the complete migrated workspace is durable.
+    if (prefs.containsKey(_key(owner, 'history')) &&
+        !await prefs.remove(_key(owner, 'history'))) {
+      throw const FormatException('历史迁移尚未完成，请重试；记录已保留。');
+    }
+    return workspace;
+  }
+
+  @override
+  Future<void> saveWorkspace(String owner, ChatWorkspace workspace) async {
+    if (owner.isEmpty) throw ArgumentError('Owner is required');
+    final data = workspace.toJson();
+    ChatWorkspace.fromJson(data);
+    if (!await (await SharedPreferences.getInstance())
+        .setString(_key(owner, 'conversations'), jsonEncode(data))) {
+      throw const FormatException('对话保存失败，请重试。');
+    }
+  }
+
+  @override
+  Future<void> deleteWorkspace(String owner) async {
+    if (owner.isEmpty) throw ArgumentError('Owner is required');
+    final prefs = await SharedPreferences.getInstance();
+    for (final kind in ['conversations', 'history']) {
+      final key = _key(owner, kind);
+      if (prefs.containsKey(key) && !await prefs.remove(key)) {
+        throw const FormatException('删除本机对话失败，请重试。');
+      }
+    }
+  }
+
   @override
   Future<ChatConnection?> loadConnection(String owner) async {
     final prefs = await SharedPreferences.getInstance();

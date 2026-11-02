@@ -25,24 +25,31 @@ class AssistantChatPage extends StatefulWidget {
 class _AssistantChatPageState extends State<AssistantChatPage> {
   late final TextEditingController _input;
   final _scroll = ScrollController();
+  final _scaffold = GlobalKey<ScaffoldState>();
   int _count = 0;
   String? _owner;
+  String? _conversation;
   AssistantChatController get c => widget.controller;
   String t(String zh, String en) => widget.language.isChinese ? zh : en;
   @override
   void initState() {
     super.initState();
     _owner = c.owner();
+    _conversation = c.activeConversationId;
     _input = TextEditingController(text: c.draft);
     c.addListener(_changed);
     unawaited(c.initialize());
   }
 
   void _changed() {
-    if (_owner != c.owner()) {
+    final ownerChanged = _owner != c.owner();
+    if (_owner != c.owner() || _conversation != c.activeConversationId) {
       _owner = c.owner();
+      _conversation = c.activeConversationId;
       _input.text = c.draft;
+      _count = -1;
     }
+    if (ownerChanged) unawaited(c.initialize());
     if (_count != c.entries.length) {
       _count = c.entries.length;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -59,6 +66,7 @@ class _AssistantChatPageState extends State<AssistantChatPage> {
   void dispose() {
     c.removeListener(_changed);
     c.draft = _input.text;
+    unawaited(c.flushDraft());
     _input.dispose();
     _scroll.dispose();
     super.dispose();
@@ -78,6 +86,99 @@ class _AssistantChatPageState extends State<AssistantChatPage> {
             _ChatSettings(controller: c, isChinese: widget.language.isChinese));
   }
 
+  Future<void> _deleteConversation(ChatConversation chat) async {
+    if (!c.canManageConversations) return;
+    final owner = c.owner();
+    final title = chat.title.isEmpty ? t('新对话', 'New chat') : chat.title;
+    final yes = await showThemedDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+                title: Text(t('删除对话', 'Delete conversation')),
+                content: Text(t('删除“$title”的消息和草稿，已保存的软件任务保留。',
+                    'Delete messages and drafts in "$title". Saved app tasks remain.')),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: Text(t('取消', 'Cancel'))),
+                  FilledButton(
+                      key: const ValueKey('chat-confirm-delete'),
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: Text(t('删除', 'Delete')))
+                ]));
+    if (yes == true && owner == c.owner()) await c.deleteConversation(chat.id);
+  }
+
+  Widget _conversationList({bool drawer = false}) => Column(children: [
+        Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+            child: Row(children: [
+              Expanded(
+                  child: Text(t('对话', 'Conversations'),
+                      style: Theme.of(context).textTheme.titleMedium)),
+              IconButton(
+                  key:
+                      ValueKey(drawer ? 'chat-drawer-new' : 'chat-sidebar-new'),
+                  tooltip: t('新建对话', 'New conversation'),
+                  onPressed: c.canManageConversations
+                      ? () async {
+                          if (await c.createConversation() &&
+                              drawer &&
+                              mounted) {
+                            Navigator.pop(context);
+                          }
+                        }
+                      : null,
+                  icon: const Icon(Icons.add_comment_outlined)),
+            ])),
+        Expanded(
+            child: ListView.builder(
+                itemCount: c.conversations.length,
+                itemBuilder: (_, index) {
+                  final chat = c.conversations[index];
+                  return ListTile(
+                      key: ValueKey('chat-conversation-${chat.id}'),
+                      selected: chat.id == c.activeConversationId,
+                      title: Text(
+                          chat.title.isEmpty
+                              ? t('新对话', 'New chat')
+                              : chat.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis),
+                      subtitle: Text(
+                          t('${chat.messages.length} 条消息${chat.draft.isEmpty ? '' : ' · 草稿'}',
+                              '${chat.messages.length} messages${chat.draft.isEmpty ? '' : ' · Draft'}'),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis),
+                      onTap: c.canManageConversations
+                          ? () async {
+                              if (await c.selectConversation(chat.id) &&
+                                  drawer &&
+                                  mounted) {
+                                Navigator.pop(context);
+                              }
+                            }
+                          : null,
+                      trailing: IconButton(
+                          key: ValueKey('chat-delete-${chat.id}'),
+                          tooltip: t('删除对话', 'Delete conversation'),
+                          onPressed: c.canManageConversations
+                              ? () => _deleteConversation(chat)
+                              : null,
+                          icon: const Icon(Icons.delete_outline_rounded)));
+                })),
+        if (c.managing || c.loading) const LinearProgressIndicator(),
+      ]);
+
+  Widget _conversationLayout(Widget content) =>
+      LayoutBuilder(builder: (context, size) {
+        if (size.maxWidth < 900) return content;
+        return Row(children: [
+          SizedBox(width: 260, child: _conversationList()),
+          const VerticalDivider(width: 1),
+          Expanded(child: content)
+        ]);
+      });
+
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
       animation: c,
@@ -86,11 +187,30 @@ class _AssistantChatPageState extends State<AssistantChatPage> {
         final visual = theme.extension<AppVisualThemeMarker>()?.visualTheme ??
             widget.visualTheme;
         return Scaffold(
+          key: _scaffold,
+          endDrawer: Drawer(
+              backgroundColor: visual == AppVisualTheme.glass
+                  ? const Color(0xFA181A24)
+                  : theme.colorScheme.surface,
+              width: MediaQuery.sizeOf(context).width < 380 ? 300 : 340,
+              child: SafeArea(child: _conversationList(drawer: true))),
           appBar: AppBar(title: Text(t('智能助手', 'Assistant')), actions: [
+            IconButton(
+                key: const ValueKey('chat-conversations'),
+                tooltip: t('对话列表', 'Conversations'),
+                onPressed: () => _scaffold.currentState?.openEndDrawer(),
+                icon: const Icon(Icons.forum_outlined)),
+            if (MediaQuery.sizeOf(context).width >= 600)
+              IconButton(
+                  key: const ValueKey('chat-new-conversation'),
+                  tooltip: t('新建对话', 'New conversation'),
+                  onPressed:
+                      c.canManageConversations ? c.createConversation : null,
+                  icon: const Icon(Icons.add_comment_outlined)),
             IconButton(
                 key: const ValueKey('chat-settings'),
                 tooltip: t('模型设置', 'Model settings'),
-                onPressed: c.busy ? null : _settings,
+                onPressed: c.busy || c.loading || c.managing ? null : _settings,
                 icon: const Icon(Icons.tune_rounded)),
             PopupMenuButton<String>(
                 onSelected: (value) async {
@@ -99,31 +219,13 @@ class _AssistantChatPageState extends State<AssistantChatPage> {
                     return;
                   }
                   if (value == 'new') {
-                    if (!context.mounted) return;
-                    final yes = await showThemedDialog<bool>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                                title: Text(t('开始新对话', 'New conversation')),
-                                content: Text(t('清除当前对话记录，保留模型配置。',
-                                    'Clear this conversation and keep model settings.')),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(ctx, false),
-                                      child: Text(t('取消', 'Cancel'))),
-                                  FilledButton(
-                                      onPressed: () => Navigator.pop(ctx, true),
-                                      child: Text(t('新对话', 'New chat')))
-                                ]));
-                    if (yes == true) {
-                      await c.clearHistory();
-                    }
+                    await c.createConversation();
                   }
                 },
                 itemBuilder: (_) => [
                       PopupMenuItem(
                           value: 'new',
-                          enabled: !c.busy,
+                          enabled: c.canManageConversations,
                           child: Text(t('新对话', 'New chat'))),
                       if (widget.onOpenPlanner != null)
                         PopupMenuItem(
@@ -134,8 +236,13 @@ class _AssistantChatPageState extends State<AssistantChatPage> {
           body: SafeArea(
               child: Center(
                   child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1100),
-                      child: Column(children: [
+                      constraints: const BoxConstraints(maxWidth: 1360),
+                      child: _conversationLayout(Column(children: [
+                        if (!c.ready && !c.loading)
+                          TextButton(
+                              onPressed: c.initialize,
+                              child: Text(
+                                  t('重试读取对话', 'Retry loading conversations'))),
                         Padding(
                             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                             child: Wrap(
@@ -348,10 +455,14 @@ class _AssistantChatPageState extends State<AssistantChatPage> {
                                   Expanded(
                                       child: TextField(
                                           key: const ValueKey('chat-input'),
+                                          enabled: c.ready &&
+                                              !c.loading &&
+                                              !c.managing &&
+                                              !c.busy &&
+                                              !c.configuring,
                                           controller: _input,
                                           minLines: 1,
                                           maxLines: 5,
-                                          enabled: !c.busy && !c.configuring,
                                           onChanged: (value) => c.draft = value,
                                           decoration: InputDecoration(
                                               hintText: t('说说你的目标，或告诉我需要操作什么…',
@@ -373,7 +484,7 @@ class _AssistantChatPageState extends State<AssistantChatPage> {
                                           ? Icons.stop_rounded
                                           : Icons.arrow_upward_rounded)),
                                 ])),
-                      ])))),
+                      ]))))),
         );
       });
 }

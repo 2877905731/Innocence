@@ -1,6 +1,7 @@
 package com.innocence.server.common.api;
 
 import java.time.OffsetDateTime;
+import com.innocence.server.common.web.RequestTrace;
 
 public record ApiResponse<T>(
         int code,
@@ -11,10 +12,10 @@ public record ApiResponse<T>(
 ) {
 
     public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(0, "ok", data, "", OffsetDateTime.now());
+        return new ApiResponse<>(0, "ok", data, RequestTrace.currentId(), OffsetDateTime.now());
     }
 
     public static <T> ApiResponse<T> fail(int code, String message) {
-        return new ApiResponse<>(code, message, null, "", OffsetDateTime.now());
+        return new ApiResponse<>(code, message, null, RequestTrace.currentId(), OffsetDateTime.now());
     }
 }

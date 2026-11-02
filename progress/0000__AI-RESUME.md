@@ -3,14 +3,14 @@ schema_version: 1
 document_type: ai_resume
 project_name: Innocence
 updated_at: "2026-11-02"
-last_resumed_at: "2026-11-02T20:27:41+08:00"
-latest_checkpoint: "0148"
-next_sequence: "0149"
+last_resumed_at: "2026-11-02T21:21:43+08:00"
+latest_checkpoint: "0149"
+next_sequence: "0150"
 current_phase: P01
 current_gate: G01
-state: manual_timer_theme_covers_local_verified_online_update_assessed
-current_goal: "用户反馈：自定义专注、番茄逐阶段手动开始与学习入账、三端其余三主题封面已本机实现；在线账号更新完成服务器资源评估。0148记录本机回归与三端构建，新接口/安装包未部署或公开；鸿蒙TIMER仍待审。"
-active_feedback: "0148：自定义专注1–1440分钟、番茄学习/休息到点等待下一次开始并入学习统计、其余三主题独立大封面已本机实现；245客户端/6条件跳过、111后端、Android原生10组及拒绝权限通过，三端构建成功。在线更新仅评估：2核/可用963MiB/余23.3GiB、套餐200Mbps/600GiB可支持受控首期分发；用户确认只限已认证在线账号。生产与公开版本仍为原基线。"
+state: assistant_annual_fix_and_multiple_conversations_locally_verified_unreleased
+current_goal: "0149年度工具与多对话本机实现/隔离验证完成；保留0148计时与封面候选，后续按正式发行指令整合并补实体与真实供应商验收，不重跑真实计划。"
+active_feedback: "0149：联网年度新建UUID误走PUT已修复，编辑保留进度/子任务，错误码/原因/请求标识穿透；按身份隔离的多对话新建/切换/删除及草稿/旧历史迁移完成。267客户端/6条件跳过、120后端、Android/鸿蒙配置各21专项与三端构建通过，124Dart/4ArkTS字节一致；均为本机/隔离证据，未安装主应用/部署/推送/发布。0148计时封面候选和已认证在线账号更新资源评估保留，更新模块尚未实现，现网仍为原基线。"
 review:
   submitted_date: "2026-10-31"
   last_verified_status: 审核中
@@ -26,7 +26,7 @@ current_baseline:
   windows: "1.3.0+12已公开（0134）；四主题、L/M/S与主动Focus Orb保留，完整DPI/输入/性能矩阵待验。"
   harmonyos: "1.3.0+12公开ARM64 AOT联网HAP未签名；本人LRT-W20/API26原证书Release安装启动/PC画面有0133证据，个人包/Profile仅F盘。实况窗待审，真实两处递减未验。"
   server_admin: "0133生产HTTPS/续期、PBKDF2、mobile/desktop/tablet独立会话与备份隔离恢复；0136后台注册控制、审计删除和团队修复，0147登录验证码账号预检均已部署。当前注册关闭，既有账号仍可验证码登录；验收不证明长期负载。"
-  assistant: "BYOK多轮聊天、地址+Key发现模型/协议验证、14工具已实现（0092/0093）；真实供应商、完整HTTP/同步与设备门禁待，原任务编辑/月历批量等未接工具。"
+  assistant: "BYOK模型发现/协议及14工具保留；0149共享年度新建/编辑与错误追踪修复、按owner多对话新建/切换/删除/草稿/迁移本机验证通过，尚未发布。真实供应商/完整同步/实体矩阵待，原日任务编辑/月历批量和年度已有子任务编辑未接工具。"
 active_constraints:
   - "现行授权与最新人类指令优先；一般设备调测已授权，已提交申请不重问旧承诺。新设备标识上传/新协议按具体范围确认，不代发邮件。"
   - "不卸载/清数据、不接管用户草稿或写真实合成任务；不把模拟器、设计图、公开发行当实体或G01通过。"
@@ -40,7 +40,7 @@ unfinished:
   - id: TODO-MANUAL-TIMER-THEME-ROLLOUT
     priority: P0
     gate: G01/G02/G06
-    item: "0148本机候选未上线：正式发版前先备份迁移20261102-pomodoro-study.sql并部署新接口，再按原证书构建发行包；补真实在线上传/断网恢复/离线确认导入、三端实体阶段和封面矩阵。鸿蒙TIMER仍待审，长于8小时不调用Live View。在线更新模块仅评估，未实现。"
+    item: "0148/0149本机候选未上线：正式发版前先备份迁移20261102-pomodoro-study.sql并部署新增学习接口/安全请求追踪，再按原证书整合计时、封面、年度工具和多对话发行包；补真实在线上传/断网恢复/离线确认导入、实体矩阵。鸿蒙TIMER仍待审，长于8小时不调用Live View；在线更新模块仅评估未实现。"
   - id: TODO-HARMONYOS-TABLET
     priority: P1
     gate: HarmonyOS-H0-H5
@@ -48,7 +48,7 @@ unfinished:
   - id: TODO-AI-CHAT-LIVE-VERIFICATION
     priority: P1
     gate: assistant-B1
-    item: "真实模型发现/生成/工具/费用、完整登录同步与原生密钥设备；原任务编辑/删除/重排、月历批量和已有年度子任务编辑未接工具。"
+    item: "0149年度实际客户端TCP/MySQL和多对话迁移/身份隔离/宿主布局已通过，仍需正式包实体与真实模型发现/生成/工具/费用、完整登录同步/原生密钥设备；原日任务编辑/删除/重排、月历批量和已有年度子任务编辑未接工具。"
   - id: TODO-ANDROID-PLAN-CLOCK-RUNTIME
     priority: P0
     gate: Android-A1/G01
@@ -87,8 +87,8 @@ unfinished:
     item: "实体/OEM/省电/折叠通知组、SDK许可实况、详情/输入/性能；联网包已公开，完整同步/WebSocket/推送仍待。"
 next_actions:
   - id: NEXT-MANUAL-TIMER-RELEASE
-    action: "收到正式发行指令后，沿0148候选执行服务端备份/幂等键迁移/新增接口部署与真实HTTP，再升版本用原签名打包并核对下载；不把当前QA包或未签名HAP当正式发行。"
-    inputs: [docs/development/计时阶段与学习入账.md, progress/0148__20261102__P01__DONE__manual-timers-study-cover-and-update-assessment.md]
+    action: "收到正式发行指令后，整合0148/0149候选：服务端备份/幂等键迁移/学习接口与追踪部署及真实HTTP，升版本按原签名打包计时/封面/年度修复/多对话并核对下载；QA包或未签名HAP不当正式发行。"
+    inputs: [docs/development/计时阶段与学习入账.md, docs/development/助手年度任务修复与多对话.md, progress/0149__20261102__P01__DONE__assistant-annual-fix-and-multiple-conversations.md]
   - id: NEXT-ONLINE-UPDATE-IMPLEMENTATION
     action: "本轮评估已完成，需实施时按在线账号鉴权、后台上传已签名包和Nginx内部下载的首期闭环推进；当前无发布模块，不在2GB主机编译。"
     inputs: [docs/planning/Innocence-在线账号版本发布与更新评估.md]
@@ -111,8 +111,8 @@ next_actions:
     action: "补跨端导入/冲突/断网/幂等及认证失败、租户不匹配、权限拒绝、缺字段、生成失败的完整负向。"
     inputs: [docs/02-contract-and-compatibility-rules.md, docs/06-contract-inventory.md]
   - id: NEXT-AI-CHAT-LIVE
-    action: "真实供应商/14工具和密钥原生存储/设备验收，未接工具按契约扩展；不在聊天索取Key或自动启用持续规则。"
-    inputs: [docs/development/AI对话助手配置与验收.md, docs/planning/Innocence-AI智能助手B方案实施与契约.md]
+    action: "正式包在原设备验年度最小新建/编辑及多对话迁移/切换/删除，用户自行在软件配置真实供应商核对14工具/生成/费用；用独立合成资料验，不重跑真实目标；密钥原生设备和未接工具按契约扩展，不在聊天索取Key或启用持续规则。"
+    inputs: [docs/development/AI对话助手配置与验收.md, docs/development/助手年度任务修复与多对话.md, docs/planning/Innocence-AI智能助手B方案实施与契约.md]
   - id: NEXT-ADMIN-FEEDBACK
     action: "0136/0147已上线，依用户实际反馈继续；当前注册关闭，未注册邮箱发送登录验证码返回没有该账号。本机后台入口可重连。真实删除由用户选择确认，真实SMTP/长期容量待；不重初始化或迁移资料。"
     inputs: [docs/development/后台注册控制与用户删除.md, infra/deploy/打开管理后台.cmd]
@@ -120,7 +120,7 @@ history:
   index: progress/INDEX.md
   pre_compression_resume: progress/archive/0000__AI-RESUME__before-20261101-compression.md
   archive_manifest: docs/archive/documentation-compression-20261101.json
-  latest_event: progress/0148__20261102__P01__DONE__manual-timers-study-cover-and-update-assessment.md
+  latest_event: progress/0149__20261102__P01__DONE__assistant-annual-fix-and-multiple-conversations.md
 ---
 
 # 恢复说明

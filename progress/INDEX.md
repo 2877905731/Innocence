@@ -1050,3 +1050,10 @@ checkpoints:
     status: complete
     path: progress/0148__20261102__P01__DONE__manual-timers-study-cover-and-update-assessment.md
     title: "自定义专注、手动番茄入账与三主题封面本机实现，在线账号更新资源评估"
+  - sequence: "0149"
+    created_at: "2026-11-02T21:25:51+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0149__20261102__P01__DONE__assistant-annual-fix-and-multiple-conversations.md
+    title: "助手年度任务路由与诊断修复，多对话创建切换删除本机验证"
