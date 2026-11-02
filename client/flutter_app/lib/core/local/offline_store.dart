@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:innocence_flutter/features/focus/domain/models/pomodoro_timer.dart';
+import 'package:innocence_flutter/features/focus/domain/models/pomodoro_study_record.dart';
 import 'dart:io';
 import 'dart:math';
 
@@ -75,12 +76,13 @@ class OfflineStore {
     _database = await factory.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 8,
+        version: 9,
         onConfigure: (database) async {
           await database.execute('PRAGMA foreign_keys = ON');
         },
         onCreate: (database, version) => _createSchema(database),
         onUpgrade: (database, oldVersion, newVersion) async {
+          if (oldVersion < 9) await _createPomodoroStudyTable(database);
           if (oldVersion < 8) await _createPomodoroTable(database);
           if (oldVersion < 7) {
             await database.execute(
@@ -280,6 +282,7 @@ class OfflineStore {
         WHEN 'daily_plan' THEN 2
         WHEN 'annual_segment' THEN 3
         WHEN 'focus_session' THEN 4
+        WHEN 'pomodoro_study' THEN 4
         WHEN 'memo' THEN 5
         WHEN 'checkin_intent' THEN 6
         ELSE 99 END,
@@ -497,6 +500,25 @@ class OfflineStore {
         (value) => value + pomodoroCount,
         ifAbsent: () => pomodoroCount,
       );
+    }
+
+    final studyRecords = await database.query('local_pomodoro_study',
+        where: 'owner_scope = ?', whereArgs: [ownerScope]);
+    final extraMs = <String, int>{};
+    for (final row in studyRecords) {
+      final record = PomodoroStudyRecord.fromJson(
+          jsonDecode(row['snapshot'] as String) as Map<String, dynamic>);
+      extraMs.update(record.date, (v) => v + record.creditedMs,
+          ifAbsent: () => record.creditedMs);
+      pomodoroByDate.update(record.date, (v) => v + record.completedRounds,
+          ifAbsent: () => record.completedRounds);
+      totalPomodoroCompleted += record.completedRounds;
+    }
+    for (final entry in extraMs.entries) {
+      final minutes = entry.value ~/ 60000;
+      studyMinutesByDate.update(entry.key, (v) => v + minutes,
+          ifAbsent: () => minutes);
+      totalStudyDurationMinutes += minutes;
     }
 
     final trend = <StatsTrendPoint>[];
@@ -1519,9 +1541,64 @@ class OfflineStore {
   Future<void> savePomodoro(String owner, PomodoroTimer timer) async {
     if (owner.isEmpty) throw ArgumentError('Owner is required');
     PomodoroTimer.fromJson(timer.toJson());
-    await (await _readyDatabase()).insert('local_pomodoro_timer',
-        {'owner_scope': owner, 'snapshot': jsonEncode(timer.toJson())},
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    await (await _readyDatabase()).transaction((db) async {
+      await db.insert('local_pomodoro_timer',
+          {'owner_scope': owner, 'snapshot': jsonEncode(timer.toJson())},
+          conflictAlgorithm: ConflictAlgorithm.replace);
+      for (final record in timer.records) {
+        final snapshot = jsonEncode(record.toJson());
+        final existing = await db.query('local_pomodoro_study',
+            where: 'owner_scope=? AND record_key=?',
+            whereArgs: [owner, record.key]);
+        if (existing.isNotEmpty && existing.first['snapshot'] == snapshot) {
+          continue;
+        }
+        await db.insert(
+            'local_pomodoro_study',
+            {
+              'owner_scope': owner,
+              'record_key': record.key,
+              'snapshot': snapshot,
+              'uploaded_snapshot':
+                  existing.isEmpty ? '' : existing.first['uploaded_snapshot'],
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace);
+        if (owner.startsWith('local:')) {
+          await _enqueue(db,
+              ownerScope: owner,
+              aggregateType: 'pomodoro_study',
+              aggregateId: record.key,
+              operationType: 'upsert',
+              payload: record.request,
+              createdAt: DateTime.now().toIso8601String());
+        }
+      }
+    });
+  }
+
+  static Future<void> _createPomodoroStudyTable(DatabaseExecutor db) => db.execute(
+      'CREATE TABLE IF NOT EXISTS local_pomodoro_study ('
+      'owner_scope TEXT NOT NULL, record_key TEXT NOT NULL, snapshot TEXT NOT NULL, '
+      "uploaded_snapshot TEXT NOT NULL DEFAULT '', PRIMARY KEY(owner_scope,record_key))");
+
+  Future<List<PomodoroStudyRecord>> pendingPomodoroStudies(String owner) async {
+    if (owner.isEmpty) throw ArgumentError('Owner is required');
+    final rows = await (await _readyDatabase()).query('local_pomodoro_study',
+        where: 'owner_scope=? AND snapshot<>uploaded_snapshot',
+        whereArgs: [owner]);
+    return rows
+        .map((r) => PomodoroStudyRecord.fromJson(
+            jsonDecode(r['snapshot'] as String) as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> acknowledgePomodoroStudy(
+      String owner, PomodoroStudyRecord record) async {
+    if (owner.isEmpty) throw ArgumentError('Owner is required');
+    await (await _readyDatabase()).update('local_pomodoro_study',
+        {'uploaded_snapshot': jsonEncode(record.toJson())},
+        where: 'owner_scope=? AND record_key=?',
+        whereArgs: [owner, record.key]);
   }
 
   DatabaseFactory _defaultDatabaseFactory() {
@@ -1551,6 +1628,7 @@ class OfflineStore {
 
   static Future<void> _createSchema(Database database) async {
     await _createPomodoroTable(database);
+    await _createPomodoroStudyTable(database);
     await _createAssistantTables(database);
     final statements = <String>[
       '''CREATE TABLE local_profile (

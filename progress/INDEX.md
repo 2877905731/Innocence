@@ -1043,3 +1043,10 @@ checkpoints:
     status: complete
     path: progress/0147__20261101__P01__DECISION__login-code-account-check-deployed.md
     title: "按用户要求在发送登录验证码前拦截未注册邮箱，已部署并保留关闭注册状态"
+  - sequence: "0148"
+    created_at: "2026-11-02T20:30:31+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0148__20261102__P01__DONE__manual-timers-study-cover-and-update-assessment.md
+    title: "自定义专注、手动番茄入账与三主题封面本机实现，在线账号更新资源评估"

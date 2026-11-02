@@ -510,9 +510,11 @@ CREATE TABLE IF NOT EXISTS study_timer_record
     pomodoro_break_minutes   INT          NOT NULL DEFAULT 0,
     completed_pomodoro_count INT          NOT NULL DEFAULT 0,
     completion_notified_flag TINYINT      NOT NULL DEFAULT 0,
+    client_pomodoro_key       VARCHAR(160) NULL,
     create_time              DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time              DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_study_timer_user_status (user_id, status),
+    UNIQUE KEY uk_study_timer_pomodoro (user_id, client_pomodoro_key),
     KEY idx_study_timer_create_time (create_time)
 );
 
@@ -532,6 +534,16 @@ SET @study_timer_completion_notified_sql = (
 PREPARE study_timer_completion_notified_stmt FROM @study_timer_completion_notified_sql;
 EXECUTE study_timer_completion_notified_stmt;
 DEALLOCATE PREPARE study_timer_completion_notified_stmt;
+
+SET @pomodoro_study_sql = (
+    SELECT IF(EXISTS(SELECT 1 FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'study_timer_record'
+        AND COLUMN_NAME = 'client_pomodoro_key'), 'SELECT 1',
+      'ALTER TABLE study_timer_record ADD COLUMN client_pomodoro_key VARCHAR(160) NULL, ADD UNIQUE KEY uk_study_timer_pomodoro (user_id,client_pomodoro_key)')
+);
+PREPARE pomodoro_study_stmt FROM @pomodoro_study_sql;
+EXECUTE pomodoro_study_stmt;
+DEALLOCATE PREPARE pomodoro_study_stmt;
 
 SET @study_timer_paused_at_sql = (
     SELECT IF(

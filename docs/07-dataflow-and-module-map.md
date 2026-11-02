@@ -1,4 +1,8 @@
 ---
+
+## 2026-11-02 手动番茄学习数据流
+
+PomodoroTimer 当前阶段封顶并进入等待 → PomodoroController 结算学习/整轮完成 → SQLite v9 按 ownerScope 保存累计记录 → 在线账号用既有认证提交 pomodoro-study（幂等 finished study_timer_record），断网待重试；本机离线资料进入原导入预览与目标账号确认，再经 pomodoro_study/upsert 同步。普通专注重叠区间保存在时钟快照中，休息/等待/暂停不产生学习片段。平台通知只安排当前阶段，无自动跨阶段。三主题封面为共享呈现组件，不修改业务数据流。规则和状态见 [计时阶段与学习入账](development/计时阶段与学习入账.md) 与 RESUME。
 schema_version: 1
 document_type: dataflow_and_module_map
 project_name: "Innocence"

@@ -5,6 +5,7 @@ import com.innocence.server.common.web.RequestUserContext;
 import com.innocence.server.modules.focus.dto.request.FinishFocusSessionRequest;
 import com.innocence.server.modules.focus.dto.request.StartFocusSessionRequest;
 import com.innocence.server.modules.focus.dto.request.ConfigurePomodoroRequest;
+import com.innocence.server.modules.focus.dto.request.PomodoroStudyRequest;
 import com.innocence.server.modules.focus.dto.response.FocusSessionResponse;
 import com.innocence.server.modules.focus.service.FocusSessionService;
 import jakarta.validation.Valid;
@@ -37,6 +38,12 @@ public class FocusSessionController {
     @PostMapping("/pomodoro")
     public ApiResponse<FocusSessionResponse> configurePomodoro(@Valid @RequestBody ConfigurePomodoroRequest request) {
         return ApiResponse.success(focusSessionService.configurePomodoro(currentUserId(), request));
+    }
+
+    @PostMapping("/pomodoro-study")
+    public ApiResponse<Void> recordPomodoroStudy(@Valid @RequestBody PomodoroStudyRequest request) {
+        focusSessionService.recordPomodoroStudy(currentUserId(), request);
+        return ApiResponse.success(null);
     }
 
     @PostMapping("/finish")

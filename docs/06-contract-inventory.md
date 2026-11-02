@@ -297,6 +297,10 @@ admin_web_contract:
   evidence: "AdminAuthController、AdminDashboardController、现有四组管理 Controller、client/admin_web/src/api.ts；真实 HTTP 样本待收集"
 ---
 
+## 2026-11-02 自定义专注与番茄学习入账
+
+`focus/session/start` 新增可选 `durationMinutes:1..1440`，存在时从服务器接收时刻起算，旧 `endTime` 请求保持兼容。新增认证 `POST focus/session/pomodoro-study`，只取登录身份，按用户+设备随机计时ID/轮次/日期幂等写 finished 学习记录；`studySeconds`、`creditedSeconds` 与整轮完成数严格校验，重复/旧快照不重复累计。同步导入新增 `pomodoro_study/upsert`，仍需原目标账号预览确认。详细字段与迁移见 [计时阶段与学习入账](development/计时阶段与学习入账.md)。本轮为本机构建验证，生产部署状态以 RESUME 为准。
+
 # 契约清单说明
 
 本文件为接口清单草案（`docs/planning/Innocence-接口清单草案.md`）的治理层索引：

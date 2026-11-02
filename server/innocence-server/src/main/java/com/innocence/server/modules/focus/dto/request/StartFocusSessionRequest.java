@@ -11,6 +11,13 @@ public class StartFocusSessionRequest {
     @NotNull(message = "End time is required.")
     private LocalDateTime endTime;
 
+    @jakarta.validation.constraints.Min(1)
+    @jakarta.validation.constraints.Max(1440)
+    private Integer durationMinutes;
+
+    public Integer getDurationMinutes() { return durationMinutes; }
+    public void setDurationMinutes(Integer value) { durationMinutes = value; }
+
     private Boolean bindPomodoro;
     private Integer pomodoroStudyMinutes;
     private Integer pomodoroBreakMinutes;

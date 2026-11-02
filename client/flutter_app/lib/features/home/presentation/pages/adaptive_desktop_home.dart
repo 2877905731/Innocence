@@ -9,13 +9,13 @@ import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
-import 'package:innocence_flutter/app/wabi_sabi_typography.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/layout/desktop_presentation.dart';
 import 'package:innocence_flutter/core/platform/desktop_widget_bridge.dart';
 import 'package:innocence_flutter/core/widgets/adaptive_canvas_shell.dart';
 import 'package:innocence_flutter/core/widgets/focus_timer_dial.dart';
 import 'package:innocence_flutter/core/widgets/minimal_white_hero.dart';
+import 'package:innocence_flutter/core/widgets/theme_cover_hero.dart';
 import 'package:innocence_flutter/core/widgets/minimal_progress_rule.dart';
 import 'package:innocence_flutter/core/widgets/glass_refractive_surface.dart';
 import 'package:innocence_flutter/core/widgets/status_banner.dart';
@@ -653,6 +653,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome>
           const SizedBox(height: 18),
         ],
         _HeroStatement(
+          isChinese: _isChinese,
           palette: palette,
           dayIndex: dailySlogan.dayIndex,
           eyebrow: 'INNOCENCE',
@@ -3747,6 +3748,7 @@ class _ResponsivePair extends StatelessWidget {
 
 class _HeroStatement extends StatefulWidget {
   const _HeroStatement({
+    required this.isChinese,
     required this.palette,
     required this.dayIndex,
     required this.eyebrow,
@@ -3755,6 +3757,7 @@ class _HeroStatement extends StatefulWidget {
   });
 
   final _HomePalette palette;
+  final bool isChinese;
   final int dayIndex;
   final String eyebrow;
   final String title;
@@ -3835,160 +3838,15 @@ class _HeroStatementState extends State<_HeroStatement>
         indexLabel: 'D/${dayIndex.toString().padLeft(2, '0')}',
       );
     }
-    final decoration = switch (palette.visualTheme) {
-      AppVisualTheme.minimalism =>
-        const BoxDecoration(color: Colors.transparent),
-      AppVisualTheme.wabiSabi => BoxDecoration(
-          color: palette.surface,
-          border: Border(left: BorderSide(color: palette.accent, width: 3)),
-        ),
-      AppVisualTheme.midCentury => BoxDecoration(
-          color: palette.ink,
-          borderRadius: const BorderRadius.only(
-            topRight: Radius.circular(54),
-            bottomLeft: Radius.circular(18),
-          ),
-          boxShadow: const [
-            BoxShadow(
-                color: Color(0x242C2416), blurRadius: 18, offset: Offset(0, 8)),
-          ],
-        ),
-      AppVisualTheme.glass => const BoxDecoration(
-          color: Colors.transparent,
-        ),
-    };
-    final darkHero = palette.visualTheme == AppVisualTheme.midCentury ||
-        palette.visualTheme == AppVisualTheme.glass;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(
-        28,
-        28,
-        28,
-        30,
-      ),
-      decoration: decoration,
-      child: Stack(
-        children: [
-          if (palette.visualTheme == AppVisualTheme.midCentury)
-            const Positioned(right: 4, top: 0, child: _MidCenturyOrnament()),
-          if (palette.visualTheme == AppVisualTheme.wabiSabi)
-            Positioned(
-              right: 2,
-              top: 2,
-              child: ExcludeSemantics(
-                child: CustomPaint(
-                  size: const Size(92, 92),
-                  painter: _WabiHeroSealPainter(palette.accent),
-                ),
-              ),
-            ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                eyebrow,
-                style: TextStyle(
-                  color: palette.visualTheme == AppVisualTheme.glass
-                      ? palette.accent
-                      : darkHero
-                          ? palette.accentSoft
-                          : palette.accent,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.4,
-                ),
-              ),
-              const SizedBox(height: 18),
-              Semantics(
-                label: title,
-                child: ExcludeSemantics(
-                  child: Text(
-                    title,
-                    maxLines: 3,
-                    overflow: TextOverflow.fade,
-                    style: TextStyle(
-                      color: darkHero ? palette.onInk : palette.ink,
-                      fontFamily: switch (palette.visualTheme) {
-                        AppVisualTheme.wabiSabi =>
-                          WabiSabiTypography.latinFamily,
-                        AppVisualTheme.midCentury => 'Century Gothic',
-                        AppVisualTheme.glass => 'Segoe UI Variable Display',
-                        _ => 'Segoe UI',
-                      },
-                      fontFamilyFallback:
-                          palette.visualTheme == AppVisualTheme.wabiSabi
-                              ? WabiSabiTypography.fallback
-                              : null,
-                      fontSize: switch (palette.visualTheme) {
-                        AppVisualTheme.minimalism => 34,
-                        AppVisualTheme.glass => 34,
-                        _ => 34,
-                      },
-                      height: 1.08,
-                      fontWeight:
-                          palette.visualTheme == AppVisualTheme.wabiSabi ||
-                                  palette.visualTheme ==
-                                      AppVisualTheme.minimalism ||
-                                  palette.visualTheme == AppVisualTheme.glass
-                              ? FontWeight.w400
-                              : FontWeight.w800,
-                      fontStyle: palette.visualTheme == AppVisualTheme.wabiSabi
-                          ? FontStyle.italic
-                          : FontStyle.normal,
-                      letterSpacing: switch (palette.visualTheme) {
-                        AppVisualTheme.minimalism => -1.0,
-                        AppVisualTheme.wabiSabi => 0.3,
-                        _ => -1.0,
-                      },
-                      shadows: null,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                description,
-                style: TextStyle(
-                  color: darkHero ? palette.onInkMuted : palette.muted,
-                  fontSize: 14,
-                  height: 1.5,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return ThemeCoverHero(
+      theme: palette.visualTheme,
+      isChinese: widget.isChinese,
+      eyebrow: eyebrow,
+      title: title,
+      description: description,
+      indexLabel: 'D/${dayIndex.toString().padLeft(2, '0')}',
     );
   }
-}
-
-class _WabiHeroSealPainter extends CustomPainter {
-  const _WabiHeroSealPainter(this.color);
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color.withValues(alpha: 0.22)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.2
-      ..strokeCap = StrokeCap.round;
-    final rect = Rect.fromLTWH(8, 8, size.width - 16, size.height - 16);
-    canvas.drawArc(rect, -0.35, 4.85, false, paint);
-    canvas.drawLine(
-      Offset(size.width * 0.22, size.height * 0.69),
-      Offset(size.width * 0.72, size.height * 0.27),
-      Paint()
-        ..color = color.withValues(alpha: 0.12)
-        ..strokeWidth = 5
-        ..strokeCap = StrokeCap.round,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _WabiHeroSealPainter oldDelegate) =>
-      color != oldDelegate.color;
 }
 
 class _FocusPanel extends StatelessWidget {
@@ -5369,41 +5227,4 @@ class _HomeBackdropPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _HomeBackdropPainter oldDelegate) =>
       oldDelegate.visualTheme != visualTheme || oldDelegate.palette != palette;
-}
-
-class _MidCenturyOrnament extends StatelessWidget {
-  const _MidCenturyOrnament();
-  @override
-  Widget build(BuildContext context) => SizedBox(
-        width: 112,
-        height: 82,
-        child: Stack(children: [
-          Positioned(
-              right: 0,
-              child: Container(
-                  width: 58,
-                  height: 58,
-                  decoration: const BoxDecoration(
-                      color: Color(0xFFE5A536), shape: BoxShape.circle))),
-          Positioned(
-              right: 42,
-              top: 28,
-              child: Transform.rotate(
-                angle: .55,
-                child: Container(
-                    width: 54, height: 28, color: const Color(0xFFD45632)),
-              )),
-          Positioned(
-              right: 78,
-              top: 4,
-              child: Container(
-                  width: 22,
-                  height: 64,
-                  decoration: const BoxDecoration(
-                      color: Color(0xFF2E7771),
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(22),
-                          bottomRight: Radius.circular(22))))),
-        ]),
-      );
 }

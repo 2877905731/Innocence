@@ -70,9 +70,15 @@ void main() {
     now += 90000;
     controller.didChangeAppLifecycleState(AppLifecycleState.resumed);
     expect(controller.timer.active, isTrue);
-    expect(controller.timer.resting, isTrue);
+    expect(controller.timer.resting, isFalse);
+    expect(controller.timer.awaitingNext, isTrue);
+    expect(controller.timer.remainingSeconds, 0);
+    expect(controller.timer.completed, 0);
+    await controller.startNextStage();
+    now += 30000;
+    controller.didChangeAppLifecycleState(AppLifecycleState.resumed);
     expect(controller.timer.remainingSeconds, 30);
-    expect(controller.timer.completed, 1);
+    expect(controller.timer.completed, 0);
     await controller.refreshNotices();
     controller.dispose();
     await store.close();
@@ -90,7 +96,7 @@ void main() {
   });
 
   test(
-      'pause across many cycles remains frozen, resume catches up, finish clears own notice only',
+      'pause remains frozen and resume stops at a single boundary, finish clears own notice only',
       () async {
     await controller.start(1, 0, true);
     now += 30500;
@@ -102,13 +108,14 @@ void main() {
     await controller.togglePause();
     now += 90500;
     controller.didChangeAppLifecycleState(AppLifecycleState.resumed);
-    expect(controller.timer.completed, 2);
+    expect(controller.timer.completed, 1);
+    expect(controller.timer.awaitingNext, isTrue);
     await controller.finish();
     expect(controller.timer.active, isFalse);
     final args = native.last.arguments as Map;
     expect(args['active'], isFalse);
     expect(native.where((call) => call.method == 'sync'), isEmpty);
-    expect((await store.loadPomodoro(owner!)).completed, 2);
+    expect((await store.loadPomodoro(owner!)).completed, 1);
   });
 
   test('owner switch cancels previous notice and isolates clocks and settings',
@@ -164,8 +171,7 @@ void main() {
         () => PomodoroTimer.fromJson({'active': true}), throwsFormatException);
   });
 
-  test(
-      'stage math catches up over days without loops and preserves fractional pause time',
+  test('background catchup caps at the current stage and waits across days',
       () {
     const t = PomodoroTimer(
         id: 'math',
@@ -173,11 +179,12 @@ void main() {
         studyMinutes: 1,
         breakMinutes: 1,
         referenceMs: 1000);
-    expect(t.advance(61000).resting, isTrue);
-    expect(t.advance(121000).cycle, 2);
-    expect(t.advance(121000).completed, 1);
-    expect(t.advance(121000).remainingSeconds, 60);
-    expect(t.advance(86401000).completed, 720);
+    expect(t.advance(61000).resting, isFalse);
+    expect(t.advance(61000).awaitingNext, isTrue);
+    expect(t.advance(121000).cycle, 1);
+    expect(t.advance(121000).completed, 0);
+    expect(t.advance(121000).remainingSeconds, 0);
+    expect(t.advance(86401000).records.single.studyMs, 60000);
     expect(t.advance(500), same(t));
     expect(t.copy(paused: true).advance(999999), isNotNull);
   });
@@ -240,6 +247,11 @@ void main() {
           controller.didChangeAppLifecycleState(AppLifecycleState.resumed);
           await controller.refreshNotices();
         });
+        await tester.pump();
+        expect(find.text('学习完成 · 等待下一阶段'), findsOneWidget);
+        expect(find.byKey(const ValueKey('independent-pomodoro-next')),
+            findsOneWidget);
+        await tester.runAsync(controller.startNextStage);
         await tester.pump();
         expect(find.text('休息'), findsOneWidget);
         await tester

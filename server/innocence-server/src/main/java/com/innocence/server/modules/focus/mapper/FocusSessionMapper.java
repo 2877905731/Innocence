@@ -11,6 +11,19 @@ import java.time.LocalDateTime;
 
 @Mapper
 public interface FocusSessionMapper {
+    @Insert("""
+        INSERT INTO study_timer_record(user_id,client_pomodoro_key,task_name,planned_end_time,actual_end_time,
+          planned_minutes,duration_seconds,status,completed_pomodoro_count,completion_notified_flag,create_time)
+        VALUES(#{userId},#{record.recordKey},'Pomodoro study',#{record.endTime},#{record.endTime},
+          CEIL(#{record.creditedSeconds}/60.0),#{record.creditedSeconds},'finished',#{record.completedRounds},1,#{record.startTime})
+        ON DUPLICATE KEY UPDATE duration_seconds=GREATEST(duration_seconds,#{record.creditedSeconds}),
+          completed_pomodoro_count=GREATEST(completed_pomodoro_count,#{record.completedRounds}),
+          actual_end_time=GREATEST(actual_end_time,#{record.endTime}),
+          planned_end_time=GREATEST(planned_end_time,#{record.endTime})
+        """)
+    void upsertPomodoroStudy(@Param("userId") Long userId,
+        @Param("record") com.innocence.server.modules.focus.dto.request.PomodoroStudyRequest record);
+
     @Update("UPDATE assistant_document SET payload_json=JSON_SET(payload_json,'$.execution.undoEligibility',JSON_EXTRACT('false','$')) WHERE user_id=#{userId} AND kind='execution' AND JSON_EXTRACT(payload_json,'$.execution.undoEligibility')=true")
     void invalidateAssistantUndo(@Param("userId") Long userId);
     @Select("SELECT id FROM app_user WHERE id=#{userId} FOR UPDATE")

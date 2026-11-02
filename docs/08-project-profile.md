@@ -118,6 +118,8 @@ v1.2.3+8已公开（Release#404930678），Windows安装器/便携包及Android�
 
 # 项目画像说明
 
+2026-11-02 用户新反馈：专注时长允许自定义；独立番茄改为逐阶段手动开始，学习到点入学习统计、休息到点完成一轮，暂停/等待/休息不入学习时长。三端其余三主题补独立大标题封面。在线更新限定已认证在线账号，本轮完成现有服务器资源评估与方案，未实现更新模块。规则、契约与验收边界分别见 `docs/development/计时阶段与学习入账.md`、`docs/planning/Innocence-UI设计规划.md`、`docs/planning/Innocence-在线账号版本发布与更新评估.md`；当前发布/部署状态以 RESUME 为准，旧番茄自动循环历史不作为现行新入口行为。
+
 本文为 Innocence 项目特有规则的权威来源。产品细节以 `docs/planning/` 为详稿，治理规则以本文为准。
 
 2026-10-05新增鸿蒙平板规划（0098），用户随后要求开始制作（0100）：Air系列/HarmonyOS 7全屏复用PC页面，不提供Windows窗口尺寸调整。实施专档为 `docs/planning/Innocence-鸿蒙平板版本实施规划.md`；0102已在F盘准备官方DevEco26/API26、四插件注册，并完成共享Dart/ArkTS/ARM64原生编译和未签名Debug HAP，CRC/摘要及元数据核对通过。用户已完成DevEco登录，真实调试签名仍需连接设备生成Profile；0104已在F盘API26/x64/MatePad Air12预设安装启动HAP，PC全屏/四主题/玻璃进程冷启动恢复及SQLite初始schema有证据；独立工具许可目录差异通过仅工具目录链接解决。当前小艺输入法首次协议/隐私页待用户，QA_NATIVE/QA_TASK草稿未保存；业务恢复/真实平板Profile签名和完整门禁仍待，H0-H5/G01整体未封板。首轮强制本机模式，Debug仍声明INTERNET权限；具体设备型号和会话槽位暂待核实，不能根据PC布局把设备归成Windows或静默扩大“一台手机 + 一台电脑”规则。既有Windows自适应与Android手机规则继续适用于各自平台。

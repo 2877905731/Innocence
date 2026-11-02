@@ -6,6 +6,7 @@ import com.innocence.server.modules.focus.domain.StudyTimerRecord;
 import com.innocence.server.modules.focus.dto.request.FinishFocusSessionRequest;
 import com.innocence.server.modules.focus.dto.request.StartFocusSessionRequest;
 import com.innocence.server.modules.focus.dto.request.ConfigurePomodoroRequest;
+import com.innocence.server.modules.focus.dto.request.PomodoroStudyRequest;
 import com.innocence.server.modules.focus.dto.response.FocusSessionResponse;
 import com.innocence.server.modules.focus.mapper.FocusSessionMapper;
 import com.innocence.server.modules.notification.service.NotificationService;
@@ -29,6 +30,29 @@ public class FocusSessionService {
     ) {
         this.focusSessionMapper = focusSessionMapper;
         this.notificationService = notificationService;
+    }
+
+    /** Cumulative per-device/day/round record; never accepts an owner from the client. */
+    @Transactional
+    public void recordPomodoroStudy(Long userId, PomodoroStudyRequest request) {
+        if (userId == null || userId <= 0) throw new BusinessException(ErrorCode.UNAUTHORIZED, "Authentication required.");
+        if (request == null || request.recordKey() == null || request.recordKey().length() > 160 ||
+                !request.recordKey().matches("[a-zA-Z0-9_-]+/[1-9][0-9]*/[0-9]{4}-[0-9]{2}-[0-9]{2}") ||
+                request.startTime() == null || request.endTime() == null || request.studySeconds() == null ||
+                request.creditedSeconds() == null || request.completedRounds() == null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "Missing or invalid study fields.");
+        }
+        int study = request.studySeconds(), credit = request.creditedSeconds(), rounds = request.completedRounds();
+        long wallSeconds = Duration.between(request.startTime(), request.endTime()).getSeconds();
+        String date = request.recordKey().substring(request.recordKey().length() - 10);
+        if (study < 0 || study > 86400 || credit < 0 || credit > study || rounds < 0 || rounds > 1 ||
+                wallSeconds < study || request.endTime().isBefore(request.startTime()) ||
+                request.endTime().isAfter(LocalDateTime.now().plusMinutes(5)) ||
+                !request.startTime().toLocalDate().toString().equals(date) ||
+                request.endTime().isAfter(request.startTime().toLocalDate().plusDays(1).atStartOfDay())) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "Invalid study duration or date.");
+        }
+        focusSessionMapper.upsertPomodoroStudy(userId, request);
     }
 
     @Transactional
@@ -64,6 +88,13 @@ public class FocusSessionService {
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime endTime = request.getEndTime();
+        if (request.getDurationMinutes() != null) {
+            int minutes = request.getDurationMinutes();
+            if (minutes < 1 || minutes > MAX_SESSION_MINUTES) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST, "Focus duration must be between 1 and 1440 minutes.");
+            }
+            endTime = now.plusMinutes(minutes);
+        }
         if (endTime == null || !endTime.isAfter(now)) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "End time must be later than now.");
         }

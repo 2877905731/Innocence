@@ -2,12 +2,19 @@ import 'package:innocence_flutter/core/network/api_client.dart';
 import 'package:innocence_flutter/core/network/api_exception.dart';
 import 'package:innocence_flutter/features/auth/domain/models/app_session.dart';
 import 'package:innocence_flutter/features/focus/domain/models/focus_session.dart';
+import 'package:innocence_flutter/features/focus/domain/models/pomodoro_study_record.dart';
 
 class FocusSessionApi {
   FocusSessionApi({ApiClient? apiClient})
       : _apiClient = apiClient ?? ApiClient();
 
   final ApiClient _apiClient;
+
+  Future<void> recordPomodoroStudy(
+      AppSession session, PomodoroStudyRecord record) async {
+    await _apiClient.post('focus/session/pomodoro-study',
+        headers: session.authHeaders, body: record.request);
+  }
 
   Future<FocusSession> getCurrentSession(AppSession session) async {
     final data = await _apiClient.get(
@@ -28,12 +35,19 @@ class FocusSessionApi {
     int pomodoroStudyMinutes = 0,
     int pomodoroBreakMinutes = 0,
   }) async {
+    final duration =
+        (endTime.difference(DateTime.now()).inMilliseconds / 60000).round();
+    if (duration < 1 || duration > 1440) {
+      throw const ApiException(
+          'Focus duration must be between 1 and 1440 minutes.');
+    }
     final data = await _apiClient.post(
       'focus/session/start',
       headers: session.authHeaders,
       body: {
         'taskName': taskName,
         'endTime': endTime.toIso8601String(),
+        'durationMinutes': duration,
         'bindPomodoro': bindPomodoro,
         'pomodoroStudyMinutes': pomodoroStudyMinutes,
         'pomodoroBreakMinutes': pomodoroBreakMinutes,

@@ -7,6 +7,7 @@ import com.innocence.server.modules.account.dto.response.UserProfileResponse;
 import com.innocence.server.modules.account.service.AccountService;
 import com.innocence.server.modules.checkin.service.CheckInService;
 import com.innocence.server.modules.focus.service.FocusSessionService;
+import com.innocence.server.modules.focus.dto.request.PomodoroStudyRequest;
 import com.innocence.server.modules.memo.dto.request.SaveMemoRequest;
 import com.innocence.server.modules.memo.dto.response.MemoCardResponse;
 import com.innocence.server.modules.memo.service.MemoService;
@@ -219,6 +220,12 @@ public class SyncImportService {
             case "daily_plan" -> applyDailyPlan(userId, localProfileId, strategy, operation);
             case "annual_segment" -> applyAnnualSegment(userId, localProfileId, operation);
             case "focus_session" -> applyFocusSession(userId, localProfileId, operation);
+            case "pomodoro_study" -> {
+                if (!"upsert".equals(operation.operationType())) throw new IllegalArgumentException("Invalid study operation.");
+                PomodoroStudyRequest record = convert(operation.payload(), PomodoroStudyRequest.class);
+                focusSessionService.recordPomodoroStudy(userId, record);
+                yield record.recordKey();
+            }
             case "memo" -> applyMemo(userId, localProfileId, operation);
             case "checkin_intent" -> applyCheckInIntent(userId, operation);
             default -> throw new IllegalArgumentException("Unsupported offline aggregate type.");
@@ -448,7 +455,7 @@ public class SyncImportService {
             case "day_template" -> 1;
             case "daily_plan" -> 2;
             case "annual_segment" -> 3;
-            case "focus_session" -> 4;
+            case "focus_session", "pomodoro_study" -> 4;
             case "memo" -> 5;
             case "checkin_intent" -> 6;
             default -> 99;

@@ -2,15 +2,15 @@
 schema_version: 1
 document_type: ai_resume
 project_name: Innocence
-updated_at: "2026-11-01"
-last_resumed_at: "2026-11-01T18:54:57+08:00"
-latest_checkpoint: "0147"
-next_sequence: "0148"
+updated_at: "2026-11-02"
+last_resumed_at: "2026-11-02T20:27:41+08:00"
+latest_checkpoint: "0148"
+next_sequence: "0149"
 current_phase: P01
 current_gate: G01
-state: harmony_timer_service_application_submitted_under_review
-current_goal: "TIMER调测服务0145已由用户提交、控制台审核中；0146记录预计日期/结果入口并压缩文档。等待实际审核结果，再核对授权和实体卡片/胶囊；不重复申请、不将待审当获批。"
-active_feedback: "0147：按用户要求，登录验证码发送前拦截未注册邮箱，404/4004/没有该账号已上线。104项后端回归及隔离MySQL/Redis/SMTP HTTP通过，生产HTTPS/运行JAR精确核对通过；注册关闭状态保留，三端无需重装。"
+state: manual_timer_theme_covers_local_verified_online_update_assessed
+current_goal: "用户反馈：自定义专注、番茄逐阶段手动开始与学习入账、三端其余三主题封面已本机实现；在线账号更新完成服务器资源评估。0148记录本机回归与三端构建，新接口/安装包未部署或公开；鸿蒙TIMER仍待审。"
+active_feedback: "0148：自定义专注1–1440分钟、番茄学习/休息到点等待下一次开始并入学习统计、其余三主题独立大封面已本机实现；245客户端/6条件跳过、111后端、Android原生10组及拒绝权限通过，三端构建成功。在线更新仅评估：2核/可用963MiB/余23.3GiB、套餐200Mbps/600GiB可支持受控首期分发；用户确认只限已认证在线账号。生产与公开版本仍为原基线。"
 review:
   submitted_date: "2026-10-31"
   last_verified_status: 审核中
@@ -37,6 +37,10 @@ active_constraints:
   - "离线ownerScope/在线账号隔离、导入预览确认/冲突/幂等不变；助手白名单与具体变更确认，不含C持续规则。"
   - "纯端侧TIMER不依赖推送但仍需实况窗授权；PushToken名单和标准权益是不同路径。<=8小时/用户主动/大陆手机平板为申请范围，未宣称限制已完成实机验证。"
 unfinished:
+  - id: TODO-MANUAL-TIMER-THEME-ROLLOUT
+    priority: P0
+    gate: G01/G02/G06
+    item: "0148本机候选未上线：正式发版前先备份迁移20261102-pomodoro-study.sql并部署新接口，再按原证书构建发行包；补真实在线上传/断网恢复/离线确认导入、三端实体阶段和封面矩阵。鸿蒙TIMER仍待审，长于8小时不调用Live View。在线更新模块仅评估，未实现。"
   - id: TODO-HARMONYOS-TABLET
     priority: P1
     gate: HarmonyOS-H0-H5
@@ -82,6 +86,12 @@ unfinished:
     gate: Android-A0
     item: "实体/OEM/省电/折叠通知组、SDK许可实况、详情/输入/性能；联网包已公开，完整同步/WebSocket/推送仍待。"
 next_actions:
+  - id: NEXT-MANUAL-TIMER-RELEASE
+    action: "收到正式发行指令后，沿0148候选执行服务端备份/幂等键迁移/新增接口部署与真实HTTP，再升版本用原签名打包并核对下载；不把当前QA包或未签名HAP当正式发行。"
+    inputs: [docs/development/计时阶段与学习入账.md, progress/0148__20261102__P01__DONE__manual-timers-study-cover-and-update-assessment.md]
+  - id: NEXT-ONLINE-UPDATE-IMPLEMENTATION
+    action: "本轮评估已完成，需实施时按在线账号鉴权、后台上传已签名包和Nginx内部下载的首期闭环推进；当前无发布模块，不在2GB主机编译。"
+    inputs: [docs/planning/Innocence-在线账号版本发布与更新评估.md]
   - id: NEXT-FOCUS-HARMONY-RIGHTS
     action: "先核对同一应用实况窗审核结果。通过后按实际权限/Profile或名单路径保原签名和资料联调；退回先读原因再改，不扩大场景或重复申请。单设备Token上传另按具体范围确认。"
     inputs: [docs/development/鸿蒙专注提醒权益接入.md]
@@ -110,7 +120,7 @@ history:
   index: progress/INDEX.md
   pre_compression_resume: progress/archive/0000__AI-RESUME__before-20261101-compression.md
   archive_manifest: docs/archive/documentation-compression-20261101.json
-  latest_event: progress/0147__20261101__P01__DECISION__login-code-account-check-deployed.md
+  latest_event: progress/0148__20261102__P01__DONE__manual-timers-study-cover-and-update-assessment.md
 ---
 
 # 恢复说明

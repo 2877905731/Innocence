@@ -104,7 +104,9 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
     pomodoro = PomodoroController(
         store: _offlineStore,
         owner: () => _focusOwner,
-        chinese: () => _isChineseLanguage);
+        chinese: () => _isChineseLanguage,
+        focusWindow: _pomodoroFocusWindow,
+        onRecorded: _recordPomodoroStudies);
     WidgetsBinding.instance.addObserver(this);
     _languageController.addListener(_refreshFocusNotices);
     assistant = AssistantController(
@@ -1626,6 +1628,7 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
     int pomodoroStudyMinutes = 0,
     int pomodoroBreakMinutes = 0,
   }) async {
+    await pomodoro.checkpoint();
     final ownerScope = localOwnerScope;
     if (isOffline && ownerScope != null) {
       await _runBusyAction(() async {
@@ -1684,6 +1687,7 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> finishFocusSession() async {
+    await pomodoro.checkpoint();
     final ownerScope = localOwnerScope;
     if (isOffline && ownerScope != null) {
       await _runBusyAction(() async {
@@ -1696,6 +1700,7 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
           'Offline focus finished and saved on this device.',
         );
         _stopFocusTicker();
+        unawaited(pomodoro.updateFocusCoverage());
       },
           fallbackMessage:
               _message('结束离线专注失败。', 'Failed to finish offline focus.'));
@@ -1730,6 +1735,7 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
       _teamChatOverview = teamChatOverview;
       _bannerMessage = _message('专注已结束。', 'Focus session finished.');
       _stopFocusTicker();
+      unawaited(pomodoro.updateFocusCoverage());
     },
         fallbackMessage:
             _message('结束专注失败。', 'Failed to finish the focus session.'));
@@ -1775,6 +1781,7 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> toggleFocusPause() async {
+    await pomodoro.checkpoint();
     if (!_focusSession.active) {
       return;
     }
@@ -3466,6 +3473,7 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void _syncFocusTicker() {
+    unawaited(pomodoro.updateFocusCoverage());
     if (_focusSession.active) _naturalCompletionKey = null;
     if (_focusSession.active && !_focusSession.paused) {
       _focusTicker ??= Timer.periodic(const Duration(seconds: 1), (_) {
@@ -3491,12 +3499,54 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
           ? 'user:${_session!.userId}'
           : null;
 
+  List<int> _pomodoroFocusWindow() {
+    if (!_focusSession.active || _focusSession.paused) return [0, 0];
+    final start =
+        DateTime.tryParse(_focusSession.startTime)?.millisecondsSinceEpoch ??
+            _focusSession.referenceTime.millisecondsSinceEpoch;
+    return [
+      start,
+      _focusSession.referenceTime.millisecondsSinceEpoch +
+          _focusSession.remainingSeconds * 1000
+    ];
+  }
+
+  Future<void> _recordPomodoroStudies(String owner) async {
+    if (_disposed || owner != _focusOwner) return;
+    if (isOffline) {
+      final stats =
+          await _offlineStore.loadStatsOverview(owner, days: _statsRangeDays);
+      if (_disposed || owner != _focusOwner) return;
+      _statsOverview = stats;
+      notifyListeners();
+      return;
+    }
+    final account = _session;
+    if (account == null || owner != 'user:${account.userId}') return;
+    final records = await _offlineStore.pendingPomodoroStudies(owner);
+    for (final record in records) {
+      if (_disposed || owner != _focusOwner || account != _session) return;
+      await _focusSessionApi.recordPomodoroStudy(account, record);
+      await _offlineStore.acknowledgePomodoroStudy(owner, record);
+    }
+    final overview =
+        await _statsApi.getOverview(account, days: _statsRangeDays);
+    final profile = await _authApi.getProfile(account);
+    final checkIn = await _checkInApi.getTodayStatus(account);
+    if (_disposed || owner != _focusOwner || account != _session) return;
+    _statsOverview = overview;
+    _syncProfile(profile);
+    _checkInStatus = checkIn;
+    notifyListeners();
+  }
+
   void _advanceFocus() {
     if (!_focusSession.active || _focusSession.paused) return;
     _focusSession = _focusSession.advanceTo(DateTime.now());
     if (!_focusSession.active) {
       _naturalCompletionKey = '$_focusOwner/${_focusSession.sessionId}';
       _stopFocusTicker();
+      unawaited(pomodoro.updateFocusCoverage());
       unawaited(_reconcileFocusCompletion());
     }
     notifyListeners();

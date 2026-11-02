@@ -83,7 +83,13 @@ class _PomodoroTimerPanelState extends State<PomodoroTimerPanel> {
                       const SizedBox(height: 12),
                       Text(
                           t.active
-                              ? '${t.resting ? text('休息', 'Break') : text('学习', 'Study')}${t.paused ? text(' · 已暂停', ' · Paused') : ''}'
+                              ? t.awaitingNext
+                                  ? (t.resting
+                                      ? text('休息完成 · 本轮已完成',
+                                          'Break complete · Round complete')
+                                      : text('学习完成 · 等待下一阶段',
+                                          'Study complete · Ready for the next stage'))
+                                  : '${t.resting ? text('休息', 'Break') : text('学习', 'Study')}${t.paused ? text(' · 已暂停', ' · Paused') : ''}'
                               : text(
                                   t.id.isEmpty ? '准备开始' : '本次已结束',
                                   t.id.isEmpty
@@ -99,8 +105,8 @@ class _PomodoroTimerPanelState extends State<PomodoroTimerPanel> {
                       Text(text('第 ${t.cycle} 轮 · 已完成 ${t.completed} 次',
                           'Cycle ${t.cycle} · ${t.completed} completed')),
                       const SizedBox(height: 16),
-                      Text(text('可直接开始，自动循环学习与休息。与总专注分别控制，总专注结束后仍会继续。',
-                          'Start directly and cycle through study and breaks. Controls are independent of the focus timer.')),
+                      Text(text('学习到点即停并提醒，点击后才开始休息；休息完成后提醒，手动开始下一轮。',
+                          'Study stops and alerts at the deadline. Start the break when ready, then start the next round after the break alert.')),
                       const SizedBox(height: 16),
                       LayoutBuilder(
                           builder: (context, size) => size.maxWidth < 460
@@ -131,10 +137,14 @@ class _PomodoroTimerPanelState extends State<PomodoroTimerPanel> {
                               onChanged: editable
                                   ? (v) => setState(() => _notices = v)
                                   : null)),
-                      Text(text('休息设为 0 可连续学习；结束后可重新设置。本计时单独保存在本机，不重复计入专注统计。',
-                          'Use 0 break minutes for continuous study. Settings can be changed after ending. Stored on this device separately from focus statistics.')),
+                      Text(text(
+                          '学习计入学习时间，休息、暂停和等待不计入。与专注同时运行时只记一次。休息设为 0 时仍需手动开始下一轮。',
+                          'Study counts toward learning time. Breaks, pauses and waiting do not. Overlapping focus time counts once. A zero-minute break still waits for the next start.')),
                       if (c.error != null) ...[
                         const SizedBox(height: 12),
+                        TextButton(
+                            onPressed: c.busy ? null : c.retryRecords,
+                            child: Text(text('重试同步', 'Retry sync'))),
                         TextButton(
                             onPressed: c.busy ? null : c.retryRestore,
                             child: Text(text('重试恢复', 'Retry restore'))),
@@ -146,18 +156,14 @@ class _PomodoroTimerPanelState extends State<PomodoroTimerPanel> {
                           t.notices &&
                           c.noticeStatus != 'available') ...[
                         const SizedBox(height: 12),
-                        Text(c.noticeStatus == 'backgroundWindow'
-                            ? text(
-                                '鸿蒙后台已预排接下来 8 个阶段的提醒；返回应用会续排。后台阶段通知显示结束时间，动态倒计时需返回应用更新。',
-                                'HarmonyOS schedules the next 8 stage alerts. Reopen to replenish. Background stage notices show the end time; reopen to refresh the live countdown.')
-                            : c.noticeStatus == 'permissionRequired'
-                                ? text('系统通知未授权，计时仍会继续。',
-                                    'Notifications are disabled. The timer continues.')
-                                : c.noticeStatus == 'exactPermissionRequired'
-                                    ? text('精确闹钟未授权，后台提醒可能延迟。',
-                                        'Allow exact alarms for timely background alerts.')
-                                    : text('系统动态倒计时或后台提醒不可用；请保持应用在前台查看当前阶段。',
-                                        'Live countdown or background alerts are unavailable. Keep the app in the foreground.')),
+                        Text(c.noticeStatus == 'permissionRequired'
+                            ? text('系统通知未授权，计时仍会继续。',
+                                'Notifications are disabled. The timer continues.')
+                            : c.noticeStatus == 'exactPermissionRequired'
+                                ? text('精确闹钟未授权，后台提醒可能延迟。',
+                                    'Allow exact alarms for timely background alerts.')
+                                : text('系统动态倒计时或后台提醒不可用；请保持应用在前台查看当前阶段。',
+                                    'Live countdown or background alerts are unavailable. Keep the app in the foreground.')),
                         TextButton(
                             onPressed: c.openSettings,
                             child: Text(text('通知设置', 'Notification settings'))),
@@ -178,14 +184,26 @@ class _PomodoroTimerPanelState extends State<PomodoroTimerPanel> {
                               icon: const Icon(Icons.play_arrow),
                               label: Text(text('开始番茄闹钟', 'Start pomodoro')))
                         else ...[
-                          FilledButton.icon(
-                              key: const ValueKey('independent-pomodoro-pause'),
-                              onPressed: c.busy ? null : c.togglePause,
-                              icon: Icon(
-                                  t.paused ? Icons.play_arrow : Icons.pause),
-                              label: Text(t.paused
-                                  ? text('继续', 'Resume')
-                                  : text('暂停', 'Pause'))),
+                          if (t.awaitingNext)
+                            FilledButton.icon(
+                                key:
+                                    const ValueKey('independent-pomodoro-next'),
+                                onPressed: c.busy ? null : c.startNextStage,
+                                icon: const Icon(Icons.play_arrow),
+                                label: Text(!t.resting && t.breakMinutes > 0
+                                    ? text('开始休息', 'Start break')
+                                    : text(
+                                        '开始下一轮学习', 'Start next study round')))
+                          else
+                            FilledButton.icon(
+                                key: const ValueKey(
+                                    'independent-pomodoro-pause'),
+                                onPressed: c.busy ? null : c.togglePause,
+                                icon: Icon(
+                                    t.paused ? Icons.play_arrow : Icons.pause),
+                                label: Text(t.paused
+                                    ? text('继续', 'Resume')
+                                    : text('暂停', 'Pause'))),
                           OutlinedButton(
                               key:
                                   const ValueKey('independent-pomodoro-finish'),

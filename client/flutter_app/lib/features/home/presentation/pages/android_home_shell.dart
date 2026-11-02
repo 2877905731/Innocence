@@ -12,6 +12,7 @@ import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/app/wabi_sabi_typography.dart';
 import 'package:innocence_flutter/core/config/app_config.dart';
 import 'package:innocence_flutter/core/widgets/minimal_white_hero.dart';
+import 'package:innocence_flutter/core/widgets/theme_cover_hero.dart';
 import 'package:innocence_flutter/core/widgets/minimal_progress_rule.dart';
 import 'package:innocence_flutter/core/widgets/focus_timer_dial.dart';
 import 'package:innocence_flutter/core/widgets/glass_motion_backdrop.dart';
@@ -557,23 +558,20 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
     return [
       if (_visualTheme == AppVisualTheme.minimalism)
         _minimalWelcome()
-      else ...[
-        Text(
-          _text('你好，${widget.profile.displayName}',
+      else
+        ThemeCoverHero(
+          theme: _visualTheme,
+          isChinese: _zh,
+          eyebrow: _text('TODAY / 今日', 'TODAY'),
+          title: _text('你好，${widget.profile.displayName}',
               'Hello, ${widget.profile.displayName}'),
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w400,
-              ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          widget.isOfflineMode
+          description: widget.isOfflineMode
               ? _text('本机资料 · 数据尚未绑定账号',
                   'On-device profile · data is not linked to an account')
               : _text('今天从一个清晰的步骤开始。', 'Start today with one clear next step.'),
-          style: Theme.of(context).textTheme.bodyLarge,
+          indexLabel:
+              '${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().day.toString().padLeft(2, '0')}',
         ),
-      ],
       if (widget.onOpenAssistant != null)
         Align(
             alignment: Alignment.centerLeft,

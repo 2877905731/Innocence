@@ -139,15 +139,20 @@ class FocusNoticeNativeTest : Instrumentation() {
             System.currentTimeMillis(), true))
         val notice = awaitNotice(7305).notification
         assertTrue(notice.extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER))
-        awaitNotice(7305) { it.extras.getString(Notification.EXTRA_TITLE) == "番茄 · 休息" }
+        awaitNotice(7305) { it.extras.getString(Notification.EXTRA_TITLE) == "番茄 · 学习完成" }
         awaitNotice(7306)
+        assertTrue(app.getSharedPreferences("independent_pomodoro", Context.MODE_PRIVATE).getBoolean("awaitingNext", false))
         val deadline = System.currentTimeMillis() + 2000
         FocusNotices.sync(app, "qa", "qa/total", true, false, deadline, 2, false, true)
         awaitNotice(7303)
         awaitAbsent(7302)
         awaitNotice(7305)
         PomodoroNotices.update(app) // Simulate boot/restore without a Flutter engine.
-        awaitNotice(7305) { it.extras.getString(Notification.EXTRA_TITLE) == "番茄 · 休息" }
+        awaitNotice(7305) { it.extras.getString(Notification.EXTRA_TITLE) == "番茄 · 学习完成" }
+        PomodoroNotices.sync(app, IndependentPomodoro("qa", "qa/pomodoro/independent", true, false, 1, 1, 58000,
+            System.currentTimeMillis(), true, "break", 1, false))
+        awaitNotice(7305) { it.extras.getString(Notification.EXTRA_TITLE) == "番茄 · 休息完成" }
+        assertTrue(app.getSharedPreferences("independent_pomodoro", Context.MODE_PRIVATE).getBoolean("awaitingNext", false))
     }
 
     fun testIndependentPauseRestoreOwnerCancel() {
@@ -160,9 +165,9 @@ class FocusNoticeNativeTest : Instrumentation() {
         assertEquals("剩余 00:01", awaitNotice(7305).notification.extras.getString(Notification.EXTRA_TEXT))
         PomodoroNotices.sync(app, IndependentPomodoro("qa", "qa/pomodoro/pause", true, false, 1, 0, 59000,
             System.currentTimeMillis(), true))
-        awaitNotice(7305) { it.`when` > System.currentTimeMillis() + 50000 }
-        assertEquals("2", app.getSharedPreferences("independent_pomodoro", Context.MODE_PRIVATE)
-            .getString("stageToken", "")?.split("/")?.get(3))
+        awaitNotice(7305) { it.extras.getString(Notification.EXTRA_TITLE) == "番茄 · 学习完成" }
+        assertTrue(app.getSharedPreferences("independent_pomodoro", Context.MODE_PRIVATE)
+            .getBoolean("awaitingNext", false))
         val saved = app.getSharedPreferences("independent_pomodoro", Context.MODE_PRIVATE)
         val stale = saved.getLong("deadline", 0)
         PomodoroNotices.sync(app, IndependentPomodoro("other", "other/pomodoro/new", true, false, 25, 5, 0,
@@ -177,10 +182,12 @@ class FocusNoticeNativeTest : Instrumentation() {
     fun testIndependentPayloadValidation() {
         val valid = mapOf<String, Any>("owner" to "qa", "key" to "qa/pomodoro/validation", "active" to true,
             "paused" to false, "studyMinutes" to 25, "breakMinutes" to 5, "elapsedMs" to 0,
-            "referenceMs" to System.currentTimeMillis(), "isChinese" to true)
+            "referenceMs" to System.currentTimeMillis(), "isChinese" to true,
+            "stage" to "study", "cycle" to 1, "awaitingNext" to false)
         assertTrue(IndependentPomodoro.parse(valid).active)
         for (bad in listOf(valid - "referenceMs", valid + ("studyMinutes" to 0), valid + ("owner" to "other"),
-            valid + ("breakMinutes" to -1), valid + ("elapsedMs" to Double.NaN), valid + ("studyMinutes" to 1.5))) {
+            valid + ("breakMinutes" to -1), valid + ("elapsedMs" to Double.NaN), valid + ("studyMinutes" to 1.5),
+            valid - "stage", valid + ("cycle" to 0), valid + ("awaitingNext" to true))) {
             var rejected = false
             try { IndependentPomodoro.parse(bad) } catch (_: IllegalArgumentException) { rejected = true }
             assertTrue(rejected)

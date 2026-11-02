@@ -869,8 +869,8 @@ bool Win32Window::ShowPomodoroTransition(bool is_chinese, bool is_break) {
   data.uFlags = NIF_INFO;
   data.dwInfoFlags = NIIF_INFO;
   wcscpy_s(data.szInfoTitle, is_chinese ? L"\u756A\u8304\u9636\u6BB5\u5DF2\u5B8C\u6210" : L"Pomodoro stage complete");
-  wcscpy_s(data.szInfo, is_chinese ? (is_break ? L"\u5F00\u59CB\u4F11\u606F\u3002" : L"\u5F00\u59CB\u65B0\u4E00\u8F6E\u5B66\u4E60\u3002")
-      : (is_break ? L"Time for a break." : L"Start the next study stage."));
+  wcscpy_s(data.szInfo, is_chinese ? (is_break ? L"\u5b66\u4e60\u5df2\u505c\u6b62\uff0c\u6253\u5f00\u5e94\u7528\u540e\u5f00\u59cb\u4f11\u606f\u6216\u4e0b\u4e00\u8f6e\u3002" : L"\u4f11\u606f\u5df2\u5b8c\u6210\uff0c\u6253\u5f00\u5e94\u7528\u5f00\u59cb\u4e0b\u4e00\u8f6e\u5b66\u4e60\u3002")
+      : (is_break ? L"Study stopped. Open the app to start a break or next round." : L"Break complete. Open the app to start the next study round."));
   return Shell_NotifyIconW(NIM_MODIFY, &data) != FALSE;
 }
 

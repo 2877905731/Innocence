@@ -46,6 +46,7 @@ class SyncImportServiceTest {
     private SyncImportMapper syncImportMapper;
     private SyncImportService service;
     private FocusSessionService focusService;
+    private CheckInService checkInService;
 
     @BeforeEach
     void setUp() {
@@ -54,6 +55,7 @@ class SyncImportServiceTest {
         studyPlanService = mock(StudyPlanService.class);
         syncImportMapper = mock(SyncImportMapper.class);
         focusService = mock(FocusSessionService.class);
+        checkInService = mock(CheckInService.class);
         PlatformTransactionManager transactionManager = mock(PlatformTransactionManager.class);
         when(transactionManager.getTransaction(any(TransactionDefinition.class)))
                 .thenReturn(mock(TransactionStatus.class));
@@ -63,7 +65,7 @@ class SyncImportServiceTest {
                 studyPlanMapper,
                 mock(MemoService.class),
                 focusService,
-                mock(CheckInService.class),
+                checkInService,
                 syncImportMapper,
                 new ObjectMapper().findAndRegisterModules(),
                 transactionManager
@@ -93,6 +95,22 @@ class SyncImportServiceTest {
         assertEquals(1, response.conflictCount());
         assertEquals(List.of("2026-09-08"), response.dailyPlanConflictDates());
         verify(studyPlanMapper).findDailyPlanByUserIdAndDate(7L, conflictDate);
+    }
+
+    @Test
+    void importsPomodoroStudyBeforeDependentCheckinUsingConfirmedOwner() {
+        when(accountService.getMyProfile(7L)).thenReturn(profile(7L, "U7", "June"));
+        var study = new SyncImportOperationRequest("study-op", "pomodoro_study", "qa/1/2026-11-01", "upsert",
+            Map.of("recordKey", "qa/1/2026-11-01", "startTime", "2026-11-01T09:00:00",
+                "endTime", "2026-11-01T09:01:00", "studySeconds", 60, "creditedSeconds", 60, "completedRounds", 1),
+            1, "study-op", "2026-11-01T09:02:00");
+        var checkin = new SyncImportOperationRequest("checkin-op", "checkin_intent", "2026-11-01", "upsert",
+            Map.of("planDate", "2026-11-01"), 1, "checkin-op", "2026-11-01T09:01:00");
+        var response = service.importData(7L, new SyncImportRequest("local-profile", "U7", "keep_server", List.of(checkin, study)));
+        assertEquals(2, response.acceptedCount());
+        var order = org.mockito.Mockito.inOrder(focusService, checkInService);
+        order.verify(focusService).recordPomodoroStudy(eq(7L), any());
+        order.verify(checkInService).importCheckInIntent(7L, LocalDate.of(2026, 11, 1));
     }
 
     @Test

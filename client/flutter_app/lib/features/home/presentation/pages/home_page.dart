@@ -1,3 +1,4 @@
+import 'package:innocence_flutter/features/focus/presentation/widgets/start_focus_session_dialog.dart';
 import 'package:innocence_flutter/features/focus/application/pomodoro_controller.dart';
 import 'dart:async';
 
@@ -801,9 +802,9 @@ class HomePage extends StatelessWidget {
   }
 
   Future<void> _openFocusSessionDialog(BuildContext context) async {
-    final result = await showThemedDialog<_FocusSessionDraft>(
+    final result = await showThemedDialog<FocusSessionDraft>(
       context: context,
-      builder: (context) => const _StartFocusSessionDialog(),
+      builder: (context) => const StartFocusSessionDialog(),
     );
     if (result == null) {
       return;
@@ -3083,7 +3084,7 @@ class _FocusSessionCard extends StatelessWidget {
                   : _contextText(
                       context,
                       '先设定结束时间，可选绑定番茄循环，然后直接从首页开始学习。',
-                      'Set an end time, optionally bind a custom pomodoro loop, and start directly from the home page.',
+                      'Set a custom duration and receive an alert when focus ends.',
                     ),
               style: textTheme.bodyLarge,
             ),
@@ -5491,204 +5492,6 @@ class _NotificationSummaryCard extends StatelessWidget {
   }
 }
 
-class _StartFocusSessionDialog extends StatefulWidget {
-  const _StartFocusSessionDialog();
-
-  @override
-  State<_StartFocusSessionDialog> createState() =>
-      _StartFocusSessionDialogState();
-}
-
-class _StartFocusSessionDialogState extends State<_StartFocusSessionDialog> {
-  late final TextEditingController _taskNameController;
-  late final TextEditingController _studyMinutesController;
-  late final TextEditingController _breakMinutesController;
-  int _durationMinutes = 60;
-  bool _bindPomodoro = false;
-  String? _validationMessage;
-
-  String _text(String zh, String en) {
-    return _contextText(context, zh, en);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _taskNameController = TextEditingController();
-    _studyMinutesController = TextEditingController(text: '40');
-    _breakMinutesController = TextEditingController(text: '5');
-  }
-
-  @override
-  void dispose() {
-    _taskNameController.dispose();
-    _studyMinutesController.dispose();
-    _breakMinutesController.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    final studyMinutes = int.tryParse(_studyMinutesController.text.trim()) ?? 0;
-    final breakMinutes = int.tryParse(_breakMinutesController.text.trim()) ?? 0;
-
-    if (_durationMinutes <= 0) {
-      setState(() {
-        _validationMessage =
-            _text('请选择有效的结束时长。', 'Please choose a valid end duration.');
-      });
-      return;
-    }
-    if (_bindPomodoro && studyMinutes <= 0) {
-      setState(() {
-        _validationMessage = _text(
-            '番茄学习时长必须大于 0。', 'Pomodoro study minutes must be greater than 0.');
-      });
-      return;
-    }
-    if (_bindPomodoro && breakMinutes < 0) {
-      setState(() {
-        _validationMessage = _text(
-            '番茄休息时长不能小于 0。', 'Pomodoro break minutes cannot be negative.');
-      });
-      return;
-    }
-
-    final draft = _FocusSessionDraft(
-      taskName: _taskNameController.text.trim(),
-      endTime: DateTime.now().add(Duration(minutes: _durationMinutes)),
-      bindPomodoro: _bindPomodoro,
-      pomodoroStudyMinutes: _bindPomodoro ? studyMinutes : 0,
-      pomodoroBreakMinutes: _bindPomodoro ? breakMinutes : 0,
-    );
-    Navigator.of(context).pop(draft);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final plannedEndTime =
-        DateTime.now().add(Duration(minutes: _durationMinutes));
-    final endHour = plannedEndTime.hour.toString().padLeft(2, '0');
-    final endMinute = plannedEndTime.minute.toString().padLeft(2, '0');
-
-    return AlertDialog(
-      title: Text(_text('开始专注', 'Start focus session')),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 460),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: _taskNameController,
-                decoration: InputDecoration(
-                  labelText: _text('任务名称', 'Task name'),
-                  hintText: _text('例如：英语阅读', 'For example: English reading'),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                _text('你想学习多久？', 'How long do you want to study?'),
-                style: textTheme.titleSmall,
-              ),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [30, 45, 60, 90, 120].map((minutes) {
-                  final selected = _durationMinutes == minutes;
-                  return ChoiceChip(
-                    label: Text(_text('$minutes 分钟', '$minutes min')),
-                    selected: selected,
-                    onSelected: (_) {
-                      setState(() {
-                        _durationMinutes = minutes;
-                        _validationMessage = null;
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                _text(
-                  '结束于 $endHour:$endMinute  |  计划 ${FocusSession.formatMinutes(_durationMinutes)}',
-                  'Ends at $endHour:$endMinute  |  Planned ${FocusSession.formatMinutes(_durationMinutes)}',
-                ),
-                style: textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 18),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: _bindPomodoro,
-                title: Text(_text('绑定番茄循环', 'Bind pomodoro loop')),
-                subtitle: Text(
-                  _text(
-                    '按自定义的学习/休息循环持续运行，直到本次专注结束。',
-                    'Repeat a custom study/break cycle until the focus session ends.',
-                  ),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    _bindPomodoro = value;
-                    _validationMessage = null;
-                  });
-                },
-              ),
-              if (_bindPomodoro) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _studyMinutesController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: _text('学习时长', 'Study minutes'),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextField(
-                        controller: _breakMinutesController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: _text('休息时长', 'Break minutes'),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-              if (_validationMessage != null) ...[
-                const SizedBox(height: 14),
-                Text(
-                  _validationMessage!,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: Colors.orange.shade200,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(_text('取消', 'Cancel')),
-        ),
-        ElevatedButton(
-          onPressed: _submit,
-          child: Text(_text('开始', 'Start')),
-        ),
-      ],
-    );
-  }
-}
-
 class _TeamWorkspacePage extends StatelessWidget {
   const _TeamWorkspacePage({
     required this.profile,
@@ -5768,29 +5571,7 @@ class _TeamWorkspacePage extends StatelessWidget {
   }
 }
 
-class _FocusSessionDraft {
-  const _FocusSessionDraft({
-    required this.taskName,
-    required this.endTime,
-    required this.bindPomodoro,
-    required this.pomodoroStudyMinutes,
-    required this.pomodoroBreakMinutes,
-  });
-
-  final String taskName;
-  final DateTime endTime;
-  final bool bindPomodoro;
-  final int pomodoroStudyMinutes;
-  final int pomodoroBreakMinutes;
-}
-
-enum _DesktopWidgetSectionKey {
-  timer,
-  checkIn,
-  plan,
-  memo,
-  team,
-}
+enum _DesktopWidgetSectionKey { timer, checkIn, plan, memo, team }
 
 class _DesktopWidgetHomeV2 extends StatefulWidget {
   const _DesktopWidgetHomeV2({

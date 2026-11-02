@@ -1,4 +1,6 @@
-/// A device-local timer with its own clock. It never borrows a focus deadline.
+import 'pomodoro_study_record.dart';
+
+/// A single, bounded stage. Completion always waits for an explicit next start.
 class PomodoroTimer {
   const PomodoroTimer(
       {this.id = '',
@@ -8,33 +10,116 @@ class PomodoroTimer {
       this.breakMinutes = 5,
       this.elapsedMs = 0,
       this.referenceMs = 0,
-      this.notices = true});
+      this.notices = true,
+      this.stage = 'study',
+      this.cycle = 1,
+      this.completed = 0,
+      this.awaitingNext = false,
+      this.records = const [],
+      this.coveredFromMs = 0,
+      this.coveredUntilMs = 0});
 
-  final String id;
-  final bool active, paused, notices;
-  final int studyMinutes, breakMinutes, elapsedMs, referenceMs;
-  int get cycleMs => (studyMinutes + breakMinutes) * 60000;
+  final String id, stage;
+  final bool active, paused, notices, awaitingNext;
+  final int studyMinutes,
+      breakMinutes,
+      elapsedMs,
+      referenceMs,
+      cycle,
+      completed;
+  final List<PomodoroStudyRecord> records;
+  final int coveredFromMs, coveredUntilMs;
   int get studyMs => studyMinutes * 60000;
-  int get positionMs => elapsedMs % cycleMs;
-  bool get resting => positionMs >= studyMs && breakMinutes > 0;
-  String get stage => resting ? 'break' : 'study';
-  int get cycle => elapsedMs ~/ cycleMs + 1;
-  int get completed => elapsedMs ~/ cycleMs + (resting ? 1 : 0);
-  int get remainingMs => (resting ? cycleMs : studyMs) - positionMs;
+  int get cycleMs => (studyMinutes + breakMinutes) * 60000;
+  bool get resting => stage == 'break';
+  int get stageMs => (resting ? breakMinutes : studyMinutes) * 60000;
+  int get remainingMs => (stageMs - elapsedMs).clamp(0, stageMs);
   int get remainingSeconds => (remainingMs + 999) ~/ 1000;
   int get deadlineMs => referenceMs + remainingMs;
+  bool get running => active && !paused && !awaitingNext;
   String get remainingLabel {
     final seconds = remainingSeconds;
     String two(int n) => n.toString().padLeft(2, '0');
     return '${seconds >= 3600 ? '${two(seconds ~/ 3600)}:' : ''}${two(seconds ~/ 60 % 60)}:${two(seconds % 60)}';
   }
 
-  PomodoroTimer advance(int now) => !active || paused || now <= referenceMs
-      ? this
-      : copy(elapsedMs: elapsedMs + now - referenceMs, referenceMs: now);
+  PomodoroTimer advance(int now,
+      {int Function(int start, int end)? coveredMs}) {
+    if (!running || now <= referenceMs) return this;
+    final consumed = (now - referenceMs).clamp(0, remainingMs);
+    final end = referenceMs + consumed;
+    final ledger = [...records];
+    if (!resting) {
+      var cursor = referenceMs;
+      while (cursor < end) {
+        final date = DateTime.fromMillisecondsSinceEpoch(cursor);
+        final midnight = DateTime(date.year, date.month, date.day + 1)
+            .millisecondsSinceEpoch;
+        final until = end < midnight ? end : midnight;
+        final overlapStart = cursor > coveredFromMs ? cursor : coveredFromMs;
+        final overlapEnd = until < coveredUntilMs ? until : coveredUntilMs;
+        final overlap = (overlapEnd - overlapStart).clamp(0, until - cursor);
+        final credit =
+            (until - cursor - (coveredMs?.call(cursor, until) ?? overlap))
+                .clamp(0, until - cursor);
+        _append(ledger, cursor, until, credit);
+        cursor = until;
+      }
+    }
+    final done = consumed == remainingMs;
+    final roundDone = done && (resting || breakMinutes == 0);
+    if (roundDone) _append(ledger, end, end, 0, round: 1);
+    return copy(
+        elapsedMs: elapsedMs + consumed,
+        referenceMs: end,
+        awaitingNext: done,
+        completed: completed + (roundDone ? 1 : 0),
+        records: ledger);
+  }
+
+  void _append(List<PomodoroStudyRecord> ledger, int start, int end, int credit,
+      {int round = 0}) {
+    final date = DateTime.fromMillisecondsSinceEpoch(start);
+    final day =
+        '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final key = '$id/$cycle/$day';
+    final index = ledger.indexWhere((r) => r.key == key);
+    final row = index < 0
+        ? PomodoroStudyRecord(key: key, startMs: start, endMs: start)
+        : ledger[index];
+    final next = row.add(start, end, credit, round: round);
+    if (index < 0) {
+      ledger.add(next);
+    } else {
+      ledger[index] = next;
+    }
+  }
+
+  PomodoroTimer beginNextStage(int now) {
+    if (!active || !awaitingNext) return this;
+    final nextStudy = resting || breakMinutes == 0;
+    return copy(
+        stage: nextStudy ? 'study' : 'break',
+        elapsedMs: 0,
+        referenceMs: now,
+        awaitingNext: false,
+        paused: false,
+        cycle: cycle + (nextStudy ? 1 : 0),
+        records: nextStudy ? [] : records);
+  }
 
   PomodoroTimer copy(
-          {bool? active, bool? paused, int? elapsedMs, int? referenceMs}) =>
+          {bool? active,
+          bool? paused,
+          int? elapsedMs,
+          int? referenceMs,
+          String? stage,
+          int? cycle,
+          int? completed,
+          bool? awaitingNext,
+          List<PomodoroStudyRecord>? records,
+          int? coveredFromMs,
+          int? coveredUntilMs}) =>
       PomodoroTimer(
           id: id,
           active: active ?? this.active,
@@ -43,9 +128,17 @@ class PomodoroTimer {
           breakMinutes: breakMinutes,
           elapsedMs: elapsedMs ?? this.elapsedMs,
           referenceMs: referenceMs ?? this.referenceMs,
-          notices: notices);
+          notices: notices,
+          stage: stage ?? this.stage,
+          cycle: cycle ?? this.cycle,
+          completed: completed ?? this.completed,
+          awaitingNext: awaitingNext ?? this.awaitingNext,
+          records: records ?? this.records,
+          coveredFromMs: coveredFromMs ?? this.coveredFromMs,
+          coveredUntilMs: coveredUntilMs ?? this.coveredUntilMs);
 
   Map<String, dynamic> toJson() => {
+        'version': 2,
         'id': id,
         'active': active,
         'paused': paused,
@@ -53,37 +146,86 @@ class PomodoroTimer {
         'breakMinutes': breakMinutes,
         'elapsedMs': elapsedMs,
         'referenceMs': referenceMs,
-        'notices': notices
+        'notices': notices,
+        'stage': stage,
+        'cycle': cycle,
+        'completed': completed,
+        'awaitingNext': awaitingNext,
+        'records': records.map((r) => r.toJson()).toList(),
+        'coveredFromMs': coveredFromMs,
+        'coveredUntilMs': coveredUntilMs
       };
 
-  factory PomodoroTimer.fromJson(Map<String, dynamic> json) {
-    final study = json['studyMinutes'], rest = json['breakMinutes'];
-    if (json['id'] is! String ||
-        json['active'] is! bool ||
-        json['paused'] is! bool ||
-        json['notices'] is! bool ||
+  factory PomodoroTimer.fromJson(Map<String, dynamic> j) {
+    final study = j['studyMinutes'],
+        rest = j['breakMinutes'],
+        elapsed = j['elapsedMs'];
+    if (j['id'] is! String ||
+        j['active'] is! bool ||
+        j['paused'] is! bool ||
+        j['notices'] is! bool ||
         study is! int ||
         study < 1 ||
         study > 1440 ||
         rest is! int ||
         rest < 0 ||
         rest > 1440 ||
-        json['elapsedMs'] is! int ||
-        (json['elapsedMs'] as int) < 0 ||
-        (json['elapsedMs'] as int) > 3155760000000 ||
-        json['referenceMs'] is! int ||
-        (json['referenceMs'] as int) < 0 ||
-        (json['active'] == true && (json['id'] as String).isEmpty)) {
+        elapsed is! int ||
+        elapsed < 0 ||
+        elapsed > 3155760000000 ||
+        j['referenceMs'] is! int ||
+        j['referenceMs'] < 0 ||
+        (j['active'] == true &&
+            !RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(j['id']))) {
       throw const FormatException('Invalid pomodoro timer');
     }
+    final legacy = !j.containsKey('version');
+    final period = (study + rest) * 60000;
+    final resting = elapsed % period >= study * 60000 && rest > 0;
+    final stage = legacy ? (resting ? 'break' : 'study') : j['stage'];
+    final progress =
+        legacy ? elapsed % period - (resting ? study * 60000 : 0) : elapsed;
+    final cycle = legacy ? elapsed ~/ period + 1 : j['cycle'];
+    final completed = legacy ? elapsed ~/ period : j['completed'];
+    final awaiting = legacy ? false : j['awaitingNext'];
+    if ((!legacy && j['version'] != 2) ||
+        (stage != 'study' && stage != 'break') ||
+        (stage == 'break' && rest == 0) ||
+        cycle is! int ||
+        cycle < 1 ||
+        completed is! int ||
+        completed < 0 ||
+        completed > cycle ||
+        awaiting is! bool ||
+        progress > (stage == 'study' ? study : rest) * 60000 ||
+        (awaiting && progress != (stage == 'study' ? study : rest) * 60000) ||
+        (!legacy && j['records'] is! List)) {
+      throw const FormatException('Invalid pomodoro stage');
+    }
+    final from = j['coveredFromMs'] ?? 0, until = j['coveredUntilMs'] ?? 0;
+    if (from is! int || until is! int || from < 0 || until < from) {
+      throw const FormatException('Invalid focus coverage');
+    }
     return PomodoroTimer(
-        id: json['id'],
-        active: json['active'],
-        paused: json['paused'],
+        id: j['id'],
+        active: j['active'],
+        paused: j['paused'],
         studyMinutes: study,
         breakMinutes: rest,
-        elapsedMs: json['elapsedMs'],
-        referenceMs: json['referenceMs'],
-        notices: json['notices']);
+        elapsedMs: progress,
+        referenceMs: j['referenceMs'],
+        notices: j['notices'],
+        stage: stage,
+        cycle: cycle,
+        completed: completed,
+        awaitingNext: awaiting,
+        coveredFromMs: from,
+        coveredUntilMs: until,
+        records: legacy
+            ? []
+            : (j['records'] as List)
+                .map((r) => PomodoroStudyRecord.fromJson(
+                    Map<String, dynamic>.from(r as Map)))
+                .toList());
   }
 }
