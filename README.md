@@ -25,15 +25,13 @@ Innocence 当前以 Flutter + Spring Boot 为主线，覆盖 Windows 桌面端�
 
 | 平台 | 下载 | 范围 |
 |---|---|---|
-| Windows x64 · v1.3.0 | [安装器](https://github.com/2877905731/Innocence/releases/download/v1.3.0/Innocence-v1.3.0-windows-x64-setup.exe) · [便携 ZIP](https://github.com/2877905731/Innocence/releases/download/v1.3.0/Innocence-v1.3.0-windows-x64-portable.zip) | 联网版，安装器尚未代码签名 |
-| Android 7.0+ · v1.3.2 | [联网 APK](https://github.com/2877905731/Innocence/releases/download/v1.3.2/Innocence-v1.3.2-android-online.apk) | 通知直接显示剩余时间，保留原玻璃和侘寂字体；原发行证书 |
-| 鸿蒙平板联网版 · v1.3.0 | [ARM64 Release HAP](https://github.com/2877905731/Innocence/releases/tag/v1.3.0-harmonyos.1) | 未签名 AOT，需自己的设备 Profile／签名及 DevEco/HDC |
+| Windows x64 · v1.3.3 | [安装器](https://github.com/2877905731/Innocence/releases/download/v1.3.3/Innocence-v1.3.3-windows-x64-setup.exe) · [便携 ZIP](https://github.com/2877905731/Innocence/releases/download/v1.3.3/Innocence-v1.3.3-windows-x64-portable.zip) | 联网版，安装器尚未代码签名 |
+| Android 7.0+ · v1.3.3 | [联网 APK](https://github.com/2877905731/Innocence/releases/download/v1.3.3/Innocence-v1.3.3-android-online.apk) | 自定义计时、手动番茄学习入账、多对话与新字标；原发行证书 |
+| 鸿蒙平板联网版 · v1.3.3 | [ARM64 Release HAP](https://github.com/2877905731/Innocence/releases/tag/v1.3.3-harmonyos.1) | 未签名 AOT，需自己的设备 Profile／签名及 DevEco/HDC |
 
-[Android v1.3.2 发布说明](https://github.com/2877905731/Innocence/releases/tag/v1.3.2) · [Android SHA256](https://github.com/2877905731/Innocence/releases/download/v1.3.2/SHA256SUMS.txt) · [Windows v1.3.0](https://github.com/2877905731/Innocence/releases/tag/v1.3.0) · [历史离线版](https://github.com/2877905731/Innocence/releases/tag/v1.2.6) · [更新日志](CHANGELOG.md)
+[Android v1.3.3 发布说明](https://github.com/2877905731/Innocence/releases/tag/v1.3.3) · [Android SHA256](https://github.com/2877905731/Innocence/releases/download/v1.3.3/SHA256SUMS.txt) · [Windows v1.3.3](https://github.com/2877905731/Innocence/releases/tag/v1.3.3) · [历史离线版](https://github.com/2877905731/Innocence/releases/tag/v1.2.6) · [更新日志](CHANGELOG.md)
 
-Android v1.3.2在通知里直接显示专注/番茄剩余时间，暂停冻结、继续恢复；原液态玻璃和侘寂内置展示字保留，联网服务和本机资料规则沿v1.3.0。
-
-v1.3.0 三端连接生产HTTPS服务，同账号允许手机、电脑、平板各一个名额同时在线。Android可用原发行签名覆盖正式旧版保留资料。登录后先预览目标账号并确认本机资料导入；服务器未迁移本机账号。鸿蒙HUKS密钥仓储已接入，公开HAP仍未签名，动态和后台阶段提醒仍有权益及预排窗口限制，详见发行说明。
+v1.3.3新增自定义专注、逐阶段手动番茄及学习入账，修复年度助手并支持多个可删除对话；其余三主题改用原创Innocence品牌字标。学习入账与请求追踪后端已上线，三端独立会话、本机资料确认导入和原密钥仓储保留。软件内在线更新模块尚未提供。
 
 首次进入可登录服务器邮箱账号或选择本机模式。本机资料保存在设备，卸载／清除数据会丢失；此前开发Debug APK与正式版签名不同，不能直接覆盖。真实HTTPS登录/导入/跨用户拒绝和三类会话已核对，实体手机/OEM/Vulkan及长期容量矩阵继续待验。
 
@@ -46,7 +44,7 @@ v1.3.0 三端连接生产HTTPS服务，同账号允许手机、电脑、平板�
 - 已具备认证、资料、设置、备忘录、统计、通知、好友和团队等主要交互骨架。
 - 后端业务数据按当前登录用户隔离。
 - Windows 聊天助手支持填地址与 Key 获取模型、选择连接及经确认的本机工具操作；真实供应商与完整设备矩阵继续验收。
-- 鸿蒙平板提供[ARM64 Release 联网包](https://github.com/2877905731/Innocence/releases/tag/v1.3.0-harmonyos.1)，复用PC全屏页面，启用INTERNET权限及独立tablet槽位/HUKS加密仓储。公开包需接收者自行签名；个人签名包不公开。网页分发与HAP点文件直装的区别见[安装说明](client/flutter_app/harmonyos/INSTALL.zh-CN.md)。完整实体业务/恢复/性能矩阵继续待验。
+- 鸿蒙平板提供[ARM64 Release 联网包](https://github.com/2877905731/Innocence/releases/tag/v1.3.3-harmonyos.1)，复用PC全屏页面，启用INTERNET权限及独立tablet槽位/HUKS加密仓储。公开包需接收者自行签名；个人签名包不公开。网页分发与HAP点文件直装的区别见[安装说明](client/flutter_app/harmonyos/INSTALL.zh-CN.md)。完整实体业务/恢复/性能矩阵继续待验。
 
 ## 仓库结构
 

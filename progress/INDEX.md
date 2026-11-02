@@ -1064,3 +1064,10 @@ checkpoints:
     status: complete
     path: progress/0150__20261102__P01__DONE__brand-wordmarks-tablet-update-and-backend-rollout.md
     title: "三主题原创品牌字标、个人鸿蒙1.3.3覆盖与学习入账/追踪后端上线"
+  - sequence: "0151"
+    created_at: "2026-11-03T00:22:26+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0151__20261103__P01__DONE__v133-three-platform-release-ready.md
+    title: "三端1.3.3联网发行就绪，原签名APK与公开未签名HAP七资产核对"
