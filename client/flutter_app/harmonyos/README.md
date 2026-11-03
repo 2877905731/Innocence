@@ -1,5 +1,7 @@
 # Innocence 鸿蒙平板开发工程
 
+2026-11-03（0156）：用户原平板已从1.3.3+15以原发布签名覆盖至 **1.3.4+16联网ARM64 Release**。官方HAP/Profile验签、应用身份/签名/UID/首次安装时间及启动/进程通过，未卸载或清数据；127 Dart/5 ArkTS与0155同源。个人包、Profile及原始设备输出只留F盘私有，公开包仍为[v1.3.4-harmonyos.1](https://github.com/2877905731/Innocence/releases/tag/v1.3.4-harmonyos.1)未签名发行。完整业务恢复/后台提醒/TIMER门禁保持，详见[0156](../../../progress/0156__20261103__P01__DONE__personal-tablet-v134-cover-update.md)。
+
 2026-11-03（0152）：[v1.3.3-harmonyos.1](https://github.com/2877905731/Innocence/releases/tag/v1.3.3-harmonyos.1)已公开ARM64联网Release/AOT未签名HAP及说明/校验清单，应用版本1.3.3+15。Windows/Android同步发布[v1.3.3](https://github.com/2877905731/Innocence/releases/tag/v1.3.3)；本人原签名1.3.3沿0150保留，个人包/Profile不公开。
 
 2026-11-02（0150）：本人 LRT-W20 已沿原发布证书从1.3.0+12覆盖更新至 **1.3.3+15 ARM64联网Release**，官方HAP/Profile验签、签名/应用标识/UID/首次安装时间一致，未卸载或清资料。三主题原创Innocence字标有2800×1840真机画面，登录资料及原对话/模型配置恢复可见。番茄学习入账和安全请求追踪后端已部署，独立合成账号线上幂等/隔离与备份恢复通过；个人HAP/Profile仍仅F盘。公开下载仍为1.3.0，完整实体业务/真实模型/TIMER权益门禁保持。详见[本次更新范围](../../../docs/releases/v1.3.3-harmonyos-self-use.md)。

@@ -3,14 +3,14 @@ schema_version: 1
 document_type: ai_resume
 project_name: Innocence
 updated_at: "2026-11-03"
-last_resumed_at: "2026-11-03T01:24:55+08:00"
-latest_checkpoint: "0155"
-next_sequence: "0156"
+last_resumed_at: "2026-11-03T14:04:51+08:00"
+latest_checkpoint: "0156"
+next_sequence: "0157"
 current_phase: P01
 current_gate: G01
-state: v134_updates_deployed_and_three_platform_releases_published
-current_goal: "0153–0155完成用户授权的后台发布/在线更新、手动绑定唯一学习账本和三端1.3.4+16重新发行；源码/双标签/七资产完整下载核对通过，交付入口后按真实反馈补实体门禁。"
-active_feedback: "0155：v1.3.4（#431760442）与v1.3.4-harmonyos.1（#431762427）已公开，latest=v1.3.4，双标签源fcc4317d940066193cbd6c65ac312b29bc9bd6a6；275客户端/6跳过、离线4/在线2、127后端与三端正式包、127Dart/5ArkTS、原APK签名/未签名HAP通过，七资产匿名完整下载SHA通过。0154后台版本发布已上线，三平台16目录已真实上传发布并鉴权完整下载/Range，绑定主窗口0秒/重复学习120秒单条通过；临时账号与授权已清理，注册0/健康UP。HDC目标0，本轮没有覆盖平板，私有1.3.3及TIMER待验状态保留。"
+state: v134_personal_tablet_updated_and_release_complete
+current_goal: "0156已按用户要求将原平板从1.3.3+15原签名保资料覆盖为1.3.4+16，官方验签/身份/UID/首次安装时间和启动通过；0154后端/0155公开发行保持，交付结果后按实际反馈补实体业务门禁。"
+active_feedback: "0155：v1.3.4（#431760442）与v1.3.4-harmonyos.1（#431762427）已公开，latest=v1.3.4，双标签源fcc4317d940066193cbd6c65ac312b29bc9bd6a6；275客户端/6跳过、离线4/在线2、127后端与三端正式包、127Dart/5ArkTS、原APK签名/未签名HAP通过，七资产匿名完整下载SHA通过。0154后台版本发布已上线，三平台16目录已真实上传发布并鉴权完整下载/Range，绑定主窗口0秒/重复学习120秒单条通过；临时账号与授权已清理，注册0/健康UP。0156用户重新连接并要求更新，唯一平板已原签名保资料覆盖1.3.4，身份/UID/首次安装时间和启动通过；完整业务/TIMER门禁保留。"
 review:
   submitted_date: "2026-10-31"
   last_verified_status: 审核中
@@ -24,7 +24,7 @@ review:
 current_baseline:
   android: "1.3.4+16原证书联网APK已公开（0155），恢复专注绑定手动番茄与单一学习账本、在线账号检查/下载校验和系统安装入口；完整下载/签名/构建通过，实际安装/OEM与完整矩阵待验。"
   windows: "1.3.4+16安装器/便携ZIP已公开（0155），新增在线更新与绑定番茄，安装器四段版本1.3.4.16；七资产完整下载通过，仍无Authenticode，实际安装及完整DPI/输入/性能矩阵待验。"
-  harmonyos: "1.3.4+16公开ARM64联网AOT未签名HAP（0155），新增手动绑定和在线检查/校验下载导出，仍需电脑签名覆盖。当前HDC0，未覆盖本人平板；0150个人1.3.3原签名/资料恢复证据保留。TIMER没有新通过/递减证据。"
+  harmonyos: "0156本人原平板已原签名覆盖1.3.4+16（此前1.3.3），HAP/Profile官方验签、身份/UID/首次安装时间与启动/进程通过，未卸载清数据。公开包仍是0155未签名ARM64HAP，需电脑签名覆盖；完整业务恢复/后台/TIMER未新增通过证据。"
   server_admin: "0154部署源fcc4317/JARc236096bfd06…与版本管理后台，三平台1.3.4目录published；备份隔离恢复/真实上传/鉴权完整下载/Range/下架和绑定学习账本通过，临时账号/授权清理。注册0/健康UP，更新包152.62MiB/磁盘余22.36GiB/可用内存1023048kB；单连接2MiB/s、全局5连接。本机编译，服务器只发布传输。"
   assistant: "年度新建/编辑诊断与多对话随0152三端1.3.3公开，BYOK/14工具保留；0150本人鸿蒙原对话/配置恢复及生产年度最小创建/重试/负向通过。真实供应商/完整同步/实体矩阵待，原日任务编辑/月历批量和年度已有子任务编辑未接工具。"
 active_constraints:
@@ -40,7 +40,7 @@ unfinished:
   - id: TODO-MANUAL-TIMER-RUNTIME
     priority: P0
     gate: G01/G02/G06
-    item: "0155三端1.3.4已公开、0154在线更新和绑定后端已上线，本轮HDC0未覆盖平板；不重复发行/迁移。补真实计时/后台/断网补传/离线确认导入和完整矩阵；TIMER无新通过证据，长于8小时不调用Live View，1.3.4在线更新已上线并公开；旧版需手动覆盖引导一次。"
+    item: "0155三端1.3.4已公开、0154在线更新和绑定后端已上线，0156个人平板已原签名保资料覆盖1.3.4；不重复发行/安装/迁移。补真实计时/后台/断网补传/离线确认导入和完整矩阵；TIMER无新通过证据，长于8小时不调用Live View，1.3.4在线更新已上线并公开；旧版需手动覆盖引导一次。"
   - id: TODO-HARMONYOS-TABLET
     priority: P1
     gate: HarmonyOS-H0-H5
@@ -87,7 +87,7 @@ unfinished:
     item: "实体/OEM/省电/折叠通知组、SDK许可实况、详情/输入/性能；联网包已公开，完整同步/WebSocket/推送仍待。"
 next_actions:
   - id: NEXT-MANUAL-TIMER-RUNTIME
-    action: "三端1.3.4及在线更新/手动绑定后端已公开/上线，按实际反馈补绑定/独立阶段、后台到点、断网补传/跨日和离线导入；本轮HDC0，平板有连接后才按原签名保资料覆盖，个人包不公开，不重复迁移。"
+    action: "三端1.3.4及在线更新/手动绑定后端已公开/上线，按实际反馈补绑定/独立阶段、后台到点、断网补传/跨日和离线导入；0156个人平板已原签名保资料覆盖，按实际反馈验功能；个人包不公开，不重复安装/迁移。"
     inputs: [docs/releases/v1.3.4.md, docs/releases/v1.3.4-harmonyos.1.md, docs/development/在线更新与绑定番茄.md]
   - id: NEXT-ONLINE-UPDATE-IMPLEMENTATION
     action: "0154–0155后台/在线更新和三端1.3.4已上线公开，真实上传发布/鉴权完整下载/Range/下架及七资产匿名下载通过；后续本机编译签名，后台上传发布即可，不在服务器编译。单纯发客户端不需重复部署后端，先手动覆盖到1.3.4一次以获得更新入口。"
@@ -120,7 +120,7 @@ history:
   index: progress/INDEX.md
   pre_compression_resume: progress/archive/0000__AI-RESUME__before-20261101-compression.md
   archive_manifest: docs/archive/documentation-compression-20261101.json
-  latest_event: progress/0155__20261103__P01__DONE__v134-three-platform-release-published.md
+  latest_event: progress/0156__20261103__P01__DONE__personal-tablet-v134-cover-update.md
 ---
 
 # 恢复说明

@@ -1099,3 +1099,10 @@ checkpoints:
     status: complete
     path: progress/0155__20261103__P01__DONE__v134-three-platform-release-published.md
     title: "三端1.3.4已公开，七资产匿名完整下载和双标签核对"
+  - sequence: "0156"
+    created_at: "2026-11-03T14:08:34+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0156__20261103__P01__DONE__personal-tablet-v134-cover-update.md
+    title: "个人平板原签名1.3.4覆盖，身份/UID/首次安装时间保留并启动通过"
