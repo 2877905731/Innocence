@@ -34,7 +34,7 @@ endpoints:
     method: PUT
     path: "/api/app/v1/plans/reorder"
     specification: "docs/development/计划手动排序.md；today/annual/subtasks完整ID集合与版本校验，单事务只更新顺序，Bearer用户隔离；三端共享契约"
-    evidence_status: local_mysql_http_and_sqlite_restart_rollback_verified_production_pending_0160
+    evidence_status: production_https_ordering_isolation_and_three_platform_reads_verified_0163
   - id: U-ONLINE-RELEASE
     method: "GET/POST"
     path: "/api/admin/v1/releases；/{id}/publish；/{id}/withdraw"

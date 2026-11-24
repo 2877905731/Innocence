@@ -42,10 +42,10 @@ home_visual_refinement:
   evidence_path: docs/development/简约白最早基准重建与验收.md
   remaining: "Windows原生L/M/S多DPI、实体Android/输入法与长期性能仍待验"
 manual_plan_ordering:
-  checkpoint: "0160"
+  checkpoint: "0163"
   specification: docs/development/计划手动排序.md
-  status: local_three_platform_source_and_builds_verified_deployment_pending
-  evidence_boundary: "今日清单/年度任务/年度子任务共用排序面板，后端131项与客户端278项/6条件跳过通过，排序回滚专项3项及显式鸿蒙9项通过；Windows Release、鸿蒙未签名Release及Android Debug构建成功。Android原签名材料缺失，正式签名包未生成；未部署、发布或覆盖设备，P01/G01仍开放。"
+  status: v135_three_platform_public_and_production_ordering_verified
+  evidence_boundary: "1.3.5+17三端正式公开，原APK签名/未签名ARM64HAP/Windows安装器及七资产匿名完整下载SHA通过；后端131项与生产排序ID/业务值/三设备会话/隔离负向、后台上传发布及鉴权完整下载/Range通过，临时账号授权清理。原签名MSIX路径更正见0162，注册当前开启并保留；未覆盖设备，实体门禁及P01/G01仍开放。"
 invariants:
   - id: INV-001-TRUTHFUL-SCOPE
     enabled: true

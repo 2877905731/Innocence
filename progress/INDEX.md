@@ -1141,3 +1141,17 @@ checkpoints:
     status: complete
     path: progress/0161__20261124__P01__DONE__harmony-countdown-full-application-submitted.md
     title: "全量倒计时申请由用户提交，最新服务申请处理中与附件回执核对"
+  - sequence: "0162"
+    created_at: "2026-11-24T23:27:29+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0162__20261124__P01__CORRECTION__android-original-signing-msix-location.md
+    title: "更正原Android签名材料缺失判断，Codex虚拟化目录原材料已解锁并核对"
+  - sequence: "0163"
+    created_at: "2026-11-24T23:27:29+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0163__20261124__P01__DONE__v135-plan-ordering-three-platform-published.md
+    title: "1.3.5三端任务排序正式公开，生产排序后端与在线更新目录上线"

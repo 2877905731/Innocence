@@ -3,14 +3,14 @@ schema_version: 1
 document_type: ai_resume
 project_name: Innocence
 updated_at: "2026-11-24"
-last_resumed_at: "2026-11-24T23:05:23+08:00"
-latest_checkpoint: "0161"
-next_sequence: "0162"
+last_resumed_at: "2026-11-24T23:27:29+08:00"
+latest_checkpoint: "0163"
+next_sequence: "0164"
 current_phase: P01
 current_gate: G01
-state: plan_ordering_local_ready_and_harmony_application_under_review
-current_goal: "0160三端今日任务/年度任务及子任务手动排序本机实现完成，ID/版本/租户事务、离线重启及故障回滚通过；278客户端/6条件跳过、131后端、排序3/显式鸿蒙9、分析与Windows Release/鸿蒙未签名Release/Android Debug构建通过。Android原签名材料缺失，正式包待恢复；未部署/公开/覆盖设备，线上仍1.3.4。0161鸿蒙全量倒计时申请已由用户本人于11月24日23:02提交，申请详情处理中/系统提交通知、291字场景及完整ZIP与UX缩略图已核对；3工作日估算11月27日前后，仍非权益获批。"
-active_feedback: "0155：v1.3.4（#431760442）与v1.3.4-harmonyos.1（#431762427）已公开，latest=v1.3.4，双标签源fcc4317d940066193cbd6c65ac312b29bc9bd6a6；275客户端/6跳过、离线4/在线2、127后端与三端正式包、127Dart/5ArkTS、原APK签名/未签名HAP通过，七资产匿名完整下载SHA通过。0154后台版本发布已上线，三平台16目录已真实上传发布并鉴权完整下载/Range，绑定主窗口0秒/重复学习120秒单条通过；临时账号与授权已清理，注册0/健康UP。0156用户重新连接并要求更新，唯一平板已原签名保资料覆盖1.3.4，身份/UID/首次安装时间和启动通过；完整业务/TIMER门禁保留。"
+state: v135_plan_ordering_published_and_harmony_application_under_review
+current_goal: "0163：按用户直接重新编译发布指令，1.3.5+17三端正式包已公开并进入在线更新目录，排序后端4f057c9/JAR9e96111d…已上线；131后端、生产排序ID/业务值/三类设备读取与负向、鉴权完整下载/Range及七资产匿名完整下载SHA通过，健康UP/临时账号授权清理。0162已更正原签名材料缺失判断，MSIX原目录解锁及c3921809…原指纹通过。未覆盖设备，个人平板仍1.3.4；0161实况窗处理中和11月27日前后预计反馈保留，未宣称权益通过。"
+active_feedback: "0163：v1.3.5（#456938945）与v1.3.5-harmonyos.1（#456942292）已公开，latest=v1.3.5，双标签源4f057c9029efb2eff1444a0c6d7fdc2351e4908b；Windows安装器1.3.5.17/便携ZIP、原签名APK、未签名ARM64HAP及两清单/说明七资产完整下载SHA通过。三平台build17已后台上传发布，build16可见17；生产注册实查开启并保持现状，健康UP/备份隔离恢复及临时账号授权清理通过。本轮无设备覆盖，0161TIMER审核状态独立保留。"
 review:
   original_submitted_date: "2026-10-31"
   last_verified_status: "新申请已提交，处理中；系统通知等待审核结果"
@@ -33,10 +33,10 @@ review:
   status_entry: "开发者联盟消息中心 → 服务申请 → 最新11月24日23:02的Innocence实况窗申请；原应用开放能力管理也可查"
   guide: docs/development/鸿蒙专注提醒权益接入.md
 current_baseline:
-  android: "1.3.4+16原证书联网APK已公开（0155），恢复专注绑定手动番茄与单一学习账本、在线账号检查/下载校验和系统安装入口；完整下载/签名/构建通过，实际安装/OEM与完整矩阵待验。"
-  windows: "1.3.4+16安装器/便携ZIP已公开（0155），新增在线更新与绑定番茄，安装器四段版本1.3.4.16；七资产完整下载通过，仍无Authenticode，实际安装及完整DPI/输入/性能矩阵待验。"
-  harmonyos: "0156本人原平板已原签名覆盖1.3.4+16（此前1.3.3），HAP/Profile官方验签、身份/UID/首次安装时间与启动/进程通过，未卸载清数据。公开包仍是0155未签名ARM64HAP，需电脑签名覆盖；完整业务恢复/后台/TIMER未新增通过证据。"
-  server_admin: "0154部署源fcc4317/JARc236096bfd06…与版本管理后台，三平台1.3.4目录published；备份隔离恢复/真实上传/鉴权完整下载/Range/下架和绑定学习账本通过，临时账号/授权清理。注册0/健康UP，更新包152.62MiB/磁盘余22.36GiB/可用内存1023048kB；单连接2MiB/s、全局5连接。本机编译，服务器只发布传输。"
+  android: "1.3.5+17原证书联网APK已公开，原签名c3921809…/三ABI/版本/生产地址/CRC及匿名、鉴权完整下载通过；后台build17已发布，实际覆盖/OEM及完整矩阵待验。"
+  windows: "1.3.5+17安装器/便携ZIP已公开，安装器1.3.5.17；后台build17及完整下载/Range核对通过，仍无Authenticode，本轮无实际安装/DPI或设备操作。"
+  harmonyos: "公开1.3.5+17未签名ARM64联网Release/HAP，源码130Dart/5ArkTS一致，版本/ARM64AOT/未签名/完整下载与Range通过，需电脑有效签名覆盖。个人平板仍0156原签名1.3.4+16，未自动覆盖或清资料；TIMER0161处理中未获批。"
+  server_admin: "0163部署源4f057c9/JAR9e96111d…，生产排序ID/业务值/三类设备会话/隔离负向、后台三平台build17发布及完整鉴权下载/Range通过；私有备份隔离恢复、配置摘要/健康UP和临时账号授权清理。注册实查开启并保留，磁盘余20.62GiB/MemAvailable952744KiB；仅本机编译，服务器包装/发布/传输。"
   assistant: "年度新建/编辑诊断与多对话随0152三端1.3.3公开，BYOK/14工具保留；0150本人鸿蒙原对话/配置恢复及生产年度最小创建/重试/负向通过。真实供应商/完整同步/实体矩阵待，原日任务编辑/月历批量和年度已有子任务编辑未接工具。"
 active_constraints:
   - "现行授权与最新人类指令优先；一般设备调测已授权，已提交申请不重问旧承诺。新设备标识上传/新协议按具体范围确认，不代发邮件。"
@@ -48,10 +48,10 @@ active_constraints:
   - "离线ownerScope/在线账号隔离、导入预览确认/冲突/幂等不变；助手白名单与具体变更确认，不含C持续规则。"
   - "纯端侧TIMER不依赖推送但仍需实况窗授权；PushToken名单和标准权益是不同路径。<=8小时/用户主动/大陆手机平板为申请范围，未宣称限制已完成实机验证。"
 unfinished:
-  - id: TODO-PLAN-ORDER-DELIVERY
+  - id: TODO-PLAN-ORDER-RUNTIME
     priority: P1
     gate: G01/G02/G06
-    item: "0160本机排序实现、真实MySQL/SQLite回滚与三端构建通过；线上新端点尚未部署，三端未发布/安装。Android仅Debug，原签名材料当前缺失。按后续用户发布指令恢复原签名并部署分发，再验实际触控与跨设备；不得用Debug覆盖原签名或以真实任务造数。"
+    item: "0163排序后端与三端1.3.5+17及在线更新已上线公开，正式原签名和七资产下载通过；无需重复发布。仍需实际实体拖动/触控、DPI/OEM/安装与完整跨设备同步反馈，不能以公开构建代替实体。原签名MSIX目录发现更正见0162。"
   - id: TODO-MANUAL-TIMER-RUNTIME
     priority: P0
     gate: G01/G02/G06
@@ -101,9 +101,9 @@ unfinished:
     gate: Android-A0
     item: "实体/OEM/省电/折叠通知组、SDK许可实况、详情/输入/性能；联网包已公开，完整同步/WebSocket/推送仍待。"
 next_actions:
-  - id: NEXT-PLAN-ORDER-DELIVERY
-    action: "0160排序本机就绪，后端新增PUT /plans/reorder无结构迁移；按用户后续发布指令部署并更新三端。先恢复Android原证书/DPAPI材料，当前默认目录不存在；Windows Release/鸿蒙未签名Release/Android Debug非新发行。设备不自动安装，现有真实计划不改。"
-    inputs: [docs/development/计划手动排序.md]
+  - id: NEXT-PLAN-ORDER-RUNTIME
+    action: "0163排序后端、应用内三平台17目录与GitHub1.3.5双Release已公开，证据齐备，不重复发布/部署。后续沿新版本收集实际排序/触控/同步反馈；设备升级按用户具体指令保资料覆盖。签名目录用本机v1.3.5/signing-readiness.json的MSIX映射，禁止新建替代证书。"
+    inputs: [docs/releases/v1.3.5.md, docs/releases/v1.3.5-harmonyos.1.md, docs/development/计划手动排序.md]
   - id: NEXT-MANUAL-TIMER-RUNTIME
     action: "三端1.3.4及在线更新/手动绑定后端已公开/上线，按实际反馈补绑定/独立阶段、后台到点、断网补传/跨日和离线导入；0156个人平板已原签名保资料覆盖，按实际反馈验功能；个人包不公开，不重复安装/迁移。"
     inputs: [docs/releases/v1.3.4.md, docs/releases/v1.3.4-harmonyos.1.md, docs/development/在线更新与绑定番茄.md]
@@ -138,7 +138,7 @@ history:
   index: progress/INDEX.md
   pre_compression_resume: progress/archive/0000__AI-RESUME__before-20261101-compression.md
   archive_manifest: docs/archive/documentation-compression-20261101.json
-  latest_event: progress/0161__20261124__P01__DONE__harmony-countdown-full-application-submitted.md
+  latest_event: progress/0163__20261124__P01__DONE__v135-plan-ordering-three-platform-published.md
 ---
 
 # 恢复说明
