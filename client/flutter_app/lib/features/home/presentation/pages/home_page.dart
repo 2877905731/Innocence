@@ -5,6 +5,7 @@ import 'package:innocence_flutter/features/updates/update_controller.dart';
 
 import 'package:innocence_flutter/features/plans/presentation/pages/android_plans_view.dart';
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/features/plans/domain/models/plan_order.dart';
 import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 import 'package:innocence_flutter/app/team_workspace_snapshot.dart';
 import 'package:innocence_flutter/app/app_language.dart';
@@ -465,6 +466,7 @@ class HomePage extends StatelessWidget {
     required this.onApplyDayTemplateToDate,
     required this.onApplyDayTemplateToDates,
     required this.onSaveAnnualSegment,
+    this.onReorderPlans,
     required this.onDeleteAnnualSegment,
     required this.onSavePlanAsWeeklyTemplate,
     required this.onApplyWeeklyTemplate,
@@ -694,6 +696,7 @@ class HomePage extends StatelessWidget {
     required PlanApplyStrategy strategy,
   }) onApplyDayTemplateToDates;
   final Future<bool> Function(AnnualPlanSegment segment) onSaveAnnualSegment;
+  final SavePlanOrder? onReorderPlans;
   final Future<void> Function(AnnualPlanSegment segment) onDeleteAnnualSegment;
   final Future<bool> Function(String templateName, TodayPlan sourcePlan)
       onSavePlanAsWeeklyTemplate;
@@ -1079,6 +1082,7 @@ class HomePage extends StatelessWidget {
           deleteArchive: onDeleteWeeklyTemplate,
           applyArchive: onApplyDayTemplateToDates,
           saveAnnual: onSaveAnnualSegment,
+          reorderPlans: onReorderPlans,
           deleteAnnual: onDeleteAnnualSegment,
         ),
         onToggleTodayPlanItem: onToggleTodayPlanItem,
@@ -1148,6 +1152,7 @@ class HomePage extends StatelessWidget {
         onSavePlanAsDayTemplate: onSavePlanAsWeeklyTemplate,
         onDeleteDayTemplate: onDeleteWeeklyTemplate,
         onSaveAnnualSegment: onSaveAnnualSegment,
+        onReorderPlans: onReorderPlans,
         onDeleteAnnualSegment: onDeleteAnnualSegment,
       );
     }

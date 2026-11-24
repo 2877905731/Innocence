@@ -13,6 +13,7 @@ import '../../features/memos/domain/models/memo_overview.dart';
 import '../../features/plans/domain/models/annual_plan_overview.dart';
 import '../../features/plans/domain/models/month_plan_overview.dart';
 import '../../features/plans/domain/models/today_plan.dart';
+import '../../features/plans/domain/models/plan_order.dart';
 import '../../features/plans/domain/models/weekly_plan_template.dart';
 import '../../features/settings/domain/models/widget_setting.dart';
 import '../../features/stats/domain/models/stats_overview.dart';
@@ -21,6 +22,7 @@ import 'offline_sync_models.dart';
 import '../../features/assistant/domain/assistant_models.dart';
 
 part 'offline_assistant_store.dart';
+part 'offline_plan_order_store.dart';
 
 typedef OfflineDatabasePathProvider = Future<String> Function();
 

@@ -2,6 +2,7 @@ import 'package:innocence_flutter/core/network/api_client.dart';
 import 'package:innocence_flutter/core/network/api_exception.dart';
 import 'package:innocence_flutter/features/auth/domain/models/app_session.dart';
 import 'package:innocence_flutter/features/plans/domain/models/today_plan.dart';
+import 'package:innocence_flutter/features/plans/domain/models/plan_order.dart';
 import 'package:innocence_flutter/features/plans/domain/models/month_plan_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/annual_plan_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/week_plan_overview.dart';
@@ -11,6 +12,12 @@ class StudyPlanApi {
   StudyPlanApi({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
 
   final ApiClient _apiClient;
+
+  Future<void> reorderPlans(AppSession session, PlanOrder order) async {
+    final result = await _apiClient.put('plans/reorder',
+        body: order.toJson(), headers: session.authHeaders);
+    if (result != true) throw const ApiException('Failed to save task order.');
+  }
 
   Future<TodayPlan> getTodayPlan(
     AppSession session, {

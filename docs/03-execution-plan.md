@@ -41,6 +41,11 @@ home_visual_refinement:
   implementation: "MinimalWhiteHero与MinimalWhiteBackdrop重建黑白灰排版和中性画布，WhiteSurfacePanel实色白/1px边界/直角/无阴影；窗口/侧栏/计划页签/共享表面同步。FocusTimerDial继续读取现有计时源；业务/四主题存储/Focus Orb行为及正式发行保持"
   evidence_path: docs/development/简约白最早基准重建与验收.md
   remaining: "Windows原生L/M/S多DPI、实体Android/输入法与长期性能仍待验"
+manual_plan_ordering:
+  checkpoint: "0160"
+  specification: docs/development/计划手动排序.md
+  status: local_three_platform_source_and_builds_verified_deployment_pending
+  evidence_boundary: "今日清单/年度任务/年度子任务共用排序面板，后端131项与客户端278项/6条件跳过通过，排序回滚专项3项及显式鸿蒙9项通过；Windows Release、鸿蒙未签名Release及Android Debug构建成功。Android原签名材料缺失，正式签名包未生成；未部署、发布或覆盖设备，P01/G01仍开放。"
 invariants:
   - id: INV-001-TRUTHFUL-SCOPE
     enabled: true

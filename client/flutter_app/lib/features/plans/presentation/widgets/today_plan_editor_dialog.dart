@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'plan_order_button.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -52,6 +53,7 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
   late final TextEditingController _planNameController;
   late final List<_EditablePlanBlock> _blocks;
   late final List<_EditableFlexibleTask> _flexibleTasks;
+  final List<Object> _taskOrder = [];
 
   int? _pendingStartSlot;
   _EditablePlanBlock? _activeBlock;
@@ -76,7 +78,9 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
           : widget.initialPlan.planName,
     );
     _planNameController.addListener(_markDirty);
-    _blocks = widget.initialPlan.scheduledItems.indexed
+    _blocks = widget.initialPlan.items
+        .where((item) => item.hasSchedule)
+        .indexed
         .map(
           (entry) => _EditablePlanBlock.fromTodayPlanItem(
             entry.$2,
@@ -88,6 +92,13 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
         .where((item) => !item.hasSchedule)
         .map(_EditableFlexibleTask.fromTodayPlanItem)
         .toList();
+    var blockIndex = 0;
+    var flexibleIndex = 0;
+    for (final item in widget.initialPlan.items) {
+      _taskOrder.add(item.hasSchedule
+          ? _blocks[blockIndex++]
+          : _flexibleTasks[flexibleIndex++]);
+    }
   }
 
   void _markDirty() {
@@ -172,7 +183,7 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
       paletteIndex: _nextPaletteIndex(),
     );
     _blocks.add(block);
-    _blocks.sort((left, right) => left.startSlot.compareTo(right.startSlot));
+    _taskOrder.add(block);
     _pendingStartSlot = null;
     _activeBlock = block;
     _dirty = true;
@@ -239,6 +250,7 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
 
   void _removeBlock(int index) {
     final removed = _blocks.removeAt(index);
+    _taskOrder.remove(removed);
     if (identical(_activeBlock, removed)) {
       _activeBlock = null;
     }
@@ -293,7 +305,9 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
 
   void _addFlexibleTask() {
     setState(() {
-      _flexibleTasks.add(_EditableFlexibleTask.empty());
+      final task = _EditableFlexibleTask.empty();
+      _flexibleTasks.add(task);
+      _taskOrder.add(task);
       _validationMessage = null;
       _dirty = true;
     });
@@ -310,6 +324,7 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
     }
 
     final removed = _flexibleTasks.removeAt(index);
+    _taskOrder.remove(removed);
     removed.dispose();
     setState(() {
       _validationMessage = null;
@@ -317,10 +332,28 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
     });
   }
 
+  Widget _draftOrderButton() => DraftPlanOrderButton<Object>(
+        items: _taskOrder,
+        isChinese: _isChinese,
+        isBusy: _saving,
+        titleOf: (task) => task is _EditablePlanBlock
+            ? task.titleController.text
+            : (task as _EditableFlexibleTask).titleController.text,
+        onChanged: (tasks) => setState(() {
+          _taskOrder
+            ..clear()
+            ..addAll(tasks);
+          _blocks.sort(
+              (a, b) => _taskOrder.indexOf(a).compareTo(_taskOrder.indexOf(b)));
+          _flexibleTasks.sort(
+              (a, b) => _taskOrder.indexOf(a).compareTo(_taskOrder.indexOf(b)));
+          _dirty = true;
+        }),
+      );
+
   TodayPlan _draftPlan() {
     final scheduledItems = <TodayPlanItem>[];
-    final sortedBlocks = List<_EditablePlanBlock>.from(_blocks)
-      ..sort((left, right) => left.startSlot.compareTo(right.startSlot));
+    final sortedBlocks = List<_EditablePlanBlock>.from(_blocks);
 
     for (var index = 0; index < sortedBlocks.length; index++) {
       final block = sortedBlocks[index];
@@ -330,11 +363,11 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
           : enteredTitle;
       scheduledItems.add(
         TodayPlanItem(
-          id: 0,
+          id: block.id,
           title: title,
           completed: block.completed,
           plannedMinutes: (block.endSlot - block.startSlot) * 30,
-          actualMinutes: 0,
+          actualMinutes: block.actualMinutes,
           startSlot: block.startSlot,
           endSlot: block.endSlot,
           sortOrder: index,
@@ -343,6 +376,7 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
     }
 
     final flexibleItems = <TodayPlanItem>[];
+    final flexibleByTask = <Object, TodayPlanItem>{};
     for (var index = 0; index < _flexibleTasks.length; index++) {
       final task = _flexibleTasks[index];
       final title = task.titleController.text.trim();
@@ -353,11 +387,11 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
           int.tryParse(task.minutesController.text.trim()) ?? 0;
       flexibleItems.add(
         TodayPlanItem(
-          id: 0,
+          id: task.id,
           title: title,
           completed: task.completed,
           plannedMinutes: plannedMinutes < 0 ? 0 : plannedMinutes,
-          actualMinutes: 0,
+          actualMinutes: task.actualMinutes,
           startSlot: null,
           endSlot: null,
           sortOrder: scheduledItems.length + index,
@@ -365,10 +399,28 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
       );
     }
 
+    var flexibleIndex = 0;
+    for (final task in _flexibleTasks) {
+      if (task.titleController.text.trim().isNotEmpty) {
+        flexibleByTask[task] = flexibleItems[flexibleIndex++];
+      }
+    }
+    final byTask = <Object, TodayPlanItem>{
+      for (var i = 0; i < _blocks.length; i++) _blocks[i]: scheduledItems[i],
+      ...flexibleByTask,
+    };
+    final orderedItems = [
+      for (final task in _taskOrder)
+        if (byTask[task] != null) byTask[task]!
+    ];
     final enteredPlanName = _planNameController.text.trim();
     return TodayPlan.empty(widget.initialPlan.planDate).copyWith(
       planName: enteredPlanName.isEmpty ? 'Today' : enteredPlanName,
-      items: [...scheduledItems, ...flexibleItems],
+      items: [
+        for (final entry in orderedItems.indexed)
+          entry.$2.copyWith(sortOrder: entry.$1)
+      ],
+      dayRevision: widget.initialPlan.dayRevision,
     );
   }
 
@@ -687,6 +739,7 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
                           Text(_archiveSavedMessage!,
                               style: textTheme.bodySmall),
                         const SizedBox(height: 20),
+                        _draftOrderButton(),
                         _SectionTitle(
                           title: _text('已安排时间段', 'Scheduled blocks'),
                           subtitle: _text('选中时段后，在圆盘拖动或按半小时微调。',
@@ -907,6 +960,7 @@ class _TodayPlanEditorDialogState extends State<TodayPlanEditorDialog> {
                   Expanded(
                     child: ListView(
                       children: [
+                        _draftOrderButton(),
                         _SectionTitle(
                           title: _text('已安排时间段', 'Scheduled blocks'),
                           subtitle: _text(
@@ -1787,6 +1841,8 @@ class _EmptyStateCard extends StatelessWidget {
 
 class _EditablePlanBlock {
   _EditablePlanBlock({
+    this.id = 0,
+    this.actualMinutes = 0,
     required this.titleController,
     required this.startSlot,
     required this.endSlot,
@@ -1812,6 +1868,8 @@ class _EditablePlanBlock {
             .toInt()
         : item.endSlot!.clamp(resolvedStartSlot + 1, 48).toInt();
     return _EditablePlanBlock(
+      id: item.id,
+      actualMinutes: item.actualMinutes,
       titleController: TextEditingController(text: item.title),
       startSlot: resolvedStartSlot,
       endSlot: resolvedEndSlot,
@@ -1820,6 +1878,8 @@ class _EditablePlanBlock {
     );
   }
 
+  final int id;
+  final int actualMinutes;
   final TextEditingController titleController;
   int startSlot;
   int endSlot;
@@ -1833,6 +1893,8 @@ class _EditablePlanBlock {
 
 class _EditableFlexibleTask {
   _EditableFlexibleTask({
+    this.id = 0,
+    this.actualMinutes = 0,
     required this.titleController,
     required this.minutesController,
     required this.completed,
@@ -1840,6 +1902,8 @@ class _EditableFlexibleTask {
 
   factory _EditableFlexibleTask.fromTodayPlanItem(TodayPlanItem item) {
     return _EditableFlexibleTask(
+      id: item.id,
+      actualMinutes: item.actualMinutes,
       titleController: TextEditingController(text: item.title),
       minutesController: TextEditingController(
         text: item.plannedMinutes > 0 ? item.plannedMinutes.toString() : '',
@@ -1856,6 +1920,8 @@ class _EditableFlexibleTask {
     );
   }
 
+  final int id;
+  final int actualMinutes;
   final TextEditingController titleController;
   final TextEditingController minutesController;
   bool completed;

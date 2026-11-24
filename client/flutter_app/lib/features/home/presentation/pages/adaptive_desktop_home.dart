@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:innocence_flutter/features/plans/presentation/widgets/annual_charge_span.dart';
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/features/plans/presentation/widgets/plan_order_button.dart';
 import 'package:innocence_flutter/core/widgets/themed_dialog.dart';
 
 import 'package:innocence_flutter/app/app_language.dart';
@@ -90,6 +91,7 @@ class AdaptiveDesktopHome extends StatefulWidget {
     required this.onSavePlanAsDayTemplate,
     required this.onDeleteDayTemplate,
     required this.onSaveAnnualSegment,
+    this.onReorderPlans,
     required this.onDeleteAnnualSegment,
     this.bannerMessage,
   });
@@ -153,6 +155,7 @@ class AdaptiveDesktopHome extends StatefulWidget {
       onSavePlanAsDayTemplate;
   final Future<void> Function(int templateId) onDeleteDayTemplate;
   final Future<void> Function(AnnualPlanSegment segment) onSaveAnnualSegment;
+  final SavePlanOrder? onReorderPlans;
   final Future<void> Function(AnnualPlanSegment segment) onDeleteAnnualSegment;
 
   @override
@@ -677,6 +680,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome>
             onToggle: widget.onToggleFocus,
           ),
           secondary: _HomePlanTabs(
+            onReorderPlans: widget.onReorderPlans,
             palette: palette,
             plan: widget.todayPlan,
             annualOverview: widget.annualPlanOverview,
@@ -771,6 +775,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome>
     };
     if (_planHorizon == _PlanHorizon.year) {
       return _AnnualPlanBoard(
+        onReorderPlans: widget.onReorderPlans,
         palette: palette,
         overview: widget.annualPlanOverview,
         isChinese: _isChinese,
@@ -890,6 +895,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome>
             ),
             const SizedBox(height: 20),
             _PlanPanel(
+              onReorderPlans: widget.onReorderPlans,
               palette: palette,
               plan: widget.todayPlan,
               isChinese: _isChinese,
@@ -938,6 +944,7 @@ class _AdaptiveDesktopHomeState extends State<AdaptiveDesktopHome>
             ),
           ] else
             _AnnualPlanBoard(
+              onReorderPlans: widget.onReorderPlans,
               key: ValueKey(
                   'day-annual-${DateTime.now().year}-${DateTime.now().month}'),
               palette: palette,
@@ -1996,6 +2003,7 @@ class _AnnualPlanBoard extends StatefulWidget {
   const _AnnualPlanBoard({
     super.key,
     required this.palette,
+    this.onReorderPlans,
     required this.overview,
     this.previewMonth,
     this.onOpenFullYear,
@@ -2013,6 +2021,7 @@ class _AnnualPlanBoard extends StatefulWidget {
             pageSpec == null || (pageVisualTheme != null && pageIntro != null));
 
   final _HomePalette palette;
+  final SavePlanOrder? onReorderPlans;
   final AnnualPlanOverview overview;
   final int? previewMonth;
   final Future<void> Function()? onOpenFullYear;
@@ -2278,6 +2287,11 @@ class _AnnualPlanBoardState extends State<_AnnualPlanBoard> {
                   label: Text(widget.isChinese ? '全部任务' : 'All tasks'),
                 ),
               const SizedBox(width: 8),
+              PlanOrderButton(
+                  order: PlanOrder.annual(widget.overview),
+                  isChinese: widget.isChinese,
+                  isBusy: widget.isBusy,
+                  onSave: widget.onReorderPlans),
               FilledButton.icon(
                 key: const ValueKey('create-annual-task'),
                 onPressed: widget.isBusy
@@ -2395,6 +2409,11 @@ class _AnnualPlanBoardState extends State<_AnnualPlanBoard> {
                               label:
                                   Text(widget.isChinese ? '全部任务' : 'All tasks'),
                             ),
+                            PlanOrderButton(
+                                order: PlanOrder.annual(widget.overview),
+                                isChinese: widget.isChinese,
+                                isBusy: widget.isBusy,
+                                onSave: widget.onReorderPlans),
                             FilledButton.icon(
                               key: const ValueKey('create-annual-task'),
                               onPressed: widget.isBusy
@@ -2468,6 +2487,11 @@ class _AnnualPlanBoardState extends State<_AnnualPlanBoard> {
   Widget _buildTaskCard(AnnualPlanSegment segment) => Padding(
         padding: const EdgeInsets.only(bottom: 14),
         child: _AnnualTaskCard(
+          orderControl: PlanOrderButton(
+              order: PlanOrder.subtasks(segment),
+              isChinese: widget.isChinese,
+              isBusy: widget.isBusy,
+              onSave: widget.onReorderPlans),
           palette: widget.palette,
           segment: segment,
           isChinese: widget.isChinese,
@@ -2754,6 +2778,7 @@ class _AnnualEmptyState extends StatelessWidget {
 class _AnnualTaskCard extends StatelessWidget {
   const _AnnualTaskCard({
     required this.palette,
+    this.orderControl,
     required this.segment,
     required this.isChinese,
     required this.isBusy,
@@ -2768,6 +2793,7 @@ class _AnnualTaskCard extends StatelessWidget {
   });
 
   final _HomePalette palette;
+  final Widget? orderControl;
   final AnnualPlanSegment segment;
   final bool isChinese;
   final bool isBusy;
@@ -2912,6 +2938,7 @@ class _AnnualTaskCard extends StatelessWidget {
               style: TextStyle(color: palette.muted, height: 1.45),
             ),
           ],
+          if (orderControl != null) orderControl!,
           const SizedBox(height: 14),
           Row(
             children: [
@@ -3296,6 +3323,13 @@ class _AnnualSegmentDialogState extends State<_AnnualSegmentDialog> {
                   ),
                 ],
               ),
+              DraftPlanOrderButton<AnnualPlanSubtask>(
+                  items: _subtasks,
+                  titleOf: (item) => item.title,
+                  isChinese: widget.isChinese,
+                  onChanged: (items) => setState(() {
+                        _subtasks = items;
+                      })),
               if (_subtasks.isEmpty)
                 Text(
                   widget.isChinese
@@ -4018,6 +4052,7 @@ class _FocusPanel extends StatelessWidget {
 class _HomePlanTabs extends StatefulWidget {
   const _HomePlanTabs({
     required this.palette,
+    this.onReorderPlans,
     required this.plan,
     required this.annualOverview,
     required this.isChinese,
@@ -4030,6 +4065,7 @@ class _HomePlanTabs extends StatefulWidget {
   });
 
   final _HomePalette palette;
+  final SavePlanOrder? onReorderPlans;
   final TodayPlan plan;
   final AnnualPlanOverview annualOverview;
   final bool isChinese;
@@ -4137,6 +4173,7 @@ class _HomePlanTabsState extends State<_HomePlanTabs> {
         SizedBox(height: minimal ? 16 : 8),
         if (!_showAnnualMonth)
           _PlanPanel(
+            onReorderPlans: widget.onReorderPlans,
             palette: palette,
             plan: widget.plan,
             isChinese: widget.isChinese,
@@ -4237,6 +4274,7 @@ class _HomePlanTabsState extends State<_HomePlanTabs> {
 class _PlanPanel extends StatelessWidget {
   const _PlanPanel({
     required this.palette,
+    this.onReorderPlans,
     required this.plan,
     required this.isChinese,
     required this.isBusy,
@@ -4247,6 +4285,7 @@ class _PlanPanel extends StatelessWidget {
   });
 
   final _HomePalette palette;
+  final SavePlanOrder? onReorderPlans;
   final TodayPlan plan;
   final bool isChinese;
   final bool isBusy;
@@ -4286,6 +4325,11 @@ class _PlanPanel extends StatelessWidget {
             actionLabel: showHeaderAction ? _text('编辑', 'Edit') : null,
             onAction: showHeaderAction ? onEdit : null,
           ),
+          PlanOrderButton(
+              order: PlanOrder.today(plan),
+              isChinese: isChinese,
+              isBusy: isBusy,
+              onSave: onReorderPlans),
           const SizedBox(height: 16),
           if (palette.visualTheme == AppVisualTheme.minimalism)
             MinimalProgressRule(value: plan.completionRatio)

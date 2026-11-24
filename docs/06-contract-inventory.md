@@ -30,6 +30,11 @@ external_model_discovery:
   connection: "选择模型后无工具/业务数据的简短Chat Completions或Responses验证；成功才保存最终协议/端点至原加密仓储"
   evidence: "168项Flutter全量含loopback HTTP与布局负向用例；身份/取消/失败不保存覆盖，真实服务及工具能力单独核验"
 endpoints:
+  - id: U-PLAN-ORDER
+    method: PUT
+    path: "/api/app/v1/plans/reorder"
+    specification: "docs/development/计划手动排序.md；today/annual/subtasks完整ID集合与版本校验，单事务只更新顺序，Bearer用户隔离；三端共享契约"
+    evidence_status: local_mysql_http_and_sqlite_restart_rollback_verified_production_pending_0160
   - id: U-ONLINE-RELEASE
     method: "GET/POST"
     path: "/api/admin/v1/releases；/{id}/publish；/{id}/withdraw"

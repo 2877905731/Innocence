@@ -38,6 +38,7 @@ import 'package:innocence_flutter/features/notifications/data/notification_api.d
 import 'package:innocence_flutter/features/notifications/domain/models/notification_overview.dart';
 import 'package:innocence_flutter/features/plans/data/study_plan_api.dart';
 import 'package:innocence_flutter/features/plans/domain/models/today_plan.dart';
+import 'package:innocence_flutter/features/plans/domain/models/plan_order.dart';
 import 'package:innocence_flutter/features/plans/domain/models/month_plan_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/annual_plan_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/week_plan_overview.dart';
@@ -730,6 +731,47 @@ class SessionController extends ChangeNotifier with WidgetsBindingObserver {
     }
     _bannerMessage = null;
     notifyListeners();
+  }
+
+  Future<bool> reorderPlans(PlanOrder order) async {
+    final owner = localOwnerScope;
+    final session = _session;
+    final offline = isOffline;
+    if (_isBusy || (offline ? owner == null : session == null)) return false;
+    bool stillCurrent() => offline
+        ? isOffline && localOwnerScope == owner
+        : identical(_session, session) && !isOffline;
+    final saved = await _runBusyAction(() async {
+      if (offline) {
+        await _offlineStore.reorderPlans(owner!, order);
+      } else {
+        await _studyPlanApi.reorderPlans(session!, order);
+      }
+      if (!stillCurrent()) return;
+      if (order.scope == 'today') {
+        final plan = offline
+            ? await _offlineStore.loadDailyPlan(owner!, order.planDate!)
+            : await _studyPlanApi.getTodayPlan(session!,
+                planDate: order.planDate);
+        if (stillCurrent() && _todayPlan.planDate == plan.planDate) {
+          _todayPlan = plan;
+        }
+      } else {
+        final overview = offline
+            ? await _offlineStore.loadAnnualOverview(owner!, order.year!)
+            : await _studyPlanApi.getAnnualPlanOverview(session!,
+                year: order.year!);
+        if (stillCurrent() && _annualPlanOverview.year == overview.year) {
+          _annualPlanOverview = overview;
+        }
+      }
+      if (stillCurrent()) {
+        _bannerMessage = _message('任务顺序已保存。', 'Task order saved.');
+      }
+    },
+        fallbackMessage:
+            _message('保存排序失败，请重试。', 'Failed to save order. Please retry.'));
+    return saved && stillCurrent();
   }
 
   Future<bool> saveTodayPlan(TodayPlan plan) async {

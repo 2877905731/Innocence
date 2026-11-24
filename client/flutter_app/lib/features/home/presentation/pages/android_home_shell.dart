@@ -7,6 +7,7 @@ import 'package:innocence_flutter/features/plans/domain/models/month_plan_overvi
 import 'package:innocence_flutter/features/plans/domain/models/annual_plan_overview.dart';
 import 'package:innocence_flutter/features/plans/domain/models/weekly_plan_template.dart';
 import 'package:flutter/material.dart';
+import 'package:innocence_flutter/features/plans/presentation/widgets/plan_order_button.dart';
 import 'package:innocence_flutter/app/app_language.dart';
 import 'package:innocence_flutter/app/app_visual_theme.dart';
 import 'package:innocence_flutter/app/wabi_sabi_typography.dart';
@@ -664,6 +665,11 @@ class _AndroidHomeShellState extends State<AndroidHomeShell>
           style: Theme.of(context).textTheme.headlineSmall),
       const SizedBox(height: 8),
       Text(plan.planDate, style: Theme.of(context).textTheme.bodyMedium),
+      PlanOrderButton(
+          order: PlanOrder.today(plan),
+          isChinese: _zh,
+          isBusy: widget.isBusy,
+          onSave: widget.planActions.reorderPlans),
       const SizedBox(height: 20),
       FilledButton.icon(
         onPressed: widget.isBusy ? null : widget.onOpenPlanEditor,

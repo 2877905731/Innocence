@@ -11,6 +11,7 @@ import 'package:innocence_flutter/features/plans/domain/models/today_plan.dart';
 import 'package:innocence_flutter/features/plans/domain/models/weekly_plan_template.dart';
 import '../widgets/annual_charge_span.dart';
 import '../widgets/today_plan_editor_dialog.dart';
+import '../widgets/plan_order_button.dart';
 
 /// Uses the current session's callbacks; this view never opens a separate store.
 class AndroidPlanActions {
@@ -23,6 +24,7 @@ class AndroidPlanActions {
     required this.deleteArchive,
     required this.applyArchive,
     required this.saveAnnual,
+    this.reorderPlans,
     required this.deleteAnnual,
   });
 
@@ -35,6 +37,7 @@ class AndroidPlanActions {
   final Future<void> Function(int id, List<String> dates,
       {required PlanApplyStrategy strategy}) applyArchive;
   final Future<bool> Function(AnnualPlanSegment segment) saveAnnual;
+  final SavePlanOrder? reorderPlans;
   final Future<void> Function(AnnualPlanSegment segment) deleteAnnual;
 }
 
@@ -535,6 +538,11 @@ class _AndroidPlansViewState extends State<AndroidPlansView> {
     return _panel(
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(segment.title, style: theme.textTheme.titleLarge),
+          PlanOrderButton(
+              order: PlanOrder.subtasks(segment),
+              isChinese: _zh,
+              isBusy: _busy,
+              onSave: widget.actions.reorderPlans),
           const SizedBox(height: 8),
           Text(_t(
               '${segment.startMonth}–${segment.endMonth} 月 · ${segment.progressPercent}%${segment.isCompleted ? ' · 已完成' : ''}',
@@ -800,6 +808,11 @@ class _AndroidPlansViewState extends State<AndroidPlansView> {
                         Text(_t('外框表示月份跨度，框内填充表示进度；年度任务独立于月计划。',
                             'The frame marks the month span; its fill shows progress. Annual tasks are independent of monthly plans.')),
                         const SizedBox(height: 10),
+                        PlanOrderButton(
+                            order: PlanOrder.annual(widget.annual),
+                            isChinese: _zh,
+                            isBusy: _busy,
+                            onSave: widget.actions.reorderPlans),
                         FilledButton.icon(
                             key: const ValueKey('android-create-annual'),
                             onPressed: _busy ? null : () => _editAnnual(),
@@ -1120,6 +1133,16 @@ class _AnnualEditorState extends State<_AnnualEditor> {
                           const SizedBox(height: 16),
                           Text(_t('子任务（完成状态独立）',
                               'Subtasks (independent completion)')),
+                          DraftPlanOrderButton<AnnualPlanSubtask>(
+                              items: _subtasks,
+                              titleOf: (item) => item.title,
+                              isChinese: widget.isChinese,
+                              isBusy: _saving,
+                              onChanged: (items) => setState(() {
+                                    _subtasks
+                                      ..clear()
+                                      ..addAll(items);
+                                  })),
                           for (final entry in _subtasks.indexed)
                             Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,

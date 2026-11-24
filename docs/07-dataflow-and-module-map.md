@@ -74,6 +74,10 @@ topology:
       call: "MyBatis（MySQL）+ Redis（会话/在线状态/实时分发）"
       auth: "本地配置连接"
 business_flows:
+  - id: FLOW-PLAN-ORDER
+    specification: "docs/development/计划手动排序.md"
+    flow: "Windows/鸿蒙PC页面与Android独立计划页→共享排序面板→SessionController.reorderPlans→按ownerScope事务排序与原快照outbox，或Bearer PUT /plans/reorder→完整ID/版本校验→只更新sort_order并推进版本→刷新对应日/年范围"
+    boundary: "排序不移动时段、不重建任务ID、不改变完成或年度进度；年度筛选共用全年顺序。离线仍须确认目标账号后导入；生产部署与实体触控待验。"
   - id: FLOW-001
     steps:
       - sequence: 1

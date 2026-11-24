@@ -18,6 +18,20 @@ import java.util.List;
 
 @Mapper
 public interface StudyPlanMapper {
+    @Update("UPDATE daily_plan_item SET sort_order=#{sortOrder} WHERE user_id=#{userId} AND plan_id=#{planId} AND id=#{itemId}")
+    void reorderDailyItem(@Param("userId") Long owner, @Param("planId") Long plan,
+                         @Param("itemId") Long item, @Param("sortOrder") int sort);
+
+    @Update("UPDATE annual_plan_segment SET sort_order=#{sortOrder}, revision=revision+1 WHERE user_id=#{userId} AND id=#{segmentId}")
+    void reorderAnnualSegment(@Param("userId") Long owner, @Param("segmentId") Long segment, @Param("sortOrder") int sort);
+
+    @Update("UPDATE annual_plan_segment_subtask SET sort_order=#{sortOrder} WHERE user_id=#{userId} AND segment_id=#{segmentId} AND id=#{subtaskId}")
+    void reorderAnnualSubtask(@Param("userId") Long owner, @Param("segmentId") Long segment,
+                             @Param("subtaskId") Long subtask, @Param("sortOrder") int sort);
+
+    @Update("UPDATE annual_plan_segment SET revision=revision+1 WHERE user_id=#{userId} AND id=#{segmentId}")
+    void advanceAnnualRevision(@Param("userId") Long owner, @Param("segmentId") Long segment);
+
     @Select("SELECT id FROM app_user WHERE id=#{userId} FOR UPDATE")
     Long lockPlanningOwner(@Param("userId") Long userId);
 

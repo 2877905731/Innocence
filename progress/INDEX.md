@@ -1127,3 +1127,10 @@ checkpoints:
     status: complete
     path: progress/0159__20261124__P01__CORRECTION__harmony-countdown-scope-and-full-materials-uploaded.md
     title: "实查正计时场景退回，全量倒计时材料与UX已由代理上传待提交"
+  - sequence: "0160"
+    created_at: "2026-11-24T22:58:23+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0160__20261124__P01__DONE__three-platform-plan-ordering-local.md
+    title: "三端今日与年度任务手动排序本机实现，持久化与隔离验证及三端构建"

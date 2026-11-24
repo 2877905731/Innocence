@@ -456,6 +456,7 @@ public class StudyPlanService {
             Long segmentId,
             SaveAnnualPlanSegmentRequest request
     ) {
+        studyPlanMapper.lockPlanningOwner(userId);
         validateAnnualSegment(request);
         AnnualPlanSegment segment = segmentId == null
                 ? null
@@ -531,6 +532,7 @@ public class StudyPlanService {
 
     @Transactional
     public void deleteAnnualSegment(Long userId, Long segmentId) {
+        studyPlanMapper.lockPlanningOwner(userId);
         AnnualPlanSegment segment = studyPlanMapper.findAnnualSegmentByIdAndUserId(segmentId, userId);
         if (segment == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "Annual plan segment not found.");

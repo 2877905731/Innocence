@@ -3,13 +3,13 @@ schema_version: 1
 document_type: ai_resume
 project_name: Innocence
 updated_at: "2026-11-24"
-last_resumed_at: "2026-11-24T22:53:51+08:00"
-latest_checkpoint: "0159"
-next_sequence: "0160"
+last_resumed_at: "2026-11-24T22:58:23+08:00"
+latest_checkpoint: "0160"
+next_sequence: "0161"
 current_phase: P01
 current_gate: G01
-state: harmony_countdown_full_materials_uploaded_waiting_final_confirmation
-current_goal: "0159：用户要求全量材料由代理重申请并同意改用Edge，本人登录后实查11月4日16:44:28驳回原因是正计时不在开放场景，并非仅缺截图。当前官方TIMER支持专注/番茄主动倒计时，现有timer/胶囊isCountdown=true。五页全量Word、两原图、设计图及目录ZIP675576字节/b34d4b06…已上传主材料栏，UX单独上传、计时场景已选、291字符精确核对；声明未勾/未提交，等待Windows操作规则要求的当次确认。未操作平板/服务器或源码，权益仍无通过证据。"
+state: plan_ordering_local_ready_and_harmony_confirmation_pending
+current_goal: "0160三端今日任务/年度任务及子任务手动排序本机实现完成，ID/版本/租户事务、离线重启及故障回滚通过；278客户端/6条件跳过、131后端、排序3/显式鸿蒙9、分析与Windows Release/鸿蒙未签名Release/Android Debug构建通过。Android原签名材料缺失，正式包待恢复；未部署/公开/覆盖设备，线上仍1.3.4。并行0159鸿蒙倒计时全量材料已上传待当次提交确认，完整review及其下一动作保留；权益无新增通过证据。"
 active_feedback: "0155：v1.3.4（#431760442）与v1.3.4-harmonyos.1（#431762427）已公开，latest=v1.3.4，双标签源fcc4317d940066193cbd6c65ac312b29bc9bd6a6；275客户端/6跳过、离线4/在线2、127后端与三端正式包、127Dart/5ArkTS、原APK签名/未签名HAP通过，七资产匿名完整下载SHA通过。0154后台版本发布已上线，三平台16目录已真实上传发布并鉴权完整下载/Range，绑定主窗口0秒/重复学习120秒单条通过；临时账号与授权已清理，注册0/健康UP。0156用户重新连接并要求更新，唯一平板已原签名保资料覆盖1.3.4，身份/UID/首次安装时间和启动通过；完整业务/TIMER门禁保留。"
 review:
   original_submitted_date: "2026-10-31"
@@ -45,6 +45,10 @@ active_constraints:
   - "离线ownerScope/在线账号隔离、导入预览确认/冲突/幂等不变；助手白名单与具体变更确认，不含C持续规则。"
   - "纯端侧TIMER不依赖推送但仍需实况窗授权；PushToken名单和标准权益是不同路径。<=8小时/用户主动/大陆手机平板为申请范围，未宣称限制已完成实机验证。"
 unfinished:
+  - id: TODO-PLAN-ORDER-DELIVERY
+    priority: P1
+    gate: G01/G02/G06
+    item: "0160本机排序实现、真实MySQL/SQLite回滚与三端构建通过；线上新端点尚未部署，三端未发布/安装。Android仅Debug，原签名材料当前缺失。按后续用户发布指令恢复原签名并部署分发，再验实际触控与跨设备；不得用Debug覆盖原签名或以真实任务造数。"
   - id: TODO-MANUAL-TIMER-RUNTIME
     priority: P0
     gate: G01/G02/G06
@@ -94,6 +98,9 @@ unfinished:
     gate: Android-A0
     item: "实体/OEM/省电/折叠通知组、SDK许可实况、详情/输入/性能；联网包已公开，完整同步/WebSocket/推送仍待。"
 next_actions:
+  - id: NEXT-PLAN-ORDER-DELIVERY
+    action: "0160排序本机就绪，后端新增PUT /plans/reorder无结构迁移；按用户后续发布指令部署并更新三端。先恢复Android原证书/DPAPI材料，当前默认目录不存在；Windows Release/鸿蒙未签名Release/Android Debug非新发行。设备不自动安装，现有真实计划不改。"
+    inputs: [docs/development/计划手动排序.md]
   - id: NEXT-MANUAL-TIMER-RUNTIME
     action: "三端1.3.4及在线更新/手动绑定后端已公开/上线，按实际反馈补绑定/独立阶段、后台到点、断网补传/跨日和离线导入；0156个人平板已原签名保资料覆盖，按实际反馈验功能；个人包不公开，不重复安装/迁移。"
     inputs: [docs/releases/v1.3.4.md, docs/releases/v1.3.4-harmonyos.1.md, docs/development/在线更新与绑定番茄.md]
@@ -128,7 +135,7 @@ history:
   index: progress/INDEX.md
   pre_compression_resume: progress/archive/0000__AI-RESUME__before-20261101-compression.md
   archive_manifest: docs/archive/documentation-compression-20261101.json
-  latest_event: progress/0159__20261124__P01__CORRECTION__harmony-countdown-scope-and-full-materials-uploaded.md
+  latest_event: progress/0160__20261124__P01__DONE__three-platform-plan-ordering-local.md
 ---
 
 # 恢复说明
