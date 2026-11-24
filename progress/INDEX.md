@@ -1134,3 +1134,10 @@ checkpoints:
     status: complete
     path: progress/0160__20261124__P01__DONE__three-platform-plan-ordering-local.md
     title: "三端今日与年度任务手动排序本机实现，持久化与隔离验证及三端构建"
+  - sequence: "0161"
+    created_at: "2026-11-24T23:05:23+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0161__20261124__P01__DONE__harmony-countdown-full-application-submitted.md
+    title: "全量倒计时申请由用户提交，最新服务申请处理中与附件回执核对"

@@ -3,31 +3,34 @@ schema_version: 1
 document_type: ai_resume
 project_name: Innocence
 updated_at: "2026-11-24"
-last_resumed_at: "2026-11-24T22:58:23+08:00"
-latest_checkpoint: "0160"
-next_sequence: "0161"
+last_resumed_at: "2026-11-24T23:05:23+08:00"
+latest_checkpoint: "0161"
+next_sequence: "0162"
 current_phase: P01
 current_gate: G01
-state: plan_ordering_local_ready_and_harmony_confirmation_pending
-current_goal: "0160三端今日任务/年度任务及子任务手动排序本机实现完成，ID/版本/租户事务、离线重启及故障回滚通过；278客户端/6条件跳过、131后端、排序3/显式鸿蒙9、分析与Windows Release/鸿蒙未签名Release/Android Debug构建通过。Android原签名材料缺失，正式包待恢复；未部署/公开/覆盖设备，线上仍1.3.4。并行0159鸿蒙倒计时全量材料已上传待当次提交确认，完整review及其下一动作保留；权益无新增通过证据。"
+state: plan_ordering_local_ready_and_harmony_application_under_review
+current_goal: "0160三端今日任务/年度任务及子任务手动排序本机实现完成，ID/版本/租户事务、离线重启及故障回滚通过；278客户端/6条件跳过、131后端、排序3/显式鸿蒙9、分析与Windows Release/鸿蒙未签名Release/Android Debug构建通过。Android原签名材料缺失，正式包待恢复；未部署/公开/覆盖设备，线上仍1.3.4。0161鸿蒙全量倒计时申请已由用户本人于11月24日23:02提交，申请详情处理中/系统提交通知、291字场景及完整ZIP与UX缩略图已核对；3工作日估算11月27日前后，仍非权益获批。"
 active_feedback: "0155：v1.3.4（#431760442）与v1.3.4-harmonyos.1（#431762427）已公开，latest=v1.3.4，双标签源fcc4317d940066193cbd6c65ac312b29bc9bd6a6；275客户端/6跳过、离线4/在线2、127后端与三端正式包、127Dart/5ArkTS、原APK签名/未签名HAP通过，七资产匿名完整下载SHA通过。0154后台版本发布已上线，三平台16目录已真实上传发布并鉴权完整下载/Range，绑定主窗口0秒/重复学习120秒单条通过；临时账号与授权已清理，注册0/健康UP。0156用户重新连接并要求更新，唯一平板已原签名保资料覆盖1.3.4，身份/UID/首次安装时间和启动通过；完整业务/TIMER门禁保留。"
 review:
   original_submitted_date: "2026-10-31"
-  last_verified_status: "原申请审核驳回；重申请表全量附件已上传，尚未提交"
+  last_verified_status: "新申请已提交，处理中；系统通知等待审核结果"
   evidence_received_date: "2026-11-24"
-  status_source: "Edge原应用控制台驳回原因对话框与重申请表"
+  status_source: "Edge开发者联盟消息中心/服务申请/最新Innocence申请详情"
   rejected_at: "2026-11-04T16:44:28+08:00"
   rejection_reason: "申请的场景（正计时）不在已开放场景内"
   requested_scope: "仅专注/番茄主动倒计时TIMER，不申请正计时；截图00:15仅是应用内已用时统计"
-  resubmission_state: full_materials_uploaded_waiting_action_time_confirmation
-  resubmission_submitted: false
+  resubmission_state: submitted_processing
+  resubmission_submitted: true
+  resubmission_submitted_by: user
+  resubmission_submitted_at: "2026-11-24T23:02+08:00"
+  private_receipt: client/flutter_app/build/qa/harmony-live-complete-20261124/submission-receipt.json
   supplement_manifest: client/flutter_app/build/qa/harmony-live-complete-20261124/complete-artifacts.json
   application_id: "6917619921714239020"
   stated_turnaround: "3个工作日"
-  estimated_feedback_date: null
+  estimated_feedback_date: "2026-11-27"
   timezone: "UTC+08:00"
-  estimate_basis: "尚未重提交，不沿用上次估算；以本次实际提交和反馈为准"
-  status_entry: "华为开发者控制台 → 应用管理 → Innocence → 开放能力管理 → 我的申请 → 实况窗服务"
+  estimate_basis: "11月24日23:02提交；按次日起25/26/27日3工作日估算11月27日前后，仅估算，以实际反馈为准"
+  status_entry: "开发者联盟消息中心 → 服务申请 → 最新11月24日23:02的Innocence实况窗申请；原应用开放能力管理也可查"
   guide: docs/development/鸿蒙专注提醒权益接入.md
 current_baseline:
   android: "1.3.4+16原证书联网APK已公开（0155），恢复专注绑定手动番茄与单一学习账本、在线账号检查/下载校验和系统安装入口；完整下载/签名/构建通过，实际安装/OEM与完整矩阵待验。"
@@ -56,7 +59,7 @@ unfinished:
   - id: TODO-HARMONYOS-TABLET
     priority: P1
     gate: HarmonyOS-H0-H5
-    item: "0159控制台实查正计时不开放；全量倒计时材料主ZIP和UX均已上传，待最终声明/提交及实际授权。卡片胶囊/代理提醒、完整实体业务恢复/输入/性能与跨阶段仍待。HUKS/TLS/独立tablet槽位子集已在0133通过，不再整体列为未实现。"
+    item: "0161全量倒计时申请已由用户提交、详情处理中，仍待实际审核授权。卡片胶囊/代理提醒、完整实体业务恢复/输入/性能与跨阶段仍待。HUKS/TLS/独立tablet槽位子集已在0133通过，不再整体列为未实现。"
   - id: TODO-AI-CHAT-LIVE-VERIFICATION
     priority: P1
     gate: assistant-B1
@@ -108,8 +111,8 @@ next_actions:
     action: "0154–0155后台/在线更新和三端1.3.4已上线公开，真实上传发布/鉴权完整下载/Range/下架及七资产匿名下载通过；后续本机编译签名，后台上传发布即可，不在服务器编译。单纯发客户端不需重复部署后端，先手动覆盖到1.3.4一次以获得更新入口。"
     inputs: [docs/planning/Innocence-在线账号版本发布与更新评估.md]
   - id: NEXT-FOCUS-HARMONY-RIGHTS
-    action: "0159全量ZIP与UX图已上传，计时场景/291字符已核对，仅待当次确认后勾选声明并提交；不重复上传或恢复11月3日旧补件。保持Edge原申请表，不操作Codex窗口或扩展权限；顶部提交被无关扩展提示遮挡时用实际焦点键盘导航，不能点击接受扩展权限。确认后由代理完成并核实真实待审状态。TIMER仅主动倒计时，实况窗不显示正计时/已用时。"
-    inputs: [docs/development/鸿蒙专注提醒权益接入.md, client/flutter_app/build/qa/harmony-live-complete-20261124/complete-artifacts.json]
+    action: "0161用户本人已最终提交，消息中心新申请11月24日23:02/处理中/系统提交通知、完整ZIP与UX缩略图均核对。不要重复提交/重问旧声明；3工作日仅估算11月27日前后。按真实新结果继续，获批后再按当前授权/Profile或名单路径保资料联调；退回先读新原因，不恢复正计时范围。后台代理提醒和实体卡片/胶囊单独验。"
+    inputs: [docs/development/鸿蒙专注提醒权益接入.md, client/flutter_app/build/qa/harmony-live-complete-20261124/submission-receipt.json]
   - id: NEXT-HARMONYOS-TABLET-RUNTIME
     action: "继续原平板完整业务/恢复/输入/性能；卡片/胶囊实际递减、暂停继续/结束/锁屏/后台跨阶段分别验，代理提醒独立验。"
     inputs: [docs/planning/Innocence-鸿蒙平板版本实施规划.md, client/flutter_app/harmonyos/README.md]
@@ -135,7 +138,7 @@ history:
   index: progress/INDEX.md
   pre_compression_resume: progress/archive/0000__AI-RESUME__before-20261101-compression.md
   archive_manifest: docs/archive/documentation-compression-20261101.json
-  latest_event: progress/0160__20261124__P01__DONE__three-platform-plan-ordering-local.md
+  latest_event: progress/0161__20261124__P01__DONE__harmony-countdown-full-application-submitted.md
 ---
 
 # 恢复说明
