@@ -1106,3 +1106,24 @@ checkpoints:
     status: complete
     path: progress/0156__20261103__P01__DONE__personal-tablet-v134-cover-update.md
     title: "个人平板原签名1.3.4覆盖，身份/UID/首次安装时间保留并启动通过"
+  - sequence: "0157"
+    created_at: "2026-11-03T14:11:06+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0157__20261103__P01__CORRECTION__harmony-timer-review-needs-inapp-screenshots.md
+    title: "实况窗申请未通过，更新应用内截图补件范围与待采集状态"
+  - sequence: "0158"
+    created_at: "2026-11-03T14:20:18+08:00"
+    phase: P01
+    type: DONE
+    status: complete
+    path: progress/0158__20261103__P01__DONE__harmony-timer-inapp-screenshot-supplement-ready.md
+    title: "实况窗真实入口和运行截图补件包齐备，三页Word及四文件ZIP核对通过"
+  - sequence: "0159"
+    created_at: "2026-11-24T22:53:51+08:00"
+    phase: P01
+    type: CORRECTION
+    status: complete
+    path: progress/0159__20261124__P01__CORRECTION__harmony-countdown-scope-and-full-materials-uploaded.md
+    title: "实查正计时场景退回，全量倒计时材料与UX已由代理上传待提交"

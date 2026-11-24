@@ -2,24 +2,32 @@
 schema_version: 1
 document_type: ai_resume
 project_name: Innocence
-updated_at: "2026-11-03"
-last_resumed_at: "2026-11-03T14:04:51+08:00"
-latest_checkpoint: "0156"
-next_sequence: "0157"
+updated_at: "2026-11-24"
+last_resumed_at: "2026-11-24T22:53:51+08:00"
+latest_checkpoint: "0159"
+next_sequence: "0160"
 current_phase: P01
 current_gate: G01
-state: v134_personal_tablet_updated_and_release_complete
-current_goal: "0156已按用户要求将原平板从1.3.3+15原签名保资料覆盖为1.3.4+16，官方验签/身份/UID/首次安装时间和启动通过；0154后端/0155公开发行保持，交付结果后按实际反馈补实体业务门禁。"
+state: harmony_countdown_full_materials_uploaded_waiting_final_confirmation
+current_goal: "0159：用户要求全量材料由代理重申请并同意改用Edge，本人登录后实查11月4日16:44:28驳回原因是正计时不在开放场景，并非仅缺截图。当前官方TIMER支持专注/番茄主动倒计时，现有timer/胶囊isCountdown=true。五页全量Word、两原图、设计图及目录ZIP675576字节/b34d4b06…已上传主材料栏，UX单独上传、计时场景已选、291字符精确核对；声明未勾/未提交，等待Windows操作规则要求的当次确认。未操作平板/服务器或源码，权益仍无通过证据。"
 active_feedback: "0155：v1.3.4（#431760442）与v1.3.4-harmonyos.1（#431762427）已公开，latest=v1.3.4，双标签源fcc4317d940066193cbd6c65ac312b29bc9bd6a6；275客户端/6跳过、离线4/在线2、127后端与三端正式包、127Dart/5ArkTS、原APK签名/未签名HAP通过，七资产匿名完整下载SHA通过。0154后台版本发布已上线，三平台16目录已真实上传发布并鉴权完整下载/Range，绑定主窗口0秒/重复学习120秒单条通过；临时账号与授权已清理，注册0/健康UP。0156用户重新连接并要求更新，唯一平板已原签名保资料覆盖1.3.4，身份/UID/首次安装时间和启动通过；完整业务/TIMER门禁保留。"
 review:
-  submitted_date: "2026-10-31"
-  last_verified_status: 审核中
+  original_submitted_date: "2026-10-31"
+  last_verified_status: "原申请审核驳回；重申请表全量附件已上传，尚未提交"
+  evidence_received_date: "2026-11-24"
+  status_source: "Edge原应用控制台驳回原因对话框与重申请表"
+  rejected_at: "2026-11-04T16:44:28+08:00"
+  rejection_reason: "申请的场景（正计时）不在已开放场景内"
+  requested_scope: "仅专注/番茄主动倒计时TIMER，不申请正计时；截图00:15仅是应用内已用时统计"
+  resubmission_state: full_materials_uploaded_waiting_action_time_confirmation
+  resubmission_submitted: false
+  supplement_manifest: client/flutter_app/build/qa/harmony-live-complete-20261124/complete-artifacts.json
   application_id: "6917619921714239020"
   stated_turnaround: "3个工作日"
-  estimated_feedback_date: "2026-11-04"
+  estimated_feedback_date: null
   timezone: "UTC+08:00"
-  estimate_basis: "10月31日周六提交；11月2/3/4日为第1/2/3工作日，仅估算，以实际审核为准"
-  status_entry: "华为开发者控制台 → 应用管理 → Innocence → 开放能力管理 → 搜索实况窗 → 申请状态"
+  estimate_basis: "尚未重提交，不沿用上次估算；以本次实际提交和反馈为准"
+  status_entry: "华为开发者控制台 → 应用管理 → Innocence → 开放能力管理 → 我的申请 → 实况窗服务"
   guide: docs/development/鸿蒙专注提醒权益接入.md
 current_baseline:
   android: "1.3.4+16原证书联网APK已公开（0155），恢复专注绑定手动番茄与单一学习账本、在线账号检查/下载校验和系统安装入口；完整下载/签名/构建通过，实际安装/OEM与完整矩阵待验。"
@@ -44,7 +52,7 @@ unfinished:
   - id: TODO-HARMONYOS-TABLET
     priority: P1
     gate: HarmonyOS-H0-H5
-    item: "待TIMER审核/实际授权、卡片胶囊/代理提醒、完整实体业务恢复/输入/性能与跨阶段。HUKS/TLS/独立tablet槽位子集已在0133通过，不再整体列为未实现。"
+    item: "0159控制台实查正计时不开放；全量倒计时材料主ZIP和UX均已上传，待最终声明/提交及实际授权。卡片胶囊/代理提醒、完整实体业务恢复/输入/性能与跨阶段仍待。HUKS/TLS/独立tablet槽位子集已在0133通过，不再整体列为未实现。"
   - id: TODO-AI-CHAT-LIVE-VERIFICATION
     priority: P1
     gate: assistant-B1
@@ -93,8 +101,8 @@ next_actions:
     action: "0154–0155后台/在线更新和三端1.3.4已上线公开，真实上传发布/鉴权完整下载/Range/下架及七资产匿名下载通过；后续本机编译签名，后台上传发布即可，不在服务器编译。单纯发客户端不需重复部署后端，先手动覆盖到1.3.4一次以获得更新入口。"
     inputs: [docs/planning/Innocence-在线账号版本发布与更新评估.md]
   - id: NEXT-FOCUS-HARMONY-RIGHTS
-    action: "先核对同一应用实况窗审核结果。通过后按实际权限/Profile或名单路径保原签名和资料联调；退回先读原因再改，不扩大场景或重复申请。单设备Token上传另按具体范围确认。"
-    inputs: [docs/development/鸿蒙专注提醒权益接入.md]
+    action: "0159全量ZIP与UX图已上传，计时场景/291字符已核对，仅待当次确认后勾选声明并提交；不重复上传或恢复11月3日旧补件。保持Edge原申请表，不操作Codex窗口或扩展权限；顶部提交被无关扩展提示遮挡时用实际焦点键盘导航，不能点击接受扩展权限。确认后由代理完成并核实真实待审状态。TIMER仅主动倒计时，实况窗不显示正计时/已用时。"
+    inputs: [docs/development/鸿蒙专注提醒权益接入.md, client/flutter_app/build/qa/harmony-live-complete-20261124/complete-artifacts.json]
   - id: NEXT-HARMONYOS-TABLET-RUNTIME
     action: "继续原平板完整业务/恢复/输入/性能；卡片/胶囊实际递减、暂停继续/结束/锁屏/后台跨阶段分别验，代理提醒独立验。"
     inputs: [docs/planning/Innocence-鸿蒙平板版本实施规划.md, client/flutter_app/harmonyos/README.md]
@@ -120,7 +128,7 @@ history:
   index: progress/INDEX.md
   pre_compression_resume: progress/archive/0000__AI-RESUME__before-20261101-compression.md
   archive_manifest: docs/archive/documentation-compression-20261101.json
-  latest_event: progress/0156__20261103__P01__DONE__personal-tablet-v134-cover-update.md
+  latest_event: progress/0159__20261124__P01__CORRECTION__harmony-countdown-scope-and-full-materials-uploaded.md
 ---
 
 # 恢复说明
